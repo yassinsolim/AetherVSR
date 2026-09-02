@@ -1,5 +1,6 @@
 import { buildConvShader, convMacCount, type Activation, type ConvShaderConfig } from './conv.wgsl.js';
 import { buildTiledConvShader, tiledSharedBytes } from './conv-tiled.wgsl.js';
+import { buildPackedConvShader, packedSharedBytes } from './conv-packed.wgsl.js';
 
 /**
  * Which convolution kernel implementation to measure.
@@ -10,7 +11,7 @@ import { buildTiledConvShader, tiledSharedBytes } from './conv-tiled.wgsl.js';
  * Kept as separate implementations rather than a flag inside one shader so a
  * regression in the newer kernel can never silently become the baseline.
  */
-export type ConvVariant = 'naive' | 'tiled';
+export type ConvVariant = 'naive' | 'tiled' | 'packed';
 
 export interface ConvCase {
   readonly label: string;
@@ -109,19 +110,29 @@ export class ConvBench {
 
     const variant: ConvVariant = c.variant ?? 'naive';
     const earlyDiagnostics: string[] = [];
-    let code: string;
-    if (variant === 'tiled') {
-      const shared = tiledSharedBytes(shaderConfig);
+    // Surfaced as diagnostics rather than exceptions: the sweeps below
+    // deliberately walk into configurations that do not fit, and an invalid
+    // row carrying the reason is more useful than a missing row.
+    const guardShared = (bytes: number): void => {
       const limit = device.limits.maxComputeWorkgroupStorageSize;
-      // Surfaced as a diagnostic rather than an exception: the sweeps below
-      // deliberately walk into configurations that do not fit, and an invalid
-      // row carrying the reason is more useful than a missing row.
-      if (shared > limit) {
-        earlyDiagnostics.push(`workgroup storage ${shared}B exceeds device limit ${limit}B`);
+      if (bytes > limit) {
+        earlyDiagnostics.push(`workgroup storage ${bytes}B exceeds device limit ${limit}B`);
       }
-      code = buildTiledConvShader(shaderConfig);
-    } else {
-      code = buildConvShader(shaderConfig);
+    };
+
+    let code: string;
+    switch (variant) {
+      case 'tiled':
+        guardShared(tiledSharedBytes(shaderConfig));
+        code = buildTiledConvShader(shaderConfig);
+        break;
+      case 'packed':
+        guardShared(packedSharedBytes(shaderConfig));
+        code = buildPackedConvShader(shaderConfig);
+        break;
+      case 'naive':
+        code = buildConvShader(shaderConfig);
+        break;
     }
 
     const module = device.createShaderModule({ label: `conv:${c.label}`, code });
@@ -144,8 +155,22 @@ export class ConvBench {
 
     // Deterministic non-zero data. Values matter for `tanh` timing on some
     // hardware, and all-zero input can be optimised in ways real data is not.
-    fillDeterministic(device, input, inElements, c.useF16);
-    fillDeterministic(device, weights, weightElements, c.useF16);
+    //
+    // The packed kernel reinterprets each vec4 as four channels of one pixel,
+    // so feeding it the planar ramp would have it computing a differently
+    // permuted convolution from the one the verifier checks. The addresses
+    // touched, and therefore the timings, are identical either way — this is
+    // about the harness and the verifier agreeing on what is being computed,
+    // not about the numbers. Repacking happens once, outside the timed loop.
+    const remap =
+      variant === 'packed'
+        ? {
+            input: packedActivationIndex(c.width * c.height),
+            weights: packedWeightIndex(c.inChannels, c.outChannels),
+          }
+        : null;
+    fillDeterministic(device, input, inElements, c.useF16, remap?.input);
+    fillDeterministic(device, weights, weightElements, c.useF16, remap?.weights);
     fillDeterministic(device, biases, c.outChannels, c.useF16);
 
     const pipeline = device.createComputePipeline({
@@ -267,22 +292,61 @@ export class ConvBench {
   }
 }
 
+/** Maps a planar element index to its destination index in the target layout. */
+type LayoutRemap = (planarIndex: number) => number;
+
+/**
+ * Planar `[c][y][x]` -> grouped `[c/4][y][x][c%4]`, matching the packed shader.
+ * Curried on the geometry so the per-element cost is one closure call.
+ */
+export function packedActivationIndex(pixels: number): LayoutRemap {
+  return (i) => {
+    const c = Math.floor(i / pixels);
+    const p = i - c * pixels;
+    return (Math.floor(c / 4) * pixels + p) * 4 + (c % 4);
+  };
+}
+
+/** Planar `[oc][ic][k]` -> grouped `[oc][ic/4][k][ic%4]`. */
+export function packedWeightIndex(inChannels: number, outChannels: number): LayoutRemap {
+  const groups = inChannels / 4;
+  return (i) => {
+    const k = i % 9;
+    const ic = Math.floor(i / 9) % inChannels;
+    const oc = Math.floor(i / (9 * inChannels)) % outChannels;
+    return ((oc * groups + Math.floor(ic / 4)) * 9 + k) * 4 + (ic % 4);
+  };
+}
+
 /**
  * Writes a deterministic ramp so runs are comparable and the compiler cannot
  * fold the data away. f16 is written via the half-float bit pattern because
  * `writeBuffer` has no half-float view.
+ *
+ * `remap` relocates each planar element to the layout the kernel expects. The
+ * value written for a given logical element is the same either way, so the
+ * value distribution — and therefore anything data-dependent about the timing
+ * — is unchanged; only where it lands moves.
  */
-function fillDeterministic(device: GPUDevice, buffer: GPUBuffer, elements: number, useF16: boolean): void {
+function fillDeterministic(
+  device: GPUDevice,
+  buffer: GPUBuffer,
+  elements: number,
+  useF16: boolean,
+  remap?: LayoutRemap,
+): void {
+  const at = remap ?? ((i: number) => i);
+  const value = (i: number): number => ((i % 17) - 8) / 16;
   if (useF16) {
     // Padded to an even element count: writeBuffer rejects a byte count that
     // is not a multiple of 4, which an odd number of f16 elements produces.
     const half = new Uint16Array(elements + (elements % 2));
-    for (let i = 0; i < elements; i++) half[i] = floatToHalf(((i % 17) - 8) / 16);
+    for (let i = 0; i < elements; i++) half[at(i)] = floatToHalf(value(i));
     device.queue.writeBuffer(buffer, 0, half);
     return;
   }
   const full = new Float32Array(elements);
-  for (let i = 0; i < elements; i++) full[i] = ((i % 17) - 8) / 16;
+  for (let i = 0; i < elements; i++) full[at(i)] = value(i);
   device.queue.writeBuffer(buffer, 0, full);
 }
 

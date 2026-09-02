@@ -1,6 +1,7 @@
 import { floatToHalf, type ConvVariant } from './conv-bench.js';
 import { buildConvShader, type Activation } from './conv.wgsl.js';
 import { buildTiledConvShader } from './conv-tiled.wgsl.js';
+import { buildPackedConvShader, packActivations, packWeights } from './conv-packed.wgsl.js';
 
 export interface ConvVerifyCase {
   /** Verify the f16 variant of the shader instead of the f32 one. */
@@ -85,8 +86,17 @@ export async function verifyConv(
     return buf;
   };
 
-  const input = makeBuffer(inputData);
-  const weights = makeBuffer(weightData);
+  // The CPU reference always works in planar layout; only what the GPU is fed
+  // changes. Comparing a packed kernel against a planar reference is the point
+  // — a repacking bug then shows up as a numeric mismatch rather than hiding
+  // inside a reference that was repacked the same wrong way.
+  const packed = (c.variant ?? 'naive') === 'packed';
+  const input = makeBuffer(
+    packed ? packActivations(inputData, c.width, c.height, c.inChannels) : inputData,
+  );
+  const weights = makeBuffer(
+    packed ? packWeights(weightData, c.inChannels, c.outChannels) : weightData,
+  );
   const biases = makeBuffer(biasData);
   const output = device.createBuffer({
     size: Math.max(4, roundUp4(outElements * bytesPerElement)),
@@ -108,13 +118,19 @@ export async function verifyConv(
     residual: c.residual,
   };
 
+  const buildShader = (): string => {
+    switch (c.variant ?? 'naive') {
+      case 'tiled':
+        return buildTiledConvShader(shaderConfig);
+      case 'packed':
+        return buildPackedConvShader(shaderConfig);
+      case 'naive':
+        return buildConvShader(shaderConfig);
+    }
+  };
+
   device.pushErrorScope('validation');
-  const module = device.createShaderModule({
-    code:
-      (c.variant ?? 'naive') === 'tiled'
-        ? buildTiledConvShader(shaderConfig)
-        : buildConvShader(shaderConfig),
-  });
+  const module = device.createShaderModule({ code: buildShader() });
   const pipeline = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } });
 
   // A WGSL scope or type error makes pipeline creation fail; the dispatch then
