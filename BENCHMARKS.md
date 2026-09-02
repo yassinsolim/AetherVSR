@@ -329,25 +329,36 @@ ORT-owned output tensors disposed each iteration.
 
 | Output location | session create (ms) | first inference (ms) | steady median (ms) | mean | min | max | What the timing covers |
 |---|---:|---:|---:|---:|---:|---:|---|
-| `cpu` | 205.2 | 74.4 | 35.30 | 37.50 | 32.5 | 59.4 | End-to-end, GPU completion forced by the output download |
-| `gpu-buffer` | 5.5 (warm) | 14.0 | 13.20 | 13.26 | 12.2 | 15.2 | **Submission latency only — not GPU completion** |
+| `cpu` | 233.3 | 95.9 | 34.70 | 35.44 | 32.3 | 49.4 | End-to-end; GPU completion forced by the output download |
+| `gpu-buffer`, no fence | 5.5 (warm) | 14.0 | 13.20 | 13.26 | 12.2 | 15.2 | Submission latency only — **not** inference time |
+| `gpu-buffer`, fenced | 9.6 (warm) | 11.8 | **19.70** | 20.02 | 18.8 | 25.1 | Queue-completion latency |
 
-Three scoping facts, all of which must travel with these numbers:
+The middle row is retained deliberately as a caution. Timing `await
+session.run()` with a GPU-resident output measures submission, because ORT's
+native EP ends a run by flushing to the queue and returning; nothing waits.
+Awaiting `queue.onSubmittedWorkDone()` on ORT's own device inside the timed
+interval adds 6.5 ms of previously invisible GPU work. Reporting 13.2 ms as an
+inference cost would have understated it by a third.
 
-1. **Neither row is comparable to the WGSL figures above.** Those are GPU pass
-   time from `timestamp-query`. These are wall clock around `session.run()`.
-2. **Both rows include a CPU→GPU upload of the 56.3 MB input tensor on every
-   iteration.** `preferredOutputLocation` changes only the output side. A fair
-   comparison needs `Tensor.fromGpuBuffer` on the input too, which this spike
-   did not implement.
-3. **The `gpu-buffer` row does not wait for the GPU.** ORT's native EP ends a
-   run by flushing — submitting to the queue — and nothing forces
-   synchronisation when no output is downloaded. So 13.2 ms is a lower bound on
-   completion time, not a measurement of it. The `cpu` row is the only
-   completion-synchronised figure here, and it is dominated by transfers.
+Remaining scope caveats on the 19.7 ms figure:
 
-**Fully GPU-resident ORT inference cost on this machine is therefore
-unmeasured.** See DECISIONS.md ADR-0015.
+1. **It still includes a CPU→GPU upload of the 56.3 MB input tensor on every
+   iteration.** Making the input GPU-resident needs `Tensor.fromGpuBuffer`,
+   which this spike did not implement.
+2. It is a *queue*-completion latency: everything submitted to that queue, not
+   provably only this inference. On an idle single-session page that is the
+   inference plus its upload, but the bound is not tight.
+3. It is still not directly comparable to the 8.585 ms WGSL figure, which is
+   GPU pass time from `timestamp-query` with the input already resident.
+
+**What remains unmeasured.** ORT's *compute-only* cost on this device is not
+known. The 19.7 ms figure and our 8.585 ms WGSL figure have different scopes —
+one is queue-completion including a 56.3 MB upload, the other is GPU pass time
+with the input already resident — and subtracting an estimated upload to force
+them onto a common scale would be inventing a number. **No performance ranking
+between ORT and hand-written WGSL is drawn here.** Settling it requires
+`Tensor.fromGpuBuffer` input so that both sides measure the same work; that is
+Milestone 3's experiment, not this one's conclusion.
 
 **Execution-provider placement, measured.** With `logSeverityLevel: 0` the
 probe captures ORT's verbose placement output, which reports:

@@ -48,11 +48,19 @@ export interface OrtProbeResult {
   /**
    * Median wall time around `session.run()`.
    *
-   * **Scope depends on `outputLocation`.** With `cpu` the call must download
-   * the output, which forces GPU completion, so the figure is end-to-end
-   * including both transfers. With `gpu-buffer` nothing forces a wait — the
-   * native EP flushes by submitting to the queue and returns — so the figure
-   * is submission-side only and is a *lower bound* on GPU completion time.
+   * **Scope depends on `outputLocation`.**
+   *
+   * With `cpu` the call must download the output, which forces GPU completion,
+   * so the figure is end-to-end including both transfers.
+   *
+   * With `gpu-buffer` nothing inside `run()` waits — the native EP flushes by
+   * submitting to the queue and returns. The probe therefore awaits
+   * `queue.onSubmittedWorkDone()` on ORT's own device inside the timed
+   * interval, making the figure a **queue-completion latency**: everything
+   * submitted to that queue, which for a single-session idle page is this
+   * inference plus the input upload, but is not guaranteed to be only that.
+   * `fenced` records whether the fence was actually taken; when false the
+   * figure is submission-side only.
    */
   readonly steadyMedianMs: number;
   readonly steadyMeanMs: number;
@@ -66,6 +74,8 @@ export interface OrtProbeResult {
    */
   readonly placement: readonly string[];
   readonly outputLocation: string;
+  /** True when a GPU completion fence was inside the timed interval. */
+  readonly fenced: boolean;
   /** Console output captured during session creation, for EP-placement clues. */
   readonly logs: readonly string[];
   readonly error: string | null;
@@ -108,6 +118,7 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     iterations: 0,
     placement: [],
     outputLocation: config.outputLocation,
+    fenced: false,
     logs,
     error: null,
   } satisfies OrtProbeResult;
@@ -170,10 +181,18 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     disposeOutputs(await session.run(feeds));
     const firstInferenceMs = performance.now() - firstStart;
 
+    // With a GPU-resident output nothing in `run()` waits for the GPU: the
+    // native EP ends a run by submitting to the queue and returning. Awaiting
+    // the device's own completion signal inside the timed interval turns a
+    // submission latency into an inference latency. ORT exposes the device it
+    // is using, which is the same one the fence must be taken on.
+    const ortDevice = config.outputLocation === 'gpu-buffer' ? await readOrtDevice(ort) : null;
+
     const samples: number[] = [];
     for (let i = 0; i < config.iterations; i++) {
       const t0 = performance.now();
       const outputs = await session.run(feeds);
+      await ortDevice?.queue.onSubmittedWorkDone();
       samples.push(performance.now() - t0);
       // ORT owns GPU-resident output buffers. Without disposal they accumulate
       // for the length of the run and eventually distort or exhaust memory.
@@ -195,6 +214,7 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
       steadyMaxMs: samples[samples.length - 1] ?? NaN,
       iterations: samples.length,
       placement: logs.filter((l) => /Node placements|All nodes placed|kernel not found/i.test(l)),
+      fenced: ortDevice !== null,
     };
   } catch (err) {
     return { ...base, error: describe(err) };
@@ -203,6 +223,18 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     console.warn = originalWarn;
     console.error = originalError;
   }
+}
+
+/**
+ * ORT's own `GPUDevice`, for taking a completion fence on the right queue.
+ * Returns null if the runtime does not expose one, in which case the caller
+ * must treat the timing as submission-side only.
+ */
+async function readOrtDevice(ort: OrtModule): Promise<GPUDevice | null> {
+  const webgpu: unknown = (ort.env as unknown as Record<string, unknown>)['webgpu'];
+  if (!webgpu || typeof webgpu !== 'object' || !('device' in webgpu)) return null;
+  const device: unknown = await webgpu.device;
+  return device instanceof GPUDevice ? device : null;
 }
 
 function readVersion(ort: OrtModule): string | null {

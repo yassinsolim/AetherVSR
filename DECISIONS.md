@@ -385,12 +385,19 @@ Runtime Web on the WebGPU EP, by measurement.
 open pending one specific experiment: the same model with `Tensor.fromGpuBuffer`
 input *and* `gpu-buffer` output on AetherVSR's own device.
 
-**Why.** The measurement we took is not sufficient to rank them, and saying so
-is the honest outcome. ORT's native WebGPU EP ran the identical convolution at
-34.2 ms with CPU output and 16.5 ms with GPU-resident output, but both include
-a 56.3 MB CPU→GPU input upload per iteration, so neither is comparable to our
-GPU-pass-only 8.45 ms. That the figure halved when only the download was
-removed shows transfer dominates.
+**Why.** ORT's native WebGPU EP ran the identical convolution at 34.7 ms with
+CPU output and 19.7 ms with GPU-resident output and an explicit queue
+completion fence. Both still include a 56.3 MB CPU→GPU input upload per
+iteration, so neither is a clean comparison against our GPU-pass-only 8.585 ms.
+
+**No ranking is drawn from those numbers.** They are a different scope from our
+8.585 ms WGSL pass time, and backing out an estimated upload to compare them
+would be inventing the very number in question. ORT's compute-only cost on this
+device remains unmeasured.
+
+The decision to continue with WGSL for Milestone 3 therefore rests on the
+non-performance evidence below, and on the fact that Milestone 2's throughput
+gap must be closed in kernels regardless of who wrote them:
 
 What *does* inform the decision now, from source review rather than taste:
 
