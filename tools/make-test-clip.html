@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AetherVSR — test clip generator</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #0b0d10;
+        color: #d7dee6;
+        font: 13px/1.5 ui-monospace, Menlo, monospace;
+      }
+      canvas {
+        border: 1px solid #232a32;
+        max-width: 100%;
+      }
+      button {
+        font: inherit;
+        padding: 4px 10px;
+        margin-right: 8px;
+      }
+      #log {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AetherVSR test clip generator</h1>
+    <p>
+      Renders a deterministic 1280x720 / 30 fps clip designed to stress an upscaler: resolution wedges,
+      one-pixel gratings, hard edges, small text, a smooth gradient and continuous sub-pixel motion. Output
+      is VP9 WebM. Save the download to <code>public/media/</code>.
+    </p>
+    <p>
+      <button id="record">record 6 s clip</button>
+      <button id="preview">preview only</button>
+    </p>
+    <div id="log">idle</div>
+    <canvas id="c" width="1280" height="720"></canvas>
+
+    <script type="module">
+      // Overridable from the URL so the repo's 30 fps and 60 fps reference
+      // clips come from one generator: ?fps=60&seconds=4
+      const params = new URLSearchParams(location.search);
+      const WIDTH = 1280;
+      const HEIGHT = 720;
+      const FPS = Number(params.get('fps') ?? 30);
+      const SECONDS = Number(params.get('seconds') ?? 6);
+      const BITS_PER_SECOND = Number(params.get('bitrate') ?? 16_000_000);
+      const CODEC = params.get('codec') ?? 'vp9';
+      const EXTENSION = CODEC === 'h264' ? 'mp4' : 'webm';
+      const FILENAME = `aethervsr-testclip-720p${FPS}-${CODEC}.${EXTENSION}`;
+
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const log = document.getElementById('log');
+
+      /**
+       * Frame content is a pure function of the frame index, so a rerun on the
+       * same machine reproduces the same drawing.
+       *
+       * Across machines it will not be bit-identical: Canvas2D text
+       * rasterisation depends on the font stack, and the encoder's output
+       * depends on the browser build. The committed clips in public/media are
+       * therefore the reference artefacts; regenerate to experiment, not to
+       * reproduce a published benchmark.
+       */
+      function drawFrame(i) {
+        const t = i / FPS;
+        ctx.fillStyle = '#101014';
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // Horizontal gradient: exercises banding and colour handling.
+        const grad = ctx.createLinearGradient(0, 0, WIDTH, 0);
+        grad.addColorStop(0, '#0a2540');
+        grad.addColorStop(0.5, '#7a2f5f');
+        grad.addColorStop(1, '#d9a441');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, WIDTH, 120);
+
+        // Frequency wedge: vertical bars from 1 px to 16 px period. A 2x scaler
+        // must not alias these; a neural model must not hallucinate on them.
+        for (let x = 0; x < WIDTH; x++) {
+          const period = 1 + Math.floor((x / WIDTH) * 16);
+          const on = Math.floor(x / period) % 2 === 0;
+          ctx.fillStyle = on ? '#ffffff' : '#000000';
+          ctx.fillRect(x, 140, 1, 120);
+        }
+
+        // Radial zone plate: continuous range of spatial frequencies.
+        const cx = 220;
+        const cy = 470;
+        const img = ctx.createImageData(320, 220);
+        for (let y = 0; y < 220; y++) {
+          for (let x = 0; x < 320; x++) {
+            const dx = x - 160;
+            const dy = y - 110;
+            const v = 127.5 * (1 + Math.cos((dx * dx + dy * dy) * 0.0075));
+            const o = (y * 320 + x) * 4;
+            img.data[o] = v;
+            img.data[o + 1] = v;
+            img.data[o + 2] = v;
+            img.data[o + 3] = 255;
+          }
+        }
+        ctx.putImageData(img, cx - 160, cy - 110);
+
+        // Moving hard-edged geometry: sub-pixel motion between frames.
+        const px = 640 + 300 * Math.sin(t * 0.9);
+        const py = 470 + 120 * Math.cos(t * 1.3);
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(t * 0.7);
+        ctx.fillStyle = '#6ee7b7';
+        ctx.fillRect(-70, -70, 140, 140);
+        ctx.fillStyle = '#0b0d10';
+        ctx.fillRect(-40, -40, 80, 80);
+        ctx.restore();
+
+        // Thin diagonal lines: the classic staircase test for reconstruction.
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let k = 0; k < 12; k++) {
+          const x0 = 900 + k * 28;
+          ctx.moveTo(x0, 300);
+          ctx.lineTo(x0 + 90, 660);
+        }
+        ctx.stroke();
+
+        // Small text: high-contrast detail that upscalers most visibly ruin.
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '13px ui-monospace, Menlo, monospace';
+        ctx.fillText(`AetherVSR deterministic test pattern — ${WIDTH}x${HEIGHT} @ ${FPS}fps`, 24, 700);
+        ctx.fillText(`frame ${String(i).padStart(4, '0')}  t=${t.toFixed(3)}s`, 24, 682);
+      }
+
+      /**
+       * `?codec=h264` produces MP4/AVC, `?codec=vp9` (default) produces WebM.
+       *
+       * Both are provided because the container/codec choice measurably changes
+       * where the frame-rate ceiling sits. On the machine in BENCHMARKS.md a
+       * 720p60 VP9 clip did not sustain 60 presented fps even with the
+       * cheapest upscaler, so the codec has to be a controlled variable rather
+       * than an assumption. Which decoder the browser actually selects is not
+       * observable from this page; confirm with chrome://media-internals
+       * before attributing a result to hardware or software decode.
+       */
+      const MIME_BY_CODEC = {
+        h264: 'video/mp4;codecs=avc1.42E01E',
+        vp9: 'video/webm;codecs=vp9',
+        vp8: 'video/webm;codecs=vp8',
+      };
+
+      /**
+       * Exactly the requested codec or nothing.
+       *
+       * An earlier version fell back through a candidate list, which could
+       * silently encode VP8 into a file named `-vp9` and publish a mislabelled
+       * reference asset. A benchmark input must be what it claims to be.
+       */
+      function pickMimeType() {
+        const wanted = MIME_BY_CODEC[CODEC];
+        if (!wanted) return '';
+        return MediaRecorder.isTypeSupported(wanted) ? wanted : '';
+      }
+
+      async function record() {
+        const mimeType = pickMimeType();
+        if (!mimeType) {
+          log.textContent = `this browser cannot record codec=${CODEC} (${MIME_BY_CODEC[CODEC] ?? 'unknown codec'}); refusing to produce a mislabelled clip`;
+          return null;
+        }
+        // captureStream(0) plus explicit requestFrame(): the canvas is sampled
+        // only when we say so, and we say so on a wall-clock schedule. Letting
+        // the browser sample at rAF rate produces a clip whose real cadence is
+        // the display refresh rate, not FPS.
+        const stream = canvas.captureStream(0);
+        const track = stream.getVideoTracks()[0];
+        const chunks = [];
+        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: BITS_PER_SECOND });
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        const done = new Promise((resolve) => {
+          recorder.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
+        });
+
+        const total = FPS * SECONDS;
+        const interval = 1000 / FPS;
+        let frame = 0;
+        let missed = 0;
+        recorder.start();
+        const start = performance.now();
+        await new Promise((resolve) => {
+          // Paced on requestAnimationFrame, not setTimeout.
+          //
+          // MediaRecorder timestamps each captured frame by wall clock, so the
+          // encoded presentation timestamps inherit the jitter of whatever
+          // drives requestFrame(). A setTimeout poll lands at arbitrary
+          // instants and produced clips whose frame intervals scattered between
+          // 15 and 21 ms; Chrome's video renderer then could not align them to
+          // vsync and dropped frames on playback, which looks exactly like a
+          // pipeline that cannot keep up. rAF fires on vsync, so timestamps
+          // land on the display grid and a 60 fps clip on a 60 Hz display gets
+          // an even cadence.
+          const tick = () => {
+            const due = Math.min(total, Math.floor((performance.now() - start) / interval) + 1);
+            // Exactly one captured frame per paint. `requestFrame()` sets a
+            // boolean flag on the track, so several calls before the next
+            // canvas paint coalesce into a single encoded frame: a catch-up
+            // loop would silently encode fewer frames than it counted.
+            if (frame < due) {
+              drawFrame(frame++);
+              track.requestFrame();
+              if (frame < due) missed += due - frame;
+            }
+            log.textContent = `recording ${frame}/${total}`;
+            if (frame >= total) {
+              resolve();
+              return;
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        });
+        recorder.stop();
+        const blob = await done;
+        const cadence =
+          missed === 0
+            ? 'cadence clean'
+            : `WARNING: ${missed} frame slot(s) missed — the display could not keep up with ${FPS} fps; discard this clip`;
+        log.textContent = `done: ${mimeType}, ${(blob.size / 1e6).toFixed(2)} MB, ${frame} frames, ${SECONDS}s @ ${FPS}fps — ${cadence}`;
+        return blob;
+      }
+
+      document.getElementById('preview').addEventListener('click', () => {
+        let i = 0;
+        const tick = () => {
+          drawFrame(i++);
+          if (i < FPS * SECONDS) requestAnimationFrame(tick);
+        };
+        tick();
+      });
+
+      document.getElementById('record').addEventListener('click', async () => {
+        const blob = await record();
+        if (!blob) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = FILENAME;
+        a.click();
+      });
+
+      // Exposed so the clip can be regenerated headlessly from an automation
+      // script without clicking anything.
+      window.aethervsrRecordClip = record;
+
+      drawFrame(0);
+    </script>
+  </body>
+</html>
