@@ -13,6 +13,14 @@ export interface MatrixConvShaderConfig {
 export const MATRIX_DIM = 8;
 
 /**
+ * Workgroup storage the matrix shader declares: the staged right-hand operand
+ * and the result landing zone, one 8x8 tile each.
+ */
+export function matrixSharedBytes(useF16: boolean): number {
+  return 2 * MATRIX_DIM * MATRIX_DIM * (useF16 ? 2 : 4);
+}
+
+/**
  * 3x3 convolution as an implicit GEMM on `chromium_experimental_subgroup_matrix`.
  *
  * ## Why implicit rather than im2col

@@ -481,7 +481,11 @@ dimensions do not divide the dispatch grid: 854x480 C16 moves from 1894 to 1917
 GMAC/s, 640x360 C12 from 1724 to 1757. **The headline configuration is
 unaffected**: 1280x720 with an 8x4 workgroup and 2x2 blocking divides exactly,
 so its 2.1234 GMAC stands and the ladder above is unchanged by the correction.
-All figures in this section were re-measured after the fix regardless.
+
+Every throughput figure in this section was re-measured after the fix — the
+ladder, the feasibility map, the raised-limit rows and the subgroup-matrix
+comparison. Timings in milliseconds were unaffected by the correction in any
+case, since only the denominator changed.
 
 ### Optimization ladder — 1280x720, C16 -> C16, relu, fp16
 
@@ -540,9 +544,22 @@ The configuration above reports 1 440 B and `requiresRaisedLimit: false`.
 
 Dawn reports this adapter supports `maxComputeWorkgroupStorageSize` of 32 768
 against the 16 384 the WebGPU spec guarantees. With the larger limit granted,
-the best newly-legal configuration is t16x16 b4x2 ob8 at **1.217 ms / 1745
-GMAC/s** — slower than the 1.065 ms configuration that fits inside the floor.
-Every larger tile is slower. AetherVSR does not need a raised limit.
+the best newly-legal configuration is t16x16 b4x2 ob8 (17 952 B) at **1.168 ms
+/ 1858 GMAC/s** — slower than the 1.067 ms configuration that fits inside the
+floor. Every larger tile is slower:
+
+| Configuration | Workgroup storage | GPU ms | GMAC/s |
+| --- | ---: | ---: | ---: |
+| t8x4 b2x2 ob16 (shipped, portable) | 1 440 B | 1.067 | 1989 |
+| t16x16 b4x2 ob8 | 17 952 B | 1.168 | 1858 |
+| t32x4 b8x2 ob8 | 20 640 B | 1.667 | 1274 |
+| t16x8 b4x4 ob8 | 17 952 B | 1.625 | 1336 |
+| t16x8 b8x2 ob8 | 18 720 B | 1.719 | 1235 |
+
+AetherVSR does not need a raised limit. Note the raised-limit rows have their
+own MAC counts (2.1706 GMAC for a 32-row dispatch grid against 2.1234 for the
+shipped one) because their dispatch grids overhang 720 rows differently; the
+throughput column already accounts for that.
 
 ### Subgroup-matrix — experimental, rejected
 
@@ -552,11 +569,11 @@ Every larger tile is slower. AetherVSR does not need a raised limit.
 
 | Path | GPU ms | GMAC/s |
 | --- | ---: | ---: |
-| Portable `blocked` fp16 | 1.085 | 1958 |
-| Subgroup-matrix fp16 | 8.451 | 251 |
+| Portable `blocked` fp16 (shipped) | 1.067 | 1989 |
+| Subgroup-matrix fp16 | 8.542 | 249 |
 | Subgroup-matrix fp32 | 8.711 | 244 |
 
-7.8x slower, and `rowsPerGroup` from 1 to 16 barely moves it. The cause is
+8.0x slower, and `rowsPerGroup` from 1 to 16 barely moves it. The cause is
 structural: Dawn on Metal exposes exactly two configurations, both 8x8x8
 (f32->f32 and f16->f16). An 8x8x8 tile performs 512 MACs against 64 staged
 activations — 8 MACs per staged value, plus two barriers per K-slice — where the
@@ -565,6 +582,8 @@ arithmetic units matter.
 
 This is **not** evidence that the M5's matrix hardware is slow. It is evidence
 that an 8x8 tile cannot amortise a gather for a 3x3 convolution at 16 channels.
+The variant declares only 256 B of workgroup storage, so it is not competing for
+occupancy either.
 
 Independently of speed, the feature is unusable in production: it requires
 `--enable-unsafe-webgpu` (measured — it is absent from `adapter.features`
@@ -581,7 +600,7 @@ nodes confirmed on `[WebGpuExecutionProvider]`.
 | CPU input, GPU output | 20.1 ms (min 18.7, max 22.1) | 59.0 MB | yes |
 | CPU input, CPU output | 35.3 ms | 59.0 MB | no |
 | **GPU input, GPU output** | **could not create session** | 0 | — |
-| AetherVSR WGSL, fully GPU-resident | 1.065 ms | 0 | n/a |
+| AetherVSR WGSL, fully GPU-resident | 1.067 ms | 0 | n/a |
 
 The GPU-resident path is implemented — shared `GPUDevice` on the EP option,
 input buffer allocated on it and filled once outside the timed loop, 16-byte

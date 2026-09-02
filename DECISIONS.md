@@ -516,7 +516,7 @@ through host memory — the one thing this project's data flow exists to avoid.
 Even a hypothetically faster ORT would have to pay that crossing every frame.
 
 For the record, and **not as a ranking**, the scope-mismatched figures are ORT
-20.1 ms (CPU input, GPU output, fenced, all nodes on WebGPU) against 1.065 ms
+20.1 ms (CPU input, GPU output, fenced, all nodes on WebGPU) against 1.067 ms
 for our kernel. The 59 MB upload inside ORT's figure measures 8.3 ms standalone
 and is reported alongside, never subtracted. Crediting it back entirely still
 leaves ORT around 11x slower.
@@ -570,8 +570,11 @@ the adapter reports, and falling back to a plain request if that is refused —
 but no AetherVSR configuration may depend on a raised limit.
 
 **Why.** The experiment came back negative, which settles it. With 32 768 bytes
-granted, the best newly-legal configuration is 1.217 ms against 1.065 ms for a
-configuration that fits inside the floor; every larger tile is slower. The
+granted, the best newly-legal configuration is 1.168 ms against 1.067 ms for a
+configuration that fits inside the floor; every larger tile is slower. The rule
+is now machine-checked: every benchmark result carries `sharedBytes` and a
+`requiresRaisedLimit` flag, so a non-portable configuration cannot be published
+as portable by oversight. The
 guaranteed floor is not binding for this kernel, so there is no speed-versus-
 portability trade to make here. That is worth recording precisely because the
 result could have gone the other way and forced one.
@@ -606,5 +609,7 @@ is a per-kernel decision, so extent must be a per-kernel calculation.
 understating issued work understates throughput. Only cells whose dimensions do
 not divide the dispatch grid were affected: 854x480 C16 moved 1894 -> 1917
 GMAC/s, 640x360 C12 moved 1724 -> 1757. The headline 1280x720 configuration
-divides exactly and did not move. Every Milestone 3 figure was re-measured after
-the fix regardless of whether it was expected to change.
+divides exactly and did not move. Every *throughput* figure in the Milestone 3
+section was re-measured after the fix regardless of whether it was expected to
+change; millisecond timings were unaffected either way, since only the
+denominator moved.

@@ -195,11 +195,22 @@ export async function verifyConv(
 
   // WebGPU zero-initialises a new buffer, and a relu reference is exactly 0
   // over large regions, so an output element the dispatch never wrote would
-  // match the reference at those positions and the check would pass
-  // vacuously. Poison the buffer first: any unwritten element then fails.
+  // match the reference at those positions and the check would pass vacuously.
+  // Poison the buffer first, so any unwritten element fails loudly.
+  //
+  // The pattern has to be written in the element type the kernel writes. A
+  // Float32Array of -1e4 reinterpreted as f16 decodes to alternating +2.0 and
+  // -6.109375, and +2.0 is a value a real kernel can legitimately produce - so
+  // the f32 poison would have reopened the same hole it was added to close.
   {
-    const sentinel = new Float32Array(roundUp4(outElements * bytesPerElement) / 4).fill(-1e4);
-    device.queue.writeBuffer(output, 0, sentinel);
+    const bytes = roundUp4(outElements * bytesPerElement);
+    if (useF16) {
+      // 0xFBFF is -65504, the most negative finite f16; the test data cannot
+      // reach it.
+      device.queue.writeBuffer(output, 0, new Uint16Array(bytes / 2).fill(0xfbff));
+    } else {
+      device.queue.writeBuffer(output, 0, new Float32Array(bytes / 4).fill(-1e4));
+    }
   }
 
   const readback = device.createBuffer({

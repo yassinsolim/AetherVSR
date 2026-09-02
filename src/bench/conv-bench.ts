@@ -2,7 +2,7 @@ import { buildConvShader, convMacCount, type Activation, type ConvShaderConfig }
 import { buildTiledConvShader, tiledSharedBytes } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packedSharedBytes } from './conv-packed.wgsl.js';
 import { buildBlockedConvShader, blockedSharedBytes } from './conv-blocked.wgsl.js';
-import { buildMatrixConvShader, matrixWeightIndex } from './conv-matrix.wgsl.js';
+import { buildMatrixConvShader, matrixSharedBytes, matrixWeightIndex } from './conv-matrix.wgsl.js';
 
 /**
  * Which convolution kernel implementation to measure.
@@ -168,10 +168,13 @@ export class ConvBench {
     const guardShared = (bytes: number): void => {
       sharedBytes = bytes;
       const limit = device.limits.maxComputeWorkgroupStorageSize;
+      // Set whenever the portable floor is exceeded, including when the device
+      // limit is exceeded too. Reporting `false` for a configuration that needs
+      // 68 KiB - on the grounds that it failed for a worse reason - would be a
+      // strange thing for a portability flag to say.
+      if (bytes > PORTABLE_WORKGROUP_STORAGE_BYTES) requiresRaisedLimit = true;
       if (bytes > limit) {
         earlyDiagnostics.push(`workgroup storage ${bytes}B exceeds device limit ${limit}B`);
-      } else if (bytes > PORTABLE_WORKGROUP_STORAGE_BYTES) {
-        requiresRaisedLimit = true;
       }
     };
 
@@ -197,6 +200,10 @@ export class ConvBench {
         break;
       }
       case 'matrix':
+        // Two array<T, 64> staging buffers: the right-hand operand and the
+        // result landing zone. Small, but reporting 0 would make the
+        // machine-checked portability claim untrue for this variant.
+        guardShared(matrixSharedBytes(c.useF16));
         code = buildMatrixConvShader({
           inChannels: c.inChannels,
           outChannels: c.outChannels,
