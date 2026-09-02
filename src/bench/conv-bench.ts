@@ -208,7 +208,7 @@ export class ConvBench {
     const executed = median > 0;
     const valid = diagnostics.length === 0 && executed;
     if (!executed) diagnostics.push('dispatch produced zero-length GPU timestamps: it did not run');
-    const macs = convMacCount(c.width, c.height, c.inChannels, c.outChannels);
+    const macs = convMacCount(c.width, c.height, c.inChannels, c.outChannels, c.blockX);
     // Lower bound: every activation element read once, written once, plus the
     // weights. Real traffic is higher because the 3x3 windows overlap and
     // cache behaviour is not modelled, so treat this as a floor.

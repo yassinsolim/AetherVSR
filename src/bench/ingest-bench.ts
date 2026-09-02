@@ -39,7 +39,7 @@ export interface IngestBenchStats {
   readonly ingestMs: StageStats | null;
   /** GPU time of the upscale pass. */
   readonly scaleMs: StageStats;
-  /** Sum of the two measured passes. */
+  /** Sum of the two measured passes, or NaN when nothing was measured. */
   readonly totalGpuMs: number;
   /** Main-thread time: import call, command recording, submit. */
   readonly cpuFrameMs: StageStats;
@@ -233,7 +233,12 @@ export class IngestBench {
         elapsed > 0 ? (Math.max(0, this.framesRendered - this.openingRendered) / elapsed) * 1000 : 0,
       ingestMs: ingest,
       scaleMs: scale,
-      totalGpuMs: (ingest && ingest.samples > 0 ? ingest.mean : 0) + (scale.samples > 0 ? scale.mean : 0),
+      // NaN, not 0, when the upscale pass was never timed: AGENTS.md §2
+      // requires "not measured" to stay distinguishable from a real zero.
+      totalGpuMs:
+        scale.samples === 0
+          ? Number.NaN
+          : (ingest && ingest.samples > 0 ? ingest.mean : 0) + scale.mean,
       cpuFrameMs: summarise(this.cpuWindow),
     };
   }

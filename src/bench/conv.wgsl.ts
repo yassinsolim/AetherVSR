@@ -147,18 +147,26 @@ ${accStore}
 }
 
 /**
- * Multiply-accumulate count for one dispatch of the shader above.
+ * Multiply-accumulate count actually issued by one dispatch of the shader.
  *
  * A 3x3 convolution performs `9 * inC` MACs per output pixel per output
- * channel. Border pixels do fewer useful MACs because of zero padding, but the
- * shader still issues the reads and multiplies, so this counts issued work —
- * which is what a throughput figure should reflect.
+ * channel. Two adjustments make this *issued* work rather than useful work,
+ * which is what a throughput figure should reflect:
+ *
+ * - Border pixels do fewer useful MACs because of zero padding, but the shader
+ *   still issues the reads and multiplies.
+ * - When `width` is not a multiple of `blockX`, the tail invocation still
+ *   accumulates all `blockX` outputs and only the *stores* are guarded. Those
+ *   accumulations are issued and must be counted, or throughput is overstated
+ *   for non-divisible widths.
  */
 export function convMacCount(
   width: number,
   height: number,
   inChannels: number,
   outChannels: number,
+  blockX = 1,
 ): number {
-  return width * height * inChannels * outChannels * 9;
+  const issuedWidth = Math.ceil(width / blockX) * blockX;
+  return issuedWidth * height * inChannels * outChannels * 9;
 }
