@@ -1,0 +1,190 @@
+# AetherVSR
+
+Real-time, local, GPU-accelerated video super-resolution for web video.
+
+AetherVSR upscales video in the browser using WebGPU, entirely on your machine —
+no uploads, no server. Apple Silicon is a first-class target; the architecture
+is cross-platform through WebGPU.
+
+**Status: Milestone 1 — WebGPU video baseline. There is no AI inference in this
+codebase yet.** What exists is a working, measured, zero-readback video →
+WebGPU → canvas pipeline with a conventional GPU scaler, and a clean seam for a
+neural upscaler to arrive through. See `ROADMAP.md`.
+
+## What works today
+
+- Local video decoded into an `HTMLVideoElement`, never displayed directly.
+- `requestVideoFrameCallback()` as the frame clock, so work is synchronised to
+  presented video frames rather than to display refresh.
+- `GPUDevice.importExternalTexture()` for the frame import, with a
+  `copyExternalImageToTexture()` fallback that can be forced for testing.
+- Exact 2x output: 1280x720 in, 2560x1440 out, always.
+- Two non-neural GPU scalers: hardware bilinear, and a 9-tap bilinear-fused
+  Catmull-Rom bicubic.
+- A diagnostic overlay with real GPU timings where `timestamp-query` is
+  available, and an explicit "not measured" where it is not.
+- No CPU pixel readback anywhere in the frame loop.
+
+Measured on a MacBook Pro (Apple M5, 24 GB), Chrome for Testing 152, 720p60
+H.264 → 1440p:
+
+| Upscaler | Presented fps | Rendered fps | GPU upscale | 60 Hz budget |
+|---|---:|---:|---|---:|
+| Catmull-Rom 9-tap | 59.8 | 59.4 | 4.03 ms avg (p95 4.86) | 24.2% |
+| Bilinear | 59.8 | 59.5 | 0.86 ms avg (p95 2.22) | 5.1% |
+
+30 s run; FPS are means over the run, GPU timings aggregate the trailing 240
+samples (~4 s at 60 fps). 1780 and 1784 frames upscaled respectively, with
+12 and 8 presented frames skipped. Full environment, method, caveats and the things that were **not**
+measured are in `BENCHMARKS.md`. Numbers here are never estimates — see
+`AGENTS.md` §2.
+
+## Requirements
+
+- A Chromium-based browser with WebGPU (Chrome/Edge/Brave 113+). Safari 26+
+  should work but has not been tested.
+- Any browser without `requestVideoFrameCallback` falls back to a labelled
+  degraded rAF clock. Firefox has supported rVFC since 132, so the clock is not
+  the blocker there; its WebGPU availability is, and Firefox was not tested.
+- Node.js 20+.
+
+## Quick start
+
+```bash
+npm install
+npm run dev
+```
+
+Open the printed URL. A bundled test clip loads automatically; use the **clip**
+picker to load any local video instead (it never leaves your machine).
+
+**Keep the window frontmost while measuring.** A backgrounded tab suspends
+`requestVideoFrameCallback` and clamps timers, and every number becomes
+meaningless.
+
+### Commands
+
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Vite dev server with the harness |
+| `npm run typecheck` | `tsc --noEmit`, strict |
+| `npm run lint` | ESLint (type-aware) |
+| `npm test` | Vitest unit tests |
+| `npm run build` | Typecheck and production build |
+
+### Reproducible runs
+
+| Parameter | Values | Effect |
+|---|---|---|
+| `clip` | a path under `/media/...` | Selects the clip |
+| `filter` | `catmull-rom`, `bilinear` | Selects the upscaler |
+| `import` | `copy` | Forces the copy fallback import path |
+
+```
+http://127.0.0.1:5173/?clip=/media/aethervsr-testclip-720p60-h264.mp4&filter=catmull-rom
+```
+
+## Test clips
+
+`public/media/` holds four clips (1280x720, at 30 and 60 fps, in VP9/WebM and
+H.264/MP4). The drawing is a pure function of frame index: a 1-to-16 px
+frequency wedge, a radial zone plate, thin diagonals, small text, hard edges
+and continuous sub-pixel motion — chosen to make resampling errors visible.
+
+The **committed binaries are the benchmark reference**, not the recipe.
+Regenerating on another machine will not be bit-identical: Canvas2D text
+rasterisation depends on the font stack, and encoding depends on the browser
+build and refresh rate.
+
+Regenerate with `tools/make-test-clip.html`, served by the dev server:
+
+```
+http://127.0.0.1:5173/tools/make-test-clip.html?fps=60&seconds=4&codec=h264
+```
+
+Press **record**, then save the download into `public/media/`. The generator is
+paced on `requestAnimationFrame` for a reason — see `DECISIONS.md` ADR-0009.
+
+## Testing
+
+`npm test` covers the logic that can be tested without a GPU: the statistics
+and rate meters that produce every published number, and the frame-clock state
+machine including skipped-frame accounting and stop/start reentrancy.
+
+One test asserts on generated WGSL text — that the external-texture variant
+uses `textureSampleBaseClampToEdge` and the 2D variant `textureSampleLevel`,
+and that the bicubic kernel emits nine taps. That is a source-text assertion,
+not a rendering test: it pins a contract whose violation fails at pipeline
+creation inside a browser, where no unit test can reach it. Whether pixels are
+correct is established by running the harness and looking.
+
+GPU and video behaviour is verified by running the harness and reading the
+overlay; the procedure is in `BENCHMARKS.md`. There are deliberately no mocked
+WebGPU tests — a mock would assert that our mock works.
+
+## Repository layout
+
+```
+src/
+  main.ts                      harness bootstrap and wiring
+  core/
+    types.ts                   Upscaler, FrameTexture, FrameTick contracts
+    pipeline.ts                stage orchestration, the hot path
+    acquisition/
+      video-source.ts          rVFC frame clock (no GPU)
+      frame-importer.ts        external texture / copy fallback
+    gpu/
+      device.ts                adapter/device acquisition, capability probing
+    upscale/
+      baseline-scaler.ts       Milestone 1 Upscaler implementation
+      baseline.wgsl.ts         WGSL, specialised per source kind and filter
+    present/
+      canvas-target.ts         swap chain, exact-2x backing store
+    metrics/
+      stats.ts                 SampleWindow, RateMeter (pure)
+      gpu-timer.ts             timestamp-query pool
+  ui/
+    overlay.ts                 diagnostic overlay
+    harness.css
+index.html                     harness entry point
+test/                          unit tests for the non-GPU logic
+tools/make-test-clip.html      deterministic clip generator
+public/media/                  committed test clips (30/60 fps, VP9 and H.264)
+```
+
+## Documentation
+
+| File | Contents |
+|---|---|
+| `AGENTS.md` | Binding engineering rules for contributors |
+| `ARCHITECTURE.md` | Data flow, stage contracts, where the neural stage goes |
+| `DECISIONS.md` | Architecture decision records |
+| `BENCHMARKS.md` | Benchmark format, environment, measured results, non-results |
+| `ROADMAP.md` | Milestones and acceptance criteria |
+
+## Prior art and licensing
+
+AetherVSR is independently engineered. Other projects were read for
+architectural ideas and are cited; no third-party source was copied. Licences
+were established by reading each repository rather than assumed — the verdict
+table is in `DECISIONS.md` ADR-0010.
+
+Of note: **no `LICENSE` file was present in the `fishy-ops/WebVSR` snapshot we
+reviewed, and the GitHub API reported `license: null`.** We treated it as
+unlicensed for this project and copied nothing from it; anyone reusing it
+should verify the current state themselves.
+
+Selected references:
+
+- `requestVideoFrameCallback` — https://wicg.github.io/video-rvfc/
+- `GPUExternalTexture` — https://gpuweb.github.io/gpuweb/#gpuexternaltexture
+- Media Playback Quality — https://w3c.github.io/media-playback-quality/
+- WebVSR (WebGPU/WGSL SPAN-Lite browser SR) — https://github.com/fishy-ops/WebVSR
+- StreamSR / EfRLFN, ICLR 2026 — https://arxiv.org/abs/2602.11339
+- SPAN — https://github.com/hongyuanyu/SPAN (Apache-2.0)
+- RLFN — https://github.com/bytedance/RLFN (Apache-2.0)
+- ONNX Runtime Web, WebGPU EP — https://onnxruntime.ai/docs/tutorials/web/ep-webgpu.html
+
+## Licence
+
+Apache-2.0.
