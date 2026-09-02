@@ -76,24 +76,24 @@ achievable on a base Apple M5 through WebGPU, and decide from that whether a
 neural stage is viable at 720p, at reduced internal resolution, or not at all.
 
 **Outcome: the gap is largely closed, and 720p C16 is viable.** Convolution
-throughput went from 239 to **1993 GMAC/s** in fp16 — **8.3x** — putting a
-1280x720 16->16 layer at **1.065 ms**. Full tables in `BENCHMARKS.md`.
+throughput went from 240 to **1990 GMAC/s** in fp16 — **8.3x** — putting a
+1280x720 16->16 layer at **1.067 ms**. Full tables in `BENCHMARKS.md`.
 
 | Step | GPU ms | GMAC/s | vs original |
 | --- | ---: | ---: | ---: |
-| M2 baseline (naive) | 8.868 | 239 | 1.00x |
-| + workgroup tiling with halo | 6.717 | 316 | 1.32x |
-| + vec4 input-channel packing | 3.723 | 570 | 2.38x |
-| + 8 output channels per invocation | 1.212 | 1751 | 7.32x |
-| + 2D spatial blocking | 1.132 | 1875 | 7.83x |
-| + tap-major weight layout | 1.089 | 1950 | 8.14x |
-| + occupancy tuning | **1.065** | **1993** | **8.32x** |
+| M2 baseline (naive) | 8.846 | 240 | 1.00x |
+| + workgroup tiling with halo | 6.697 | 317 | 1.32x |
+| + vec4 input-channel packing | 3.936 | 539 | 2.25x |
+| + 8 output channels per invocation | 1.213 | 1751 | 7.29x |
+| + 2D spatial blocking | 1.141 | 1861 | 7.75x |
+| + tap-major weight layout | 1.086 | 1955 | 8.15x |
+| + occupancy tuning | **1.067** | **1990** | **8.29x** |
 
 Against acceptance criteria:
 
 - ✅ A measured GMAC/s figure per optimisation, each verified against the CPU
   reference before timing.
-- ✅ Maximum achievable throughput and its configuration: 1993 GMAC/s, fp16,
+- ✅ Maximum achievable throughput and its configuration: 1990 GMAC/s, fp16,
   `blocked` variant, 8x4 workgroup, blockX 2, blockY 2, outBlock 16, tap-major
   weights, inside the guaranteed workgroup-storage floor.
 - ✅ A documented reason the GPU-resident ORT figure could not be obtained: ORT
@@ -105,7 +105,7 @@ Against acceptance criteria:
 - ✅ No production model, no extension, no temporal VSR implementation.
 
 **The ≤8 ms verdict.** At 1280x720 with 16 channels, **7 convolution layers**
-fit in 8 ms (1.065 ms each). At 960x540, 12 fit; at 640x360, 28. This is an
+fit in 8 ms (1.078 ms each). At 960x540, 12 fit; at 640x360, 28. This is an
 upper bound on convolution alone: a real network also has activations, pixel
 shuffle, format conversion, residual adds and per-layer dispatch overhead, so
 layer-count arithmetic is not a model prediction. It does mean a C16-class

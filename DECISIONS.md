@@ -571,3 +571,36 @@ configuration that fits inside the floor; every larger tile is slower. The
 guaranteed floor is not binding for this kernel, so there is no speed-versus-
 portability trade to make here. That is worth recording precisely because the
 result could have gone the other way and forced one.
+
+## ADR-0021 — Throughput denominators come from dispatch geometry, not block size
+
+**Status:** accepted (Milestone 3)
+
+**Context.** `convMacCount` is the denominator of every GMAC/s figure this
+project publishes, so an error in it mis-scales a whole milestone quietly
+instead of failing. Through Milestone 2 it inferred the issued extent from
+`blockX` and used height unrounded. That was correct for the only kernel that
+existed: the naive one returns *before* accumulating when an invocation falls
+outside the image.
+
+Every Milestone 3 kernel guards at the **store** and accumulates its whole
+spatial block regardless, so an overhanging dispatch really does pay for the
+overhang — and once `blockY` existed, vertically too, which the function had no
+parameter for.
+
+**Decision.** `convMacCount` takes the issued width and height directly. The
+caller derives them from the same numbers it passes to `dispatchWorkgroups`,
+per variant, because how far a dispatch overhangs is a property of the kernel's
+guard placement and not something a shared helper can infer.
+
+**Why not just add a `blockY` argument.** Because the next kernel would break it
+again. The failure mode is a helper quietly guessing at something only the call
+site knows; adding one more guessed parameter preserves that. Guard placement
+is a per-kernel decision, so extent must be a per-kernel calculation.
+
+**Impact on published figures.** Small, and in the conservative direction —
+understating issued work understates throughput. Only cells whose dimensions do
+not divide the dispatch grid were affected: 854x480 C16 moved 1894 -> 1917
+GMAC/s, 640x360 C12 moved 1724 -> 1757. The headline 1280x720 configuration
+divides exactly and did not move. Every Milestone 3 figure was re-measured after
+the fix regardless of whether it was expected to change.

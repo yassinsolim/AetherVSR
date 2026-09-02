@@ -459,22 +459,53 @@ is already correct, with <=1% spread across four repeats.
 millisecond-scale workloads in the regime where the two warm-up strategies agree,
 and the re-measured baseline below reproduces them within run-to-run variance.
 
+### MAC accounting correction
+
+`convMacCount` is the denominator of every GMAC/s figure this project
+publishes. Through Milestone 2 it rounded width up to a multiple of `blockX`
+and used height unrounded, which was right for the naive kernel: that one
+returns *before* accumulating when an invocation falls outside the image.
+
+Every kernel added in Milestone 3 guards at the **store** instead and
+accumulates its whole spatial block regardless, so a dispatch that overhangs
+the image really does pay for the overhang — vertically as well as
+horizontally, once `blockY` exists. The function had no `blockY` parameter at
+all.
+
+It now takes the issued extent directly, derived by the caller from the same
+numbers it passes to `dispatchWorkgroups`.
+
+The effect is small and was in the conservative direction — understating issued
+work understates throughput — but it was wrong. It touched only cells whose
+dimensions do not divide the dispatch grid: 854x480 C16 moves from 1894 to 1917
+GMAC/s, 640x360 C12 from 1724 to 1757. **The headline configuration is
+unaffected**: 1280x720 with an 8x4 workgroup and 2x2 blocking divides exactly,
+so its 2.1234 GMAC stands and the ladder above is unchanged by the correction.
+All figures in this section were re-measured after the fix regardless.
+
 ### Optimization ladder — 1280x720, C16 -> C16, relu, fp16
 
 Each step is cumulative and was verified and measured separately.
 
+Each row is the mean of three interleaved repeats of a median-of-40, measured
+in one session after the MAC-accounting correction described below.
+
 | Step | Correct? | GPU ms | GMAC/s | vs previous | vs original |
 | --- | --- | ---: | ---: | ---: | ---: |
-| M2 baseline — naive, blk4 tile16x16 | yes | 8.868 | 239 | — | 1.00x |
-| + workgroup tiling with halo | yes | 6.717 | 316 | +32.0% | 1.32x |
-| + vec4 input-channel packing | yes | 3.723 | 570 | +80.4% | 2.38x |
-| + 8 output channels per invocation | yes | 1.212 | 1751 | +207% | 7.32x |
-| + 2D spatial blocking (b4x2) | yes | 1.132 | 1875 | +7.1% | 7.83x |
-| + tap-major weight layout | yes | 1.089 | 1950 | +4.1% | 8.14x |
-| + occupancy tuning (t8x4 b2x2 ob16) | yes | 1.065 | 1993 | +2.2% | 8.32x |
+| M2 baseline — naive, blk4 tile16x16 | yes | 8.846 | 240 | — | 1.00x |
+| + workgroup tiling with halo | yes | 6.697 | 317 | +32.1% | 1.32x |
+| + vec4 input-channel packing | yes | 3.936 | 539 | +70.1% | 2.25x |
+| + 8 output channels per invocation | yes | 1.213 | 1751 | +224.5% | 7.29x |
+| + 2D spatial blocking (b4x2) | yes | 1.141 | 1861 | +6.3% | 7.75x |
+| + tap-major weight layout | yes | 1.086 | 1955 | +5.1% | 8.15x |
+| + occupancy tuning (t8x4 b2x2 ob16) | yes | 1.067 | 1990 | +1.8% | 8.29x |
 
-The same ladder in fp32 ends at 1.979 ms / 1073 GMAC/s, a 5.2x improvement over
-its own 10.295 ms baseline.
+The `packed` step is the least stable of the seven — its three repeats spanned
+3.837 to 4.012 ms (4.5%), against <=0.5% for every step from `blocked` onward.
+Its step size should be read as approximate; the endpoints are not.
+
+fp32 has a different optimum and ends at **1.929 ms / 1101 GMAC/s**
+(t8x8 b4x1 ob8), a 5.34x improvement over its own 10.295 ms baseline.
 
 Two steps are worth reading for their shape rather than their size. Workgroup
 tiling cut *issued* global loads about sevenfold and bought only 32%, which says
@@ -493,8 +524,8 @@ staged at all.
 | Output channels per invocation | 16 |
 | Weight layout | tap-major `[ic/4][k][oc]` |
 | Workgroup storage | 5 440 B — inside the 16 384 B guaranteed floor |
-| GPU time | **1.0654 ms** (mean of 3 runs of median-of-40; runs 1.0642 / 1.0684 / 1.0636) |
-| Throughput | **1993 GMAC/s** |
+| GPU time | **1.067 ms** (mean of 3 runs of median-of-40; runs 1.0674 / 1.0688 / 1.0663) |
+| Throughput | **1990 GMAC/s** |
 | Numerical error vs CPU reference | 2.4e-7 (fp32 build of same config), 2.3e-3 (fp16) |
 
 Uses no extension beyond `shader-f16` and no raised limit. The nine best
@@ -576,19 +607,19 @@ is the fastest of 15-25 configurations.
 
 | Resolution | C4 | C8 | C12 | C16 |
 | --- | ---: | ---: | ---: | ---: |
-| 640x360 | 0.0313 ms | 0.0833 ms | 0.1732 ms | 0.2831 ms |
-| 854x480 | 0.0496 ms | 0.1399 ms | 0.3049 ms | 0.4986 ms |
-| 960x540 | 0.0613 ms | 0.1751 ms | 0.3826 ms | 0.6202 ms |
-| 1280x720 | 0.1144 ms | 0.3056 ms | 0.6707 ms | 1.0805 ms |
+| 640x360 | 0.0312 ms | 0.0835 ms | 0.1737 ms | 0.2823 ms |
+| 854x480 | 0.0495 ms | 0.1399 ms | 0.3057 ms | 0.4985 ms |
+| 960x540 | 0.0614 ms | 0.1769 ms | 0.3832 ms | 0.6245 ms |
+| 1280x720 | 0.1115 ms | 0.3051 ms | 0.6639 ms | 1.0781 ms |
 
 Achieved throughput, same cells:
 
 | Resolution | C4 | C8 | C12 | C16 |
 | --- | ---: | ---: | ---: | ---: |
-| 640x360 | 1062 | 1593 | 1724 | 1875 |
-| 854x480 | 1190 | 1688 | 1747 | 1894 |
-| 960x540 | 1218 | 1705 | 1756 | 1926 |
-| 1280x720 | 1160 | 1737 | 1781 | 1965 |
+| 640x360 | 1085 | 1590 | 1757 | 1881 |
+| 854x480 | 1206 | 1708 | 1758 | 1917 |
+| 960x540 | 1225 | 1700 | 1766 | 1927 |
+| 1280x720 | 1190 | 1740 | 1799 | 1970 |
 
 No cell was invalid: every resolution/channel combination fit in memory.
 
@@ -604,12 +635,12 @@ Layers of the given shape that fit in a budget, from the measured costs above.
 
 | Configuration | 4 ms | 8 ms | 12 ms | 16.67 ms |
 | --- | ---: | ---: | ---: | ---: |
-| 1280x720 C16 | 3.7 | 7.4 | 11.1 | 15.4 |
-| 1280x720 C12 | 6.0 | 11.9 | 17.9 | 24.9 |
+| 1280x720 C16 | 3.7 | 7.4 | 11.1 | 15.5 |
+| 1280x720 C12 | 6.0 | 12.0 | 18.1 | 25.1 |
 | 1280x720 C8 | 13.1 | 26.2 | 39.3 | 54.6 |
-| 960x540 C16 | 6.4 | 12.9 | 19.3 | 26.9 |
+| 960x540 C16 | 6.4 | 12.8 | 19.2 | 26.7 |
 | 854x480 C16 | 8.0 | 16.0 | 24.1 | 33.4 |
-| 640x360 C16 | 14.1 | 28.3 | 42.4 | 58.9 |
+| 640x360 C16 | 14.2 | 28.3 | 42.5 | 59.1 |
 
 **These are upper bounds and nothing more.** A real network also contains
 activations, pixel shuffle or other resampling, input/output format conversion,

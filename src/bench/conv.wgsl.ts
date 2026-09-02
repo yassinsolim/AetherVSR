@@ -147,26 +147,29 @@ ${accStore}
 }
 
 /**
- * Multiply-accumulate count actually issued by one dispatch of the shader.
+ * Multiply-accumulate count actually issued by one dispatch.
  *
  * A 3x3 convolution performs `9 * inC` MACs per output pixel per output
- * channel. Two adjustments make this *issued* work rather than useful work,
- * which is what a throughput figure should reflect:
+ * channel. The arguments are the *issued* extent, not the image extent, because
+ * throughput must be computed from the work the GPU actually performed:
  *
  * - Border pixels do fewer useful MACs because of zero padding, but the shader
  *   still issues the reads and multiplies.
- * - When `width` is not a multiple of `blockX`, the tail invocation still
- *   accumulates all `blockX` outputs and only the *stores* are guarded. Those
- *   accumulations are issued and must be counted, or throughput is overstated
- *   for non-divisible widths.
+ * - Every kernel here accumulates its whole spatial block and guards only the
+ *   *stores*, so a dispatch that overhangs the image still pays for the
+ *   overhang. How far it overhangs depends on the variant's dispatch geometry,
+ *   which is why the caller computes the extent rather than this function
+ *   guessing from `blockX` alone.
+ *
+ * Understating the extent understates throughput; overstating it flatters it.
+ * Neither is acceptable, so the caller derives both extents from the same
+ * numbers it passes to `dispatchWorkgroups`.
  */
 export function convMacCount(
-  width: number,
-  height: number,
+  issuedWidth: number,
+  issuedHeight: number,
   inChannels: number,
   outChannels: number,
-  blockX = 1,
 ): number {
-  const issuedWidth = Math.ceil(width / blockX) * blockX;
-  return issuedWidth * height * inChannels * outChannels * 9;
+  return issuedWidth * issuedHeight * inChannels * outChannels * 9;
 }

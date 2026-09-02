@@ -18,7 +18,7 @@ packed into `vec4`, several output channels accumulated per invocation, and
 weights pre-arranged tap-major at load time. That shape is not a preference; it
 is 8.3x faster than the naive kernel it replaced, and each part of it was
 measured separately (`BENCHMARKS.md`). The operating point that fits the frame
-budget is C16 at 1280x720, where one 3x3 layer costs 1.065 ms.
+budget is C16 at 1280x720, where one 3x3 layer costs 1.067 ms.
 
 ONNX Runtime Web is not a candidate for the video path: version 1.29.0 cannot
 accept a caller-supplied `GPUDevice`, so it cannot read a decoded frame without

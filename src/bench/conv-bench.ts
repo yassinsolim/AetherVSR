@@ -333,7 +333,22 @@ export class ConvBench {
     const executed = median > 0;
     const valid = diagnostics.length === 0 && executed;
     if (!executed) diagnostics.push('dispatch produced zero-length GPU timestamps: it did not run');
-    const macs = convMacCount(c.width, c.height, c.inChannels, c.outChannels, c.blockX);
+    // The extent the dispatch actually covers, which is what was paid for.
+    //
+    // The naive kernel returns before accumulating when an invocation is out of
+    // range, so only its blockX tail overhangs. Every other variant guards at
+    // the store and accumulates regardless, so their overhang is the full
+    // dispatch grid.
+    const issued =
+      variant === 'naive'
+        ? { width: Math.ceil(c.width / c.blockX) * c.blockX, height: c.height }
+        : variant === 'matrix'
+          ? { width: groupsX * 8, height: groupsY * matrixRows }
+          : {
+              width: groupsX * c.tileX * c.blockX,
+              height: groupsY * c.tileY * (variant === 'blocked' ? (c.blockY ?? 1) : 1),
+            };
+    const macs = convMacCount(issued.width, issued.height, c.inChannels, c.outChannels);
     // Lower bound: every activation element read once, written once, plus the
     // weights. Real traffic is higher because the 3x3 windows overlap and
     // cache behaviour is not modelled, so treat this as a floor.
