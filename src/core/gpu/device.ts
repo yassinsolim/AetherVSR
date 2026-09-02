@@ -181,6 +181,11 @@ export async function acquireGpu(options: AcquireGpuOptions = {}): Promise<GpuCo
   const wanted = new Set([...HARNESS_OPTIONAL_FEATURES, ...(options.optionalFeatures ?? [])]);
   const requiredFeatures = [...wanted].filter((f) => adapter.features.has(f));
 
+  // Clamping to what the adapter reports should already make this
+  // unrejectable, but "should" is not a fallback. A raised limit is a
+  // nice-to-have; failing to acquire a device over one would take the whole
+  // harness down for an optimisation we have measured to be unnecessary. So
+  // the raised request is attempted once and then genuinely abandoned.
   const adapterLimits = adapter.limits as unknown as Record<string, number | undefined>;
   const requiredLimits: Record<string, number> = {};
   for (const [name, wantedValue] of Object.entries(options.optionalLimits ?? {})) {
@@ -189,7 +194,17 @@ export async function acquireGpu(options: AcquireGpuOptions = {}): Promise<GpuCo
       requiredLimits[name] = Math.min(wantedValue, supported);
     }
   }
-  const device = await adapter.requestDevice({ requiredFeatures, requiredLimits });
+
+  let device: GPUDevice;
+  if (Object.keys(requiredLimits).length === 0) {
+    device = await adapter.requestDevice({ requiredFeatures });
+  } else {
+    try {
+      device = await adapter.requestDevice({ requiredFeatures, requiredLimits });
+    } catch {
+      device = await adapter.requestDevice({ requiredFeatures });
+    }
+  }
 
   const info: GPUAdapterInfo | undefined = adapter.info;
   const adapterReport: AdapterReport = {

@@ -5,6 +5,19 @@ export interface BlockedConvShaderConfig extends PackedConvShaderConfig {
   readonly outBlock: number;
   /** Output rows each invocation computes. 1 restores pure horizontal blocking. */
   readonly blockY: number;
+  /**
+   * Memory order of the weight tensor.
+   *
+   * - `oc-major`  - `[oc][ic/4][k]`, the natural order. The outBlock weights
+   *   needed at one tap sit `inGroups * 9` vec4s apart.
+   * - `tap-major` - `[ic/4][k][oc]`, so those same outBlock weights are
+   *   contiguous and load as one run.
+   *
+   * Weights are static, so any repacking happens once at model load and never
+   * in the per-frame path. That makes layout free to choose and therefore
+   * worth measuring rather than assuming.
+   */
+  readonly weightLayout: 'oc-major' | 'tap-major';
 }
 
 /** Bytes of workgroup storage the blocked shader declares. */
@@ -36,6 +49,7 @@ export function blockedSharedBytes(config: BlockedConvShaderConfig): number {
 export function buildBlockedConvShader(config: BlockedConvShaderConfig): string {
   const { inChannels, outChannels, tileX, tileY, blockX, blockY, outBlock, activation, useF16, residual } =
     config;
+  const weightLayout = config.weightLayout;
 
   if (inChannels % 4 !== 0) {
     throw new Error(`blocked variant requires inChannels % 4 === 0, got ${inChannels}`);
@@ -80,9 +94,10 @@ export function buildBlockedConvShader(config: BlockedConvShaderConfig): string 
     ).join('\n'),
   ).join('\n');
 
-  const weightLoads = each(
-    outBlock,
-    (j) => `        let w${j} = weights[(ocBase + ${j}u) * IN_GROUPS * 9u + wTap];`,
+  const weightLoads = each(outBlock, (j) =>
+    weightLayout === 'tap-major'
+      ? `        let w${j} = weights[wTap * OUT_C + ocBase + ${j}u];`
+      : `        let w${j} = weights[(ocBase + ${j}u) * IN_GROUPS * 9u + wTap];`,
   ).join('\n');
 
   // One staged value feeds outBlock dot products. With blockY > 1 the vertical

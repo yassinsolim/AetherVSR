@@ -205,3 +205,28 @@ export function packWeights(
 }
 
 export type { Activation };
+
+/**
+ * Grouped `[oc][ic/4][k]` weights -> tap-major `[ic/4][k][oc]`.
+ *
+ * Operates on the already-vec4-grouped layout, so the four lanes of each vec4
+ * move together and only the ordering of whole vec4s changes.
+ */
+export function toTapMajorWeights(
+  grouped: Float32Array,
+  inChannels: number,
+  outChannels: number,
+): Float32Array<ArrayBuffer> {
+  const groups = inChannels / 4;
+  const out = new Float32Array(new ArrayBuffer(grouped.length * 4));
+  for (let oc = 0; oc < outChannels; oc++) {
+    for (let cg = 0; cg < groups; cg++) {
+      for (let k = 0; k < 9; k++) {
+        const from = ((oc * groups + cg) * 9 + k) * 4;
+        const to = ((cg * 9 + k) * outChannels + oc) * 4;
+        for (let lane = 0; lane < 4; lane++) out[to + lane] = grouped[from + lane] as number;
+      }
+    }
+  }
+  return out;
+}

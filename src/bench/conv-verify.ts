@@ -3,6 +3,15 @@ import { buildConvShader, type Activation } from './conv.wgsl.js';
 import { buildTiledConvShader } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packActivations, packWeights } from './conv-packed.wgsl.js';
 import { buildBlockedConvShader } from './conv-blocked.wgsl.js';
+import { toTapMajorWeights } from './conv-packed.wgsl.js';
+
+/** Groups the weights, then reorders them if the case asks for tap-major. */
+function packedWeightsFor(c: ConvVerifyCase, planar: Float32Array): Float32Array<ArrayBuffer> {
+  const grouped = packWeights(planar, c.inChannels, c.outChannels);
+  return c.variant === 'blocked' && c.weightLayout === 'tap-major'
+    ? toTapMajorWeights(grouped, c.inChannels, c.outChannels)
+    : grouped;
+}
 
 export interface ConvVerifyCase {
   /** Verify the f16 variant of the shader instead of the f32 one. */
@@ -20,6 +29,8 @@ export interface ConvVerifyCase {
   readonly outBlock?: number;
   /** Output rows per invocation, for the `blocked` variant. Defaults to 1. */
   readonly blockY?: number;
+  /** Weight memory order, for the `blocked` variant. Defaults to `oc-major`. */
+  readonly weightLayout?: 'oc-major' | 'tap-major';
   /** Workgroup shape. Defaults to 8x8. Tiling bugs are shape-dependent, so
    *  the tiled kernel must be verified at the shapes it is benchmarked at. */
   readonly tileX?: number;
@@ -101,7 +112,7 @@ export async function verifyConv(
     packed ? packActivations(inputData, c.width, c.height, c.inChannels) : inputData,
   );
   const weights = makeBuffer(
-    packed ? packWeights(weightData, c.inChannels, c.outChannels) : weightData,
+    packed ? packedWeightsFor(c, weightData) : weightData,
   );
   const biases = makeBuffer(biasData);
   const output = device.createBuffer({
@@ -131,7 +142,12 @@ export async function verifyConv(
       case 'packed':
         return buildPackedConvShader(shaderConfig);
       case 'blocked':
-        return buildBlockedConvShader({ ...shaderConfig, outBlock: c.outBlock ?? 1, blockY: c.blockY ?? 1 });
+        return buildBlockedConvShader({
+          ...shaderConfig,
+          outBlock: c.outBlock ?? 1,
+          blockY: c.blockY ?? 1,
+          weightLayout: c.weightLayout ?? 'oc-major',
+        });
       case 'naive':
         return buildConvShader(shaderConfig);
     }

@@ -32,6 +32,8 @@ export interface ConvCase {
   readonly outBlock?: number;
   /** Output rows per invocation, for the `blocked` variant. Defaults to 1. */
   readonly blockY?: number;
+  /** Weight memory order, for the `blocked` variant. Defaults to `oc-major`. */
+  readonly weightLayout?: 'oc-major' | 'tap-major';
 }
 
 export interface ConvResult extends ConvCase {
@@ -136,7 +138,12 @@ export class ConvBench {
         code = buildPackedConvShader(shaderConfig);
         break;
       case 'blocked': {
-        const blockedConfig = { ...shaderConfig, outBlock: c.outBlock ?? 1, blockY: c.blockY ?? 1 };
+        const blockedConfig = {
+          ...shaderConfig,
+          outBlock: c.outBlock ?? 1,
+          blockY: c.blockY ?? 1,
+          weightLayout: c.weightLayout ?? ('oc-major' as const),
+        };
         guardShared(blockedSharedBytes(blockedConfig));
         code = buildBlockedConvShader(blockedConfig);
         break;
@@ -174,10 +181,13 @@ export class ConvBench {
     // about the harness and the verifier agreeing on what is being computed,
     // not about the numbers. Repacking happens once, outside the timed loop.
     const remap =
-      variant === 'packed'
+      variant === 'packed' || variant === 'blocked'
         ? {
             input: packedActivationIndex(c.width * c.height),
-            weights: packedWeightIndex(c.inChannels, c.outChannels),
+            weights:
+              variant === 'blocked' && c.weightLayout === 'tap-major'
+                ? tapMajorWeightIndex(c.inChannels, c.outChannels)
+                : packedWeightIndex(c.inChannels, c.outChannels),
           }
         : null;
     fillDeterministic(device, input, inElements, c.useF16, remap?.input);
@@ -317,6 +327,16 @@ export function packedActivationIndex(pixels: number): LayoutRemap {
     const c = Math.floor(i / pixels);
     const p = i - c * pixels;
     return (Math.floor(c / 4) * pixels + p) * 4 + (c % 4);
+  };
+}
+
+/** Planar `[oc][ic][k]` -> tap-major grouped `[ic/4][k][oc][ic%4]`. */
+export function tapMajorWeightIndex(inChannels: number, outChannels: number): LayoutRemap {
+  return (i) => {
+    const k = i % 9;
+    const ic = Math.floor(i / 9) % inChannels;
+    const oc = Math.floor(i / (9 * inChannels)) % outChannels;
+    return ((Math.floor(ic / 4) * 9 + k) * outChannels + oc) * 4 + (ic % 4);
   };
 }
 
