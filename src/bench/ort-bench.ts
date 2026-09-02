@@ -171,6 +171,10 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     });
     const sessionCreateMs = performance.now() - createStart;
 
+    // Resolved before the first inference so that run and the steady loop are
+    // fenced identically.
+    const ortDevice = config.outputLocation === 'gpu-buffer' ? await readOrtDevice(ort) : null;
+
     const elements = config.channels * config.height * config.width;
     const data = new Float32Array(elements);
     for (let i = 0; i < elements; i++) data[i] = Math.sin(i * 0.01) * 0.5;
@@ -178,16 +182,17 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     const feeds: Record<string, OrtTensor> = { input };
 
     const firstStart = performance.now();
-    disposeOutputs(await session.run(feeds));
+    const firstOutputs = await session.run(feeds);
+    // Fenced on the same terms as the steady loop, so the two are comparable.
+    await ortDevice?.queue.onSubmittedWorkDone();
     const firstInferenceMs = performance.now() - firstStart;
+    disposeOutputs(firstOutputs);
 
     // With a GPU-resident output nothing in `run()` waits for the GPU: the
     // native EP ends a run by submitting to the queue and returning. Awaiting
     // the device's own completion signal inside the timed interval turns a
     // submission latency into an inference latency. ORT exposes the device it
     // is using, which is the same one the fence must be taken on.
-    const ortDevice = config.outputLocation === 'gpu-buffer' ? await readOrtDevice(ort) : null;
-
     const samples: number[] = [];
     for (let i = 0; i < config.iterations; i++) {
       const t0 = performance.now();

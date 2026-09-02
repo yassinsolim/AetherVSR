@@ -44,9 +44,11 @@ depending on filter. Full results and caveats in `BENCHMARKS.md`.
 **Question asked:** what neural super-resolution workload realistically fits
 inside AetherVSR's frame budget on a base Apple M5?
 
-**Answer: none of the published lightweight architectures, by roughly an order
-of magnitude, with the convolution kernel as written.** Full numbers and
-scoping in `BENCHMARKS.md`.
+**Answer: not the one workload we costed — a C16-class network at full 720p —
+with the convolution kernel as written, by roughly an order of magnitude.**
+That is a statement about one model size, one resolution and one naive kernel,
+not about every lightweight architecture. Full numbers and scoping in
+`BENCHMARKS.md`.
 
 | Experiment | Result |
 |---|---|
@@ -57,9 +59,10 @@ scoping in `BENCHMARKS.md`.
 | Image quality | Deterministic harness established. Catmull-Rom 19.45 dB PSNR-Y / 0.925 SSIM, bilinear 17.51 / 0.862, nearest control 16.92 / 0.880 |
 
 **The budget arithmetic.** A SPAN-Lite C16-class model is ≈30.5 GMAC per 720p
-frame. At 247 GMAC/s that is ≈123 ms, against a 16.67 ms total frame budget of
-which the upscale stage should use a fraction. Reaching ~8 ms needs ≈15x the
-measured throughput.
+frame — a third-party architecture figure derived from the published SPAN
+design, not measured by us. At our measured 247 GMAC/s that is ≈123 ms, against
+a 16.67 ms total frame budget of which the upscale stage should use a fraction.
+Reaching ~8 ms needs ≈15x the throughput of the current kernel.
 
 That gap — not the runtime choice, not the ingest cost, not the model choice —
 is the finding that governs Milestone 3.

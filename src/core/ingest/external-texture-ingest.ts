@@ -115,14 +115,33 @@ export class ExternalTextureIngest {
   }
 
   /**
+   * True when {@link encode} will actually record a pass for this frame kind.
+   *
+   * A `sampled` frame is already an ordinary texture and is passed straight
+   * through, so callers must not claim a timestamp slot for it: the slot would
+   * be resolved having never been written, yielding a fabricated duration.
+   */
+  static writesPass(frame: FrameTexture): boolean {
+    return frame.kind === 'external';
+  }
+
+  /**
    * Records the conversion pass. Returns the view downstream passes sample.
    *
-   * A `sampled` frame is already an ordinary texture, so the pass is skipped
-   * entirely and the incoming view is returned untouched — ingesting it would
-   * be a pointless copy.
+   * A `sampled` frame is returned untouched — ingesting it would be a
+   * pointless copy — and in that case `timing` must be null, because no pass
+   * is recorded to write the timestamps into. Note the returned view then has
+   * the *source's* format, not {@link outputFormat}.
    */
   encode(encoder: GPUCommandEncoder, frame: FrameTexture, timing: PassTiming | null): GPUTextureView {
-    if (frame.kind === 'sampled') return frame.view;
+    if (frame.kind === 'sampled') {
+      if (timing !== null) {
+        throw new Error(
+          'ExternalTextureIngest: a sampled frame records no pass, so it cannot write timestamps',
+        );
+      }
+      return frame.view;
+    }
 
     const { device, pipeline, layout, sampler, textureView } = this;
     if (!device || !pipeline || !layout || !sampler || !textureView) {

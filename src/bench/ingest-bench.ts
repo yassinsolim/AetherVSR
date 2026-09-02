@@ -157,7 +157,10 @@ export class IngestBench {
 
       let scalerInput: FrameTexture = frame;
       let ingestTiming = null;
-      if (this.config.mode === 'ingest') {
+      // Only claim a timestamp slot when the ingest stage will actually record
+      // a pass; a passed-through `sampled` frame writes none, and resolving an
+      // unwritten slot fabricates a duration.
+      if (this.config.mode === 'ingest' && ExternalTextureIngest.writesPass(frame)) {
         ingestTiming = this.ingestTimer?.begin() ?? null;
         const view = this.ingest.encode(encoder, frame, ingestTiming);
         scalerInput = { kind: 'sampled', view };

@@ -134,10 +134,16 @@ function main(gpu: GpuContext): void {
     }
   };
 
-  w['aethervsrConvVerify'] = async (cases: readonly ConvVerifyCase[]): Promise<ConvVerifyResult[]> => {
+  w['aethervsrConvVerify'] = async (
+    cases: readonly ConvVerifyCase[],
+    // f32 cases land at ~1e-7. f16 accumulates over 9*inChannels MACs and needs
+    // a tolerance sized to that; without this parameter the hook could not
+    // verify the f16 kernel at all.
+    tolerance = 1e-4,
+  ): Promise<ConvVerifyResult[]> => {
     setStatus(`verifying ${cases.length} convolution cases against a CPU reference…`);
     const results: ConvVerifyResult[] = [];
-    for (const c of cases) results.push(await verifyConv(gpu.device, c));
+    for (const c of cases) results.push(await verifyConv(gpu.device, c, tolerance));
     const failed = results.filter((r) => !r.passed).length;
     setStatus(failed === 0 ? 'convolution kernel verified' : `${failed} verification case(s) FAILED`);
     return results;

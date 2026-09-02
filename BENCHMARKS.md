@@ -331,7 +331,7 @@ ORT-owned output tensors disposed each iteration.
 |---|---:|---:|---:|---:|---:|---:|---|
 | `cpu` | 233.3 | 95.9 | 34.70 | 35.44 | 32.3 | 49.4 | End-to-end; GPU completion forced by the output download |
 | `gpu-buffer`, no fence | 5.5 (warm) | 14.0 | 13.20 | 13.26 | 12.2 | 15.2 | Submission latency only — **not** inference time |
-| `gpu-buffer`, fenced | 9.6 (warm) | 11.8 | **19.70** | 20.02 | 18.8 | 25.1 | Queue-completion latency |
+| `gpu-buffer`, fenced | 225.0 | 77.9 | **20.10** | 20.02 | 18.8 | 25.1 | Queue-completion latency; first run fenced on the same terms |
 
 The middle row is retained deliberately as a caution. Timing `await
 session.run()` with a GPU-resident output measures submission, because ORT's
@@ -376,9 +376,11 @@ console output is the only mechanism available, and it does work. Any future
 adoption must assert on this line in CI rather than assume.
 
 What the run does establish: the native WebGPU EP loads and executes correctly
-on this device; session creation is ~205 ms cold and ~5 ms warm; and the first
-inference costs roughly 5x a steady one, so shader compilation and allocation
-must be warmed before any frame-rate claim.
+on this device; session creation is ~225 ms cold; and with both runs fenced
+identically, the first inference costs 77.9 ms against 20.1 ms steady — **3.9x**
+— so shader compilation and allocation must be warmed before any frame-rate
+claim. An earlier unfenced first-run figure of 11.8 ms made that ratio look
+inverted, which is what prompted fencing both.
 
 ### Image quality
 
@@ -405,14 +407,22 @@ alone would mis-rank scalers on this kind of content.
 
 ## Milestone 2 budget implication
 
-The published arithmetic for a SPAN-Lite C16-class model (four SPAB blocks,
-16 channels) is ≈30.5 GMAC per 720p frame. At the best measured convolution
+A SPAN-Lite C16-class model (four SPAB blocks, 16 channels) is **≈30.5 GMAC
+per 720p frame** — that figure is arithmetic derived from the published SPAN
+architecture by our research pass, **not measured here and not ours**; see
+`DECISIONS.md` ADR-0010 for the source and its licence. At the best measured convolution
 throughput on this machine (247 GMAC/s, fp16) that is **≈123 ms per frame** —
 against a 16.67 ms total budget of which the upscale stage should use a
 fraction. Reaching ~8 ms would require roughly **15x** the measured throughput.
 
 That gap, not the runtime choice and not the ingest cost, is the finding that
 governs Milestone 3.
+
+**Scope of that claim.** It covers one workload — a C16-class network at full
+720p — measured against *our current naive kernel*, which has no shared-memory
+tiling and is bound on redundant global loads. It is not a statement about all
+lightweight architectures, and not a statement about what this GPU can do. Both
+the model and the kernel are variables Milestone 3 changes.
 
 ## Reproducing
 

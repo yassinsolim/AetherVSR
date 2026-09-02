@@ -12,10 +12,13 @@ pipeline with a conventional GPU scaler, a clean seam for a neural upscaler to
 arrive through, and a measured answer to whether a neural stage is currently
 affordable. See `ROADMAP.md`.
 
-**The Milestone 2 headline: it is not, yet.** A SPAN-Lite C16-class model is
-≈30.5 GMAC per 720p frame; the best 3x3 convolution throughput measured here is
-247 GMAC/s, so that model would take ≈123 ms against a 16.67 ms budget. Closing
-that ≈15x gap is Milestone 3. Details and scoping in `BENCHMARKS.md`.
+**The Milestone 2 headline: not with the kernel we have.** A SPAN-Lite
+C16-class model is ≈30.5 GMAC per 720p frame (a published-architecture figure,
+not measured by us); the best 3x3 convolution throughput measured here is
+247 GMAC/s, so that model would take ≈123 ms against a 16.67 ms budget. Our
+kernel is deliberately naive — no shared-memory tiling — so that ≈15x gap is a
+statement about one workload and one implementation, not about the hardware.
+Closing it is Milestone 3. Details and scoping in `BENCHMARKS.md`.
 
 ## What works today
 
