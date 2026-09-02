@@ -285,7 +285,8 @@ export class VideoPipeline {
   private meanRate(frames: number, opening: number, nowMs: number): number {
     const elapsed = this.elapsed(nowMs);
     if (!(elapsed > 0)) return 0;
-    return ((frames - opening) / elapsed) * 1000;
+    // Clamped: a rate below zero is never a meaningful reading.
+    return (Math.max(0, frames - opening) / elapsed) * 1000;
   }
 
   /** Milliseconds of measurement so far; 0 before the first frame arrives. */
@@ -306,11 +307,6 @@ export class VideoPipeline {
     try {
       this.ensureConfigured(tick.size);
 
-      if (this.windowStart === null) {
-        this.windowStart = tick.now;
-        this.openingRendered = 1;
-        this.openingPresented = tick.presentedDelta;
-      }
       this.sourceRate.mark(tick.now, tick.presentedDelta);
       this.renderRate.mark(tick.now);
       this.framesPresented += tick.presentedDelta;
@@ -333,6 +329,16 @@ export class VideoPipeline {
 
       this.cpuFrame.push(performance.now() - frameStart);
       this.framesRendered++;
+
+      // The window opens on the first frame that actually completed. Opening
+      // it earlier would let a frame that threw mid-encode contribute to the
+      // subtracted opening weights but not to the counters, publishing a
+      // negative mean rate.
+      if (this.windowStart === null) {
+        this.windowStart = tick.now;
+        this.openingRendered = 1;
+        this.openingPresented = tick.presentedDelta;
+      }
       this.lastError = null;
     } catch (err) {
       // A slot claimed by `begin()` is still marked busy if the frame threw

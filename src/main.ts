@@ -179,12 +179,21 @@ function main(gpu: GpuContext): void {
         setStatus(`playing ${file.name}`);
       },
       (err: unknown) => {
-        // The candidate never became the active clip; drop it rather than
-        // leaking the Blob for the lifetime of the page.
-        URL.revokeObjectURL(candidate);
-        if (generation === loadGeneration) {
-          setStatus(`could not play ${file.name}: ${describeError(err)}`, 'error');
+        if (generation !== loadGeneration) {
+          URL.revokeObjectURL(candidate);
+          return;
         }
+        // The element is still pointing at the candidate that just failed.
+        // Detach it before revoking, so the harness never holds a dead URL, and
+        // drop the previous blob too: nothing is playing now, and naming a
+        // stale clip in a benchmark export would be a lie.
+        video.removeAttribute('src');
+        video.load();
+        URL.revokeObjectURL(candidate);
+        if (previous) URL.revokeObjectURL(previous);
+        activeObjectUrl = null;
+        activeClip = `none — last load failed (${file.name})`;
+        setStatus(`could not play ${file.name}: ${describeError(err)}`, 'error');
       },
     );
   });
