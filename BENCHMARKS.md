@@ -349,6 +349,21 @@ Three scoping facts, all of which must travel with these numbers:
 **Fully GPU-resident ORT inference cost on this machine is therefore
 unmeasured.** See DECISIONS.md ADR-0015.
 
+**Execution-provider placement, measured.** With `logSeverityLevel: 0` the
+probe captures ORT's verbose placement output, which reports:
+
+```
+[session_state.cc VerifyEachNodeIsAssignedToAnEp]
+  All nodes placed on [WebGpuExecutionProvider]. Number of nodes: 3
+```
+
+So this graph ran entirely on the WebGPU EP with no silent CPU fallback. That
+matters beyond this model: the fallback risk is real — ORT adds a default CPU
+provider and any unclaimed node lands there, inserting GPU→CPU→GPU transfers
+mid-graph — and there is no structured API to query placement. Parsing verbose
+console output is the only mechanism available, and it does work. Any future
+adoption must assert on this line in CI rather than assume.
+
 What the run does establish: the native WebGPU EP loads and executes correctly
 on this device; session creation is ~205 ms cold and ~5 ms warm; and the first
 inference costs roughly 5x a steady one, so shader compilation and allocation

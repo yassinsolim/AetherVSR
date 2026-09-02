@@ -59,8 +59,12 @@ export interface OrtProbeResult {
   readonly steadyMinMs: number;
   readonly steadyMaxMs: number;
   readonly iterations: number;
-  readonly macs: number;
-  readonly gmacPerSecond: number;
+  /**
+   * Node-to-execution-provider placement lines captured from ORT's verbose
+   * log. The only way to observe a silent CPU fallback: there is no structured
+   * API for it. Empty means nothing matched, not that placement was all-GPU.
+   */
+  readonly placement: readonly string[];
   readonly outputLocation: string;
   /** Console output captured during session creation, for EP-placement clues. */
   readonly logs: readonly string[];
@@ -86,7 +90,10 @@ interface OrtModule {
  * ORT's own dispatch and synchronisation, not just GPU execution.
  */
 export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> {
-  const macs = config.width * config.height * config.channels * config.channels * 9;
+  // Deliberately no MAC/throughput figure. The probe cannot introspect the
+  // loaded graph, so a caller-supplied channel count is not evidence that the
+  // model matches, and a derived GMAC/s would be unfalsifiable. Compare
+  // against the WGSL kernel on time, with the scope caveats in BENCHMARKS.md.
   const logs: string[] = [];
   const base = {
     available: false,
@@ -99,8 +106,7 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     steadyMinMs: NaN,
     steadyMaxMs: NaN,
     iterations: 0,
-    macs,
-    gmacPerSecond: NaN,
+    placement: [],
     outputLocation: config.outputLocation,
     logs,
     error: null,
@@ -123,8 +129,15 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
 
   // ORT reports execution-provider placement only through its own logging;
   // there is no structured API for it, so capture the console during setup.
+  const originalLog = console.log;
   const originalWarn = console.warn;
   const originalError = console.error;
+  console.log = (...args: unknown[]) => {
+    const text = args.map(String).join(' ');
+    // Keep only placement-relevant lines; verbose ORT logging is enormous.
+    if (/placement|provider|fallback|kernel not found/i.test(text)) logs.push(`log: ${text}`);
+    originalLog(...args);
+  };
   console.warn = (...args: unknown[]) => {
     logs.push(`warn: ${args.map(String).join(' ')}`);
     originalWarn(...args);
@@ -140,6 +153,10 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
       executionProviders: config.providers,
       graphOptimizationLevel: 'all',
       preferredOutputLocation: config.outputLocation,
+      // ORT emits node-to-execution-provider placement only at verbose level.
+      // Without this the console capture below can never observe a silent CPU
+      // fallback, which is the specific risk we are trying to detect.
+      logSeverityLevel: 0,
     });
     const sessionCreateMs = performance.now() - createStart;
 
@@ -177,11 +194,12 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
       steadyMinMs: samples[0] ?? NaN,
       steadyMaxMs: samples[samples.length - 1] ?? NaN,
       iterations: samples.length,
-      gmacPerSecond: macs / (median / 1000) / 1e9,
+      placement: logs.filter((l) => /Node placements|All nodes placed|kernel not found/i.test(l)),
     };
   } catch (err) {
     return { ...base, error: describe(err) };
   } finally {
+    console.log = originalLog;
     console.warn = originalWarn;
     console.error = originalError;
   }

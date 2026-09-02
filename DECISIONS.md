@@ -397,7 +397,9 @@ What *does* inform the decision now, from source review rather than taste:
 - ORT's execution-provider placement is not programmatically queryable. An
   unsupported node falls back to CPU, inserting GPU→CPU→GPU transfers
   mid-graph, and the only way to observe it is parsing verbose console output.
-  For a per-frame budget an undetectable silent fallback is a serious risk.
+  We confirmed that mechanism works — with `logSeverityLevel: 0` the probe
+  captured `All nodes placed on [WebGpuExecutionProvider]. Number of nodes: 3`
+  — so the risk is manageable, but only by asserting on a log line in CI.
 - The native `/webgpu` entry point fetches a 25.7 MB WASM artefact.
 - ORT has no WebGPU *texture* tensor — input and output are `GPUBuffer` only —
   so AetherVSR would need conversion passes on both ends, which is exactly the
