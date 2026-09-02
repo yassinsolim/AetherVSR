@@ -469,9 +469,9 @@ pixels. It is numerically correct: <=4.5e-7 f32, 2.8e-3 f16.
 
 **Decision.** Do not pursue it. Keep the portable `blocked` kernel.
 
-**Why.** Measured at 1280x720 C16, it runs at 8.451 ms against the portable
-kernel's 1.085 ms — **7.8x slower** — and `rowsPerGroup` from 1 to 16 barely
-moves it. Dawn on Metal exposes exactly two configurations, both 8x8x8. That
+**Why.** Measured at 1280x720 C16, it runs at 8.664 ms against the portable
+kernel's 1.067 ms — **8.1x slower**, mean of four repeats each — and
+`rowsPerGroup` from 1 to 16 barely moves it. Dawn on Metal exposes exactly two configurations, both 8x8x8. That
 tile does 512 MACs against 64 staged activations, 8 MACs per staged value,
 plus two barriers per K-slice; the `blocked` kernel reaches 64 per staged
 value. The matrix path is bound on staging before its arithmetic units matter.

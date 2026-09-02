@@ -569,11 +569,14 @@ throughput column already accounts for that.
 
 | Path | GPU ms | GMAC/s |
 | --- | ---: | ---: |
-| Portable `blocked` fp16 (shipped) | 1.067 | 1989 |
-| Subgroup-matrix fp16 | 8.542 | 249 |
-| Subgroup-matrix fp32 | 8.711 | 244 |
+| Portable `blocked` fp16 (shipped) | 1.067 | 1990 |
+| Subgroup-matrix fp16 | 8.664 | 245 |
+| Subgroup-matrix fp32 | 8.851 | 240 |
 
-8.0x slower, and `rowsPerGroup` from 1 to 16 barely moves it. The cause is
+Mean of four repeats each; the matrix rows are the least reproducible figures in
+this document, spanning 8.548-8.775 ms (2.6%) against 0.5% for the portable row.
+
+**8.1x slower**, and `rowsPerGroup` from 1 to 16 barely moves it. The cause is
 structural: Dawn on Metal exposes exactly two configurations, both 8x8x8
 (f32->f32 and f16->f16). An 8x8x8 tile performs 512 MACs against 64 staged
 activations — 8 MACs per staged value, plus two barriers per K-slice — where the

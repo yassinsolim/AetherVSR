@@ -123,7 +123,7 @@ sits at roughly **54% of measured FMA throughput and ~53% of measured streaming
 bandwidth** — about half of each endpoint, which is why it is faster than the
 outBlock 8 row that reaches 73% of bandwidth.
 
-**Rejected:** `chromium-experimental-subgroup-matrix`, 7.8x slower than the
+**Rejected:** `chromium-experimental-subgroup-matrix`, 8.1x slower than the
 portable kernel and unavailable without `--enable-unsafe-webgpu` (ADR-0017).
 **Not needed:** raised workgroup-storage limits — every tile above the
 guaranteed 16 KiB floor was slower.
