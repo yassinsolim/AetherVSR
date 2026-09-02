@@ -154,6 +154,21 @@ interface OrtModule {
  * honest end-to-end figure an application would experience — it includes
  * ORT's own dispatch and synchronisation, not just GPU execution.
  */
+/**
+ * Set once an `InferenceSession.create` has failed on this page.
+ *
+ * `onnxruntime-web/webgpu` is an ES-module singleton and its WebAssembly
+ * runtime is instantiated on first use. A failed session leaves that runtime
+ * initialised but unusable, and no amount of resetting `env` from outside
+ * recovers it: the next probe fails with an opaque numeric error that has
+ * nothing to do with its own configuration.
+ *
+ * Rather than let a later probe report a misleading failure - or worse, a
+ * misleading success - the module refuses and says why. Each ORT configuration
+ * must be measured in a fresh page, and every published ORT figure was.
+ */
+let ortRuntimePoisoned = false;
+
 export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> {
   // Deliberately no MAC/throughput figure. The probe cannot introspect the
   // loaded graph, so a caller-supplied channel count is not evidence that the
@@ -169,7 +184,11 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     inputLocation: config.inputLocation,
     wasmVariant: config.wasmVariant ?? 'asyncify',
     sharedDevice: false,
-    uploadBytesPerRun: 0,
+    // Seeded from the requested mode, not from success. A failed CPU-input
+    // probe still would have uploaded, and reporting 0 there would claim a
+    // GPU-resident input that never existed.
+    uploadBytesPerRun:
+      config.inputLocation === 'gpu-buffer' ? 0 : config.channels * config.height * config.width * 4,
     steadyMedianMs: NaN,
     steadyMeanMs: NaN,
     steadyMinMs: NaN,
@@ -221,7 +240,14 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     originalError(...args);
   };
 
+  let previousAdapter: { had: boolean; value: GPUAdapter | undefined } | null = null;
   try {
+    if (ortRuntimePoisoned) {
+      throw new Error(
+        'a previous ORT session on this page failed and left the wasm runtime unusable; ' +
+          'reload the page and run this configuration first',
+      );
+    }
     const createStart = performance.now();
     // ORT's native WebGPU EP accepts a caller-supplied device per session.
     // env.webgpu.device is *output only* for this EP - it is written by the
@@ -232,7 +258,14 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
       // Documented as an input to native EP initialisation. `env.webgpu.device`
       // is not: it is written by the JSEP callback, which a custom-device
       // session never runs.
-      (ort.env.webgpu as unknown as { adapter?: GPUAdapter }).adapter = config.adapter;
+      //
+      // `ort` is an ES-module singleton for the whole page, so this mutation
+      // outlives the call. It is restored in the `finally` below: without that,
+      // one failed shared-device probe leaves every later probe on the page
+      // running against an adapter it did not ask for.
+      const env = ort.env.webgpu as unknown as { adapter?: GPUAdapter };
+      previousAdapter = { had: 'adapter' in env, value: env.adapter };
+      env.adapter = config.adapter;
     }
     const executionProviders = sharedDevice
       ? config.providers.map((name) => (name === 'webgpu' ? { name, device: sharedDevice } : name))
@@ -326,11 +359,25 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
       fenced: ortDevice !== null,
     };
   } catch (err) {
+    // Conservative: any failure in here may have left the singleton runtime
+    // half-initialised, and a wrong number is worse than a refusal.
+    if (!ortRuntimePoisoned) ortRuntimePoisoned = true;
     return { ...base, error: describe(err) };
   } finally {
     console.log = originalLog;
     console.warn = originalWarn;
     console.error = originalError;
+    // The module is a per-page singleton. Leaving a mutated adapter behind
+    // makes the *next* probe on the page fail for a reason that has nothing
+    // to do with it.
+    if (previousAdapter) {
+      const env = ort.env.webgpu as unknown as { adapter?: GPUAdapter | undefined };
+      if (previousAdapter.had && previousAdapter.value !== undefined) {
+        env.adapter = previousAdapter.value;
+      } else {
+        delete env.adapter;
+      }
+    }
   }
 }
 
@@ -369,5 +416,9 @@ function disposeOutputs(outputs: Record<string, OrtTensor>): void {
 
 function describe(err: unknown): string {
   if (err instanceof Error) return err.message;
+  // ORT surfaces some wasm failures as a bare numeric pointer. Left alone it
+  // reads like a measurement rather than a crash.
+  if (typeof err === 'number') return `ORT wasm abort (code ${err})`;
+  if (typeof err === 'string' && /^\d+$/.test(err)) return `ORT wasm abort (code ${err})`;
   return typeof err === 'string' ? err : JSON.stringify(err);
 }

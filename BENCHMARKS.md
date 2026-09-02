@@ -523,13 +523,18 @@ staged at all.
 | Spatial blocking | blockX 2, blockY 2 |
 | Output channels per invocation | 16 |
 | Weight layout | tap-major `[ic/4][k][oc]` |
-| Workgroup storage | 5 440 B — inside the 16 384 B guaranteed floor |
+| Workgroup storage | 1 440 B — inside the 16 384 B guaranteed floor (machine-checked, see below) |
 | GPU time | **1.067 ms** (mean of 3 runs of median-of-40; runs 1.0674 / 1.0688 / 1.0663) |
 | Throughput | **1990 GMAC/s** |
 | Numerical error vs CPU reference | 2.4e-7 (fp32 build of same config), 2.3e-3 (fp16) |
 
 Uses no extension beyond `shader-f16` and no raised limit. The nine best
 configurations span 2.6%, so this is a plateau, not a knife-edge.
+
+"Portable" here is checked by the harness, not asserted by hand: every result
+carries `sharedBytes` and a `requiresRaisedLimit` flag set when a configuration
+fits only because this adapter granted more than the WebGPU-guaranteed 16 384 B.
+The configuration above reports 1 440 B and `requiresRaisedLimit: false`.
 
 ### Workgroup storage above the guaranteed floor — negative result
 
@@ -600,6 +605,15 @@ The decisive fact is not the timing. ORT 1.29.0 cannot accept our device, so it
 cannot consume a decoded video frame without a round trip through host memory,
 which is the one thing this architecture exists to avoid.
 
+**Reproducing these rows requires one configuration per page load.**
+`onnxruntime-web/webgpu` is an ES-module singleton whose WebAssembly runtime is
+instantiated on first use, and a failed session leaves it initialised but
+unusable — a later probe then fails with an opaque wasm abort code that has
+nothing to do with its own configuration. The harness now detects this and
+refuses with an explanatory error instead of returning a misleading result.
+Every figure above, and each of the four failing configurations, was measured as
+the first probe on a freshly loaded page.
+
 ### Feasibility map — measured convolution cost per layer
 
 Best configuration per cell, fp16, relu, `inChannels == outChannels`. Each cell
@@ -667,22 +681,51 @@ compute metrics: a benchmark-only readback, absent from the production path.
 rest trustworthy: the harness and the GPU are deterministic, and neither filter
 flickers on unchanging input.
 
-**Catmull-Rom's still-frame advantage costs it temporal stability.** Raw
-frame-to-frame difference barely separates the two (5.00 vs 5.44 MAD) because
-most of that is real image motion, which a sharper filter legitimately renders
-with larger differences. After compensating the known shift — which removes the
-"it moved" component and leaves only "it changed" — the separation is clear:
-Catmull-Rom's residual MAD is 35% higher and its motion-compensated temporal
-variance is **1.9x** bilinear's. Read alongside its still-frame advantage
-(19.45 dB / 0.925 SSIM vs 17.51 dB / 0.862), this is a real trade, and a future
-neural upscaler inherits exactly this risk.
+**What the motion compensation does and does not remove.** It cancels the
+*integer output-pixel* component of the motion and nothing else. An integer-pan
+control makes that concrete — the same harness at `panPxPerFrame` 1.0, an exact
+whole LR pixel per frame, so consecutive frames are identical content translated
+with no change of resampling phase:
 
-Translation is 0.25 LR px/frame, which is 0.5 output px and not an integer, so
-motion compensation compares frames two apart, where the shift accumulates to
-exactly -1 output pixel. **Camera-motion has no motion-compensated row**: a
-spatially varying zoom has no single integer shift that aligns two frames, so
-those raw figures are an uninterpreted upper bound and no stability conclusion
-is drawn from them.
+| Pan (LR px/frame) | Filter | Motion-comp. residual MAD | Motion-comp. variance (LSB^2) |
+| --- | --- | ---: | ---: |
+| 1.0 (integer LR pixel) | bilinear | 0.0040 | 0.0019 |
+| 1.0 (integer LR pixel) | catmull-rom | 0.0048 | 0.0013 |
+| 0.5 (half LR pixel) | bilinear | 2.8291 | 9.0852 |
+| 0.5 (half LR pixel) | catmull-rom | 3.8101 | 17.2957 |
+| 0.25 (published, stride 2) | bilinear | 2.8373 | 9.0618 |
+| 0.25 (published, stride 2) | catmull-rom | 3.8187 | 17.2357 |
+
+At an integer LR shift the residual collapses to ~0.004 LSB for both filters and
+the separation vanishes entirely — Catmull-Rom is in fact marginally *lower* in
+variance. **Both filters are exactly shift-invariant at integer input shifts, so
+neither introduces flicker in the usual sense.** Pan 0.5 and pan 0.25 give
+essentially identical compensated figures, which shows what survives
+compensation is the half-LR-pixel change in resampling phase between input
+frames.
+
+**So the 1.9x is sensitivity to sub-pixel motion, not temporal instability.** It
+is a real and relevant property — real video moves by sub-pixel amounts
+constantly, and a filter whose response varies with phase will pulse where a
+flatter one does not — but it is the filter reconstructing genuinely different
+content, not the filter being unstable on identical content. An earlier draft of
+this section claimed compensation "leaves only 'it changed'"; the control above
+shows that overstated it, and the claim has been corrected rather than removed.
+
+Read next to the still-frame scores (Catmull-Rom 19.45 dB / 0.925 SSIM against
+bilinear 17.51 dB / 0.862), the trade is: Catmull-Rom reconstructs more detail
+and responds ~1.9x more strongly to sub-pixel motion. **The value of this
+baseline for Milestone 4 is the number a neural model must be held against**,
+and the integer-pan control is the check that would catch a model which is *not*
+shift-invariant — something neither of these filters fails, and a learned model
+easily could.
+
+Translation at 0.25 LR px/frame is 0.5 output px, not an integer, so the
+published row compares frames two apart where the shift accumulates to exactly
+-1 output pixel. **Camera-motion has no motion-compensated row**: a spatially
+varying zoom has no single integer shift that aligns two frames, so those raw
+figures are an uninterpreted upper bound and no stability conclusion is drawn
+from them.
 
 ### Bottleneck characterization
 
@@ -726,8 +769,19 @@ A clean U, isolated from bandwidth.
 
 **Conclusion.** The optimum is a trough between two different walls: reduce
 traffic further and register pressure bites, increase reuse and bandwidth binds.
-At the best configuration the kernel runs at **54% of measured FMA throughput**
-and **73% of measured streaming bandwidth**.
+
+Locating the *shipped* configuration on those axes needs care, because the two
+percentages come from different rows. At `outBlock` 8 the kernel reaches 92 GB/s,
+**73% of measured streaming bandwidth** — that is the row in the table above,
+not the best configuration. The best configuration is t8x4 b2x2 ob16: a single
+staging pass with a 1.41 halo factor gives 41.5 MB read plus 29.5 MB written,
+71 MB in 1.067 ms, so **~67 GB/s or ~53% of measured streaming bandwidth**. Its
+arithmetic side is 1990 GMAC/s = 3980 GFLOP/s, **~54% of the measured 7306
+GFLOP/s FMA probe**.
+
+So the shipped operating point sits at roughly half of each measured endpoint —
+further from the bandwidth wall than the `outBlock` 8 row, which is precisely
+why it is faster.
 
 **Hardware saturation was not established.** Neither probe is a hardware ceiling,
 and the convolution sits below both of them. The limiting behaviour is the

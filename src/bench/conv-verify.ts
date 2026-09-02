@@ -193,6 +193,15 @@ export async function verifyConv(
     ],
   });
 
+  // WebGPU zero-initialises a new buffer, and a relu reference is exactly 0
+  // over large regions, so an output element the dispatch never wrote would
+  // match the reference at those positions and the check would pass
+  // vacuously. Poison the buffer first: any unwritten element then fails.
+  {
+    const sentinel = new Float32Array(roundUp4(outElements * bytesPerElement) / 4).fill(-1e4);
+    device.queue.writeBuffer(output, 0, sentinel);
+  }
+
   const readback = device.createBuffer({
     size: Math.max(4, roundUp4(outElements * bytesPerElement)),
     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,

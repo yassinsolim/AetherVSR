@@ -59,9 +59,25 @@ export interface ConvResult extends ConvCase {
   readonly gbPerSecond: number;
   /** Total GPU buffer bytes allocated for this case. */
   readonly bufferBytes: number;
+  /** Workgroup storage the generated shader declares. 0 for variants without any. */
+  readonly sharedBytes: number;
+  /**
+   * True when the configuration fits this adapter only because a raised
+   * `maxComputeWorkgroupStorageSize` was granted. Such a result is valid but
+   * **not portable**, and must not be published as a portable figure.
+   */
+  readonly requiresRaisedLimit: boolean;
 }
 
 const NS_PER_MS = 1_000_000;
+
+/**
+ * The `maxComputeWorkgroupStorageSize` every WebGPU implementation must offer.
+ *
+ * Anything above this is a per-adapter bonus. A configuration that needs more
+ * is not portable, however fast it is here.
+ */
+export const PORTABLE_WORKGROUP_STORAGE_BYTES = 16384;
 
 /**
  * Measures 3x3 convolution throughput on the real device.
@@ -134,13 +150,28 @@ export class ConvBench {
 
     const variant: ConvVariant = c.variant ?? 'naive';
     const earlyDiagnostics: string[] = [];
-    // Surfaced as diagnostics rather than exceptions: the sweeps below
-    // deliberately walk into configurations that do not fit, and an invalid
-    // row carrying the reason is more useful than a missing row.
+    let sharedBytes = 0;
+    // Two separate questions, and conflating them is how an unshippable
+    // configuration gets labelled portable.
+    //
+    // Exceeding the *device* limit is fatal - the pipeline will not build - and
+    // is surfaced as a diagnostic rather than an exception because the sweeps
+    // deliberately walk into configurations that do not fit, and an invalid row
+    // carrying the reason is more useful than a missing row.
+    //
+    // Exceeding the *guaranteed* floor still runs here, because this adapter
+    // grants a raised limit, but it would not run on a device that offers only
+    // the WebGPU minimum. That is recorded on the result instead of being
+    // asserted by hand in the documentation, which is what ADR-0020 requires
+    // and what nothing was previously enforcing.
+    let requiresRaisedLimit = false;
     const guardShared = (bytes: number): void => {
+      sharedBytes = bytes;
       const limit = device.limits.maxComputeWorkgroupStorageSize;
       if (bytes > limit) {
         earlyDiagnostics.push(`workgroup storage ${bytes}B exceeds device limit ${limit}B`);
+      } else if (bytes > PORTABLE_WORKGROUP_STORAGE_BYTES) {
+        requiresRaisedLimit = true;
       }
     };
 
@@ -372,6 +403,8 @@ export class ConvBench {
       bytesMoved,
       gbPerSecond: valid ? bytesMoved / (median / 1000) / 1e9 : NaN,
       bufferBytes,
+      sharedBytes,
+      requiresRaisedLimit,
     };
   }
 }

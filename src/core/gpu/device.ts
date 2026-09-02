@@ -151,8 +151,13 @@ export interface AcquireGpuOptions {
   readonly optionalFeatures?: readonly GPUFeatureName[];
   /**
    * Limits to raise above the WebGPU guaranteed minimums *if the adapter
-   * allows it*. Each entry is clamped to what the adapter reports and dropped
-   * when it is not an improvement, so a device is never refused for asking.
+   * allows it*. Each entry is clamped to the adapter's reported maximum, and
+   * the whole request is abandoned if it is refused, so a device is never lost
+   * for asking.
+   *
+   * Only meaningful for limits where larger is better. `Math.min` clamping is
+   * the wrong direction for alignment limits, where the adapter reports a
+   * minimum; those are not supported here and must not be passed.
    *
    * The guaranteed floor is the portable contract; anything above it has to be
    * discovered per adapter. Benchmarks that use a raised limit must say so,

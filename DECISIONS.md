@@ -549,9 +549,13 @@ correct, with <=1% spread across four repeats.
 
 **Consequence.** Milestone 2's published figures stand: they are all
 millisecond-scale workloads in the regime where both strategies agree, and the
-re-measured baseline reproduces them within run-to-run variance. Sub-millisecond
-figures from before this change would not be trustworthy, and none were
-published.
+re-measured baseline reproduces them within run-to-run variance.
+
+No sub-millisecond figure *measured through the convolution harness* was
+published before this fix. BENCHMARKS.md does publish sub-millisecond ingest
+figures (0.357-0.510 ms), and those are unaffected: `IngestBench` warms up
+through four seconds of continuous rVFC-driven rendering, so it was never in
+the regime this defect occupied.
 
 ## ADR-0020 — The portable floor is the target; raised limits are not required
 

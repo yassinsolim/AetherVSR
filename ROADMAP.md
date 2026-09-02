@@ -72,8 +72,10 @@ is the finding that governs Milestone 3.
 ## Milestone 3 — Close the convolution throughput gap ✅ complete
 
 **Goal:** establish, by measurement, the maximum 3x3 convolution throughput
-achievable on a base Apple M5 through WebGPU, and decide from that whether a
-neural stage is viable at 720p, at reduced internal resolution, or not at all.
+*reachable across the configurations we sweep* on a base Apple M5 through
+WebGPU, and decide from that whether a neural stage is viable at 720p, at
+reduced internal resolution, or not at all. Deliberately not "the maximum the
+hardware can do" — see the bottleneck note below.
 
 **Outcome: the gap is largely closed, and 720p C16 is viable.** Convolution
 throughput went from 240 to **1990 GMAC/s** in fp16 — **8.3x** — putting a
@@ -93,7 +95,8 @@ Against acceptance criteria:
 
 - ✅ A measured GMAC/s figure per optimisation, each verified against the CPU
   reference before timing.
-- ✅ Maximum achievable throughput and its configuration: 1990 GMAC/s, fp16,
+- ✅ Maximum throughput measured across the configurations swept, and the
+  configuration that produced it: 1990 GMAC/s, fp16,
   `blocked` variant, 8x4 workgroup, blockX 2, blockY 2, outBlock 16, tap-major
   weights, inside the guaranteed workgroup-storage floor.
 - ✅ A documented reason the GPU-resident ORT figure could not be obtained: ORT
@@ -101,7 +104,8 @@ Against acceptance criteria:
   four configurations tried (ADR-0018).
 - ✅ An explicit ≤8 ms verdict — see below.
 - ✅ Temporal baseline numbers for bilinear and Catmull-Rom, with an exactly-zero
-  static control.
+  static control and an integer-pan control showing both filters are
+  shift-invariant.
 - ✅ No production model, no extension, no temporal VSR implementation.
 
 **The ≤8 ms verdict.** At 1280x720 with 16 channels, **7 convolution layers**
@@ -114,9 +118,10 @@ network at full 720p is now a question of how many layers, not whether.
 **Bottleneck.** Not resolved into a single cause, and deliberately not claimed
 as hardware saturation. The optimum sits in a trough between two measured walls:
 below outBlock 8 the kernel is at or above the device's measured streaming
-bandwidth, and above it register pressure dominates. At the best configuration
-it runs at 54% of measured FMA throughput and 73% of measured streaming
-bandwidth.
+bandwidth, and above it register pressure dominates. The shipped configuration
+sits at roughly **54% of measured FMA throughput and ~53% of measured streaming
+bandwidth** — about half of each endpoint, which is why it is faster than the
+outBlock 8 row that reaches 73% of bandwidth.
 
 **Rejected:** `chromium-experimental-subgroup-matrix`, 7.8x slower than the
 portable kernel and unavailable without `--enable-unsafe-webgpu` (ADR-0017).
@@ -150,9 +155,16 @@ until it can accept a caller-supplied device (ADR-0018).
   16.67 ms budget, with the layer-by-layer breakdown.
 - Still-frame quality beats Catmull-Rom's 19.45 dB PSNR / 0.925 SSIM on the
   existing generated reference, **and** temporal behaviour is reported on the
-  Milestone 3 sequences. A model that wins on PSNR while its
-  motion-compensated variance exceeds Catmull-Rom's 17.24 LSB^2 has not
-  succeeded — that check is the reason the temporal baseline exists.
+  Milestone 3 sequences. Two distinct checks, and the second is the one the
+  baseline exists for:
+  - **Shift-invariance**, on the integer-pan control. Both baseline filters
+    score ~0.004 LSB residual there, because a fixed linear kernel cannot do
+    otherwise. A learned model can, and a model that flickers on content which
+    merely translated by a whole pixel has failed outright.
+  - **Sub-pixel response**, on the 0.25 px/frame sequence, reported next to
+    still-frame quality rather than as a pass/fail. Catmull-Rom's 17.24 LSB^2
+    motion-compensated variance buys 19.45 dB; a model is only better if it
+    improves that ratio, not just one side of it.
 - Automatic fallback to the baseline scaler when the measured stage time
   exceeds its budget, exercised in a real run rather than asserted.
 - The `Upscaler` seam is unchanged: acquisition, ingest and presentation code
