@@ -149,6 +149,17 @@ export interface AcquireGpuOptions {
    * here rather than discovering the gap at shader-validation time.
    */
   readonly optionalFeatures?: readonly GPUFeatureName[];
+  /**
+   * Limits to raise above the WebGPU guaranteed minimums *if the adapter
+   * allows it*. Each entry is clamped to what the adapter reports and dropped
+   * when it is not an improvement, so a device is never refused for asking.
+   *
+   * The guaranteed floor is the portable contract; anything above it has to be
+   * discovered per adapter. Benchmarks that use a raised limit must say so,
+   * because a configuration that only fits at 32 KiB of workgroup storage is
+   * not a configuration every WebGPU device can run.
+   */
+  readonly optionalLimits?: Readonly<Record<string, number>>;
 }
 
 export async function acquireGpu(options: AcquireGpuOptions = {}): Promise<GpuContext> {
@@ -169,7 +180,16 @@ export async function acquireGpu(options: AcquireGpuOptions = {}): Promise<GpuCo
   // unsupported feature makes requestDevice() reject outright.
   const wanted = new Set([...HARNESS_OPTIONAL_FEATURES, ...(options.optionalFeatures ?? [])]);
   const requiredFeatures = [...wanted].filter((f) => adapter.features.has(f));
-  const device = await adapter.requestDevice({ requiredFeatures });
+
+  const adapterLimits = adapter.limits as unknown as Record<string, number | undefined>;
+  const requiredLimits: Record<string, number> = {};
+  for (const [name, wantedValue] of Object.entries(options.optionalLimits ?? {})) {
+    const supported = adapterLimits[name];
+    if (typeof supported === 'number' && supported > 0) {
+      requiredLimits[name] = Math.min(wantedValue, supported);
+    }
+  }
+  const device = await adapter.requestDevice({ requiredFeatures, requiredLimits });
 
   const info: GPUAdapterInfo | undefined = adapter.info;
   const adapterReport: AdapterReport = {

@@ -188,7 +188,12 @@ function main(gpu: GpuContext): void {
   });
 }
 
-acquireGpu({ optionalFeatures: ['shader-f16'] })
+acquireGpu({
+  optionalFeatures: ['shader-f16'],
+  // Raised only if the adapter allows it. Any result that depends on more
+  // than the 16384-byte guaranteed floor is labelled as such in BENCHMARKS.md.
+  optionalLimits: { maxComputeWorkgroupStorageSize: 32768 },
+})
   .then(main)
   .catch((err: unknown) => {
     setStatus(err instanceof Error ? err.message : String(err));
