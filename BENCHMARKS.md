@@ -134,6 +134,25 @@ frames skipped over the whole run (0.3–0.7%).
 At 30 fps the pipeline is frame-perfect: zero skipped frames and zero decoder
 drops over 30 s in all three runs.
 
+### Re-verification run — 2026-09-02
+
+Independent re-run of the two H.264 60 fps rows above on the same machine and
+browser, after the Milestone 1 audit. Recorded separately rather than replacing
+the originals: the run-to-run spread is itself information.
+
+| Upscaler | Import | Presented fps | Rendered fps | Frames | Skipped | Decoder drops | GPU upscale (ms) | 60 Hz budget | Duration |
+|---|---|---:|---:|---:|---:|---:|---|---:|---:|
+| Catmull-Rom 9-tap | external | 59.7 | 59.3 | 1778 | 13 | 13 / 1791 | 3.79 avg · p50 3.54 · p95 5.57 · max 8.13 | 22.7% | 30 s |
+| Bilinear | external | 59.7 | 59.3 | 1778 | 13 | 13 / 1792 | 0.91 avg · p50 0.59 · p95 2.23 · max 5.90 | 5.4% | 30 s |
+
+`cpu per frame` 0.14–0.15 ms avg; `decode latency` ~101 ms avg (queueing, not
+cost). Input 1280x720 H.264/MP4 at 60 fps, output 2560x1440, exact 2x.
+
+Averages agree with the originals to within 0.11 ms (Catmull-Rom 3.79 vs 3.90)
+and 0.05 ms (bilinear 0.91 vs 0.86); p95 and max are noisier, as expected from
+a 240-sample trailing window on a quantised timer. Frame delivery is
+indistinguishable. **The original rows above remain the reference figures.**
+
 ## Observations
 
 **The upscaler is not the bottleneck.** Bilinear costs 0.86 ms and Catmull-Rom
