@@ -1,5 +1,6 @@
 import { acquireGpu, describeAdapter, type GpuContext } from '../core/gpu/device.js';
 import { ConvBench, type ConvCase, type ConvResult } from './conv-bench.js';
+import { measureRoofline, type RooflineResult } from './roofline.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
@@ -7,6 +8,7 @@ import { evaluateScalers } from './quality-bench.js';
 import type { QualityScores } from './quality.js';
 import { IngestBench, type IngestBenchConfig, type IngestBenchStats } from './ingest-bench.js';
 import type { BaselineFilter } from '../core/upscale/baseline.wgsl.js';
+import { runTemporalBench, type TemporalBenchConfig, type TemporalSequenceResult } from './temporal-bench.js';
 
 /**
  * Milestone 2 feasibility bench.
@@ -160,6 +162,13 @@ function main(gpu: GpuContext): void {
     return results;
   };
 
+  w['aethervsrRoofline'] = async (useF16 = true): Promise<RooflineResult[]> => {
+    setStatus('measuring achievable bandwidth and FMA throughput…');
+    const results = await measureRoofline(gpu.device, useF16);
+    setStatus('roofline probe complete');
+    return results;
+  };
+
   w['aethervsrQualityBench'] = async (
     filters: readonly BaselineFilter[] = ['bilinear', 'catmull-rom'],
   ): Promise<QualityScores[]> => {
@@ -174,6 +183,15 @@ function main(gpu: GpuContext): void {
     const result = await probeOrt(config);
     setStatus(result.error ? `ORT probe failed: ${result.error}` : 'ORT probe complete');
     return result;
+  };
+
+  w['aethervsrTemporalBench'] = async (
+    temporalConfig?: TemporalBenchConfig,
+  ): Promise<TemporalSequenceResult[]> => {
+    setStatus('measuring temporal behaviour (frame-to-frame shimmer) of the baseline upscalers…');
+    const results = await runTemporalBench(gpu.device, temporalConfig);
+    setStatus('temporal baseline measurement complete');
+    return results;
   };
 
   // Surfaces a device-side validation failure that would otherwise only
