@@ -3,6 +3,8 @@ import { ConvBench, type ConvCase, type ConvResult } from './conv-bench.js';
 import { measureRoofline, type RooflineResult } from './roofline.js';
 import { ChainBench, type ChainCase, type ChainResult } from './chain-bench.js';
 import { verifyChain, type ChainVerifyCase, type ChainVerifyResult } from './chain-verify.js';
+import { StemBench, type StemCase, type StemResult } from './stem-bench.js';
+import { verifyStem, type StemVerifyCase, type StemVerifyResult } from './stem-verify.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
@@ -180,6 +182,25 @@ function main(gpu: GpuContext): void {
     const out: ChainVerifyResult[] = [];
     for (const c of cases) out.push(await verifyChain(gpu.device, c, tolerance));
     setStatus('chain verification complete');
+    return out;
+  };
+
+  w['aethervsrStemBench'] = async (cases: readonly StemCase[]): Promise<StemResult[]> => {
+    setStatus(`running ${cases.length} stem cases…`);
+    const bench = new StemBench(gpu.device);
+    const results = await bench.run(cases);
+    setStatus('stem bench complete');
+    return results;
+  };
+
+  w['aethervsrStemVerify'] = async (
+    cases: readonly StemVerifyCase[],
+    tolerance?: number,
+  ): Promise<StemVerifyResult[]> => {
+    setStatus(`verifying ${cases.length} stem cases…`);
+    const out: StemVerifyResult[] = [];
+    for (const c of cases) out.push(await verifyStem(gpu.device, c, tolerance));
+    setStatus('stem verification complete');
     return out;
   };
 
