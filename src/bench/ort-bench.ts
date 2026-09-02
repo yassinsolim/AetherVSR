@@ -20,8 +20,23 @@ import type { Env, InferenceSession, Tensor as OrtTensor } from 'onnxruntime-web
 // Let Vite own these two artefacts and hand us final URLs. Without this the
 // Emscripten glue's own dynamic import is rewritten by Vite's module pipeline
 // and resolves to the dev server's HTML fallback.
-import ortWasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url';
-import ortMjsUrl from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url';
+// Vite must own these URLs: left alone, the Emscripten glue's own dynamic
+// import gets rewritten by Vite's module pipeline and resolves to the dev
+// server's HTML fallback.
+//
+// Only two of the four published artefacts export `webgpuInit`, which
+// `ort.webgpu.bundle.min.mjs` requires: `.asyncify` and `.jspi`. The plain and
+// `.jsep` builds cannot host this entry point at all.
+//
+// The two differ in how WebAssembly suspends on a host promise. Asyncify
+// rewrites the module to unwind the stack manually; JSPI uses the browser's
+// native stack switching. That distinction decides whether ORT can block on a
+// Dawn future during device import, so it is a runtime choice here, not a
+// constant.
+import ortAsyncifyWasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm?url';
+import ortAsyncifyMjsUrl from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url';
+import ortJspiWasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.jspi.wasm?url';
+import ortJspiMjsUrl from 'onnxruntime-web/ort-wasm-simd-threaded.jspi.mjs?url';
 
 export interface OrtProbeConfig {
   readonly modelUrl: string;
@@ -37,6 +52,39 @@ export interface OrtProbeConfig {
    * activation tensor the difference is most of the measurement.
    */
   readonly outputLocation: 'cpu' | 'gpu-buffer';
+  /**
+   * Where the *input* tensor lives.
+   *
+   * `cpu` hands ORT a `Float32Array`, so every run re-uploads the whole
+   * activation tensor - 56.3 MB at C16/720p. That upload is not inference, and
+   * comparing it against a GPU-only WGSL figure compares different things.
+   *
+   * `gpu-buffer` requires a shared device: the caller passes AetherVSR's own
+   * `GPUDevice` to the execution provider, allocates the input buffer on it,
+   * fills it once, and wraps it with `Tensor.fromGpuBuffer`. Nothing crosses
+   * the bus in the measured loop, which is the only scope comparable to our
+   * kernel and to a real per-frame pipeline where the frame is already a GPU
+   * texture.
+   */
+  readonly inputLocation: 'cpu' | 'gpu-buffer';
+  /**
+   * The device to share with ORT. Required for `inputLocation: 'gpu-buffer'`;
+   * without it there is no device on which both AetherVSR and ORT can see the
+   * same buffer, and the probe falls back to a CPU input rather than pretending.
+   */
+  readonly device?: GPUDevice;
+  /**
+   * The adapter that produced {@link device}. ORT's native EP initialisation
+   * reads `env.webgpu.adapter`, so supplying it is the documented way to keep
+   * the runtime on the same physical device rather than acquiring its own.
+   */
+  readonly adapter?: GPUAdapter;
+  /**
+   * Which WebAssembly suspension build to load. `asyncify` is the compiled
+   * stack-unwinding approach; `jspi` uses the browser's native stack
+   * switching. Defaults to `asyncify`, which is what Milestone 2 measured.
+   */
+  readonly wasmVariant?: 'asyncify' | 'jspi';
 }
 
 export interface OrtProbeResult {
@@ -76,6 +124,12 @@ export interface OrtProbeResult {
   readonly outputLocation: string;
   /** True when a GPU completion fence was inside the timed interval. */
   readonly fenced: boolean;
+  readonly inputLocation: string;
+  readonly wasmVariant: string;
+  /** True when ORT accepted the caller's GPUDevice rather than making its own. */
+  readonly sharedDevice: boolean;
+  /** Bytes uploaded per steady-state run. 0 is the point of the exercise. */
+  readonly uploadBytesPerRun: number;
   /** Console output captured during session creation, for EP-placement clues. */
   readonly logs: readonly string[];
   readonly error: string | null;
@@ -86,11 +140,12 @@ interface OrtModule {
   readonly InferenceSession: {
     create(uri: string, options: InferenceSession.SessionOptions): Promise<InferenceSession>;
   };
-  readonly Tensor: new (
-    type: 'float32',
-    data: Float32Array,
-    dims: readonly number[],
-  ) => OrtTensor;
+  readonly Tensor: (new (type: 'float32', data: Float32Array, dims: readonly number[]) => OrtTensor) & {
+    fromGpuBuffer(
+      buffer: GPUBuffer,
+      options: { dataType: 'float32'; dims: readonly number[] },
+    ): OrtTensor;
+  };
   readonly env: Env;
 }
 
@@ -111,6 +166,10 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     providers: config.providers,
     sessionCreateMs: NaN,
     firstInferenceMs: NaN,
+    inputLocation: config.inputLocation,
+    wasmVariant: config.wasmVariant ?? 'asyncify',
+    sharedDevice: false,
+    uploadBytesPerRun: 0,
     steadyMedianMs: NaN,
     steadyMeanMs: NaN,
     steadyMinMs: NaN,
@@ -136,7 +195,11 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
 
   // Explicit per-file URLs, not a prefix: ORT would otherwise construct the
   // paths itself and Vite would intercept the glue module import.
-  ort.env.wasm.wasmPaths = { wasm: ortWasmUrl, mjs: ortMjsUrl };
+  const wasmVariant = config.wasmVariant ?? 'asyncify';
+  ort.env.wasm.wasmPaths =
+    wasmVariant === 'jspi'
+      ? { wasm: ortJspiWasmUrl, mjs: ortJspiMjsUrl }
+      : { wasm: ortAsyncifyWasmUrl, mjs: ortAsyncifyMjsUrl };
 
   // ORT reports execution-provider placement only through its own logging;
   // there is no structured API for it, so capture the console during setup.
@@ -160,8 +223,23 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
 
   try {
     const createStart = performance.now();
+    // ORT's native WebGPU EP accepts a caller-supplied device per session.
+    // env.webgpu.device is *output only* for this EP - it is written by the
+    // JSEP init callback, which a custom-device session never invokes - so the
+    // device has to be passed here or not at all.
+    const sharedDevice = config.inputLocation === 'gpu-buffer' ? (config.device ?? null) : null;
+    if (sharedDevice && config.adapter) {
+      // Documented as an input to native EP initialisation. `env.webgpu.device`
+      // is not: it is written by the JSEP callback, which a custom-device
+      // session never runs.
+      (ort.env.webgpu as unknown as { adapter?: GPUAdapter }).adapter = config.adapter;
+    }
+    const executionProviders = sharedDevice
+      ? config.providers.map((name) => (name === 'webgpu' ? { name, device: sharedDevice } : name))
+      : [...config.providers];
+
     const session = await ort.InferenceSession.create(config.modelUrl, {
-      executionProviders: config.providers,
+      executionProviders,
       graphOptimizationLevel: 'all',
       preferredOutputLocation: config.outputLocation,
       // ORT emits node-to-execution-provider placement only at verbose level.
@@ -173,12 +251,33 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
 
     // Resolved before the first inference so that run and the steady loop are
     // fenced identically.
-    const ortDevice = config.outputLocation === 'gpu-buffer' ? await readOrtDevice(ort) : null;
+    const ortDevice =
+      sharedDevice ?? (config.outputLocation === 'gpu-buffer' ? await readOrtDevice(ort) : null);
 
     const elements = config.channels * config.height * config.width;
     const data = new Float32Array(elements);
     for (let i = 0; i < elements; i++) data[i] = Math.sin(i * 0.01) * 0.5;
-    const input = new ort.Tensor('float32', data, [1, config.channels, config.height, config.width]);
+    const dims = [1, config.channels, config.height, config.width];
+
+    let input: OrtTensor;
+    let inputBuffer: GPUBuffer | null = null;
+    let uploadBytesPerRun = data.byteLength;
+    if (sharedDevice) {
+      // ORT normalises buffer sizes to a multiple of 16 internally; allocating
+      // to that granularity avoids a validation failure on the download path.
+      inputBuffer = sharedDevice.createBuffer({
+        size: Math.ceil(data.byteLength / 16) * 16,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+      });
+      // Written once, before timing. This is the whole point: in a real
+      // pipeline the frame is already resident and no upload happens per frame.
+      sharedDevice.queue.writeBuffer(inputBuffer, 0, data);
+      await sharedDevice.queue.onSubmittedWorkDone();
+      input = ort.Tensor.fromGpuBuffer(inputBuffer, { dataType: 'float32', dims });
+      uploadBytesPerRun = 0;
+    } else {
+      input = new ort.Tensor('float32', data, dims);
+    }
     const feeds: Record<string, OrtTensor> = { input };
 
     const firstStart = performance.now();
@@ -204,6 +303,9 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
       disposeOutputs(outputs);
     }
     await session.release();
+    // The tensor never owned this buffer - a user-created GPU tensor is a view -
+    // so releasing the session does not free it.
+    inputBuffer?.destroy();
 
     samples.sort((a, b) => a - b);
     const median = samples[Math.floor(samples.length / 2)] ?? NaN;
@@ -213,6 +315,8 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
       ortVersion: readVersion(ort),
       sessionCreateMs,
       firstInferenceMs,
+      sharedDevice: sharedDevice !== null,
+      uploadBytesPerRun,
       steadyMedianMs: median,
       steadyMeanMs: samples.reduce((a, b) => a + b, 0) / samples.length,
       steadyMinMs: samples[0] ?? NaN,

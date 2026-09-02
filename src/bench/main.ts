@@ -180,7 +180,14 @@ function main(gpu: GpuContext): void {
 
   w['aethervsrOrtProbe'] = async (config: OrtProbeConfig): Promise<OrtProbeResult> => {
     setStatus('probing ONNX Runtime Web (WebGPU EP) — this fetches a ~26 MB WASM artefact…');
-    const result = await probeOrt(config);
+    // The harness owns the only device on the page. Handing it to ORT is what
+    // makes a GPU-resident input possible at all: a buffer allocated here has
+    // to be visible to the runtime that reads it.
+    const result = await probeOrt(
+      config.inputLocation === 'gpu-buffer'
+        ? { ...config, device: gpu.device, adapter: gpu.adapter }
+        : config,
+    );
     setStatus(result.error ? `ORT probe failed: ${result.error}` : 'ORT probe complete');
     return result;
   };
