@@ -1,6 +1,7 @@
 import { buildConvShader, convMacCount, type Activation, type ConvShaderConfig } from './conv.wgsl.js';
 import { buildTiledConvShader, tiledSharedBytes } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packedSharedBytes } from './conv-packed.wgsl.js';
+import { buildBlockedConvShader, blockedSharedBytes } from './conv-blocked.wgsl.js';
 
 /**
  * Which convolution kernel implementation to measure.
@@ -11,7 +12,7 @@ import { buildPackedConvShader, packedSharedBytes } from './conv-packed.wgsl.js'
  * Kept as separate implementations rather than a flag inside one shader so a
  * regression in the newer kernel can never silently become the baseline.
  */
-export type ConvVariant = 'naive' | 'tiled' | 'packed';
+export type ConvVariant = 'naive' | 'tiled' | 'packed' | 'blocked';
 
 export interface ConvCase {
   readonly label: string;
@@ -27,6 +28,8 @@ export interface ConvCase {
   readonly residual: boolean;
   /** Defaults to `naive`, which is the Milestone 2 reference implementation. */
   readonly variant?: ConvVariant;
+  /** Output channels per invocation, for the `blocked` variant. Defaults to 1. */
+  readonly outBlock?: number;
 }
 
 export interface ConvResult extends ConvCase {
@@ -130,6 +133,12 @@ export class ConvBench {
         guardShared(packedSharedBytes(shaderConfig));
         code = buildPackedConvShader(shaderConfig);
         break;
+      case 'blocked': {
+        const blockedConfig = { ...shaderConfig, outBlock: c.outBlock ?? 1 };
+        guardShared(blockedSharedBytes(blockedConfig));
+        code = buildBlockedConvShader(blockedConfig);
+        break;
+      }
       case 'naive':
         code = buildConvShader(shaderConfig);
         break;
@@ -202,7 +211,9 @@ export class ConvBench {
 
     const groupsX = Math.ceil(c.width / (c.tileX * c.blockX));
     const groupsY = Math.ceil(c.height / c.tileY);
-    const groupsZ = c.outChannels;
+    // The blocked variant folds `outBlock` output channels into one
+    // invocation, so it needs proportionally fewer z-slices.
+    const groupsZ = variant === 'blocked' ? c.outChannels / (c.outBlock ?? 1) : c.outChannels;
 
     const dispatch = (withTimestamps: boolean): GPUCommandBuffer => {
       const encoder = device.createCommandEncoder();

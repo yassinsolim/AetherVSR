@@ -2,6 +2,7 @@ import { floatToHalf, type ConvVariant } from './conv-bench.js';
 import { buildConvShader, type Activation } from './conv.wgsl.js';
 import { buildTiledConvShader } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packActivations, packWeights } from './conv-packed.wgsl.js';
+import { buildBlockedConvShader } from './conv-blocked.wgsl.js';
 
 export interface ConvVerifyCase {
   /** Verify the f16 variant of the shader instead of the f32 one. */
@@ -15,6 +16,8 @@ export interface ConvVerifyCase {
   readonly residual: boolean;
   /** Which kernel implementation to check. Defaults to `naive`. */
   readonly variant?: ConvVariant;
+  /** Output channels per invocation, for the `blocked` variant. Defaults to 1. */
+  readonly outBlock?: number;
   /** Workgroup shape. Defaults to 8x8. Tiling bugs are shape-dependent, so
    *  the tiled kernel must be verified at the shapes it is benchmarked at. */
   readonly tileX?: number;
@@ -90,7 +93,8 @@ export async function verifyConv(
   // changes. Comparing a packed kernel against a planar reference is the point
   // — a repacking bug then shows up as a numeric mismatch rather than hiding
   // inside a reference that was repacked the same wrong way.
-  const packed = (c.variant ?? 'naive') === 'packed';
+  // Both vec4 variants consume the same grouped layout.
+  const packed = (c.variant ?? 'naive') === 'packed' || (c.variant ?? 'naive') === 'blocked';
   const input = makeBuffer(
     packed ? packActivations(inputData, c.width, c.height, c.inChannels) : inputData,
   );
@@ -124,6 +128,8 @@ export async function verifyConv(
         return buildTiledConvShader(shaderConfig);
       case 'packed':
         return buildPackedConvShader(shaderConfig);
+      case 'blocked':
+        return buildBlockedConvShader({ ...shaderConfig, outBlock: c.outBlock ?? 1 });
       case 'naive':
         return buildConvShader(shaderConfig);
     }
@@ -165,7 +171,7 @@ export async function verifyConv(
   pass.dispatchWorkgroups(
     Math.ceil(c.width / (tileX * c.blockX)),
     Math.ceil(c.height / tileY),
-    c.outChannels,
+    (c.variant ?? 'naive') === 'blocked' ? c.outChannels / (c.outBlock ?? 1) : c.outChannels,
   );
   pass.end();
   encoder.copyBufferToBuffer(output, 0, readback, 0, roundUp4(outElements * bytesPerElement));

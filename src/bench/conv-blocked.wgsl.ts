@@ -1,0 +1,169 @@
+import type { PackedConvShaderConfig } from './conv-packed.wgsl.js';
+
+export interface BlockedConvShaderConfig extends PackedConvShaderConfig {
+  /** Output channels each invocation accumulates simultaneously. */
+  readonly outBlock: number;
+}
+
+/** Bytes of workgroup storage the blocked shader declares. */
+export function blockedSharedBytes(config: BlockedConvShaderConfig): number {
+  const tileW = config.tileX * config.blockX + 2;
+  const tileH = config.tileY + 2;
+  return tileW * tileH * (config.useF16 ? 8 : 16);
+}
+
+/**
+ * Tiled, vec4-packed 3x3 convolution accumulating several output channels per
+ * invocation.
+ *
+ * ## Why
+ *
+ * With one output channel per invocation, every value read from the staged
+ * tile feeds exactly one multiply-add. The tile is then re-read, in full, by
+ * every other workgroup in the z dimension — `outChannels` times over.
+ *
+ * Holding `outBlock` accumulators lets one shared-memory read feed `outBlock`
+ * dot products, and cuts the number of z-slices — and therefore the number of
+ * times the input is staged at all — by the same factor. The cost is
+ * `blockX * outBlock` live accumulators plus `outBlock` weight vectors, which
+ * is where occupancy starts to suffer.
+ *
+ * That trade-off is the measurement: this file makes the knob exist, it does
+ * not assert which setting wins.
+ */
+export function buildBlockedConvShader(config: BlockedConvShaderConfig): string {
+  const { inChannels, outChannels, tileX, tileY, blockX, outBlock, activation, useF16, residual } = config;
+
+  if (inChannels % 4 !== 0) {
+    throw new Error(`blocked variant requires inChannels % 4 === 0, got ${inChannels}`);
+  }
+  if (outChannels % outBlock !== 0) {
+    throw new Error(`blocked variant requires outChannels % outBlock === 0, got ${outChannels} % ${outBlock}`);
+  }
+  if (residual && inChannels !== outChannels) {
+    throw new Error(`residual requires inChannels === outChannels, got ${inChannels} -> ${outChannels}`);
+  }
+
+  const T = useF16 ? 'f16' : 'f32';
+  const V = `vec4<${T}>`;
+  const enable = useF16 ? 'enable f16;\n' : '';
+  const groups = inChannels / 4;
+  const tileW = tileX * blockX + 2;
+  const tileH = tileY + 2;
+  const threads = tileX * tileY;
+
+  const activate = (expr: string): string => {
+    switch (activation) {
+      case 'relu':
+        return `max(${expr}, ${T}(0.0))`;
+      case 'tanh':
+        return `tanh(${expr})`;
+      case 'none':
+        return expr;
+    }
+  };
+
+  // acc[j][i]: output channel ocBase+j, pixel outX+i. Flattened so the compiler
+  // sees plain scalars rather than a dynamically indexed array, which on Metal
+  // is the difference between registers and thread-local memory.
+  const accDecl = Array.from({ length: outBlock }, (_, j) =>
+    Array.from({ length: blockX }, (_, i) => `  var acc${j}_${i}: ${T} = biases[ocBase + ${j}u];`).join('\n'),
+  ).join('\n');
+
+  const weightLoads = Array.from(
+    { length: outBlock },
+    (_, j) => `        let w${j} = weights[(ocBase + ${j}u) * IN_GROUPS * 9u + wTap];`,
+  ).join('\n');
+
+  const macBody = Array.from({ length: blockX }, (_, i) => {
+    const v = `        let v${i} = tile[rowBase + localX + ${i}u + u32(kx)];`;
+    const dots = Array.from(
+      { length: outBlock },
+      (_, j) => `        acc${j}_${i} += dot(w${j}, v${i});`,
+    ).join('\n');
+    return `${v}\n${dots}`;
+  }).join('\n');
+
+  const stores = Array.from({ length: outBlock }, (_, j) =>
+    Array.from({ length: blockX }, (_, i) => {
+      const oc = `(ocBase + ${j}u)`;
+      const value = residual
+        ? `${activate(`acc${j}_${i}`)} + input[(${oc} / 4u) * W * H + outY * W + outX + ${i}u][${oc} % 4u]`
+        : activate(`acc${j}_${i}`);
+      return `  if (outX + ${i}u < W) { output[${oc} * W * H + outY * W + outX + ${i}u] = ${value}; }`;
+    }).join('\n'),
+  ).join('\n');
+
+  return /* wgsl */ `${enable}
+const IN_GROUPS: u32 = ${groups}u;
+const OUT_C: u32 = ${outChannels}u;
+const OUT_BLOCK: u32 = ${outBlock}u;
+const BLOCK_X: u32 = ${blockX}u;
+const TILE_W: u32 = ${tileW}u;
+const TILE_N: u32 = ${tileW * tileH}u;
+const THREADS: u32 = ${threads}u;
+
+struct Dims {
+  width: u32,
+  height: u32,
+};
+
+@group(0) @binding(0) var<storage, read> input: array<${V}>;
+@group(0) @binding(1) var<storage, read> weights: array<${V}>;
+@group(0) @binding(2) var<storage, read> biases: array<${T}>;
+@group(0) @binding(3) var<storage, read_write> output: array<${T}>;
+@group(0) @binding(4) var<uniform> dims: Dims;
+
+var<workgroup> tile: array<${V}, ${tileW * tileH}>;
+
+@compute @workgroup_size(${tileX}, ${tileY}, 1)
+fn main(
+  @builtin(local_invocation_id) lid: vec3u,
+  @builtin(local_invocation_index) lindex: u32,
+  @builtin(workgroup_id) wid: vec3u,
+) {
+  let W = dims.width;
+  let H = dims.height;
+
+  let originX = i32(wid.x * ${tileX}u * BLOCK_X);
+  let originY = i32(wid.y * ${tileY}u);
+  let ocBase = wid.z * OUT_BLOCK;
+
+  let localX = lid.x * BLOCK_X;
+  let outX = u32(originX) + localX;
+  let outY = u32(originY) + lid.y;
+
+${accDecl}
+
+  for (var cg: u32 = 0u; cg < IN_GROUPS; cg = cg + 1u) {
+    let inBase = cg * W * H;
+
+    workgroupBarrier();
+    for (var i: u32 = lindex; i < TILE_N; i = i + THREADS) {
+      let sx = originX + i32(i % TILE_W) - 1;
+      let sy = originY + i32(i / TILE_W) - 1;
+      var v: ${V} = ${V}(${T}(0.0));
+      if (sx >= 0 && sy >= 0 && sx < i32(W) && sy < i32(H)) {
+        v = input[inBase + u32(sy) * W + u32(sx)];
+      }
+      tile[i] = v;
+    }
+    workgroupBarrier();
+
+    for (var ky: i32 = 0; ky < 3; ky = ky + 1) {
+      let rowBase = (lid.y + u32(ky)) * TILE_W;
+      for (var kx: i32 = 0; kx < 3; kx = kx + 1) {
+        let wTap = cg * 9u + u32(ky * 3 + kx);
+${weightLoads}
+${macBody}
+      }
+    }
+  }
+
+  if (outY >= H || ocBase >= OUT_C) {
+    return;
+  }
+${stores}
+}
+`;
+}
