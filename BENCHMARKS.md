@@ -487,6 +487,60 @@ ladder, the feasibility map, the raised-limit rows and the subgroup-matrix
 comparison. Timings in milliseconds were unaffected by the correction in any
 case, since only the denominator changed.
 
+### Baseline reference record
+
+The point every Milestone 3 optimisation is measured against, recorded in full
+so the comparison can be reconstructed without reading back through Milestone 2.
+Optimisations are only meaningful relative to a reference whose configuration
+*and* correctness are both known, so both are here.
+
+| Property | Value |
+| --- | --- |
+| Kernel | `naive` — Milestone 2 reference, every tap read from global storage |
+| Source | `src/bench/conv.wgsl.ts`, unchanged by Milestone 3 |
+| Input | 1280x720, 16 channels, planar `[c][y][x]` |
+| Output | 1280x720, 16 channels, planar |
+| Kernel shape | 3x3, zero padding |
+| Activation | relu |
+| Residual | none |
+| Workgroup | 16 x 16 invocations |
+| Spatial blocking | blockX 4, no vertical blocking |
+| Workgroup storage | 0 B — this kernel stages nothing |
+| Issued MACs | 2.1234 GMAC (1280 x 720 x 16 x 16 x 9; the grid divides exactly, so issued equals useful) |
+| Timing method | median of 40 GPU timestamp spans, duration-based warm-up |
+| Machine | MacBook Pro, Apple M5 (base), 24 GB unified memory, macOS 26.6.2 |
+| Browser | Chrome for Testing 152.0.7977.42, `--enable-unsafe-webgpu` |
+| Adapter | `apple` / `metal-3`, `shader-f16` and `timestamp-query` present |
+
+**Measured correctness of the baseline itself**, against the CPU reference at
+the geometry it is timed at, including a tail case that divides evenly in
+neither axis:
+
+| Precision | Geometry | Max abs error | Mean abs error | Reference range |
+| --- | --- | ---: | ---: | --- |
+| fp32 | 128x96 | 2.83e-7 | 1.70e-8 | 0 .. 0.451 |
+| fp32 | 127x95 | 5.96e-7 | 1.83e-8 | 0 .. 1.723 |
+| fp16 | 128x96 | 2.14e-3 | 1.54e-4 | — |
+| fp16 | 127x95 | 6.84e-3 | 1.72e-4 | — |
+
+**Measured baseline performance**, both precisions, four interleaved repeats of
+a median-of-40 in a single session:
+
+| Precision | GPU ms (mean) | Spread | GMAC/s |
+| --- | ---: | ---: | ---: |
+| fp16 | 8.811 | 8.704 - 8.872 | 241 |
+| fp32 | 11.058 | 11.031 - 11.089 | 192 |
+
+**A note on the fp32 figure.** Milestone 3 originally recorded a 10.295 ms fp32
+baseline, measured in an early session. It does not reproduce: seven
+measurements taken later, across two Chrome instances, all land at 11.03-11.09
+ms with 0.5% spread. The fp16 baseline from the same early session (8.868 ms)
+*does* reproduce (8.811 ms here). Rather than pick whichever is flattering, the
+fp32 speedup below is now quoted from a baseline and an optimum measured
+**interleaved in one session**, which is the only ratio that is defensible.
+This is exactly the failure mode interleaving exists to prevent, and it is
+recorded rather than quietly corrected.
+
 ### Optimization ladder — 1280x720, C16 -> C16, relu, fp16
 
 Each step is cumulative and was verified and measured separately.
@@ -508,8 +562,11 @@ The `packed` step is the least stable of the seven — its three repeats spanned
 3.837 to 4.012 ms (4.5%), against <=0.5% for every step from `blocked` onward.
 Its step size should be read as approximate; the endpoints are not.
 
-fp32 has a different optimum and ends at **1.929 ms / 1101 GMAC/s**
-(t8x8 b4x1 ob8), a 5.34x improvement over its own 10.295 ms baseline.
+fp32 has a different optimum, t8x8 b4x1 ob8. Measured interleaved against the
+fp32 baseline in a single session: **11.058 ms -> 1.930 ms / 1100 GMAC/s, a
+5.73x improvement**. The same session reproduces the fp16 ladder endpoints at
+8.811 -> 1.069 ms, 8.24x, against the 8.29x in the table above — a 0.6%
+difference, which is the run-to-run variance of the baseline row.
 
 Two steps are worth reading for their shape rather than their size. Workgroup
 tiling cut *issued* global loads about sevenfold and bought only 32%, which says
