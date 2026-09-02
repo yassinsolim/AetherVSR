@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AetherVSR — WebGPU video baseline harness</title>
+    <link rel="stylesheet" href="/src/ui/harness.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <span class="brand">AetherVSR</span>
+      <span class="milestone">Milestone 1 · WebGPU baseline · no inference</span>
+      <label class="control">
+        clip
+        <input id="file" type="file" accept="video/*" />
+      </label>
+      <label class="control">
+        upscaler
+        <select id="upscaler"></select>
+      </label>
+      <button id="reset" type="button">reset stats</button>
+      <button id="export" type="button">copy benchmark JSON</button>
+    </header>
+
+    <main id="stage" class="stage">
+      <canvas id="output"></canvas>
+      <p id="status" class="status">Loading…</p>
+    </main>
+
+    <!--
+      The source element is never displayed. It is a decode target only; every
+      pixel the user sees comes out of the WebGPU canvas above.
+    -->
+    <video id="source" muted loop playsinline preload="auto"></video>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
