@@ -6,6 +6,7 @@ import { verifyChain, type ChainVerifyCase, type ChainVerifyResult } from './cha
 import { StemBench, type StemCase, type StemResult } from './stem-bench.js';
 import { verifyStem, type StemVerifyCase, type StemVerifyResult } from './stem-verify.js';
 import { BridgeBench, type BridgeBenchConfig } from './bridge-bench.js';
+import { verifyPixelShuffle, type ShuffleVerifyCase, type ShuffleVerifyResult } from './shuffle-verify.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
@@ -225,6 +226,17 @@ function main(gpu: GpuContext): void {
     } finally {
       bench.destroy();
     }
+  };
+
+  w['aethervsrShuffleVerify'] = async (
+    cases: readonly ShuffleVerifyCase[],
+    tolerance?: number,
+  ): Promise<ShuffleVerifyResult[]> => {
+    setStatus(`verifying ${cases.length} pixel-shuffle cases…`);
+    const out: ShuffleVerifyResult[] = [];
+    for (const c of cases) out.push(await verifyPixelShuffle(gpu.device, c, tolerance));
+    setStatus('pixel-shuffle verification complete');
+    return out;
   };
 
   w['aethervsrRoofline'] = async (useF16 = true): Promise<RooflineResult[]> => {
