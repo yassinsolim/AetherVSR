@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AetherVSR — Milestone 2 feasibility bench</title>
+    <link rel="stylesheet" href="/src/ui/harness.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <span class="brand">AetherVSR</span>
+      <span class="milestone">Milestone 2 · feasibility spike · no production model</span>
+      <a class="control" href="/">← Milestone 1 harness</a>
+    </header>
+
+    <main id="stage" class="stage">
+      <canvas id="output"></canvas>
+      <p id="status" class="status">Loading…</p>
+    </main>
+
+    <video id="source" muted loop playsinline preload="auto"></video>
+
+    <script type="module" src="/src/bench/main.ts"></script>
+  </body>
+</html>
