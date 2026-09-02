@@ -5,10 +5,25 @@ describes what exists today (Milestone 1: a non-neural WebGPU baseline) and the
 boundary through which a neural stage will later arrive.
 
 Nothing in the production video pipeline currently performs neural
-inference. Milestone 2 added isolated neural/inference benchmark
-experiments under `src/bench/` — a convolution throughput harness and an
-ONNX Runtime Web probe — which are reachable only from `bench.html` and
-never from the video path.
+inference. Milestones 2 and 3 added isolated neural/inference benchmark
+experiments under `src/bench/` — convolution throughput harnesses, an
+ONNX Runtime Web probe, a device roofline probe and a temporal-behaviour
+harness — which are reachable only from `bench.html` and never from the
+video path.
+
+**What Milestone 3 settled about the future neural stage.** Its kernels will be
+hand-written WGSL rather than a third-party runtime, and they will look like
+`src/bench/conv-blocked.wgsl.ts`: workgroup-tiled with a halo, input channels
+packed into `vec4`, several output channels accumulated per invocation, and
+weights pre-arranged tap-major at load time. That shape is not a preference; it
+is 8.3x faster than the naive kernel it replaced, and each part of it was
+measured separately (`BENCHMARKS.md`). The operating point that fits the frame
+budget is C16 at 1280x720, where one 3x3 layer costs 1.065 ms.
+
+ONNX Runtime Web is not a candidate for the video path: version 1.29.0 cannot
+accept a caller-supplied `GPUDevice`, so it cannot read a decoded frame without
+a round trip through host memory (ADR-0018). `chromium-experimental-subgroup-matrix`
+is rejected on measurement and on availability (ADR-0017).
 
 ## Data flow
 

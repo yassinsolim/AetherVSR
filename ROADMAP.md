@@ -69,51 +69,59 @@ is the finding that governs Milestone 3.
 
 ---
 
-## Milestone 3 — Close the convolution throughput gap
+## Milestone 3 — Close the convolution throughput gap ✅ complete
 
 **Goal:** establish, by measurement, the maximum 3x3 convolution throughput
 achievable on a base Apple M5 through WebGPU, and decide from that whether a
 neural stage is viable at 720p, at reduced internal resolution, or not at all.
 
-This is deliberately still not "ship a model". Milestone 2 showed the
-bottleneck is the throughput of our current convolution implementation, which
-has substantial redundant global-memory traffic and has not been shown to reach
-any hardware limit. Shipping a model before that is resolved would just produce
-a slow model.
+**Outcome: the gap is largely closed, and 720p C16 is viable.** Convolution
+throughput went from 239 to **1993 GMAC/s** in fp16 — **8.3x** — putting a
+1280x720 16->16 layer at **1.065 ms**. Full tables in `BENCHMARKS.md`.
 
-1. **Optimise the kernel.** The current one is naive: no shared-memory tiling,
-   no cooperative loading, scalar loads. Issued load traffic is ≈8.5 GB per
-   16→16 dispatch (14.7M outputs x 144 taps x 4 B), ≈745 GB/s at the measured
-   time, so it is bound on redundant global reads. Implement and measure, in
-   order: workgroup-shared input tiles; `vec4` channel packing; accumulating
-   several output channels per invocation; and `chromium-experimental-subgroup-matrix`,
-   which this adapter advertises and which is the one lever that could plausibly
-   deliver a large multiple.
-2. **Re-measure the ceiling.** Report GMAC/s for each optimisation
-   independently, so the contribution of each is attributable.
-3. **Take the deferred ORT measurement.** Same model, `Tensor.fromGpuBuffer`
-   input *and* `gpu-buffer` output on AetherVSR's own `GPUDevice`, with an
-   explicit completion fence. This is the experiment ADR-0015 defers, and it
-   may show ORT's mature kernels beat ours.
-4. **Establish the resolution/channel trade.** If 720p cannot be reached,
-   measure what can: internal processing at 960x540 upscaled 2x then resampled,
-   or a narrower network.
-5. **Add temporal measurement.** Frame-to-frame difference on static shots and
-   motion-compensated difference on moving shots, on the *baseline* scalers
-   first, to establish what "no flicker" looks like before any model exists.
+| Step | GPU ms | GMAC/s | vs original |
+| --- | ---: | ---: | ---: |
+| M2 baseline (naive) | 8.868 | 239 | 1.00x |
+| + workgroup tiling with halo | 6.717 | 316 | 1.32x |
+| + vec4 input-channel packing | 3.723 | 570 | 2.38x |
+| + 8 output channels per invocation | 1.212 | 1751 | 7.32x |
+| + 2D spatial blocking | 1.132 | 1875 | 7.83x |
+| + tap-major weight layout | 1.089 | 1950 | 8.14x |
+| + occupancy tuning | **1.065** | **1993** | **8.32x** |
 
-**Acceptance criteria:**
+Against acceptance criteria:
 
-- A measured GMAC/s figure for each optimisation step, each verified against
-  the CPU reference before timing.
-- A stated maximum achievable throughput with the configuration that produced
-  it.
-- A completion-synchronised, GPU-resident ORT figure, or a documented reason it
-  could not be obtained.
-- An explicit verdict: at what (channels, resolution, layer count) a neural
-  stage fits in ≤8 ms, or a statement that none does on this hardware.
-- Temporal baseline numbers for bilinear and Catmull-Rom.
-- No production model, no extension, no temporal VSR implementation.
+- ✅ A measured GMAC/s figure per optimisation, each verified against the CPU
+  reference before timing.
+- ✅ Maximum achievable throughput and its configuration: 1993 GMAC/s, fp16,
+  `blocked` variant, 8x4 workgroup, blockX 2, blockY 2, outBlock 16, tap-major
+  weights, inside the guaranteed workgroup-storage floor.
+- ✅ A documented reason the GPU-resident ORT figure could not be obtained: ORT
+  1.29.0 rejects a caller-supplied `GPUDevice` at session creation across all
+  four configurations tried (ADR-0018).
+- ✅ An explicit ≤8 ms verdict — see below.
+- ✅ Temporal baseline numbers for bilinear and Catmull-Rom, with an exactly-zero
+  static control.
+- ✅ No production model, no extension, no temporal VSR implementation.
+
+**The ≤8 ms verdict.** At 1280x720 with 16 channels, **7 convolution layers**
+fit in 8 ms (1.065 ms each). At 960x540, 12 fit; at 640x360, 28. This is an
+upper bound on convolution alone: a real network also has activations, pixel
+shuffle, format conversion, residual adds and per-layer dispatch overhead, so
+layer-count arithmetic is not a model prediction. It does mean a C16-class
+network at full 720p is now a question of how many layers, not whether.
+
+**Bottleneck.** Not resolved into a single cause, and deliberately not claimed
+as hardware saturation. The optimum sits in a trough between two measured walls:
+below outBlock 8 the kernel is at or above the device's measured streaming
+bandwidth, and above it register pressure dominates. At the best configuration
+it runs at 54% of measured FMA throughput and 73% of measured streaming
+bandwidth.
+
+**Rejected:** `chromium-experimental-subgroup-matrix`, 7.8x slower than the
+portable kernel and unavailable without `--enable-unsafe-webgpu` (ADR-0017).
+**Not needed:** raised workgroup-storage limits — every tile above the
+guaranteed 16 KiB floor was slower.
 
 ---
 
@@ -123,6 +131,35 @@ A real 2x model behind the existing `Upscaler` interface: weight loading and
 packing, the full inference graph, quality comparison against the baseline, and
 automatic fallback to the baseline when the frame budget is exceeded. Adding it
 must not modify acquisition, import or presentation.
+
+**Architecture, decided by Milestone 3 measurement:** hand-written WGSL, the
+`blocked` kernel family, fp16, at an operating point of **C16 at 1280x720** with
+a depth chosen to fit the budget. ORT is not a candidate for the video path
+until it can accept a caller-supplied device (ADR-0018).
+
+**Acceptance criteria:**
+
+- One concrete published lightweight architecture, chosen and named, with its
+  licence recorded before any weights are used.
+- The full graph runs GPU-resident end to end: `importExternalTexture` ->
+  ingest -> network -> presentation, with **no CPU readback in the frame loop**
+  and no per-frame allocation.
+- Every layer type the network needs is verified against a CPU reference at the
+  geometry it ships at, in both fp16 and fp32, before any timing is published.
+- Measured whole-stage GPU time at 1280x720 -> 2560x1440, reported next to the
+  16.67 ms budget, with the layer-by-layer breakdown.
+- Still-frame quality beats Catmull-Rom's 19.45 dB PSNR / 0.925 SSIM on the
+  existing generated reference, **and** temporal behaviour is reported on the
+  Milestone 3 sequences. A model that wins on PSNR while its
+  motion-compensated variance exceeds Catmull-Rom's 17.24 LSB^2 has not
+  succeeded — that check is the reason the temporal baseline exists.
+- Automatic fallback to the baseline scaler when the measured stage time
+  exceeds its budget, exercised in a real run rather than asserted.
+- The `Upscaler` seam is unchanged: acquisition, ingest and presentation code
+  is not modified to accommodate the model.
+
+**Explicitly not in Milestone 4:** temporal VSR, frame interpolation, multiple
+selectable models, the Chrome extension, compression-artifact removal.
 
 ---
 

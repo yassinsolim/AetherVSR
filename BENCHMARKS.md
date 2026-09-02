@@ -424,6 +424,285 @@ tiling and is bound on redundant global loads. It is not a statement about all
 lightweight architectures, and not a statement about what this GPU can do. Both
 the model and the kernel are variables Milestone 3 changes.
 
+## Milestone 3 — Convolution optimization and feasibility mapping
+
+Same machine and browser as the Milestone 2 section above (Apple M5 base, 24 GB,
+macOS 26.6.2, Chrome for Testing 152.0.7977.42). Every figure is a median of 40
+GPU-timestamped iterations unless stated otherwise. No CPU pixel readback occurs
+in any timed convolution path.
+
+**Every kernel in this section was verified against a CPU reference before it
+was timed**, at the geometry it was timed at, including odd widths and heights
+that exercise tail handling. A faster kernel that is wrong is a failed
+experiment, not a result — see ADR-0014.
+
+### Measurement methodology correction
+
+Milestone 2's harness warmed up for a fixed 8 dispatches. Building the
+feasibility map below produced an impossible row — C4 at 854x480 measuring
+*faster* than C4 at 640x360 with 1.8x the pixels — and repeating each cell four
+times located the cause: only the first pass of a session was wrong, and only
+for small workloads.
+
+| Workload | First pass | Steady | Error |
+| --- | ---: | ---: | ---: |
+| 640x360 C4 | 0.135 ms | 0.031 ms | 4.3x |
+| 1280x720 C16 | 1.087 ms | 1.090 ms | none |
+
+Eight dispatches of a 0.03 ms kernel is 0.25 ms of work, nowhere near enough to
+bring the GPU off its idle clock. Milestone 2 never saw it because every kernel
+it measured took milliseconds and ramped the clock itself. Warm-up is now
+duration-based (60 ms minimum); after the fix the first measurement of a session
+is already correct, with <=1% spread across four repeats.
+
+**Milestone 2's published numbers are not invalidated** — they are all
+millisecond-scale workloads in the regime where the two warm-up strategies agree,
+and the re-measured baseline below reproduces them within run-to-run variance.
+
+### Optimization ladder — 1280x720, C16 -> C16, relu, fp16
+
+Each step is cumulative and was verified and measured separately.
+
+| Step | Correct? | GPU ms | GMAC/s | vs previous | vs original |
+| --- | --- | ---: | ---: | ---: | ---: |
+| M2 baseline — naive, blk4 tile16x16 | yes | 8.868 | 239 | — | 1.00x |
+| + workgroup tiling with halo | yes | 6.717 | 316 | +32.0% | 1.32x |
+| + vec4 input-channel packing | yes | 3.723 | 570 | +80.4% | 2.38x |
+| + 8 output channels per invocation | yes | 1.212 | 1751 | +207% | 7.32x |
+| + 2D spatial blocking (b4x2) | yes | 1.132 | 1875 | +7.1% | 7.83x |
+| + tap-major weight layout | yes | 1.089 | 1950 | +4.1% | 8.14x |
+| + occupancy tuning (t8x4 b2x2 ob16) | yes | 1.065 | 1993 | +2.2% | 8.32x |
+
+The same ladder in fp32 ends at 1.979 ms / 1073 GMAC/s, a 5.2x improvement over
+its own 10.295 ms baseline.
+
+Two steps are worth reading for their shape rather than their size. Workgroup
+tiling cut *issued* global loads about sevenfold and bought only 32%, which says
+the cache was already absorbing most of the redundancy. Output-channel blocking
+was the large win, and it is the one that reduces how many times the input is
+staged at all.
+
+### Fastest verified portable configuration
+
+| Property | Value |
+| --- | --- |
+| Variant | `blocked` — tiled, vec4-packed, output-channel blocked |
+| Precision | fp16 (`shader-f16`) |
+| Workgroup | 8 x 4 invocations |
+| Spatial blocking | blockX 2, blockY 2 |
+| Output channels per invocation | 16 |
+| Weight layout | tap-major `[ic/4][k][oc]` |
+| Workgroup storage | 5 440 B — inside the 16 384 B guaranteed floor |
+| GPU time | **1.0654 ms** (mean of 3 runs of median-of-40; runs 1.0642 / 1.0684 / 1.0636) |
+| Throughput | **1993 GMAC/s** |
+| Numerical error vs CPU reference | 2.4e-7 (fp32 build of same config), 2.3e-3 (fp16) |
+
+Uses no extension beyond `shader-f16` and no raised limit. The nine best
+configurations span 2.6%, so this is a plateau, not a knife-edge.
+
+### Workgroup storage above the guaranteed floor — negative result
+
+Dawn reports this adapter supports `maxComputeWorkgroupStorageSize` of 32 768
+against the 16 384 the WebGPU spec guarantees. With the larger limit granted,
+the best newly-legal configuration is t16x16 b4x2 ob8 at **1.217 ms / 1745
+GMAC/s** — slower than the 1.065 ms configuration that fits inside the floor.
+Every larger tile is slower. AetherVSR does not need a raised limit.
+
+### Subgroup-matrix — experimental, rejected
+
+`chromium-experimental-subgroup-matrix` implemented as an implicit GEMM
+(im2col is not viable: the 9x expansion is 265 MB in f16 at C16/720p, past the
+128 MiB default storage binding limit).
+
+| Path | GPU ms | GMAC/s |
+| --- | ---: | ---: |
+| Portable `blocked` fp16 | 1.085 | 1958 |
+| Subgroup-matrix fp16 | 8.451 | 251 |
+| Subgroup-matrix fp32 | 8.711 | 244 |
+
+7.8x slower, and `rowsPerGroup` from 1 to 16 barely moves it. The cause is
+structural: Dawn on Metal exposes exactly two configurations, both 8x8x8
+(f32->f32 and f16->f16). An 8x8x8 tile performs 512 MACs against 64 staged
+activations — 8 MACs per staged value, plus two barriers per K-slice — where the
+`blocked` kernel reaches 64. The matrix path is bound by staging before its
+arithmetic units matter.
+
+This is **not** evidence that the M5's matrix hardware is slow. It is evidence
+that an 8x8 tile cannot amortise a gather for a 3x3 convolution at 16 channels.
+
+Independently of speed, the feature is unusable in production: it requires
+`--enable-unsafe-webgpu` (measured — it is absent from `adapter.features`
+without it), is absent from Chrome 152 release notes, and the W3C draft has
+already renamed the extension and changed the load/store signature.
+
+### ONNX Runtime Web — GPU-resident comparison attempted, not achieved
+
+ORT 1.29.0, native WebGPU EP, same 16->16 3x3 convolution at 720p, all three
+nodes confirmed on `[WebGpuExecutionProvider]`.
+
+| Configuration | Steady median | Upload per run | Fenced |
+| --- | ---: | ---: | --- |
+| CPU input, GPU output | 20.1 ms (min 18.7, max 22.1) | 59.0 MB | yes |
+| CPU input, CPU output | 35.3 ms | 59.0 MB | no |
+| **GPU input, GPU output** | **could not create session** | 0 | — |
+| AetherVSR WGSL, fully GPU-resident | 1.065 ms | 0 | n/a |
+
+The GPU-resident path is implemented — shared `GPUDevice` on the EP option,
+input buffer allocated on it and filled once outside the timed loop, 16-byte
+size rounding, `preferredOutputLocation: 'gpu-buffer'`, explicit
+`queue.onSubmittedWorkDone()` fence — and session creation fails with
+`Failed to wait for the operation:3`. Four configurations were tried before
+concluding this is a runtime limitation: supplying `env.webgpu.adapter`
+alongside the device; the plain and `.jsep` artefacts (neither exports
+`webgpuInit`, so they cannot host this entry point at all); and the `.jspi`
+build, whose native stack switching is exactly the mechanism a blocking Dawn
+future wait would need.
+
+**The scopes are not comparable and no ranking is drawn from the timings.** Both
+ORT rows include a 59 MB host-to-device upload per run; ours includes none. That
+upload measures **8.3 ms** standalone on this device. It is reported alongside,
+never subtracted — the remainder of a subtraction is not a measurement. It does
+support one bound: crediting ORT the entire upload for free still leaves it
+around 11x slower on this workload.
+
+The decisive fact is not the timing. ORT 1.29.0 cannot accept our device, so it
+cannot consume a decoded video frame without a round trip through host memory,
+which is the one thing this architecture exists to avoid.
+
+### Feasibility map — measured convolution cost per layer
+
+Best configuration per cell, fp16, relu, `inChannels == outChannels`. Each cell
+is the fastest of 15-25 configurations.
+
+| Resolution | C4 | C8 | C12 | C16 |
+| --- | ---: | ---: | ---: | ---: |
+| 640x360 | 0.0313 ms | 0.0833 ms | 0.1732 ms | 0.2831 ms |
+| 854x480 | 0.0496 ms | 0.1399 ms | 0.3049 ms | 0.4986 ms |
+| 960x540 | 0.0613 ms | 0.1751 ms | 0.3826 ms | 0.6202 ms |
+| 1280x720 | 0.1144 ms | 0.3056 ms | 0.6707 ms | 1.0805 ms |
+
+Achieved throughput, same cells:
+
+| Resolution | C4 | C8 | C12 | C16 |
+| --- | ---: | ---: | ---: | ---: |
+| 640x360 | 1062 | 1593 | 1724 | 1875 |
+| 854x480 | 1190 | 1688 | 1747 | 1894 |
+| 960x540 | 1218 | 1705 | 1756 | 1926 |
+| 1280x720 | 1160 | 1737 | 1781 | 1965 |
+
+No cell was invalid: every resolution/channel combination fit in memory.
+
+**Scaling with pixel count is close to linear but slightly sublinear** — C16 from
+640x360 to 1280x720 is 4.0x the pixels for 3.82x the time — because fixed
+per-dispatch cost amortises. Narrow layers are markedly less efficient: C4
+reaches only ~55-60% of the throughput C16 does, so halving channel width does
+not halve cost.
+
+### Layer budget — upper bounds, not model predictions
+
+Layers of the given shape that fit in a budget, from the measured costs above.
+
+| Configuration | 4 ms | 8 ms | 12 ms | 16.67 ms |
+| --- | ---: | ---: | ---: | ---: |
+| 1280x720 C16 | 3.7 | 7.4 | 11.1 | 15.4 |
+| 1280x720 C12 | 6.0 | 11.9 | 17.9 | 24.9 |
+| 1280x720 C8 | 13.1 | 26.2 | 39.3 | 54.6 |
+| 960x540 C16 | 6.4 | 12.9 | 19.3 | 26.9 |
+| 854x480 C16 | 8.0 | 16.0 | 24.1 | 33.4 |
+| 640x360 C16 | 14.1 | 28.3 | 42.4 | 58.9 |
+
+**These are upper bounds and nothing more.** A real network also contains
+activations, pixel shuffle or other resampling, input/output format conversion,
+residual adds, and per-layer dispatch overhead. Division is not a model.
+
+### Temporal baseline — before any neural model exists
+
+Establishes how the existing non-neural upscalers behave under motion, so a
+future model cannot look excellent in still-frame PSNR while shimmering.
+Deterministic procedurally generated sequences, 24 frames, 1280x720 -> 2560x1440
+exact 2x, BT.601 luma in 8-bit output code values (LSB). Frames are read back to
+compute metrics: a benchmark-only readback, absent from the production path.
+
+| Sequence | Filter | Frame-to-frame MAD | Frame-to-frame RMS | Motion-comp. residual MAD | Motion-comp. variance (LSB^2) |
+| --- | --- | ---: | ---: | ---: | ---: |
+| static | bilinear | 0 | 0 | n/a | n/a |
+| static | catmull-rom | 0 | 0 | n/a | n/a |
+| translating | bilinear | 5.003 | 9.124 | 2.837 | 9.06 |
+| translating | catmull-rom | 5.438 | 10.647 | 3.819 | 17.24 |
+| camera-motion | bilinear | 12.532 | 21.224 | n/a | n/a |
+| camera-motion | catmull-rom | 13.088 | 22.675 | n/a | n/a |
+
+**The static control is exactly zero for both filters**, which is what makes the
+rest trustworthy: the harness and the GPU are deterministic, and neither filter
+flickers on unchanging input.
+
+**Catmull-Rom's still-frame advantage costs it temporal stability.** Raw
+frame-to-frame difference barely separates the two (5.00 vs 5.44 MAD) because
+most of that is real image motion, which a sharper filter legitimately renders
+with larger differences. After compensating the known shift — which removes the
+"it moved" component and leaves only "it changed" — the separation is clear:
+Catmull-Rom's residual MAD is 35% higher and its motion-compensated temporal
+variance is **1.9x** bilinear's. Read alongside its still-frame advantage
+(19.45 dB / 0.925 SSIM vs 17.51 dB / 0.862), this is a real trade, and a future
+neural upscaler inherits exactly this risk.
+
+Translation is 0.25 LR px/frame, which is 0.5 output px and not an integer, so
+motion compensation compares frames two apart, where the shift accumulates to
+exactly -1 output pixel. **Camera-motion has no motion-compensated row**: a
+spatially varying zoom has no single integer shift that aligns two frames, so
+those raw figures are an uninterpreted upper bound and no stability conclusion
+is drawn from them.
+
+### Bottleneck characterization
+
+Both endpoints measured on this device, with kernels that do nothing else:
+
+| Probe | f16 | f32 |
+| --- | ---: | ---: |
+| Streaming copy (64 MiB each way) | 126 GB/s | 120 GB/s |
+| FMA chain, 16 independent accumulators | 7306 GFLOP/s | 3955 GFLOP/s |
+
+Neither is a hardware ceiling; both are what this harness can extract. Three
+experiments then locate the convolution.
+
+*Arithmetic headroom.* Adding `tanh` to all 14.7M outputs — a transcendental per
+output, zero extra traffic — costs 3.2% (1.076 -> 1.110 ms).
+
+*Bandwidth.* Varying `outBlock` changes staging passes at a constant MAC count:
+
+| outBlock | Modelled traffic | GPU ms | Effective GB/s |
+| ---: | ---: | ---: | ---: |
+| 1 | 593 MB | 4.081 | 145 |
+| 2 | 311 MB | 2.172 | 143 |
+| 4 | 170 MB | 1.340 | 127 |
+| 8 | 100 MB | 1.085 | 92 |
+| 16 | 65 MB | 1.265 | 51 |
+
+At ob1-ob4 the kernel is at or above the measured streaming ceiling — above
+because the model counts issued loads and the cache absorbs part of them — so it
+is bandwidth-saturated there.
+
+*Occupancy.* Holding traffic fixed at ob16 and varying only accumulator count:
+
+| Accumulators | GPU ms |
+| ---: | ---: |
+| 16 | 1.605 |
+| 32 | 1.215 |
+| 64 | 1.068 |
+| 128 | 1.266 |
+
+A clean U, isolated from bandwidth.
+
+**Conclusion.** The optimum is a trough between two different walls: reduce
+traffic further and register pressure bites, increase reuse and bandwidth binds.
+At the best configuration the kernel runs at **54% of measured FMA throughput**
+and **73% of measured streaming bandwidth**.
+
+**Hardware saturation was not established.** Neither probe is a hardware ceiling,
+and the convolution sits below both of them. The limiting behaviour is the
+interaction of memory traffic and register pressure in this implementation, not
+a demonstrated property of the M5.
+
 ## Reproducing
 
 ```bash

@@ -452,3 +452,122 @@ The harness immediately produced a useful warning: nearest neighbour scores
 SSIM rewards preserved local variance and blurring suppresses variance more
 than blocking does. Ranking on SSIM alone would have been wrong. Any future
 model must be judged on both, and on temporal behaviour that neither captures.
+
+## ADR-0017 — Subgroup matrix rejected: measured slower, and unshippable anyway
+
+**Status:** accepted (Milestone 3)
+
+**Context.** Milestone 2 named `chromium-experimental-subgroup-matrix` as the
+one lever that could plausibly deliver a large multiple, because this adapter
+advertises it. Milestone 3 had to either use it or say why not.
+
+It was implemented as an implicit GEMM — not im2col, whose 9x activation
+expansion is 265 MB in f16 at C16/720p, past the 128 MiB default storage
+binding limit. K was ordered `tap * inChannels + ic` so each 8-wide slice stays
+inside one 3x3 tap, making the staged operand eight channels of eight adjacent
+pixels. It is numerically correct: <=4.5e-7 f32, 2.8e-3 f16.
+
+**Decision.** Do not pursue it. Keep the portable `blocked` kernel.
+
+**Why.** Measured at 1280x720 C16, it runs at 8.451 ms against the portable
+kernel's 1.085 ms — **7.8x slower** — and `rowsPerGroup` from 1 to 16 barely
+moves it. Dawn on Metal exposes exactly two configurations, both 8x8x8. That
+tile does 512 MACs against 64 staged activations, 8 MACs per staged value,
+plus two barriers per K-slice; the `blocked` kernel reaches 64 per staged
+value. The matrix path is bound on staging before its arithmetic units matter.
+
+Three further reasons hold regardless of speed:
+
+1. It requires `--enable-unsafe-webgpu`. Measured: the feature is absent from
+   `adapter.features` without it, so no shipped page can reach it.
+2. It is absent from Chrome 152's release notes and marked Experimental in Dawn.
+3. The W3C draft has already renamed the extension to `subgroup_matrix` and
+   replaced the boolean `col_major` argument with a template parameter, so the
+   shader is written against a moving target.
+
+**What this is not.** It is not evidence that the M5's matrix hardware is slow.
+It is evidence that an 8x8 tile cannot amortise a gather for a 3x3 convolution
+at 16 channels. A much wider layer could plausibly change the answer, and the
+experiment is retained so it can be re-run.
+
+## ADR-0018 — ORT Web is not a candidate until it accepts a caller's GPUDevice
+
+**Status:** accepted (Milestone 3), supersedes the deferral in ADR-0015
+
+**Context.** ADR-0015 deferred the runtime choice pending a fair comparison:
+same workload, GPU-resident input and output, completion-fenced. Milestone 2's
+figure was not comparable because a 59 MB tensor was re-uploaded every run.
+
+**Decision.** Milestone 4 uses hand-written WGSL. ORT Web is not a candidate
+for the video path, and this does not rest on a timing comparison.
+
+**Why.** The fair comparison could not be constructed. Sharing AetherVSR's
+`GPUDevice` with ORT's native WebGPU EP — the documented mechanism, and the
+prerequisite for `Tensor.fromGpuBuffer` on a buffer we own — fails at session
+creation with `Failed to wait for the operation:3`. Four configurations were
+tried: with `env.webgpu.adapter` supplied alongside the device; with the plain
+and `.jsep` artefacts, neither of which exports the `webgpuInit` the entry
+point needs; and with `.jspi`, whose native stack switching is exactly the
+mechanism a blocking Dawn future wait would require.
+
+The consequence is architectural rather than numerical. A runtime that cannot
+accept our device cannot consume a decoded video frame without a round trip
+through host memory — the one thing this project's data flow exists to avoid.
+Even a hypothetically faster ORT would have to pay that crossing every frame.
+
+For the record, and **not as a ranking**, the scope-mismatched figures are ORT
+20.1 ms (CPU input, GPU output, fenced, all nodes on WebGPU) against 1.065 ms
+for our kernel. The 59 MB upload inside ORT's figure measures 8.3 ms standalone
+and is reported alongside, never subtracted. Crediting it back entirely still
+leaves ORT around 11x slower.
+
+**Revisit when** ORT Web supports an externally supplied device on the native
+WebGPU EP. The probe and both wasm variants are retained so this is a re-run,
+not a rewrite.
+
+## ADR-0019 — Warm-up is measured in time, not iterations
+
+**Status:** accepted (Milestone 3)
+
+**Context.** The feasibility map produced an impossible row: C4 at 854x480
+measured faster than C4 at 640x360 with 1.8x the pixels. Repeating each cell
+four times showed only the first pass of a session was wrong, and only for
+small workloads — 0.135 ms against a steady 0.031 ms, a 4.3x error.
+
+Eight warm-up dispatches of a 0.03 ms kernel is 0.25 ms of work, nowhere near
+enough to bring the GPU off its idle clock. Milestone 2 never saw this because
+every kernel it measured took milliseconds and ramped the clock itself.
+
+**Decision.** Warm-up runs until at least 60 ms of wall time has elapsed,
+batched 16 dispatches per fence and bounded against a hung case. Fixed
+iteration counts are not used.
+
+**Why not tell callers to discard a pass.** That leaves the trap in place for
+whoever forgets, and the failure is silent: a plausible number, in the right
+units, wrong by 4x. After the fix the first measurement of a session is already
+correct, with <=1% spread across four repeats.
+
+**Consequence.** Milestone 2's published figures stand: they are all
+millisecond-scale workloads in the regime where both strategies agree, and the
+re-measured baseline reproduces them within run-to-run variance. Sub-millisecond
+figures from before this change would not be trustworthy, and none were
+published.
+
+## ADR-0020 — The portable floor is the target; raised limits are not required
+
+**Status:** accepted (Milestone 3)
+
+**Context.** 11 of 72 spatial configurations were rejected by the WebGPU
+guaranteed `maxComputeWorkgroupStorageSize` of 16 384 bytes, while Dawn reported
+this adapter would allow 32 768 through `requiredLimits`.
+
+**Decision.** `acquireGpu` may raise limits opportunistically — clamped to what
+the adapter reports, and falling back to a plain request if that is refused —
+but no AetherVSR configuration may depend on a raised limit.
+
+**Why.** The experiment came back negative, which settles it. With 32 768 bytes
+granted, the best newly-legal configuration is 1.217 ms against 1.065 ms for a
+configuration that fits inside the floor; every larger tile is slower. The
+guaranteed floor is not binding for this kernel, so there is no speed-versus-
+portability trade to make here. That is worth recording precisely because the
+result could have gone the other way and forced one.
