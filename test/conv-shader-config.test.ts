@@ -28,6 +28,7 @@ const base = {
   useF16: true,
   residual: false,
   weightLayout: 'oc-major' as const,
+  packedOutput: false,
 };
 
 const count = (src: string, needle: string): number => src.split(needle).length - 1;
@@ -125,6 +126,34 @@ describe('blocked shader structure', () => {
     const src = buildBlockedConvShader(base);
     const body = src.slice(src.indexOf('for (var cg'), src.indexOf('if (ocBase >= OUT_C)'));
     expect(count(body, 'workgroupBarrier()')).toBe(2);
+  });
+});
+
+describe('packed output', () => {
+  it('stores whole vec4s rather than masked components', () => {
+    const src = buildBlockedConvShader({ ...base, packedOutput: true, outBlock: 8 });
+    // Two vec4s per blocked column, each written entire.
+    expect(count(src, 'output[(ocBase / 4u +')).toBe((8 / 4) * base.blockX * base.blockY);
+    expect(src).toContain('read_write> output: array<vec4<f16>>');
+    expect(src).not.toContain('output[(ocBase + ');
+  });
+
+  it('keeps scalar planar output when not asked', () => {
+    const src = buildBlockedConvShader({ ...base, packedOutput: false });
+    expect(src).toContain('read_write> output: array<f16>');
+    expect(src).not.toContain('output[(ocBase / 4u +');
+  });
+
+  it('refuses an output block that does not fill whole vec4s', () => {
+    expect(() => buildBlockedConvShader({ ...base, packedOutput: true, outBlock: 2 })).toThrow(
+      /packedOutput requires outBlock/,
+    );
+    expect(() => buildBlockedConvShader({ ...base, packedOutput: true, outBlock: 8 })).not.toThrow();
+  });
+
+  it('still applies the residual in packed mode', () => {
+    const res = buildBlockedConvShader({ ...base, packedOutput: true, outBlock: 8, residual: true });
+    expect(count(res, '+ input[')).toBe(8 * base.blockX * base.blockY);
   });
 });
 

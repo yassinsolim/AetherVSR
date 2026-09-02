@@ -18,6 +18,20 @@ export interface BlockedConvShaderConfig extends PackedConvShaderConfig {
    * worth measuring rather than assuming.
    */
   readonly weightLayout: 'oc-major' | 'tap-major';
+  /**
+   * Emit `array<vec4<T>>` in the same grouped `[c/4][y][x][c%4]` layout the
+   * kernel *reads*, instead of scalar planar `[c][y][x]`.
+   *
+   * This is what makes layers chainable at all. With scalar output the next
+   * layer cannot consume this one without a repack pass, because the two
+   * layouts disagree.
+   *
+   * Requires `outBlock % 4 === 0`, so that one invocation owns whole vec4s and
+   * can store them entire. Storing single components of a vec4 would work but
+   * compiles to masked stores, which is the thing worth measuring rather than
+   * assuming.
+   */
+  readonly packedOutput: boolean;
 }
 
 /** Bytes of workgroup storage the blocked shader declares. */
@@ -62,6 +76,12 @@ export function buildBlockedConvShader(config: BlockedConvShaderConfig): string 
   }
   if (!Number.isInteger(blockY) || blockY < 1) {
     throw new Error(`blocked variant requires blockY >= 1, got ${blockY}`);
+  }
+  if (config.packedOutput && outBlock % 4 !== 0) {
+    throw new Error(`packedOutput requires outBlock % 4 === 0, got ${outBlock}`);
+  }
+  if (config.packedOutput && outChannels % 4 !== 0) {
+    throw new Error(`packedOutput requires outChannels % 4 === 0, got ${outChannels}`);
   }
 
   const T = useF16 ? 'f16' : 'f32';
@@ -112,16 +132,39 @@ export function buildBlockedConvShader(config: BlockedConvShaderConfig): string 
     }).join('\n'),
   ).join('\n');
 
+  const packedOutput = config.packedOutput;
+
   const stores = each(blockY, (m) => {
-    const body = each(outBlock, (j) =>
-      each(blockX, (i) => {
-        const oc = `(ocBase + ${j}u)`;
-        const value = residual
-          ? `${activate(`acc${j}_${m}_${i}`)} + input[(${oc} / 4u) * W * H + row * W + outX + ${i}u][${oc} % 4u]`
-          : activate(`acc${j}_${m}_${i}`);
-        return `        if (outX + ${i}u < W) { output[${oc} * W * H + row * W + outX + ${i}u] = ${value}; }`;
-      }).join('\n'),
-    ).join('\n');
+    let body: string;
+    if (packedOutput) {
+      // One invocation owns outBlock consecutive channels, so it owns
+      // outBlock/4 whole vec4s and stores each in one go.
+      body = each(outBlock / 4, (g) =>
+        each(blockX, (i) => {
+          const lanes = each(4, (l) => {
+            const j = g * 4 + l;
+            const oc = `(ocBase + ${j}u)`;
+            return residual
+              ? `${activate(`acc${j}_${m}_${i}`)} + input[(${oc} / 4u) * W * H + row * W + outX + ${i}u][${oc} % 4u]`
+              : activate(`acc${j}_${m}_${i}`);
+          }).join(', ');
+          return (
+            `        if (outX + ${i}u < W) { ` +
+            `output[(ocBase / 4u + ${g}u) * W * H + row * W + outX + ${i}u] = ${V}(${lanes}); }`
+          );
+        }).join('\n'),
+      ).join('\n');
+    } else {
+      body = each(outBlock, (j) =>
+        each(blockX, (i) => {
+          const oc = `(ocBase + ${j}u)`;
+          const value = residual
+            ? `${activate(`acc${j}_${m}_${i}`)} + input[(${oc} / 4u) * W * H + row * W + outX + ${i}u][${oc} % 4u]`
+            : activate(`acc${j}_${m}_${i}`);
+          return `        if (outX + ${i}u < W) { output[${oc} * W * H + row * W + outX + ${i}u] = ${value}; }`;
+        }).join('\n'),
+      ).join('\n');
+    }
     return `  {\n    let row = outY + ${m}u;\n    if (row < H) {\n${body}\n    }\n  }`;
   }).join('\n');
 
@@ -143,7 +186,7 @@ struct Dims {
 @group(0) @binding(0) var<storage, read> input: array<${V}>;
 @group(0) @binding(1) var<storage, read> weights: array<${V}>;
 @group(0) @binding(2) var<storage, read> biases: array<${T}>;
-@group(0) @binding(3) var<storage, read_write> output: array<${T}>;
+@group(0) @binding(3) var<storage, read_write> output: array<${packedOutput ? V : T}>;
 @group(0) @binding(4) var<uniform> dims: Dims;
 
 var<workgroup> tile: array<${V}, ${tileW * tileH}>;

@@ -1,6 +1,8 @@
 import { acquireGpu, describeAdapter, type GpuContext } from '../core/gpu/device.js';
 import { ConvBench, type ConvCase, type ConvResult } from './conv-bench.js';
 import { measureRoofline, type RooflineResult } from './roofline.js';
+import { ChainBench, type ChainCase, type ChainResult } from './chain-bench.js';
+import { verifyChain, type ChainVerifyCase, type ChainVerifyResult } from './chain-verify.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
@@ -160,6 +162,25 @@ function main(gpu: GpuContext): void {
     const results = await bench.run(cases);
     setStatus('convolution bench complete');
     return results;
+  };
+
+  w['aethervsrChainBench'] = async (cases: readonly ChainCase[]): Promise<ChainResult[]> => {
+    setStatus(`running ${cases.length} convolution chain cases…`);
+    const bench = new ChainBench(gpu.device);
+    const results = await bench.run(cases);
+    setStatus('chain bench complete');
+    return results;
+  };
+
+  w['aethervsrChainVerify'] = async (
+    cases: readonly ChainVerifyCase[],
+    tolerance?: number,
+  ): Promise<ChainVerifyResult[]> => {
+    setStatus(`verifying ${cases.length} chains against the CPU reference…`);
+    const out: ChainVerifyResult[] = [];
+    for (const c of cases) out.push(await verifyChain(gpu.device, c, tolerance));
+    setStatus('chain verification complete');
+    return out;
   };
 
   w['aethervsrRoofline'] = async (useF16 = true): Promise<RooflineResult[]> => {

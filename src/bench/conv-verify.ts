@@ -32,6 +32,8 @@ export interface ConvVerifyCase {
   readonly blockY?: number;
   /** Weight memory order, for the `blocked` variant. Defaults to `oc-major`. */
   readonly weightLayout?: 'oc-major' | 'tap-major';
+  /** Emit grouped vec4 output instead of scalar planar. Defaults to false. */
+  readonly packedOutput?: boolean;
   /** Output rows per workgroup, for the `matrix` variant. Defaults to 1. */
   readonly rowsPerGroup?: number;
   /** Workgroup shape. Defaults to 8x8. Tiling bugs are shape-dependent, so
@@ -155,6 +157,7 @@ export async function verifyConv(
           outBlock: c.outBlock ?? 1,
           blockY: c.blockY ?? 1,
           weightLayout: c.weightLayout ?? 'oc-major',
+          packedOutput: c.packedOutput ?? false,
         });
       case 'matrix':
         return buildMatrixConvShader({
@@ -242,9 +245,14 @@ export async function verifyConv(
   await readback.mapAsync(GPUMapMode.READ);
   const rawBytes = readback.getMappedRange().slice(0);
   readback.unmap();
-  const actual = useF16
+  const raw = useF16
     ? Float32Array.from(new Uint16Array(rawBytes).subarray(0, outElements), halfToFloat)
     : new Float32Array(rawBytes);
+
+  // The packed-output kernel writes grouped [c/4][y][x][c%4]. Unpack it back to
+  // planar before comparing, rather than repacking the reference: a layout bug
+  // then shows as a numeric mismatch instead of cancelling on both sides.
+  const actual = c.packedOutput === true ? unpackActivations(raw, c.width * c.height, c.outChannels) : raw;
 
   const expected = referenceConv(c, inputData, weightData, biasData);
 
@@ -304,6 +312,19 @@ function referenceConv(
         if (c.residual) value += input[oc * W * H + y * W + x] as number;
         out[oc * W * H + y * W + x] = value;
       }
+    }
+  }
+  return out;
+}
+
+/** Grouped `[c/4][y][x][c%4]` -> planar `[c][y][x]`. Inverse of `packActivations`. */
+function unpackActivations(grouped: Float32Array, pixels: number, channels: number): Float32Array {
+  const out = new Float32Array(grouped.length);
+  for (let c = 0; c < channels; c++) {
+    const group = Math.floor(c / 4);
+    const lane = c % 4;
+    for (let p = 0; p < pixels; p++) {
+      out[c * pixels + p] = grouped[(group * pixels + p) * 4 + lane] as number;
     }
   }
   return out;

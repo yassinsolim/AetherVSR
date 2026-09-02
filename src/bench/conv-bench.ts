@@ -35,6 +35,8 @@ export interface ConvCase {
   readonly blockY?: number;
   /** Weight memory order, for the `blocked` variant. Defaults to `oc-major`. */
   readonly weightLayout?: 'oc-major' | 'tap-major';
+  /** Emit grouped vec4 output instead of scalar planar. Defaults to false. */
+  readonly packedOutput?: boolean;
   /** Output rows per workgroup, for the `matrix` variant. Defaults to 1. */
   readonly rowsPerGroup?: number;
 }
@@ -194,6 +196,7 @@ export class ConvBench {
           outBlock: c.outBlock ?? 1,
           blockY: c.blockY ?? 1,
           weightLayout: c.weightLayout ?? ('oc-major' as const),
+          packedOutput: c.packedOutput ?? false,
         };
         guardShared(blockedSharedBytes(blockedConfig));
         code = buildBlockedConvShader(blockedConfig);
