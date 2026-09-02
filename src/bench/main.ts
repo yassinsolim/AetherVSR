@@ -5,6 +5,7 @@ import { ChainBench, type ChainCase, type ChainResult } from './chain-bench.js';
 import { verifyChain, type ChainVerifyCase, type ChainVerifyResult } from './chain-verify.js';
 import { StemBench, type StemCase, type StemResult } from './stem-bench.js';
 import { verifyStem, type StemVerifyCase, type StemVerifyResult } from './stem-verify.js';
+import { BridgeBench, type BridgeBenchConfig } from './bridge-bench.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
@@ -202,6 +203,28 @@ function main(gpu: GpuContext): void {
     for (const c of cases) out.push(await verifyStem(gpu.device, c, tolerance));
     setStatus('stem verification complete');
     return out;
+  };
+
+  w['aethervsrBridgeBench'] = async (
+    bridgeConfig: BridgeBenchConfig,
+    warmupMs = 3000,
+    runMs = 8000,
+  ): Promise<unknown> => {
+    setStatus('measuring external texture -> ingest -> packed activations…');
+    await loadClip(CLIP);
+    const bench = new BridgeBench(gpu, video, bridgeConfig);
+    try {
+      bench.start();
+      await delay(warmupMs);
+      bench.reset();
+      await delay(runMs);
+      const verification = await bench.captureAndVerify();
+      const stats = bench.stats();
+      setStatus('bridge bench complete');
+      return { ...stats, verification };
+    } finally {
+      bench.destroy();
+    }
   };
 
   w['aethervsrRoofline'] = async (useF16 = true): Promise<RooflineResult[]> => {
