@@ -76,8 +76,10 @@ achievable on a base Apple M5 through WebGPU, and decide from that whether a
 neural stage is viable at 720p, at reduced internal resolution, or not at all.
 
 This is deliberately still not "ship a model". Milestone 2 showed the
-bottleneck is arithmetic throughput; shipping a model before that is resolved
-would just produce a slow model.
+bottleneck is the throughput of our current convolution implementation, which
+has substantial redundant global-memory traffic and has not been shown to reach
+any hardware limit. Shipping a model before that is resolved would just produce
+a slow model.
 
 1. **Optimise the kernel.** The current one is naive: no shared-memory tiling,
    no cooperative loading, scalar loads. Issued load traffic is ≈8.5 GB per
