@@ -45,6 +45,15 @@ export interface OrtProbeResult {
   readonly providers: readonly string[];
   readonly sessionCreateMs: number;
   readonly firstInferenceMs: number;
+  /**
+   * Median wall time around `session.run()`.
+   *
+   * **Scope depends on `outputLocation`.** With `cpu` the call must download
+   * the output, which forces GPU completion, so the figure is end-to-end
+   * including both transfers. With `gpu-buffer` nothing forces a wait — the
+   * native EP flushes by submitting to the queue and returns — so the figure
+   * is submission-side only and is a *lower bound* on GPU completion time.
+   */
   readonly steadyMedianMs: number;
   readonly steadyMeanMs: number;
   readonly steadyMinMs: number;
@@ -141,14 +150,17 @@ export async function probeOrt(config: OrtProbeConfig): Promise<OrtProbeResult> 
     const feeds: Record<string, OrtTensor> = { input };
 
     const firstStart = performance.now();
-    await session.run(feeds);
+    disposeOutputs(await session.run(feeds));
     const firstInferenceMs = performance.now() - firstStart;
 
     const samples: number[] = [];
     for (let i = 0; i < config.iterations; i++) {
       const t0 = performance.now();
-      await session.run(feeds);
+      const outputs = await session.run(feeds);
       samples.push(performance.now() - t0);
+      // ORT owns GPU-resident output buffers. Without disposal they accumulate
+      // for the length of the run and eventually distort or exhaust memory.
+      disposeOutputs(outputs);
     }
     await session.release();
 
@@ -181,6 +193,19 @@ function readVersion(ort: OrtModule): string | null {
     return String((versions as Record<string, unknown>)['web']);
   }
   return null;
+}
+
+/**
+ * Releases ORT-owned output tensors.
+ *
+ * Only meaningful for `gpu-buffer` outputs, where the tensor owns a GPUBuffer
+ * that is not reclaimed by dropping the JS reference.
+ */
+function disposeOutputs(outputs: Record<string, OrtTensor>): void {
+  for (const tensor of Object.values(outputs)) {
+    const disposable = tensor as unknown as { dispose?: () => void };
+    disposable.dispose?.();
+  }
 }
 
 function describe(err: unknown): string {

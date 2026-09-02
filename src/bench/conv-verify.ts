@@ -1,6 +1,9 @@
+import { floatToHalf } from './conv-bench.js';
 import { buildConvShader, type Activation } from './conv.wgsl.js';
 
 export interface ConvVerifyCase {
+  /** Verify the f16 variant of the shader instead of the f32 one. */
+  readonly useF16?: boolean;
   readonly width: number;
   readonly height: number;
   readonly inChannels: number;
@@ -32,15 +35,20 @@ export interface ConvVerifyResult extends ConvVerifyCase {
  * per-frame hot path and irrelevant here — this is an offline correctness
  * check, not a frame path.
  *
- * FP32 only: the point is to validate indexing, padding, register blocking and
- * the residual/activation wiring, none of which depend on element type, and a
- * half-precision reference would only add rounding noise to the comparison.
+ * `useF16` verifies the half-precision variant against the same f32 CPU
+ * reference. That comparison cannot use the f32 tolerance — half precision has
+ * ~3 decimal digits and the accumulator rounds at every one of the
+ * `9 * inChannels` MACs — so the caller must pass a tolerance appropriate to
+ * the accumulation depth. The point is to catch a *wrong* f16 kernel, not to
+ * pretend f16 is exact.
  */
 export async function verifyConv(
   device: GPUDevice,
   c: ConvVerifyCase,
   tolerance = 1e-4,
 ): Promise<ConvVerifyResult> {
+  const useF16 = c.useF16 ?? false;
+  const bytesPerElement = useF16 ? 2 : 4;
   const pixels = c.width * c.height;
   const inElements = pixels * c.inChannels;
   const outElements = pixels * c.outChannels;
@@ -55,10 +63,18 @@ export async function verifyConv(
 
   const makeBuffer = (data: Float32Array<ArrayBuffer>, extra = 0): GPUBuffer => {
     const buf = device.createBuffer({
-      size: Math.max(4, data.byteLength),
+      size: Math.max(4, roundUp4(data.length * bytesPerElement)),
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | extra,
     });
-    device.queue.writeBuffer(buf, 0, data);
+    if (useF16) {
+      // writeBuffer requires a byte count that is a multiple of 4, and an odd
+      // number of f16 elements is not. Pad to an even element count.
+      const half = new Uint16Array(data.length + (data.length % 2));
+      for (let i = 0; i < data.length; i++) half[i] = floatToHalf(data[i] as number);
+      device.queue.writeBuffer(buf, 0, half);
+    } else {
+      device.queue.writeBuffer(buf, 0, data);
+    }
     return buf;
   };
 
@@ -66,7 +82,7 @@ export async function verifyConv(
   const weights = makeBuffer(weightData);
   const biases = makeBuffer(biasData);
   const output = device.createBuffer({
-    size: Math.max(4, outElements * 4),
+    size: Math.max(4, roundUp4(outElements * bytesPerElement)),
     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
   });
   const dims = device.createBuffer({ size: 8, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
@@ -81,7 +97,7 @@ export async function verifyConv(
       tileY: 8,
       blockX: c.blockX,
       activation: c.activation,
-      useF16: false,
+      useF16,
       residual: c.residual,
     }),
   });
@@ -108,7 +124,7 @@ export async function verifyConv(
   });
 
   const readback = device.createBuffer({
-    size: Math.max(4, outElements * 4),
+    size: Math.max(4, roundUp4(outElements * bytesPerElement)),
     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
   });
 
@@ -122,12 +138,15 @@ export async function verifyConv(
     c.outChannels,
   );
   pass.end();
-  encoder.copyBufferToBuffer(output, 0, readback, 0, outElements * 4);
+  encoder.copyBufferToBuffer(output, 0, readback, 0, roundUp4(outElements * bytesPerElement));
   device.queue.submit([encoder.finish()]);
 
   await readback.mapAsync(GPUMapMode.READ);
-  const actual = new Float32Array(readback.getMappedRange().slice(0));
+  const rawBytes = readback.getMappedRange().slice(0);
   readback.unmap();
+  const actual = useF16
+    ? Float32Array.from(new Uint16Array(rawBytes).subarray(0, outElements), halfToFloat)
+    : new Float32Array(rawBytes);
 
   const expected = referenceConv(c, inputData, weightData, biasData);
 
@@ -190,4 +209,19 @@ function referenceConv(
     }
   }
   return out;
+}
+
+/** Rounds a byte count up to the 4-byte granularity WebGPU copies require. */
+function roundUp4(bytes: number): number {
+  return Math.ceil(bytes / 4) * 4;
+}
+
+/** IEEE-754 binary16 to binary32, for reading back f16 GPU output. */
+function halfToFloat(bits: number): number {
+  const sign = (bits & 0x8000) !== 0 ? -1 : 1;
+  const exponent = (bits >> 10) & 0x1f;
+  const mantissa = bits & 0x3ff;
+  if (exponent === 0) return sign * mantissa * 2 ** -24;
+  if (exponent === 0x1f) return mantissa === 0 ? sign * Infinity : Number.NaN;
+  return sign * (1 + mantissa / 1024) * 2 ** (exponent - 15);
 }

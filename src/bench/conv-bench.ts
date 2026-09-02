@@ -100,7 +100,7 @@ export class ConvBench {
 
     const storage = (elements: number, extraUsage = 0): GPUBuffer =>
       device.createBuffer({
-        size: Math.max(4, elements * bytesPerElement),
+        size: Math.max(4, Math.ceil((elements * bytesPerElement) / 4) * 4),
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | extraUsage,
       });
 
@@ -173,13 +173,17 @@ export class ConvBench {
     const diagnostics = compilation.messages
       .filter((m) => m.type !== 'info')
       .map((m) => `${m.type} ${m.lineNum}:${m.linePos} ${m.message}`);
+
+    // Warm up *inside* the error scopes: a bind group or dispatch rejected at
+    // submit time is exactly the failure mode that otherwise shows up only as
+    // a zero-length timestamp span.
+    for (let i = 0; i < this.warmup; i++) device.queue.submit([dispatch(false)]);
+    await device.queue.onSubmittedWorkDone();
+
     const oom = await device.popErrorScope();
     if (oom) diagnostics.push(`out-of-memory ${oom.message}`);
     const validation = await device.popErrorScope();
     if (validation) diagnostics.push(`validation ${validation.message}`);
-
-    for (let i = 0; i < this.warmup; i++) device.queue.submit([dispatch(false)]);
-    await device.queue.onSubmittedWorkDone();
 
     const samples: number[] = [];
     for (let i = 0; i < this.iterations; i++) {
@@ -209,7 +213,10 @@ export class ConvBench {
     // weights. Real traffic is higher because the 3x3 windows overlap and
     // cache behaviour is not modelled, so treat this as a floor.
     const bytesMoved = (inElements + outElements + weightElements) * bytesPerElement;
-    const bufferBytes = (inElements + outElements + weightElements + c.outChannels) * bytesPerElement;
+    // Every GPU buffer this case allocates: activations, weights, biases, the
+    // 8-byte dims uniform and the two 16-byte timestamp buffers.
+    const bufferBytes =
+      (inElements + outElements + weightElements + c.outChannels) * bytesPerElement + 8 + 16 + 16;
 
     return {
       ...c,
@@ -236,7 +243,9 @@ export class ConvBench {
  */
 function fillDeterministic(device: GPUDevice, buffer: GPUBuffer, elements: number, useF16: boolean): void {
   if (useF16) {
-    const half = new Uint16Array(elements);
+    // Padded to an even element count: writeBuffer rejects a byte count that
+    // is not a multiple of 4, which an odd number of f16 elements produces.
+    const half = new Uint16Array(elements + (elements % 2));
     for (let i = 0; i < elements; i++) half[i] = floatToHalf(((i % 17) - 8) / 16);
     device.queue.writeBuffer(buffer, 0, half);
     return;

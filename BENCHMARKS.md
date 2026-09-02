@@ -220,6 +220,174 @@ These were not obtained and must not be inferred:
 - **Other GPUs, and power draw.** Single machine, no power instrumentation.
 - **Sustained thermal behaviour.** Longest measurement window was 30 s.
 
+## Milestone 2 — feasibility spike measurements
+
+Same machine and browser as above (MacBook Pro, Apple M5, 24 GB; macOS 26.6.2
+build 25G83; Chrome for Testing 152.0.7977.42; adapter `apple`/`metal-3`).
+Date 2026-09-02. Run from `bench.html`, which is a separate Vite entry point so
+none of this code ships in the Milestone 1 harness.
+
+Device limits recorded for these runs: `maxStorageBufferBindingSize`
+134,217,728 (128 MiB), `maxBufferSize` 268,435,456, `maxComputeInvocationsPerWorkgroup`
+256, `maxComputeWorkgroupStorageSize` 16,384. `timestamp-query` and
+`shader-f16` both available.
+
+### External-texture ingest
+
+720p60 H.264 clip, live rVFC loop, both passes timed with independent
+`timestamp-query` sets in the same command encoder, n=240 trailing samples.
+
+| Mode | Consumer | ingest (ms) | upscale (ms) | total GPU (ms) |
+|---|---|---:|---:|---:|
+| direct | bilinear — 1 external tap | — | 0.882 | 0.882 |
+| direct | Catmull-Rom — 9 external taps | — | 3.765 | 3.765 |
+| ingest `rgba8unorm` | bilinear — 1 2D tap | 0.357 | 0.510 | 0.867 |
+| ingest `rgba8unorm` | Catmull-Rom — 9 2D taps | 0.391 | 1.312 | **1.703** |
+| ingest `rgba16float` | bilinear — 1 2D tap | 0.447 | 0.643 | 1.090 |
+| ingest `rgba16float` | Catmull-Rom — 9 2D taps | 0.359 | 1.128 | 1.487 |
+
+Both totals now cover all GPU work AetherVSR encodes, so unlike the Milestone 1
+comparison these rows *are* rankable against each other.
+
+Differencing the two filters within a mode isolates the marginal cost of eight
+extra taps:
+
+| Sampling domain | 8 extra taps cost | per tap |
+|---|---:|---:|
+| `texture_external` | 2.883 ms | **≈0.360 ms** |
+| `texture_2d<f32>` from `rgba8unorm` | 0.802 ms | **≈0.100 ms** |
+| `texture_2d<f32>` from `rgba16float` | 0.485 ms | ≈0.061 ms |
+
+**Caveat on that derivation:** bilinear and Catmull-Rom differ by more than tap
+count — the cubic also evaluates weights and clamps — so the per-tap figures
+are upper bounds that attribute all of the difference to sampling. The
+direction and rough magnitude are robust; the exact numbers are not.
+
+The ingest pass costs ~0.36–0.45 ms and saves ~0.26 ms per subsequent tap, so
+it pays for itself at roughly two taps. A 3x3 convolution reads nine times per
+output pixel per input channel, which is far past that break-even.
+
+### 3x3 convolution throughput
+
+1280x720, planar storage buffers, median of 40 timed dispatches after 8
+warm-up dispatches. Every kernel was first verified against a CPU reference. The fp32 variant
+passes 9 cases at ≤1.5e-7 absolute error. The fp16 variant is verified
+separately against the same fp32 reference at a tolerance appropriate to half
+precision: 4 cases, absolute error 0.0006–0.006, growing with accumulation
+depth (144 MACs at 16→16) exactly as half precision predicts.
+
+Channel sweep, `blockX=4`, workgroup 8x8, ReLU:
+
+| Case | Precision | GMAC/dispatch | median (ms) | GMAC/s |
+|---|---|---:|---:|---:|
+| 3 → 16 | fp32 | 0.40 | 1.966 | 202.5 |
+| 16 → 16 | fp32 | 2.12 | 11.207 | 189.5 |
+| 28 → 28 | fp32 | 6.50 | 34.800 | 186.9 |
+| 48 → 48 | fp32 | 19.11 | **rejected** | — |
+| 16 → 16 | fp16 | 2.12 | 8.585 | 247.3 |
+| 28 → 28 | fp16 | 6.50 | 26.411 | 246.2 |
+| 48 → 48 | fp16 | 19.11 | 77.070 | 248.0 |
+| 52 → 52 | fp16 | 22.43 | 90.964 | 246.6 |
+
+**48→48 fp32 at 720p is not slow, it is impossible on this device as
+configured.** One activation tensor is 176,947,200 bytes against a 128 MiB
+`maxStorageBufferBindingSize`, so the bind group is rejected. Dawn's message
+notes the *adapter* supports up to 4,294,967,292 bytes and the higher limit can
+be requested in `requiredLimits` at device creation — this is a Chrome default,
+not a hardware ceiling. fp16 halves the tensor and fits.
+
+Tuning sweep, 16→16 at 720p:
+
+| Configuration | Precision | median (ms) | GMAC/s |
+|---|---|---:|---:|
+| `blockX=1`, 8x8 | fp32 | 13.763 | 154.3 |
+| `blockX=2`, 8x8 | fp32 | 12.321 | 172.3 |
+| `blockX=4`, 8x8 | fp32 | 11.403 | 186.2 |
+| `blockX=8`, 8x8 | fp32 | 12.911 | 164.5 |
+| `blockX=4`, 16x16 | fp32 | 10.945 | 194.0 |
+| `blockX=4`, 32x2 | fp32 | **10.224** | **207.7** |
+| `blockX=8`, 8x8 | fp16 | 10.027 | 211.8 |
+| `blockX=4`, 16x16 | fp16 | **8.585** | **247.3** |
+
+Best measured: **207.7 GMAC/s fp32, 247.3 GMAC/s fp16** — fp16 is worth about
+1.3x. Tuning within this kernel family moves the result by only ~1.3x from
+worst to best, so the family itself is the limit, not the parameters.
+
+**Why it is slow.** The reported `GB/s` column in the raw results counts each
+activation element once and is therefore a floor. The traffic the kernel
+actually issues is 14.7M outputs x 144 taps x 4 B ≈ 8.5 GB per dispatch, which
+at 11.4 ms is ≈745 GB/s of load requests. The kernel is bound on redundant
+global loads: it has no shared-memory tiling and no cooperative loading, and
+relies entirely on cache for reuse.
+
+### ONNX Runtime Web, native WebGPU execution provider
+
+`onnxruntime-web` 1.29.0, `/webgpu` entry point (the native EP, not JSEP).
+Model is a single `Conv` 16→16 3x3 pad 1 with bias plus `Relu` at 1280x720 —
+deliberately the same arithmetic as the 16→16 row above. 20 iterations,
+ORT-owned output tensors disposed each iteration.
+
+| Output location | session create (ms) | first inference (ms) | steady median (ms) | mean | min | max | What the timing covers |
+|---|---:|---:|---:|---:|---:|---:|---|
+| `cpu` | 205.2 | 74.4 | 35.30 | 37.50 | 32.5 | 59.4 | End-to-end, GPU completion forced by the output download |
+| `gpu-buffer` | 5.5 (warm) | 14.0 | 13.20 | 13.26 | 12.2 | 15.2 | **Submission latency only — not GPU completion** |
+
+Three scoping facts, all of which must travel with these numbers:
+
+1. **Neither row is comparable to the WGSL figures above.** Those are GPU pass
+   time from `timestamp-query`. These are wall clock around `session.run()`.
+2. **Both rows include a CPU→GPU upload of the 56.3 MB input tensor on every
+   iteration.** `preferredOutputLocation` changes only the output side. A fair
+   comparison needs `Tensor.fromGpuBuffer` on the input too, which this spike
+   did not implement.
+3. **The `gpu-buffer` row does not wait for the GPU.** ORT's native EP ends a
+   run by flushing — submitting to the queue — and nothing forces
+   synchronisation when no output is downloaded. So 13.2 ms is a lower bound on
+   completion time, not a measurement of it. The `cpu` row is the only
+   completion-synchronised figure here, and it is dominated by transfers.
+
+**Fully GPU-resident ORT inference cost on this machine is therefore
+unmeasured.** See DECISIONS.md ADR-0015.
+
+What the run does establish: the native WebGPU EP loads and executes correctly
+on this device; session creation is ~205 ms cold and ~5 ms warm; and the first
+inference costs roughly 5x a steady one, so shader compilation and allocation
+must be warmed before any frame-rate claim.
+
+### Image quality
+
+Generated 2560x1440 reference, exact integer 2x box downsample to 1280x720,
+upscaled by the real GPU scalers, compared against the reference.
+
+| Upscaler | PSNR-Y (dB) | PSNR-RGB (dB) | SSIM (luma) |
+|---|---:|---:|---:|
+| Nearest neighbour (control) | 16.924 | 17.084 | 0.87956 |
+| Bilinear | 17.507 | 17.667 | 0.86200 |
+| Catmull-Rom 9-tap | **19.448** | **19.607** | **0.92522** |
+
+Catmull-Rom leads on every metric, by 1.94 dB PSNR-Y over bilinear.
+
+Two honest caveats. First, absolute values are low because the reference is
+deliberately adversarial — a zone plate sweeping to Nyquist, which no 2x scaler
+can reconstruct. These numbers rank scalers on one fixed image; they are not
+comparable with PSNR figures from the SR literature, which use natural-image
+sets. Second, **nearest neighbour scores higher SSIM than bilinear** (0.880 vs
+0.862) while scoring lower PSNR. That is expected rather than a bug: SSIM
+rewards preserved local variance, and on near-Nyquist content blurring
+suppresses variance more than blocking does. It is a useful warning that SSIM
+alone would mis-rank scalers on this kind of content.
+
+## Milestone 2 budget implication
+
+The published arithmetic for a SPAN-Lite C16-class model (four SPAB blocks,
+16 channels) is ≈30.5 GMAC per 720p frame. At the best measured convolution
+throughput on this machine (247 GMAC/s, fp16) that is **≈123 ms per frame** —
+against a 16.67 ms total budget of which the upscale stage should use a
+fraction. Reaching ~8 ms would require roughly **15x** the measured throughput.
+
+That gap, not the runtime choice and not the ingest cost, is the finding that
+governs Milestone 3.
+
 ## Reproducing
 
 ```bash

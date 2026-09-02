@@ -290,3 +290,156 @@ pass will be the first genuine second implementation and is the real test.
 
 **Consequences.** Implementations must tolerate both `FrameTexture` variants,
 or declare which they support.
+
+---
+
+## ADR-0012 — A dedicated ingest pass converts the external texture once
+
+**Status:** accepted (Milestone 2)
+
+**Context.** Milestone 1 observed that a nine-tap kernel was much more
+expensive reading `texture_external` than reading an ordinary texture, but the
+two figures bracketed different work so the comparison was suggestive only.
+Milestone 2 measured it properly, timing an ingest pass and its consumer
+separately in the same command encoder.
+
+**Decision.** `ExternalTextureIngest` converts the imported video frame into a
+regular `GPUTexture` in one pass. Any consumer that samples the frame more than
+about twice should run behind it.
+
+**Why.** Measured: a `texture_external` tap costs ≈0.360 ms per 720p frame
+against ≈0.100 ms for a `texture_2d<f32>` tap. The ingest pass costs
+0.357–0.447 ms and saves ≈0.26 ms per subsequent tap, so it repays itself at
+roughly two taps. Nine-tap Catmull-Rom total drops from 3.765 ms to 1.703 ms —
+2.2x — and that comparison covers all GPU work we encode, so it is a real
+ranking rather than two differently-scoped numbers.
+
+A convolution reads nine times per output pixel *per input channel*. For any
+neural stage the question is not whether to ingest but that ingesting is
+obviously correct.
+
+**Consequences.** One extra pass and one extra full-resolution texture. The
+output is `TEXTURE_BINDING | RENDER_ATTACHMENT` so a ping-pong graph can write
+back into it. `rgba16float` costs marginally more to produce than `rgba8unorm`
+but is slightly cheaper to sample; the choice is deferred to whichever the
+neural stage needs.
+
+---
+
+## ADR-0013 — Benchmarks must refuse to report unmeasured work
+
+**Status:** accepted (Milestone 2)
+
+**Context.** Three separate times during this milestone, a harness produced a
+number that looked like a result and was not one: a throttled tab yielded
+all-`NaN` aggregates that became `null` when marshalled out of the page as
+JSON; a shader that failed to compile left its output buffer zeroed, which
+scored as a plausible image; and a bind group rejected for exceeding a device
+limit produced identical begin/end timestamps, i.e. 0 ms and infinite
+throughput.
+
+**Decision.** Every measurement path fails loudly instead of returning a
+figure. `IngestBench` throws when it collected no frames or no GPU samples.
+`ConvBench` marks a case invalid when a dispatch produced a zero-length
+timestamp span and attaches the Dawn validation message. `verifyConv` fails on
+any non-info shader compilation diagnostic.
+
+**Why.** `AGENTS.md` §3 forbids reporting a benchmark that was not measured.
+That rule is only enforceable if the tooling can tell the difference. A silent
+zero is worse than a crash because it survives into a table.
+
+**Consequences.** Slightly more code in every harness. Each of the three
+failures above was caught by the mechanism rather than by luck.
+
+---
+
+## ADR-0014 — Convolution kernels are verified against a CPU reference before timing
+
+**Status:** accepted (Milestone 2)
+
+**Decision.** `conv-verify.ts` runs the same shader the benchmark uses on small
+tensors and compares every output element against a straightforward CPU
+implementation, including padding, register blocking, activation and residual
+variants.
+
+**Why.** It immediately found a real bug: the residual path referenced a
+binding scoped inside the accumulation loop, so pipeline creation failed
+silently and the output stayed zero. Without the check that configuration would
+have been recorded as unusually fast. A throughput number from an incorrect
+kernel is not merely useless, it is fast *because* it is skipping work.
+
+**Consequences.** Verification reads pixels back to the CPU, which is forbidden
+in the frame hot path and entirely appropriate offline. All nine cases now pass
+at ≤1.5e-7 absolute error.
+
+---
+
+## ADR-0015 — Runtime choice deferred: hand-written WGSL first, ORT re-evaluated with GPU IO binding
+
+**Status:** accepted (Milestone 2)
+
+**Context.** Milestone 2 was to decide between hand-written WGSL and ONNX
+Runtime Web on the WebGPU EP, by measurement.
+
+**Decision.** Continue with hand-written WGSL for Milestone 3, and keep ORT
+open pending one specific experiment: the same model with `Tensor.fromGpuBuffer`
+input *and* `gpu-buffer` output on AetherVSR's own device.
+
+**Why.** The measurement we took is not sufficient to rank them, and saying so
+is the honest outcome. ORT's native WebGPU EP ran the identical convolution at
+34.2 ms with CPU output and 16.5 ms with GPU-resident output, but both include
+a 56.3 MB CPU→GPU input upload per iteration, so neither is comparable to our
+GPU-pass-only 8.45 ms. That the figure halved when only the download was
+removed shows transfer dominates.
+
+What *does* inform the decision now, from source review rather than taste:
+
+- ORT's execution-provider placement is not programmatically queryable. An
+  unsupported node falls back to CPU, inserting GPU→CPU→GPU transfers
+  mid-graph, and the only way to observe it is parsing verbose console output.
+  For a per-frame budget an undetectable silent fallback is a serious risk.
+- The native `/webgpu` entry point fetches a 25.7 MB WASM artefact.
+- ORT has no WebGPU *texture* tensor — input and output are `GPUBuffer` only —
+  so AetherVSR would need conversion passes on both ends, which is exactly the
+  work ADR-0012 already does in one direction.
+- ORT can adopt an externally created `GPUDevice` via `{name:'webgpu', device}`,
+  so same-device interop is possible; that is the enabling fact for the
+  deferred experiment.
+- `js/web` still labels WebGPU experimental at 1.29.0.
+
+Against that, ORT's kernels are mature and ours are naive, so it may well win
+once transfers are removed. The decision is deferred on evidence, not
+preference.
+
+**Consequences.** Milestone 3 owns the GPU-IO-bound ORT measurement. Until it
+is taken, no performance claim may be made in either direction.
+
+---
+
+## ADR-0016 — Quality is evaluated against a generated reference, not a compressed one
+
+**Status:** accepted (Milestone 2)
+
+**Decision.** The quality harness generates a 2560x1440 reference, downsamples
+it by an exact integer 2x box filter implemented in our own code, upscales the
+result with the real GPU scaler, and compares against the reference. PSNR over
+luma and RGB, plus mean SSIM over 8x8 luma windows, with a nearest-neighbour
+control.
+
+**Why.** Using a compressed source would measure compression-artefact
+restoration and super-resolution simultaneously with no way to separate them,
+and those are different problems on the roadmap. Delegating the downsample to
+`drawImage` would make the reference browser-defined. Averaging is done in the
+encoded domain to match ADR-0006, so the metric does not penalise the scaler
+for a colour-space convention the pipeline deliberately chose.
+
+**Consequences.** Absolute values are low and not comparable with the SR
+literature, which uses natural-image sets; these numbers rank scalers on one
+fixed adversarial image. The SSIM window is the fast 8x8 uniform
+approximation, not the canonical 11x11 Gaussian.
+
+The harness immediately produced a useful warning: nearest neighbour scores
+*higher* SSIM than bilinear (0.880 vs 0.862) while scoring lower PSNR, because
+SSIM rewards preserved local variance and blurring suppresses variance more
+than blocking does. Ranking on SSIM alone would have been wrong. Any future
+model must be judged on both, and on temporal behaviour that neither captures.
