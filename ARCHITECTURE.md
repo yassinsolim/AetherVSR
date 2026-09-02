@@ -19,8 +19,12 @@ flowchart TD
     C["CanvasTarget<br/>GPUCanvasContext swap chain"]
     M["Metrics<br/>GPU timestamps · rate meters"]
 
+    G["ExternalTextureIngest<br/>one conversion pass · MILESTONE 2"]
+
     V --> S --> I --> U
     U --> B
+    I -.-> G
+    G -.-> N
     U -.-> N
     B --> C
     N -.-> C
@@ -128,6 +132,22 @@ The context is configured with the preferred canvas format (`bgra8unorm` on
 macOS Chromium), `alphaMode: 'opaque'`, and `colorSpace: 'srgb'` to match the
 destination colour space that `importExternalTexture()` converts into.
 
+### 4b. Ingest — `src/core/ingest/` (Milestone 2)
+
+`ExternalTextureIngest` converts the imported frame into an ordinary
+`GPUTexture` in a single pass. The baseline scaler does not use it — one tap
+does not justify a pass — but any multi-tap consumer should.
+
+This is measured, not assumed. A `texture_external` tap costs ≈0.360 ms per
+720p frame against ≈0.100 ms for an ordinary `texture_2d<f32>` tap, and the
+ingest pass costs ≈0.36–0.45 ms, so it repays itself at roughly two taps.
+Nine-tap Catmull-Rom drops from 3.765 ms to 1.703 ms total GPU time. A 3x3
+convolution reads nine times per output pixel *per input channel*.
+
+The output is `TEXTURE_BINDING | RENDER_ATTACHMENT`, so it is both sampleable
+by a convolution and usable as a ping-pong render target — the two things a
+multi-pass neural graph needs. See DECISIONS.md ADR-0012.
+
 ### 5. Metrics — `src/core/metrics/`
 
 - `SampleWindow` — fixed-capacity ring buffer with mean, quantiles and max.
@@ -177,6 +197,15 @@ The constraint that must hold: adding a backend changes `src/core/upscale/`
 plus its registration in the `FILTERS` list and construction site in
 `src/main.ts`. It must not require changes to acquisition, import or
 presentation.
+
+## Milestone 2 feasibility bench — `bench.html`, `src/bench/`
+
+A second Vite entry point, deliberately separate so experiment code never ships
+in the baseline harness bundle: the ORT probe alone pulls a 25.7 MB WASM
+artefact. It holds the ingest A/B experiment, a verified 3x3 convolution
+throughput harness, an ONNX Runtime Web probe, and a deterministic image
+quality evaluation. None of it is production code, and none of it performs
+inference in the video path.
 
 ## Deliberate non-goals for Milestone 1
 

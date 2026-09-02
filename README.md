@@ -6,10 +6,16 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine �
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 1 — WebGPU video baseline. There is no AI inference in this
-codebase yet.** What exists is a working, measured, zero-readback video →
-WebGPU → canvas pipeline with a conventional GPU scaler, and a clean seam for a
-neural upscaler to arrive through. See `ROADMAP.md`.
+**Status: Milestone 2 complete — feasibility spike. There is still no AI
+inference in this codebase, by design.** What exists is a working, measured, zero-readback video → WebGPU → canvas
+pipeline with a conventional GPU scaler, a clean seam for a neural upscaler to
+arrive through, and a measured answer to whether a neural stage is currently
+affordable. See `ROADMAP.md`.
+
+**The Milestone 2 headline: it is not, yet.** A SPAN-Lite C16-class model is
+≈30.5 GMAC per 720p frame; the best 3x3 convolution throughput measured here is
+247 GMAC/s, so that model would take ≈123 ms against a 16.67 ms budget. Closing
+that ≈15x gap is Milestone 3. Details and scoping in `BENCHMARKS.md`.
 
 ## What works today
 
@@ -95,6 +101,31 @@ npm run build
 ```
 http://127.0.0.1:5173/?clip=/media/aethervsr-testclip-720p60-h264.mp4&filter=catmull-rom
 ```
+
+## Milestone 2 feasibility bench
+
+`http://localhost:5173/bench.html` is a separate entry point holding the
+Milestone 2 experiments. It is not part of the baseline harness — the ONNX
+Runtime probe alone fetches a ~26 MB WASM artefact, which is why the two are
+separate bundles.
+
+Everything is driven from the console so a run is reproducible:
+
+```js
+await window.aethervsrEnvironment();
+await window.aethervsrIngestBench({ mode: 'ingest', filter: 'catmull-rom', ingestFormat: 'rgba8unorm' }, 3000, 15000);
+await window.aethervsrConvVerify([{ width: 17, height: 13, inChannels: 3, outChannels: 4, blockX: 2, activation: 'none', residual: false }]);
+await window.aethervsrConvBench([{ label: '16->16', width: 1280, height: 720, inChannels: 16, outChannels: 16, tileX: 8, tileY: 8, blockX: 4, activation: 'relu', useF16: true, residual: false }]);
+await window.aethervsrQualityBench(['bilinear', 'catmull-rom']);
+await window.aethervsrOrtProbe({ modelUrl: '/models/conv16-720p.onnx', channels: 16, height: 720, width: 1280, iterations: 20, providers: ['webgpu'], outputLocation: 'cpu' });
+```
+
+Keep the window frontmost for `aethervsrIngestBench`: it is driven by
+`requestVideoFrameCallback`, which a backgrounded tab suspends. The harness
+throws rather than returning an empty result if that happens.
+
+Regenerate the ONNX benchmark fixture with
+`node tools/make-onnx-conv.mjs 16 public/models/conv16-720p.onnx 720 1280`.
 
 ## Test clips
 
