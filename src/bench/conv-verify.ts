@@ -3,6 +3,7 @@ import { buildConvShader, type Activation } from './conv.wgsl.js';
 import { buildTiledConvShader } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packActivations, packWeights } from './conv-packed.wgsl.js';
 import { buildBlockedConvShader } from './conv-blocked.wgsl.js';
+import { buildMatrixConvShader, toMatrixWeights } from './conv-matrix.wgsl.js';
 import { toTapMajorWeights } from './conv-packed.wgsl.js';
 
 /** Groups the weights, then reorders them if the case asks for tap-major. */
@@ -31,6 +32,8 @@ export interface ConvVerifyCase {
   readonly blockY?: number;
   /** Weight memory order, for the `blocked` variant. Defaults to `oc-major`. */
   readonly weightLayout?: 'oc-major' | 'tap-major';
+  /** Output rows per workgroup, for the `matrix` variant. Defaults to 1. */
+  readonly rowsPerGroup?: number;
   /** Workgroup shape. Defaults to 8x8. Tiling bugs are shape-dependent, so
    *  the tiled kernel must be verified at the shapes it is benchmarked at. */
   readonly tileX?: number;
@@ -107,12 +110,17 @@ export async function verifyConv(
   // — a repacking bug then shows up as a numeric mismatch rather than hiding
   // inside a reference that was repacked the same wrong way.
   // Both vec4 variants consume the same grouped layout.
-  const packed = (c.variant ?? 'naive') === 'packed' || (c.variant ?? 'naive') === 'blocked';
+  const variant = c.variant ?? 'naive';
+  const packed = variant === 'packed' || variant === 'blocked';
   const input = makeBuffer(
     packed ? packActivations(inputData, c.width, c.height, c.inChannels) : inputData,
   );
   const weights = makeBuffer(
-    packed ? packedWeightsFor(c, weightData) : weightData,
+    variant === 'matrix'
+      ? toMatrixWeights(weightData, c.inChannels, c.outChannels)
+      : packed
+        ? packedWeightsFor(c, weightData)
+        : weightData,
   );
   const biases = makeBuffer(biasData);
   const output = device.createBuffer({
@@ -147,6 +155,14 @@ export async function verifyConv(
           outBlock: c.outBlock ?? 1,
           blockY: c.blockY ?? 1,
           weightLayout: c.weightLayout ?? 'oc-major',
+        });
+      case 'matrix':
+        return buildMatrixConvShader({
+          inChannels: c.inChannels,
+          outChannels: c.outChannels,
+          rowsPerGroup: c.rowsPerGroup ?? 1,
+          activation: c.activation,
+          useF16,
         });
       case 'naive':
         return buildConvShader(shaderConfig);
@@ -186,11 +202,19 @@ export async function verifyConv(
   const pass = encoder.beginComputePass();
   pass.setPipeline(pipeline);
   pass.setBindGroup(0, bindGroup);
-  pass.dispatchWorkgroups(
-    Math.ceil(c.width / (tileX * c.blockX)),
-    Math.ceil(c.height / (tileY * ((c.variant ?? 'naive') === 'blocked' ? (c.blockY ?? 1) : 1))),
-    (c.variant ?? 'naive') === 'blocked' ? c.outChannels / (c.outBlock ?? 1) : c.outChannels,
-  );
+  if (variant === 'matrix') {
+    pass.dispatchWorkgroups(
+      Math.ceil(c.width / 8),
+      Math.ceil(c.height / (c.rowsPerGroup ?? 1)),
+      c.outChannels / 8,
+    );
+  } else {
+    pass.dispatchWorkgroups(
+      Math.ceil(c.width / (tileX * c.blockX)),
+      Math.ceil(c.height / (tileY * (variant === 'blocked' ? (c.blockY ?? 1) : 1))),
+      variant === 'blocked' ? c.outChannels / (c.outBlock ?? 1) : c.outChannels,
+    );
+  }
   pass.end();
   encoder.copyBufferToBuffer(output, 0, readback, 0, roundUp4(outElements * bytesPerElement));
   device.queue.submit([encoder.finish()]);

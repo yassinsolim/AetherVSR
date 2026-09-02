@@ -2,6 +2,7 @@ import { buildConvShader, convMacCount, type Activation, type ConvShaderConfig }
 import { buildTiledConvShader, tiledSharedBytes } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packedSharedBytes } from './conv-packed.wgsl.js';
 import { buildBlockedConvShader, blockedSharedBytes } from './conv-blocked.wgsl.js';
+import { buildMatrixConvShader, matrixWeightIndex } from './conv-matrix.wgsl.js';
 
 /**
  * Which convolution kernel implementation to measure.
@@ -12,7 +13,7 @@ import { buildBlockedConvShader, blockedSharedBytes } from './conv-blocked.wgsl.
  * Kept as separate implementations rather than a flag inside one shader so a
  * regression in the newer kernel can never silently become the baseline.
  */
-export type ConvVariant = 'naive' | 'tiled' | 'packed' | 'blocked';
+export type ConvVariant = 'naive' | 'tiled' | 'packed' | 'blocked' | 'matrix';
 
 export interface ConvCase {
   readonly label: string;
@@ -34,6 +35,8 @@ export interface ConvCase {
   readonly blockY?: number;
   /** Weight memory order, for the `blocked` variant. Defaults to `oc-major`. */
   readonly weightLayout?: 'oc-major' | 'tap-major';
+  /** Output rows per workgroup, for the `matrix` variant. Defaults to 1. */
+  readonly rowsPerGroup?: number;
 }
 
 export interface ConvResult extends ConvCase {
@@ -162,6 +165,15 @@ export class ConvBench {
         code = buildBlockedConvShader(blockedConfig);
         break;
       }
+      case 'matrix':
+        code = buildMatrixConvShader({
+          inChannels: c.inChannels,
+          outChannels: c.outChannels,
+          rowsPerGroup: c.rowsPerGroup ?? 1,
+          activation: c.activation,
+          useF16: c.useF16,
+        });
+        break;
       case 'naive':
         code = buildConvShader(shaderConfig);
         break;
@@ -195,7 +207,9 @@ export class ConvBench {
     // about the harness and the verifier agreeing on what is being computed,
     // not about the numbers. Repacking happens once, outside the timed loop.
     const remap =
-      variant === 'packed' || variant === 'blocked'
+      variant === 'matrix'
+        ? { input: undefined, weights: matrixWeightIndex(c.inChannels, c.outChannels) }
+        : variant === 'packed' || variant === 'blocked'
         ? {
             input: packedActivationIndex(c.width * c.height),
             weights:
@@ -235,11 +249,21 @@ export class ConvBench {
       usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
     });
 
-    const groupsX = Math.ceil(c.width / (c.tileX * c.blockX));
-    const groupsY = Math.ceil(c.height / (c.tileY * (variant === 'blocked' ? (c.blockY ?? 1) : 1)));
+    const matrixRows = c.rowsPerGroup ?? 1;
+    const groupsX =
+      variant === 'matrix' ? Math.ceil(c.width / 8) : Math.ceil(c.width / (c.tileX * c.blockX));
+    const groupsY =
+      variant === 'matrix'
+        ? Math.ceil(c.height / matrixRows)
+        : Math.ceil(c.height / (c.tileY * (variant === 'blocked' ? (c.blockY ?? 1) : 1)));
     // The blocked variant folds `outBlock` output channels into one
     // invocation, so it needs proportionally fewer z-slices.
-    const groupsZ = variant === 'blocked' ? c.outChannels / (c.outBlock ?? 1) : c.outChannels;
+    const groupsZ =
+      variant === 'blocked'
+        ? c.outChannels / (c.outBlock ?? 1)
+        : variant === 'matrix'
+          ? c.outChannels / 8
+          : c.outChannels;
 
     const dispatch = (withTimestamps: boolean): GPUCommandBuffer => {
       const encoder = device.createCommandEncoder();

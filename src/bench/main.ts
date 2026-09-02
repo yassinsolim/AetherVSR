@@ -189,7 +189,15 @@ function main(gpu: GpuContext): void {
 }
 
 acquireGpu({
-  optionalFeatures: ['shader-f16'],
+  // 'chromium-experimental-subgroup-matrix' is requested opportunistically and
+  // is absent unless Chrome was launched with --enable-unsafe-webgpu, so it can
+  // never be part of a shipped path. acquireGpu drops features the adapter does
+  // not advertise, so asking is free.
+  optionalFeatures: [
+    'shader-f16',
+    'subgroups',
+    'chromium-experimental-subgroup-matrix' as GPUFeatureName,
+  ],
   // Raised only if the adapter allows it. Any result that depends on more
   // than the 16384-byte guaranteed floor is labelled as such in BENCHMARKS.md.
   optionalLimits: { maxComputeWorkgroupStorageSize: 32768 },
