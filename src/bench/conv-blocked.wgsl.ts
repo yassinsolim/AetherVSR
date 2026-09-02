@@ -3,12 +3,14 @@ import type { PackedConvShaderConfig } from './conv-packed.wgsl.js';
 export interface BlockedConvShaderConfig extends PackedConvShaderConfig {
   /** Output channels each invocation accumulates simultaneously. */
   readonly outBlock: number;
+  /** Output rows each invocation computes. 1 restores pure horizontal blocking. */
+  readonly blockY: number;
 }
 
 /** Bytes of workgroup storage the blocked shader declares. */
 export function blockedSharedBytes(config: BlockedConvShaderConfig): number {
   const tileW = config.tileX * config.blockX + 2;
-  const tileH = config.tileY + 2;
+  const tileH = config.tileY * config.blockY + 2;
   return tileW * tileH * (config.useF16 ? 8 : 16);
 }
 
@@ -32,7 +34,8 @@ export function blockedSharedBytes(config: BlockedConvShaderConfig): number {
  * not assert which setting wins.
  */
 export function buildBlockedConvShader(config: BlockedConvShaderConfig): string {
-  const { inChannels, outChannels, tileX, tileY, blockX, outBlock, activation, useF16, residual } = config;
+  const { inChannels, outChannels, tileX, tileY, blockX, blockY, outBlock, activation, useF16, residual } =
+    config;
 
   if (inChannels % 4 !== 0) {
     throw new Error(`blocked variant requires inChannels % 4 === 0, got ${inChannels}`);
@@ -43,13 +46,16 @@ export function buildBlockedConvShader(config: BlockedConvShaderConfig): string 
   if (residual && inChannels !== outChannels) {
     throw new Error(`residual requires inChannels === outChannels, got ${inChannels} -> ${outChannels}`);
   }
+  if (!Number.isInteger(blockY) || blockY < 1) {
+    throw new Error(`blocked variant requires blockY >= 1, got ${blockY}`);
+  }
 
   const T = useF16 ? 'f16' : 'f32';
   const V = `vec4<${T}>`;
   const enable = useF16 ? 'enable f16;\n' : '';
   const groups = inChannels / 4;
   const tileW = tileX * blockX + 2;
-  const tileH = tileY + 2;
+  const tileH = tileY * blockY + 2;
   const threads = tileX * tileY;
 
   const activate = (expr: string): string => {
@@ -63,42 +69,53 @@ export function buildBlockedConvShader(config: BlockedConvShaderConfig): string 
     }
   };
 
-  // acc[j][i]: output channel ocBase+j, pixel outX+i. Flattened so the compiler
-  // sees plain scalars rather than a dynamically indexed array, which on Metal
-  // is the difference between registers and thread-local memory.
-  const accDecl = Array.from({ length: outBlock }, (_, j) =>
-    Array.from({ length: blockX }, (_, i) => `  var acc${j}_${i}: ${T} = biases[ocBase + ${j}u];`).join('\n'),
+  // acc[j][m][i]: output channel ocBase+j, row outY+m, pixel outX+i. Flattened
+  // so the compiler sees plain scalars rather than a dynamically indexed array,
+  // which on Metal is the difference between registers and thread-local memory.
+  const each = <R,>(n: number, f: (k: number) => R): R[] => Array.from({ length: n }, (_, k) => f(k));
+
+  const accDecl = each(outBlock, (j) =>
+    each(blockY, (m) =>
+      each(blockX, (i) => `  var acc${j}_${m}_${i}: ${T} = biases[ocBase + ${j}u];`).join('\n'),
+    ).join('\n'),
   ).join('\n');
 
-  const weightLoads = Array.from(
-    { length: outBlock },
-    (_, j) => `        let w${j} = weights[(ocBase + ${j}u) * IN_GROUPS * 9u + wTap];`,
+  const weightLoads = each(
+    outBlock,
+    (j) => `        let w${j} = weights[(ocBase + ${j}u) * IN_GROUPS * 9u + wTap];`,
   ).join('\n');
 
-  const macBody = Array.from({ length: blockX }, (_, i) => {
-    const v = `        let v${i} = tile[rowBase + localX + ${i}u + u32(kx)];`;
-    const dots = Array.from(
-      { length: outBlock },
-      (_, j) => `        acc${j}_${i} += dot(w${j}, v${i});`,
-    ).join('\n');
-    return `${v}\n${dots}`;
-  }).join('\n');
-
-  const stores = Array.from({ length: outBlock }, (_, j) =>
-    Array.from({ length: blockX }, (_, i) => {
-      const oc = `(ocBase + ${j}u)`;
-      const value = residual
-        ? `${activate(`acc${j}_${i}`)} + input[(${oc} / 4u) * W * H + outY * W + outX + ${i}u][${oc} % 4u]`
-        : activate(`acc${j}_${i}`);
-      return `  if (outX + ${i}u < W) { output[${oc} * W * H + outY * W + outX + ${i}u] = ${value}; }`;
+  // One staged value feeds outBlock dot products. With blockY > 1 the vertical
+  // taps of adjacent output rows overlap, so a tile row staged for row m is
+  // re-read for rows m-1 and m-2 from the same shared storage while the
+  // accumulators for all of them stay live in registers.
+  const macBody = each(blockY, (m) =>
+    each(blockX, (i) => {
+      const v = `        let v${m}_${i} = tile[rowBase + ${m}u * TILE_W + localX + ${i}u + u32(kx)];`;
+      const dots = each(outBlock, (j) => `        acc${j}_${m}_${i} += dot(w${j}, v${m}_${i});`).join('\n');
+      return `${v}\n${dots}`;
     }).join('\n'),
   ).join('\n');
+
+  const stores = each(blockY, (m) => {
+    const body = each(outBlock, (j) =>
+      each(blockX, (i) => {
+        const oc = `(ocBase + ${j}u)`;
+        const value = residual
+          ? `${activate(`acc${j}_${m}_${i}`)} + input[(${oc} / 4u) * W * H + row * W + outX + ${i}u][${oc} % 4u]`
+          : activate(`acc${j}_${m}_${i}`);
+        return `        if (outX + ${i}u < W) { output[${oc} * W * H + row * W + outX + ${i}u] = ${value}; }`;
+      }).join('\n'),
+    ).join('\n');
+    return `  {\n    let row = outY + ${m}u;\n    if (row < H) {\n${body}\n    }\n  }`;
+  }).join('\n');
 
   return /* wgsl */ `${enable}
 const IN_GROUPS: u32 = ${groups}u;
 const OUT_C: u32 = ${outChannels}u;
 const OUT_BLOCK: u32 = ${outBlock}u;
 const BLOCK_X: u32 = ${blockX}u;
+const BLOCK_Y: u32 = ${blockY}u;
 const TILE_W: u32 = ${tileW}u;
 const TILE_N: u32 = ${tileW * tileH}u;
 const THREADS: u32 = ${threads}u;
@@ -126,12 +143,12 @@ fn main(
   let H = dims.height;
 
   let originX = i32(wid.x * ${tileX}u * BLOCK_X);
-  let originY = i32(wid.y * ${tileY}u);
+  let originY = i32(wid.y * ${tileY}u * BLOCK_Y);
   let ocBase = wid.z * OUT_BLOCK;
 
   let localX = lid.x * BLOCK_X;
   let outX = u32(originX) + localX;
-  let outY = u32(originY) + lid.y;
+  let outY = u32(originY) + lid.y * BLOCK_Y;
 
 ${accDecl}
 
@@ -151,7 +168,7 @@ ${accDecl}
     workgroupBarrier();
 
     for (var ky: i32 = 0; ky < 3; ky = ky + 1) {
-      let rowBase = (lid.y + u32(ky)) * TILE_W;
+      let rowBase = (lid.y * BLOCK_Y + u32(ky)) * TILE_W;
       for (var kx: i32 = 0; kx < 3; kx = kx + 1) {
         let wTap = cg * 9u + u32(ky * 3 + kx);
 ${weightLoads}
@@ -160,7 +177,7 @@ ${macBody}
     }
   }
 
-  if (outY >= H || ocBase >= OUT_C) {
+  if (ocBase >= OUT_C) {
     return;
   }
 ${stores}

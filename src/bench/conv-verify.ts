@@ -18,6 +18,8 @@ export interface ConvVerifyCase {
   readonly variant?: ConvVariant;
   /** Output channels per invocation, for the `blocked` variant. Defaults to 1. */
   readonly outBlock?: number;
+  /** Output rows per invocation, for the `blocked` variant. Defaults to 1. */
+  readonly blockY?: number;
   /** Workgroup shape. Defaults to 8x8. Tiling bugs are shape-dependent, so
    *  the tiled kernel must be verified at the shapes it is benchmarked at. */
   readonly tileX?: number;
@@ -129,7 +131,7 @@ export async function verifyConv(
       case 'packed':
         return buildPackedConvShader(shaderConfig);
       case 'blocked':
-        return buildBlockedConvShader({ ...shaderConfig, outBlock: c.outBlock ?? 1 });
+        return buildBlockedConvShader({ ...shaderConfig, outBlock: c.outBlock ?? 1, blockY: c.blockY ?? 1 });
       case 'naive':
         return buildConvShader(shaderConfig);
     }
@@ -170,7 +172,7 @@ export async function verifyConv(
   pass.setBindGroup(0, bindGroup);
   pass.dispatchWorkgroups(
     Math.ceil(c.width / (tileX * c.blockX)),
-    Math.ceil(c.height / tileY),
+    Math.ceil(c.height / (tileY * ((c.variant ?? 'naive') === 'blocked' ? (c.blockY ?? 1) : 1))),
     (c.variant ?? 'naive') === 'blocked' ? c.outChannels / (c.outBlock ?? 1) : c.outChannels,
   );
   pass.end();

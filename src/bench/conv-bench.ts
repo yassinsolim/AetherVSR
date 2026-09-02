@@ -30,6 +30,8 @@ export interface ConvCase {
   readonly variant?: ConvVariant;
   /** Output channels per invocation, for the `blocked` variant. Defaults to 1. */
   readonly outBlock?: number;
+  /** Output rows per invocation, for the `blocked` variant. Defaults to 1. */
+  readonly blockY?: number;
 }
 
 export interface ConvResult extends ConvCase {
@@ -134,7 +136,7 @@ export class ConvBench {
         code = buildPackedConvShader(shaderConfig);
         break;
       case 'blocked': {
-        const blockedConfig = { ...shaderConfig, outBlock: c.outBlock ?? 1 };
+        const blockedConfig = { ...shaderConfig, outBlock: c.outBlock ?? 1, blockY: c.blockY ?? 1 };
         guardShared(blockedSharedBytes(blockedConfig));
         code = buildBlockedConvShader(blockedConfig);
         break;
@@ -210,7 +212,7 @@ export class ConvBench {
     });
 
     const groupsX = Math.ceil(c.width / (c.tileX * c.blockX));
-    const groupsY = Math.ceil(c.height / c.tileY);
+    const groupsY = Math.ceil(c.height / (c.tileY * (variant === 'blocked' ? (c.blockY ?? 1) : 1)));
     // The blocked variant folds `outBlock` output channels into one
     // invocation, so it needs proportionally fewer z-slices.
     const groupsZ = variant === 'blocked' ? c.outChannels / (c.outBlock ?? 1) : c.outChannels;
