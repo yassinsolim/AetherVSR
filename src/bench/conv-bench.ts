@@ -1,4 +1,16 @@
 import { buildConvShader, convMacCount, type Activation, type ConvShaderConfig } from './conv.wgsl.js';
+import { buildTiledConvShader, tiledSharedBytes } from './conv-tiled.wgsl.js';
+
+/**
+ * Which convolution kernel implementation to measure.
+ *
+ * - `naive`  - Milestone 2 kernel: every tap read from global storage.
+ * - `tiled`  - stages each input channel through workgroup memory with a halo.
+ *
+ * Kept as separate implementations rather than a flag inside one shader so a
+ * regression in the newer kernel can never silently become the baseline.
+ */
+export type ConvVariant = 'naive' | 'tiled';
 
 export interface ConvCase {
   readonly label: string;
@@ -12,6 +24,8 @@ export interface ConvCase {
   readonly activation: Activation;
   readonly useF16: boolean;
   readonly residual: boolean;
+  /** Defaults to `naive`, which is the Milestone 2 reference implementation. */
+  readonly variant?: ConvVariant;
 }
 
 export interface ConvResult extends ConvCase {
@@ -93,10 +107,24 @@ export class ConvBench {
       residual: c.residual,
     };
 
-    const module = device.createShaderModule({
-      label: `conv:${c.label}`,
-      code: buildConvShader(shaderConfig),
-    });
+    const variant: ConvVariant = c.variant ?? 'naive';
+    const earlyDiagnostics: string[] = [];
+    let code: string;
+    if (variant === 'tiled') {
+      const shared = tiledSharedBytes(shaderConfig);
+      const limit = device.limits.maxComputeWorkgroupStorageSize;
+      // Surfaced as a diagnostic rather than an exception: the sweeps below
+      // deliberately walk into configurations that do not fit, and an invalid
+      // row carrying the reason is more useful than a missing row.
+      if (shared > limit) {
+        earlyDiagnostics.push(`workgroup storage ${shared}B exceeds device limit ${limit}B`);
+      }
+      code = buildTiledConvShader(shaderConfig);
+    } else {
+      code = buildConvShader(shaderConfig);
+    }
+
+    const module = device.createShaderModule({ label: `conv:${c.label}`, code });
 
     const storage = (elements: number, extraUsage = 0): GPUBuffer =>
       device.createBuffer({
@@ -170,9 +198,12 @@ export class ConvBench {
     };
 
     const compilation = await module.getCompilationInfo();
-    const diagnostics = compilation.messages
-      .filter((m) => m.type !== 'info')
-      .map((m) => `${m.type} ${m.lineNum}:${m.linePos} ${m.message}`);
+    const diagnostics = [
+      ...earlyDiagnostics,
+      ...compilation.messages
+        .filter((m) => m.type !== 'info')
+        .map((m) => `${m.type} ${m.lineNum}:${m.linePos} ${m.message}`),
+    ];
 
     // Warm up *inside* the error scopes: a bind group or dispatch rejected at
     // submit time is exactly the failure mode that otherwise shows up only as

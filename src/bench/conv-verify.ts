@@ -1,5 +1,6 @@
-import { floatToHalf } from './conv-bench.js';
+import { floatToHalf, type ConvVariant } from './conv-bench.js';
 import { buildConvShader, type Activation } from './conv.wgsl.js';
+import { buildTiledConvShader } from './conv-tiled.wgsl.js';
 
 export interface ConvVerifyCase {
   /** Verify the f16 variant of the shader instead of the f32 one. */
@@ -11,6 +12,12 @@ export interface ConvVerifyCase {
   readonly blockX: number;
   readonly activation: Activation;
   readonly residual: boolean;
+  /** Which kernel implementation to check. Defaults to `naive`. */
+  readonly variant?: ConvVariant;
+  /** Workgroup shape. Defaults to 8x8. Tiling bugs are shape-dependent, so
+   *  the tiled kernel must be verified at the shapes it is benchmarked at. */
+  readonly tileX?: number;
+  readonly tileY?: number;
 }
 
 export interface ConvVerifyResult extends ConvVerifyCase {
@@ -88,18 +95,25 @@ export async function verifyConv(
   const dims = device.createBuffer({ size: 8, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   device.queue.writeBuffer(dims, 0, new Uint32Array([c.width, c.height]));
 
+  const tileX = c.tileX ?? 8;
+  const tileY = c.tileY ?? 8;
+  const shaderConfig = {
+    inChannels: c.inChannels,
+    outChannels: c.outChannels,
+    tileX,
+    tileY,
+    blockX: c.blockX,
+    activation: c.activation,
+    useF16,
+    residual: c.residual,
+  };
+
   device.pushErrorScope('validation');
   const module = device.createShaderModule({
-    code: buildConvShader({
-      inChannels: c.inChannels,
-      outChannels: c.outChannels,
-      tileX: 8,
-      tileY: 8,
-      blockX: c.blockX,
-      activation: c.activation,
-      useF16,
-      residual: c.residual,
-    }),
+    code:
+      (c.variant ?? 'naive') === 'tiled'
+        ? buildTiledConvShader(shaderConfig)
+        : buildConvShader(shaderConfig),
   });
   const pipeline = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } });
 
@@ -133,8 +147,8 @@ export async function verifyConv(
   pass.setPipeline(pipeline);
   pass.setBindGroup(0, bindGroup);
   pass.dispatchWorkgroups(
-    Math.ceil(c.width / (8 * c.blockX)),
-    Math.ceil(c.height / 8),
+    Math.ceil(c.width / (tileX * c.blockX)),
+    Math.ceil(c.height / tileY),
     c.outChannels,
   );
   pass.end();
