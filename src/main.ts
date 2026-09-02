@@ -35,7 +35,17 @@ const upscalerSelect = requireElement('upscaler', HTMLSelectElement);
 const resetButton = requireElement('reset', HTMLButtonElement);
 const exportButton = requireElement('export', HTMLButtonElement);
 
+/**
+ * True once the GPU device has failed unrecoverably.
+ *
+ * A lost device never comes back, so after one the harness must neither resume
+ * submitting nor let a cheerful "playing ..." overwrite the explanation.
+ */
+let gpuFatal = false;
+
 function setStatus(text: string, level: 'info' | 'warn' | 'error' = 'info'): void {
+  // A fatal GPU failure is the last thing worth saying; nothing may bury it.
+  if (gpuFatal && level !== 'error') return;
   status.textContent = text;
   status.dataset['level'] = level;
 }
@@ -107,8 +117,9 @@ function main(gpu: GpuContext): void {
   // A discarded submission or a lost device never throws in the frame loop, so
   // without this the canvas can freeze while the frame counter keeps climbing.
   watchDeviceFailures(gpu.device, (message) => {
+    gpuFatal = true;
     pipeline.stop();
-    setStatus(message, 'error');
+    setStatus(`${message} — reload the page to recover`, 'error');
   });
 
   // What is actually playing, for the benchmark record. Not the startup clip:
@@ -143,33 +154,54 @@ function main(gpu: GpuContext): void {
     console.info(json);
   });
 
+  // Guards against a slow load being overtaken by a newer selection.
+  let loadGeneration = 0;
+
   fileInput.addEventListener('change', () => {
     const file = fileInput.files?.[0];
     if (!file) return;
-    // Release the previous blob only after the element has stopped using it.
+    const generation = ++loadGeneration;
     const previous = activeObjectUrl;
-    const url = URL.createObjectURL(file);
-    activeObjectUrl = url;
-    activeClip = `file picker: ${file.name}`;
+    const candidate = URL.createObjectURL(file);
     pipeline.resetMeasurements();
-    void loadClip(url).then(
+
+    void loadClip(candidate).then(
       () => {
+        if (generation !== loadGeneration) {
+          URL.revokeObjectURL(candidate);
+          return;
+        }
+        // Commit only now: until playback actually started, the old clip is
+        // still the one a benchmark export should name.
+        activeObjectUrl = candidate;
+        activeClip = `file picker: ${file.name}`;
         if (previous) URL.revokeObjectURL(previous);
         setStatus(`playing ${file.name}`);
       },
       (err: unknown) => {
-        if (previous) URL.revokeObjectURL(previous);
-        setStatus(`could not play ${file.name}: ${describeError(err)}`, 'error');
+        // The candidate never became the active clip; drop it rather than
+        // leaking the Blob for the lifetime of the page.
+        URL.revokeObjectURL(candidate);
+        if (generation === loadGeneration) {
+          setStatus(`could not play ${file.name}: ${describeError(err)}`, 'error');
+        }
       },
     );
   });
 
-  window.addEventListener('pagehide', () => {
+  window.addEventListener('pagehide', (event) => {
+    // `persisted` means the document is going into the back/forward cache and
+    // may be restored with this same video element; revoking now would leave
+    // it pointing at a dead URL.
+    if (event.persisted) return;
     if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
   });
 
   video.addEventListener('playing', () => {
-    if (!pipeline.running) pipeline.start();
+    // Never resume onto a lost device: submissions would be silently discarded
+    // while the frame counter kept climbing.
+    if (gpuFatal || pipeline.running) return;
+    pipeline.start();
   });
   // The global `error` listener would fire for a clip we already reported on,
   // so only the load path reports media errors; this catches later failures.

@@ -161,11 +161,11 @@ and the interface already anticipates it:
 - **Intermediate buffers** — allocated in `configure()`, where sizes are known.
 - **An ingest pass** — measurements in `BENCHMARKS.md` show the same nine-tap
   kernel costs markedly more in its render pass when reading through
-  `texture_external` than through an ordinary `texture_2d<f32>` (4.03 ms vs
-  1.46 ms). The *explanation* — that a multi-planar external texture performs
+  `texture_external` than through an ordinary `texture_2d<f32>` (3.90 ms vs
+  1.55 ms). The *explanation* — that a multi-planar external texture performs
   plane sampling and colour conversion on every tap — is inferred from the
   specification and was not measured, and the copy path's own upload cost is
-  not in that 1.46 ms. What is established is the render-pass difference, and
+  not in that 1.55 ms. What is established is the render-pass difference, and
   it is enough to expect that a model reading the source many times will want
   one pass converting the external texture into a regular texture first. The
   `FrameTexture` union already lets a stage see which kind it has.

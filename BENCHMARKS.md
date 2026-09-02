@@ -107,29 +107,29 @@ trailing 240 samples.
 
 | Upscaler | Import | Presented fps | Rendered fps | Frames | Skipped | Decoder drops | GPU upscale (ms) | 60 Hz budget | Scope |
 |---|---|---:|---:|---:|---:|---:|---|---:|---|
-| Catmull-Rom 9-tap | external | 59.8 | 59.4 | 1780 | 12 | 12 / 1792 | 4.03 avg · p50 4.07 · p95 4.86 · max 5.82 | 24.2% | render pass; no other AetherVSR GPU work |
-| Bilinear | external | 59.8 | 59.5 | 1784 | 8 | 8 / 1792 | 0.86 avg · p50 0.81 · p95 2.22 · max 3.99 | 5.1% | render pass; no other AetherVSR GPU work |
-| Catmull-Rom 9-tap | copy fallback | 59.8 | 59.5 | 1783 | 9 | 9 / 1792 | 1.46 avg · p50 1.44 · p95 2.98 · max 4.53 | 8.7% | **render pass only, excludes import copy** |
+| Catmull-Rom 9-tap | external | 59.7 | 59.3 | 1779 | 13 | 13 / 1792 | 3.90 avg · p50 3.93 · p95 4.52 · max 5.49 | 23.4% | render pass; no other AetherVSR GPU work |
+| Bilinear | external | 59.7 | 59.5 | 1786 | 6 | 6 / 1792 | 0.86 avg · p50 0.81 · p95 1.96 · max 4.29 | 5.1% | render pass; no other AetherVSR GPU work |
+| Catmull-Rom 9-tap | copy fallback | 59.7 | 59.3 | 1779 | 13 | 12 / 1792 | 1.55 avg · p50 1.47 · p95 3.11 · max 4.48 | 9.3% | **render pass only, excludes import copy** |
 
 `cpu per frame` was 0.11–0.13 ms average in all three runs.
 
 The pipeline tracks a 60 fps source essentially frame for frame at the measured
-59.2 Hz paint rate: 1780–1784 frames upscaled in 30 s, with 8–12 presented
-frames skipped over the whole run (0.5–0.7%).
+59.2 Hz paint rate: 1779–1786 frames upscaled in 30 s, with 6–13 presented
+frames skipped over the whole run (0.3–0.7%).
 
 ### 720p60 → 1440p, VP9
 
 | Upscaler | Import | Presented fps | Rendered fps | Frames | Skipped | Decoder drops | GPU upscale (ms) | 60 Hz budget |
 |---|---|---:|---:|---:|---:|---:|---|---:|
-| Catmull-Rom 9-tap | external | 59.9 | 59.3 | 1779 | 18 | 14 / 1797 | 2.40 avg · p50 2.28 · p95 3.36 · max 4.52 | 14.4% |
+| Catmull-Rom 9-tap | external | 59.9 | 59.5 | 1785 | 12 | 10 / 1797 | 2.43 avg · p50 2.32 · p95 3.59 · max 4.46 | 14.6% |
 
 ### 720p30 → 1440p
 
 | Clip | Upscaler | Import | Presented fps | Rendered fps | Frames | Skipped | Decoder drops | GPU upscale (ms) | 60 Hz budget |
 |---|---|---|---:|---:|---:|---:|---:|---|---:|
-| VP9 | Catmull-Rom 9-tap | external | 30.0 | 30.0 | 898 | 0 | 0 / 899 | 2.41 avg · p50 2.60 · p95 3.36 · max 5.82 | 14.5% |
-| VP9 | Bilinear | external | 30.0 | 30.0 | 898 | 0 | 0 / 898 | 0.50 avg · p50 0.36 · p95 1.68 · max 3.83 | 3.0% |
-| H.264 | Catmull-Rom 9-tap | external | 30.1 | 30.1 | 902 | 0 | 0 / 903 | 4.70 avg · p50 4.64 · p95 6.26 · max 7.59 | 28.2% |
+| VP9 | Catmull-Rom 9-tap | external | 29.9 | 29.9 | 899 | 0 | 0 / 898 | 2.55 avg · p50 2.37 · p95 4.09 · max 5.82 | 15.3% |
+| VP9 | Bilinear | external | 29.9 | 29.9 | 898 | 0 | 0 / 899 | 0.48 avg · p50 0.36 · p95 1.38 · max 4.04 | 2.9% |
+| H.264 | Catmull-Rom 9-tap | external | 30.1 | 30.1 | 903 | 0 | 0 / 903 | 4.64 avg · p50 4.42 · p95 6.50 · max 8.25 | 27.8% |
 
 At 30 fps the pipeline is frame-perfect: zero skipped frames and zero decoder
 drops over 30 s in all three runs.
@@ -137,14 +137,14 @@ drops over 30 s in all three runs.
 ## Observations
 
 **The upscaler is not the bottleneck.** Bilinear costs 0.86 ms and Catmull-Rom
-4.03 ms on the same 60 fps clip — a 4.7x difference in stage cost — yet both
-upscale within four frames of each other over 30 s (1784 vs 1780). A stage
-consuming 5–24% of the frame interval leaves the frame rate unchanged, which is
+3.90 ms on the same 60 fps clip — a 4.5x difference in stage cost — yet both
+upscale within seven frames of each other over 30 s (1786 vs 1779). A stage
+consuming 5–23% of the frame interval leaves the frame rate unchanged, which is
 the evidence needed before attributing any frame drop to the upscaler.
 
 **Sampling an external texture repeatedly is expensive.** On the same H.264
-clip and the same kernel, nine taps cost 4.03 ms through `texture_external` but
-1.46 ms through an ordinary `texture_2d<f32>`. The likely mechanism is that
+clip and the same kernel, nine taps cost 3.90 ms through `texture_external` but
+1.55 ms through an ordinary `texture_2d<f32>`. The likely mechanism is that
 each `textureSampleBaseClampToEdge` on a multi-planar external texture samples
 the planes and performs colour conversion, so a 9-tap kernel pays for that nine
 times — but that mechanism is inferred from the specification, not measured
@@ -154,8 +154,8 @@ and it is the reason `ARCHITECTURE.md` expects a multi-tap neural stage to want
 a one-time ingest pass. Quantifying the copy itself is Milestone 2 work.
 
 **Codec changes upscale cost, and the cause is not established.** The identical
-Catmull-Rom kernel at identical resolution measured 4.70 ms on H.264 and
-2.41 ms on VP9 at 30 fps. The plausible explanation is a different decoded
+Catmull-Rom kernel at identical resolution measured 4.64 ms on H.264 and
+2.55 ms on VP9 at 30 fps. The plausible explanation is a different decoded
 pixel format reaching the external texture, but this was not verified and is
 recorded as an open question, not a conclusion.
 

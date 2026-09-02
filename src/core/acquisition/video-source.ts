@@ -45,12 +45,26 @@ export class VideoFrameSource {
   private handle: number | null = null;
   private handler: FrameTickHandler | null = null;
   private lastPresentedFrames = -1;
+  private generation = 0;
 
   constructor(
     private readonly video: HTMLVideoElement,
     clock: FrameClockKind = FRAME_CLOCK_SUPPORTED,
   ) {
     this.clock = clock;
+    // The media load algorithm zeroes the playback-quality counters. Consumers
+    // that report deltas need a deterministic signal that this happened;
+    // inferring it from a counter going backwards misses the case where the
+    // new resource overtakes the old total between two polls.
+    video.addEventListener('loadstart', () => this.generation++);
+  }
+
+  /**
+   * Increments whenever the element starts loading a new resource, and
+   * therefore whenever {@link quality} restarts from zero.
+   */
+  get loadGeneration(): number {
+    return this.generation;
   }
 
   get running(): boolean {

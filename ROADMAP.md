@@ -33,8 +33,8 @@ The smallest browser harness that proves the whole non-neural path.
 | 8 | Diagnostic overlay | ✅ 16 rows: source/output resolution, mean and instantaneous presented and rendered FPS, skipped frames, decoder drops, decode latency, measured GPU upscale time, CPU per-frame time, callback lag, 60 Hz budget, upscaler, import path, frame clock, adapter and device info |
 | 9 | Clean seam for a future neural upscaler | ⚠️ designed and lifecycle-exercised, sufficiency unproven. `Upscaler` isolates the stage and runtime swapping exercises configure/destroy, but both variants are the same `BaselineScaler` class; no second implementation exists yet. See DECISIONS ADR-0011 |
 
-Measured: 720p60 H.264 → 1440p at **59.8 presented / 59.4–59.5 rendered fps**
-over 30 s, upscale stage consuming 5.1–24.2% of a 60 Hz frame interval
+Measured: 720p60 H.264 → 1440p at **59.7 presented / 59.3–59.5 rendered fps**
+over 30 s, upscale stage consuming 5.1–23.4% of a 60 Hz frame interval
 depending on filter. Full results and caveats in `BENCHMARKS.md`.
 
 ---
@@ -48,7 +48,7 @@ Not "ship a neural upscaler" — answer the question that decides how.
 
 1. **Ingest pass.** Convert the external texture to a regular RGBA texture once
    per frame in a timestamped pass. Milestone 1 measured nine
-   `texture_external` taps at 4.03 ms versus nine `texture_2d` taps at 1.46 ms
+   `texture_external` taps at 3.90 ms versus nine `texture_2d` taps at 1.55 ms
    on the same clip and kernel; quantify the conversion so multi-tap consumers
    have a real number to plan against. This also closes the measurement gap in
    the copy-fallback path, whose upload cost is currently unmeasured.

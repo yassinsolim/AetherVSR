@@ -178,6 +178,49 @@ describe('GpuTimer slot pool', () => {
     expect(timer.last).toBeNaN();
   });
 
+  it('drops readbacks that were started before a new measurement epoch', async () => {
+    // Without epochs, a stats reset or an upscaler swap would be contaminated
+    // by up to poolSize samples measured under the previous configuration.
+    const { device, settle } = makeDevice({ deltaNs: 9_000_000n });
+    const samples: number[] = [];
+    const timer = new GpuTimer(device, (ms) => samples.push(ms), 2);
+
+    timer.begin();
+    timer.end(encoder);
+    timer.afterSubmit();
+
+    timer.newEpoch();
+    await settle();
+
+    expect(samples).toEqual([]);
+    expect(timer.last).toBeNaN();
+  });
+
+  it('keeps measuring after a new epoch', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 3_000_000n });
+    const samples: number[] = [];
+    const timer = new GpuTimer(device, (ms) => samples.push(ms), 2);
+
+    timer.newEpoch();
+    timer.begin();
+    timer.end(encoder);
+    timer.afterSubmit();
+    await settle();
+
+    expect(samples).toEqual([3]);
+  });
+
+  it('releases epoch-discarded slots back to the pool', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 1_000_000n });
+    const timer = new GpuTimer(device, () => {}, 1);
+    timer.begin();
+    timer.end(encoder);
+    timer.afterSubmit();
+    timer.newEpoch();
+    await settle();
+    expect(timer.begin()).not.toBeNull();
+  });
+
   it('end() and afterSubmit() are safe with no claimed slot', () => {
     const { device } = makeDevice();
     const timer = new GpuTimer(device, () => {}, 1);

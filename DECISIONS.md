@@ -119,8 +119,8 @@ with its exact scope (import call, command recording, submit). When
 `timestamp-query` is unavailable the overlay prints "not measured".
 
 **Why.** Wall-clock timing on the main thread does not observe GPU work: it
-measured 0.11–0.14 ms in every run here while the GPU pass ranged from 0.50 to
-4.70 ms depending on filter and codec. Publishing the CPU figure as "processing
+measured 0.11–0.14 ms in every run here while the GPU pass ranged from 0.48 to
+4.64 ms depending on filter and codec. Publishing the CPU figure as "processing
 time" would be misleading. Reading back 16 bytes of timestamps (two 64-bit
 values) is not a pixel readback and never blocks the frame.
 

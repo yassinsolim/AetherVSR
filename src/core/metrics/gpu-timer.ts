@@ -8,6 +8,8 @@ interface Slot {
   readonly beginIndex: number;
   readonly endIndex: number;
   busy: boolean;
+  /** Measurement epoch this slot was claimed in; see {@link GpuTimer.newEpoch}. */
+  epoch: number;
 }
 
 /**
@@ -33,6 +35,7 @@ export class GpuTimer {
   private readonly slots: Slot[] = [];
   private active: Slot | null = null;
   private lastMs = Number.NaN;
+  private epoch = 0;
 
   constructor(
     device: GPUDevice,
@@ -59,8 +62,22 @@ export class GpuTimer {
         beginIndex: i * 2,
         endIndex: i * 2 + 1,
         busy: false,
+        epoch: 0,
       });
     }
+  }
+
+  /**
+   * Starts a new measurement epoch, discarding readbacks still in flight.
+   *
+   * Up to `poolSize` frames can be awaiting `mapAsync()` at any moment. Without
+   * this, samples measured before a stats reset — or worse, under the previous
+   * upscaler after a runtime swap — would land in the freshly cleared window
+   * and be attributed to the new configuration.
+   */
+  newEpoch(): void {
+    this.epoch++;
+    this.lastMs = Number.NaN;
   }
 
   /** Most recent measured pass duration in milliseconds, or NaN. */
@@ -76,6 +93,7 @@ export class GpuTimer {
     const slot = this.slots.find((s) => !s.busy);
     if (!slot) return null;
     slot.busy = true;
+    slot.epoch = this.epoch;
     this.active = slot;
     return { querySet: this.querySet, beginIndex: slot.beginIndex, endIndex: slot.endIndex };
   }
@@ -113,6 +131,9 @@ export class GpuTimer {
         const [begin, end] = new BigInt64Array(slot.staging.getMappedRange());
         slot.staging.unmap();
         if (begin === undefined || end === undefined) return;
+        // Dropped rather than published: this sample belongs to a measurement
+        // window the caller has already discarded.
+        if (slot.epoch !== this.epoch) return;
         const deltaNs = Number(end - begin);
         if (deltaNs >= 0) {
           this.lastMs = deltaNs / NS_PER_MS;

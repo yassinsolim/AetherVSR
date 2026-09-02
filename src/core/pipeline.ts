@@ -155,6 +155,17 @@ export class VideoPipeline {
    */
   private framesPresented = 0;
   /**
+   * The opening tick's contribution, excluded from mean-rate numerators.
+   *
+   * `windowStart` is the opening tick's own timestamp, so that tick bounds the
+   * window rather than occurring within it. Counting it would report N events
+   * over N-1 intervals — 70 fps for seven ideal 60 Hz ticks spanning 100 ms.
+   * This matches `RateMeter`, which subtracts its oldest sample for the same
+   * reason.
+   */
+  private openingRendered = 0;
+  private openingPresented = 0;
+  /**
    * Start of the measurement window, or null while waiting for the first frame.
    *
    * Deliberately *not* set at reset time: a reset is issued before a clip is
@@ -165,6 +176,8 @@ export class VideoPipeline {
   private windowStart: number | null = null;
   /** Cumulative decoder counters at the last reset; stats report deltas. */
   private qualityBaseline: PlaybackQuality = ZERO_QUALITY;
+  /** Media-load generation the baseline was taken in. */
+  private qualityGeneration = 0;
   private lastError: unknown = null;
 
   constructor(
@@ -233,12 +246,17 @@ export class VideoPipeline {
     this.framesRendered = 0;
     this.framesSkipped = 0;
     this.framesPresented = 0;
+    this.openingRendered = 0;
+    this.openingPresented = 0;
     // `getVideoPlaybackQuality()` counters are cumulative from media load and
     // cannot be zeroed, so snapshot them and report deltas. Without this the
     // reported drop count silently includes warm-up and any earlier playback,
     // which makes it incomparable with the frame counts beside it.
     this.qualityBaseline = this.source.quality();
+    this.qualityGeneration = this.source.loadGeneration;
     this.windowStart = null;
+    // Discard readbacks still in flight from the window being replaced.
+    this.timer?.newEpoch();
   }
 
   /**
@@ -250,20 +268,24 @@ export class VideoPipeline {
    * gone backwards is treated as a reload and the baseline is dropped.
    */
   private qualitySinceReset(): PlaybackQuality {
-    const now = this.source.quality();
-    if (now.totalVideoFrames < this.qualityBaseline.totalVideoFrames) {
+    // Keyed on the element's load generation rather than on noticing the
+    // counter go backwards: a new clip can overtake the old total between two
+    // 4 Hz polls, and the rewind would then never be observed at all.
+    if (this.source.loadGeneration !== this.qualityGeneration) {
       this.qualityBaseline = ZERO_QUALITY;
+      this.qualityGeneration = this.source.loadGeneration;
     }
-    return qualityDelta(now, this.qualityBaseline);
+    return qualityDelta(this.source.quality(), this.qualityBaseline);
   }
 
   /**
    * Frames per second averaged over the whole interval since reset. Returns 0
    * for a window too short to be meaningful rather than a huge spike.
    */
-  private meanRate(frames: number, nowMs: number): number {
+  private meanRate(frames: number, opening: number, nowMs: number): number {
     const elapsed = this.elapsed(nowMs);
-    return elapsed < 100 ? 0 : (frames / elapsed) * 1000;
+    if (!(elapsed > 0)) return 0;
+    return ((frames - opening) / elapsed) * 1000;
   }
 
   /** Milliseconds of measurement so far; 0 before the first frame arrives. */
@@ -284,7 +306,11 @@ export class VideoPipeline {
     try {
       this.ensureConfigured(tick.size);
 
-      this.windowStart ??= tick.now;
+      if (this.windowStart === null) {
+        this.windowStart = tick.now;
+        this.openingRendered = 1;
+        this.openingPresented = tick.presentedDelta;
+      }
       this.sourceRate.mark(tick.now, tick.presentedDelta);
       this.renderRate.mark(tick.now);
       this.framesPresented += tick.presentedDelta;
@@ -352,8 +378,8 @@ export class VideoPipeline {
       scaleFactor: this.upscaler.scaleFactor,
       sourceFps: this.sourceRate.rate(nowMs),
       renderFps: this.renderRate.rate(nowMs),
-      meanSourceFps: this.meanRate(this.framesPresented, nowMs),
-      meanRenderFps: this.meanRate(this.framesRendered, nowMs),
+      meanSourceFps: this.meanRate(this.framesPresented, this.openingPresented, nowMs),
+      meanRenderFps: this.meanRate(this.framesRendered, this.openingRendered, nowMs),
       elapsedMs: this.elapsed(nowMs),
       framesRendered: this.framesRendered,
       framesSkipped: this.framesSkipped,

@@ -17,7 +17,17 @@ class FakeVideo {
 
   private pending = new Map<number, VideoFrameCallback>();
   private nextHandle = 1;
+  private listeners: Record<string, (() => void)[]> = {};
   cancelled: number[] = [];
+
+  addEventListener(type: string, handler: () => void): void {
+    (this.listeners[type] ??= []).push(handler);
+  }
+
+  /** Simulates the media load algorithm starting on a new resource. */
+  emitLoadStart(): void {
+    for (const handler of this.listeners['loadstart'] ?? []) handler();
+  }
 
   requestVideoFrameCallback(cb: VideoFrameCallback): number {
     const handle = this.nextHandle++;
@@ -171,6 +181,22 @@ describe('VideoFrameSource (rVFC)', () => {
     expect(fake.cancelled).toHaveLength(1);
     fake.present(33, 2);
     expect(count).toBe(1);
+  });
+
+  it('advances the load generation when the element loads a new resource', () => {
+    // Consumers report decoder counters as deltas; the element zeroes those
+    // counters on load, so they need a deterministic signal that it happened
+    // rather than having to notice a counter going backwards, which a new clip
+    // can hide by overtaking the old total between two polls.
+    const fake = new FakeVideo();
+    const source = new VideoFrameSource(asVideo(fake), 'rvfc');
+    const before = source.loadGeneration;
+
+    fake.emitLoadStart();
+    expect(source.loadGeneration).toBe(before + 1);
+
+    fake.emitLoadStart();
+    expect(source.loadGeneration).toBe(before + 2);
   });
 
   it('does not double-schedule when the handler restarts the source', () => {

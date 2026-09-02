@@ -30,12 +30,12 @@ H.264 → 1440p:
 
 | Upscaler | Presented fps | Rendered fps | GPU upscale | 60 Hz budget |
 |---|---:|---:|---|---:|
-| Catmull-Rom 9-tap | 59.8 | 59.4 | 4.03 ms avg (p95 4.86) | 24.2% |
-| Bilinear | 59.8 | 59.5 | 0.86 ms avg (p95 2.22) | 5.1% |
+| Catmull-Rom 9-tap | 59.7 | 59.3 | 3.90 ms avg (p95 4.52) | 23.4% |
+| Bilinear | 59.7 | 59.5 | 0.86 ms avg (p95 1.96) | 5.1% |
 
 30 s run; FPS are means over the run, GPU timings aggregate the trailing 240
-samples (~4 s at 60 fps). 1780 and 1784 frames upscaled respectively, with
-12 and 8 presented frames skipped. Full environment, method, caveats and the things that were **not**
+samples (~4 s at 60 fps). 1779 and 1786 frames upscaled respectively, with
+13 and 6 presented frames skipped. Full environment, method, caveats and the things that were **not**
 measured are in `BENCHMARKS.md`. Numbers here are never estimates — see
 `AGENTS.md` §2.
 
