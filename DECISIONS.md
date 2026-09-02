@@ -386,7 +386,7 @@ open pending one specific experiment: the same model with `Tensor.fromGpuBuffer`
 input *and* `gpu-buffer` output on AetherVSR's own device.
 
 **Why.** ORT's native WebGPU EP ran the identical convolution at 34.7 ms with
-CPU output and 19.7 ms with GPU-resident output and an explicit queue
+CPU output and 20.1 ms with GPU-resident output and an explicit queue
 completion fence. Both still include a 56.3 MB CPU→GPU input upload per
 iteration, so neither is a clean comparison against our GPU-pass-only 8.585 ms.
 

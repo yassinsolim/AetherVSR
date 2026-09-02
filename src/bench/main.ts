@@ -63,8 +63,11 @@ function assertMeasured(stats: IngestBenchStats, timestampQuery: boolean): void 
   if (timestampQuery && stats.scaleMs.samples === 0) {
     throw new Error('bench collected 0 GPU timestamp samples despite timestamp-query being available');
   }
-  if (stats.mode === 'ingest' && timestampQuery && (stats.ingestMs?.samples ?? 0) === 0) {
-    throw new Error('ingest mode collected 0 ingest-pass GPU samples');
+  // Only require ingest samples when an ingest pass actually ran. Without
+  // external textures the frame arrives already sampleable and is passed
+  // through, which is a supported configuration, not a failed measurement.
+  if (stats.ingestPasses > 0 && timestampQuery && (stats.ingestMs?.samples ?? 0) === 0) {
+    throw new Error('ingest passes were recorded but produced 0 GPU samples');
   }
 }
 

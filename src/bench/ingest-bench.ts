@@ -35,8 +35,14 @@ export interface IngestBenchStats {
   readonly framesRendered: number;
   readonly elapsedMs: number;
   readonly meanRenderFps: number;
-  /** GPU time of the ingest pass. Null in `direct` mode, which has no ingest. */
+  /**
+   * GPU time of the ingest pass. Null when no ingest pass ran: in `direct`
+   * mode, and in `ingest` mode on a browser without external textures, where
+   * the frame arrives already sampleable and is passed through.
+   */
   readonly ingestMs: StageStats | null;
+  /** Frames on which an ingest pass was actually recorded. */
+  readonly ingestPasses: number;
   /** GPU time of the upscale pass. */
   readonly scaleMs: StageStats;
   /** Sum of the two measured passes, or NaN when nothing was measured. */
@@ -83,6 +89,7 @@ export class IngestBench {
   private config: IngestBenchConfig;
   private configuredSource: Size = { width: 0, height: 0 };
   private framesRendered = 0;
+  private ingestPasses = 0;
   private windowStart: number | null = null;
   private openingRendered = 0;
   private lastError: unknown = null;
@@ -130,6 +137,7 @@ export class IngestBench {
     this.scaleWindow.reset();
     this.cpuWindow.reset();
     this.framesRendered = 0;
+    this.ingestPasses = 0;
     this.windowStart = null;
     this.openingRendered = 0;
     this.ingestTimer?.newEpoch();
@@ -164,6 +172,7 @@ export class IngestBench {
         ingestTiming = this.ingestTimer?.begin() ?? null;
         const view = this.ingest.encode(encoder, frame, ingestTiming);
         scalerInput = { kind: 'sampled', view };
+        this.ingestPasses++;
       }
 
       const scaleTiming = this.scaleTimer?.begin() ?? null;
@@ -222,7 +231,7 @@ export class IngestBench {
 
   stats(nowMs: number): IngestBenchStats {
     const elapsed = this.windowStart === null ? 0 : Math.max(0, nowMs - this.windowStart);
-    const ingest = this.config.mode === 'ingest' ? summarise(this.ingestWindow) : null;
+    const ingest = this.ingestPasses > 0 ? summarise(this.ingestWindow) : null;
     const scale = summarise(this.scaleWindow);
     return {
       mode: this.config.mode,
@@ -235,6 +244,7 @@ export class IngestBench {
       meanRenderFps:
         elapsed > 0 ? (Math.max(0, this.framesRendered - this.openingRendered) / elapsed) * 1000 : 0,
       ingestMs: ingest,
+      ingestPasses: this.ingestPasses,
       scaleMs: scale,
       // NaN, not 0, when the upscale pass was never timed: AGENTS.md §2
       // requires "not measured" to stay distinguishable from a real zero.

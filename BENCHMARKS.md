@@ -340,7 +340,7 @@ Awaiting `queue.onSubmittedWorkDone()` on ORT's own device inside the timed
 interval adds 6.5 ms of previously invisible GPU work. Reporting 13.2 ms as an
 inference cost would have understated it by a third.
 
-Remaining scope caveats on the 19.7 ms figure:
+Remaining scope caveats on the 20.1 ms figure:
 
 1. **It still includes a CPU→GPU upload of the 56.3 MB input tensor on every
    iteration.** Making the input GPU-resident needs `Tensor.fromGpuBuffer`,
@@ -352,7 +352,7 @@ Remaining scope caveats on the 19.7 ms figure:
    GPU pass time from `timestamp-query` with the input already resident.
 
 **What remains unmeasured.** ORT's *compute-only* cost on this device is not
-known. The 19.7 ms figure and our 8.585 ms WGSL figure have different scopes —
+known. The 20.1 ms figure and our 8.585 ms WGSL figure have different scopes —
 one is queue-completion including a 56.3 MB upload, the other is GPU pass time
 with the input already resident — and subtracting an estimated upload to force
 them onto a common scale would be inventing a number. **No performance ranking
