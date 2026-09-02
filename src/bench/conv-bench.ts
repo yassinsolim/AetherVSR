@@ -84,6 +84,20 @@ export class ConvBench {
     private readonly device: GPUDevice,
     private readonly warmup = 8,
     private readonly iterations = 40,
+    /**
+     * Minimum wall-clock milliseconds of warm-up dispatches before timing.
+     *
+     * A fixed iteration count is not a warm-up, it is a warm-up for one
+     * workload size. Eight dispatches of a 0.03 ms kernel is 0.25 ms of work,
+     * which is nowhere near enough to bring the GPU off its idle clock: the
+     * first measured pass of a session came out at 0.135 ms against a steady
+     * 0.031 ms, a 4x error, entirely on the small configurations. Large
+     * workloads never showed it because they ramp the clock themselves.
+     *
+     * Warming for a duration instead makes every configuration in a sweep
+     * comparable without the caller having to know to throw a pass away.
+     */
+    private readonly warmupMs = 60,
   ) {}
 
   async run(cases: readonly ConvCase[]): Promise<ConvResult[]> {
@@ -257,6 +271,14 @@ export class ConvBench {
     // submit time is exactly the failure mode that otherwise shows up only as
     // a zero-length timestamp span.
     for (let i = 0; i < this.warmup; i++) device.queue.submit([dispatch(false)]);
+    // Then keep going until the clock has had time to ramp. Batched between
+    // fences so a cheap kernel does not spend the whole budget round-tripping
+    // to the CPU, and bounded so a pathologically slow case cannot hang.
+    const warmupStart = performance.now();
+    for (let batch = 0; batch < 256 && performance.now() - warmupStart < this.warmupMs; batch++) {
+      for (let i = 0; i < 16; i++) device.queue.submit([dispatch(false)]);
+      await device.queue.onSubmittedWorkDone();
+    }
     await device.queue.onSubmittedWorkDone();
 
     const oom = await device.popErrorScope();
