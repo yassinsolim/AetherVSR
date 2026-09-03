@@ -6,6 +6,17 @@ import { buildBlitShader } from '../neural/blit.wgsl.js';
 import { weightBytes, type PackedModel } from '../neural/model.js';
 import type { EncodeContext, Upscaler, UpscalerConfig } from '../types.js';
 
+/**
+ * Device features the neural backend wants.
+ *
+ * `shader-f16` is optional in the sense that the graph still produces correct
+ * output without it, and load-bearing in the sense that without it the stage
+ * costs about twice as much and twice the memory. It must be requested at
+ * device creation, which happens before any upscaler exists, so it is exported
+ * for the harness to include.
+ */
+export const NEURAL_OPTIONAL_FEATURES: readonly GPUFeatureName[] = ['shader-f16'];
+
 /** Tunables that shape the dispatches, not the network. */
 export interface NeuralUpscalerOptions {
   /** Half precision throughout. Falls back to f32 when unsupported. */
@@ -20,13 +31,9 @@ const DEFAULT_OPTIONS: NeuralUpscalerOptions = {
 
 /** Per-stage GPU times from the most recent resolved timestamp read. */
 export interface NeuralStageTiming {
-  readonly ingestMs: number;
   readonly stemMs: number;
   readonly bodyMs: number;
   readonly headMs: number;
-  readonly blitMs: number;
-  /** One span across the whole stage, not the sum of the parts. */
-  readonly totalMs: number;
 }
 
 /** Persistent GPU allocation, reported rather than estimated. */
@@ -105,6 +112,12 @@ export class NeuralUpscaler implements Upscaler {
   private sampler: GPUSampler | null = null;
   private lastIngestView: GPUTextureView | null = null;
 
+  private querySet: GPUQuerySet | null = null;
+  private resolveBuf: GPUBuffer | null = null;
+  private stagingBuf: GPUBuffer | null = null;
+  private reading = false;
+  private pendingRead = false;
+  private timing: NeuralStageTiming | null = null;
   private stemDispatch: [number, number] = [0, 0];
   private bodyDispatch: [number, number, number] = [0, 0, 0];
   private headDispatch: [number, number] = [0, 0];
@@ -122,6 +135,18 @@ export class NeuralUpscaler implements Upscaler {
   /** Persistent GPU bytes, available after {@link configure}. */
   get memoryReport(): NeuralMemoryReport | null {
     return this.memory;
+  }
+
+  /**
+   * Per-stage GPU times from the most recently resolved frame.
+   *
+   * Read asynchronously and never awaited inside `encode`, so a frame is never
+   * blocked on its own measurement. `totalMs` is one span from the first
+   * timestamp to the last, not the sum of the stages: separate passes can
+   * overlap and the gaps between them are real time.
+   */
+  get stageTiming(): NeuralStageTiming | null {
+    return this.timing;
   }
 
   configure(config: UpscalerConfig): void {
@@ -316,6 +341,20 @@ export class NeuralUpscaler implements Upscaler {
       ],
     });
 
+    if (device.features.has('timestamp-query')) {
+      // Six slots for the three compute stages. Ingest and present are
+      // bracketed by the pipeline's own timer, which spans the whole stage.
+      this.querySet = device.createQuerySet({ type: 'timestamp', count: 6 });
+      this.resolveBuf = device.createBuffer({
+        size: 48,
+        usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
+      });
+      this.stagingBuf = device.createBuffer({
+        size: 48,
+        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+      });
+    }
+
     this.stemDispatch = [Math.ceil(source.width / 16), Math.ceil(source.height / 16)];
     this.bodyDispatch = [Math.ceil(source.width / 16), Math.ceil(source.height / 8), 1];
     this.headDispatch = [Math.ceil((source.width * 2) / 16), Math.ceil((source.height * 2) / 16)];
@@ -345,8 +384,21 @@ export class NeuralUpscaler implements Upscaler {
       throw new Error('NeuralUpscaler.encode called before configure()');
     }
 
+    this.startTimestampRead();
+
     // 1. External texture -> ordinary texture, once per frame.
-    const view = this.ingest.encode(ctx.encoder, ctx.frame, null);
+    const view = this.ingest.encode(
+      ctx.encoder,
+      ctx.frame,
+      // The pipeline's own timer brackets the *whole* stage: it opens here and
+      // closes on the present pass below. That is what its overlay row claims
+      // to show, and giving it a single inner pass instead would be a quietly
+      // wrong number. Slot pairing is legal across passes because the indices
+      // are explicit.
+      ctx.timing && ctx.frame.kind === 'external' && ctx.timing.beginIndex !== undefined
+        ? { querySet: ctx.timing.querySet, beginIndex: ctx.timing.beginIndex }
+        : null,
+    );
     if (view !== this.lastIngestView) {
       this.stemGroup = device.createBindGroup({
         label: 'aethervsr:nn:stem',
@@ -376,9 +428,6 @@ export class NeuralUpscaler implements Upscaler {
       this.lastIngestView = view;
     }
 
-    // 2. Stem, body and head in one compute pass. WebGPU orders dispatches
-    //    within a pass and makes each one's writes visible to the next, so the
-    //    ping-pong chain needs no explicit barrier.
     const stemGroup = this.stemGroup;
     const headGroup = this.headGroup;
     const blitGroup = this.blitGroup;
@@ -387,21 +436,45 @@ export class NeuralUpscaler implements Upscaler {
       throw new Error('NeuralUpscaler.encode called before configure()');
     }
 
-    const pass = ctx.encoder.beginComputePass({ label: 'aethervsr:nn:graph' });
-    pass.setPipeline(this.stemPipeline);
-    pass.setBindGroup(0, stemGroup);
-    pass.dispatchWorkgroups(this.stemDispatch[0], this.stemDispatch[1], 1);
+    // 2. Each stage in its own pass, so each can be timed. WebGPU orders
+    //    passes within a command buffer and makes each one's writes visible to
+    //    the next, so the ping-pong chain still needs no explicit barrier.
+    const qs = this.querySet;
+    // Spread rather than an optional property: `exactOptionalPropertyTypes`
+    // makes `timestampWrites: undefined` a different thing from absent.
+    const stamp = (begin: number, end: number): GPUComputePassDescriptor =>
+      qs
+        ? { timestampWrites: { querySet: qs, beginningOfPassWriteIndex: begin, endOfPassWriteIndex: end } }
+        : {};
 
-    pass.setPipeline(this.bodyPipeline);
+    const stemPass = ctx.encoder.beginComputePass({
+      label: 'aethervsr:nn:stem',
+      ...stamp(0, 1),
+    });
+    stemPass.setPipeline(this.stemPipeline);
+    stemPass.setBindGroup(0, stemGroup);
+    stemPass.dispatchWorkgroups(this.stemDispatch[0], this.stemDispatch[1], 1);
+    stemPass.end();
+
+    const bodyPass = ctx.encoder.beginComputePass({
+      label: 'aethervsr:nn:body',
+      ...stamp(2, 3),
+    });
+    bodyPass.setPipeline(this.bodyPipeline);
     for (const group of this.bodyGroups) {
-      pass.setBindGroup(0, group);
-      pass.dispatchWorkgroups(this.bodyDispatch[0], this.bodyDispatch[1], this.bodyDispatch[2]);
+      bodyPass.setBindGroup(0, group);
+      bodyPass.dispatchWorkgroups(this.bodyDispatch[0], this.bodyDispatch[1], this.bodyDispatch[2]);
     }
+    bodyPass.end();
 
-    pass.setPipeline(this.headPipeline);
-    pass.setBindGroup(0, headGroup);
-    pass.dispatchWorkgroups(this.headDispatch[0], this.headDispatch[1], 1);
-    pass.end();
+    const headPass = ctx.encoder.beginComputePass({
+      label: 'aethervsr:nn:head',
+      ...stamp(4, 5),
+    });
+    headPass.setPipeline(this.headPipeline);
+    headPass.setBindGroup(0, headGroup);
+    headPass.dispatchWorkgroups(this.headDispatch[0], this.headDispatch[1], 1);
+    headPass.end();
 
     // 3. Present. The reconstruction writes an owned storage texture, which
     //    this copies to the swap-chain view. The blit's bind group references
@@ -411,11 +484,10 @@ export class NeuralUpscaler implements Upscaler {
       colorAttachments: [
         { view: ctx.target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' },
       ],
-      ...(ctx.timing
+      ...(ctx.timing && ctx.timing.endIndex !== undefined
         ? {
             timestampWrites: {
               querySet: ctx.timing.querySet,
-              beginningOfPassWriteIndex: ctx.timing.beginIndex,
               endOfPassWriteIndex: ctx.timing.endIndex,
             },
           }
@@ -425,6 +497,59 @@ export class NeuralUpscaler implements Upscaler {
     blit.setBindGroup(0, blitGroup);
     blit.draw(3);
     blit.end();
+
+    this.resolveTimestamps(ctx.encoder);
+  }
+
+  /**
+   * Copies the timestamp set out and reads it on a later turn.
+   *
+   * Never awaited inside the frame: a resolved read arrives whenever it
+   * arrives, and a frame that skips a measurement is better than a frame that
+   * waits for one.
+   */
+  private resolveTimestamps(encoder: GPUCommandEncoder): void {
+    const qs = this.querySet;
+    const resolve = this.resolveBuf;
+    const staging = this.stagingBuf;
+    if (!qs || !resolve || !staging) return;
+    // Only encode a new copy when the previous one has been consumed. A buffer
+    // that is still mapped, or still awaiting a map, must not appear in a
+    // submission.
+    if (this.pendingRead || this.reading) return;
+    encoder.resolveQuerySet(qs, 0, 6, resolve, 0);
+    encoder.copyBufferToBuffer(resolve, 0, staging, 0, 48);
+    this.pendingRead = true;
+  }
+
+  /**
+   * Starts reading the previous frame's timestamps.
+   *
+   * Called at the *top* of `encode`, which is the only safe moment: the frame
+   * that wrote them has been submitted, and nothing has yet been encoded into
+   * the staging buffer for this frame. Mapping it during the frame that writes
+   * it makes the submission fail with "used in submit while mapped", which is
+   * exactly what happened the first time this was wired up.
+   */
+  private startTimestampRead(): void {
+    const staging = this.stagingBuf;
+    if (!staging || !this.pendingRead || this.reading) return;
+    this.reading = true;
+    void staging.mapAsync(GPUMapMode.READ).then(() => {
+      const t = new BigInt64Array(staging.getMappedRange().slice(0));
+      staging.unmap();
+      const ms = (a: number, b: number): number => {
+        const begin = t[a];
+        const end = t[b];
+        return begin !== undefined && end !== undefined ? Number(end - begin) / 1_000_000 : Number.NaN;
+      };
+      const stem = ms(0, 1);
+      if (stem > 0) {
+        this.timing = { stemMs: stem, bodyMs: ms(2, 3), headMs: ms(4, 5) };
+      }
+      this.reading = false;
+      this.pendingRead = false;
+    });
   }
 
   destroy(): void {
@@ -456,6 +581,15 @@ export class NeuralUpscaler implements Upscaler {
       b?.destroy();
     }
     this.outputTexture?.destroy();
+    this.querySet?.destroy();
+    this.resolveBuf?.destroy();
+    this.stagingBuf?.destroy();
+    this.querySet = null;
+    this.resolveBuf = null;
+    this.stagingBuf = null;
+    this.timing = null;
+    this.pendingRead = false;
+    this.reading = false;
     this.ping = null;
     this.pong = null;
     this.stemWeights = null;

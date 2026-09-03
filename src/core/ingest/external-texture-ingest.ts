@@ -170,10 +170,15 @@ export class ExternalTextureIngest {
       ],
       ...(timing
         ? {
+            // Either end may be omitted, so a caller can open a span here and
+            // close it in a later pass - which is how a multi-pass stage
+            // reports one whole-stage figure rather than a slice of itself.
             timestampWrites: {
               querySet: timing.querySet,
-              beginningOfPassWriteIndex: timing.beginIndex,
-              endOfPassWriteIndex: timing.endIndex,
+              ...(timing.beginIndex !== undefined
+                ? { beginningOfPassWriteIndex: timing.beginIndex }
+                : {}),
+              ...(timing.endIndex !== undefined ? { endOfPassWriteIndex: timing.endIndex } : {}),
             },
           }
         : {}),

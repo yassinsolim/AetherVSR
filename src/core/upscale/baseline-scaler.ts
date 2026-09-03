@@ -133,8 +133,12 @@ export class BaselineScaler implements Upscaler {
         ? {
             timestampWrites: {
               querySet: ctx.timing.querySet,
-              beginningOfPassWriteIndex: ctx.timing.beginIndex,
-              endOfPassWriteIndex: ctx.timing.endIndex,
+              ...(ctx.timing.beginIndex !== undefined
+                ? { beginningOfPassWriteIndex: ctx.timing.beginIndex }
+                : {}),
+              ...(ctx.timing.endIndex !== undefined
+                ? { endOfPassWriteIndex: ctx.timing.endIndex }
+                : {}),
             },
           }
         : {}),

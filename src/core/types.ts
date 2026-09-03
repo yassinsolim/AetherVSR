@@ -58,8 +58,10 @@ export interface UpscalerConfig {
  */
 export interface PassTiming {
   readonly querySet: GPUQuerySet;
-  readonly beginIndex: number;
-  readonly endIndex: number;
+  /** Omit to leave the opening timestamp to an earlier pass. */
+  readonly beginIndex?: number;
+  /** Omit to leave the closing timestamp to a later pass. */
+  readonly endIndex?: number;
 }
 
 /** Per-frame inputs to {@link Upscaler.encode}. */

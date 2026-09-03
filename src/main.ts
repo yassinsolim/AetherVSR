@@ -6,7 +6,7 @@ import {
 } from './core/gpu/device.js';
 import { VideoPipeline, type PipelineStats } from './core/pipeline.js';
 import { BaselineScaler, UPSCALER_OPTIONAL_FEATURES } from './core/upscale/baseline-scaler.js';
-import { NeuralUpscaler } from './core/upscale/neural-upscaler.js';
+import { NeuralUpscaler, NEURAL_OPTIONAL_FEATURES } from './core/upscale/neural-upscaler.js';
 import { loadModel, type PackedModel } from './core/neural/model.js';
 import type { BaselineFilter } from './core/upscale/baseline.wgsl.js';
 import { DiagnosticOverlay, OVERLAY_INTERVAL_MS } from './ui/overlay.js';
@@ -141,6 +141,7 @@ function main(gpu: GpuContext): void {
   // menu never lists a stage that would fail on selection.
   const NEURAL_VALUE = 'neural';
   let neuralModel: PackedModel | null = null;
+  let neuralInstance: NeuralUpscaler | null = null;
   const modelParam = params.get('model');
   const modelUrl = modelParam !== null && modelParam.startsWith('/') ? modelParam : DEFAULT_MODEL;
   void loadModel(modelUrl)
@@ -152,7 +153,8 @@ function main(gpu: GpuContext): void {
       upscalerSelect.append(option);
       if (params.get('upscaler') === NEURAL_VALUE) {
         upscalerSelect.value = NEURAL_VALUE;
-        pipeline.setUpscaler(new NeuralUpscaler(model));
+        neuralInstance = new NeuralUpscaler(model);
+        pipeline.setUpscaler(neuralInstance);
       }
     })
     .catch((err: unknown) => {
@@ -164,14 +166,24 @@ function main(gpu: GpuContext): void {
   upscalerSelect.addEventListener('change', () => {
     if (upscalerSelect.value === NEURAL_VALUE) {
       if (!neuralModel) return;
-      pipeline.setUpscaler(new NeuralUpscaler(neuralModel));
+      neuralInstance = new NeuralUpscaler(neuralModel);
+      pipeline.setUpscaler(neuralInstance);
       return;
     }
     const chosen = FILTERS.find((f) => f.id === upscalerSelect.value);
     if (!chosen) return;
     // Exercises the Milestone 1 seam: the processing stage is reconfigured
     // while acquisition and presentation keep running untouched.
+    neuralInstance = null;
     pipeline.setUpscaler(new BaselineScaler(chosen.id));
+  });
+
+  // The neural stage measures itself per pass; expose it so a whole-stage
+  // breakdown never has to be inferred from the pipeline's single span.
+  (window as unknown as Record<string, unknown>)['aethervsrNeuralStage'] = () => ({
+    id: neuralInstance?.id ?? null,
+    timing: neuralInstance?.stageTiming ?? null,
+    memory: neuralInstance?.memoryReport ?? null,
   });
 
   resetButton.addEventListener('click', () => pipeline.resetMeasurements());
@@ -353,7 +365,13 @@ function benchmarkRecord(gpu: GpuContext, stats: PipelineStats, clip: string): u
 // `.catch` after `.then`, not a rejection callback: a synchronous throw inside
 // `main()` (a missing element, or a canvas that cannot give a WebGPU context)
 // must reach the status line too, not become an unhandled rejection.
-acquireGpu({ optionalFeatures: UPSCALER_OPTIONAL_FEATURES })
+// A device only exposes features requested at creation, and creation happens
+// before an upscaler is chosen. Without shader-f16 here the neural backend
+// silently runs in fp32 - twice the activation memory and, measured, roughly
+// twice the convolution time - while still reporting itself as working.
+acquireGpu({
+  optionalFeatures: [...UPSCALER_OPTIONAL_FEATURES, ...NEURAL_OPTIONAL_FEATURES],
+})
   .then(main)
   .catch((err: unknown) => {
     setStatus(describeError(err), 'error');
