@@ -1,6 +1,11 @@
 export interface StemShaderConfig {
   /** Output feature width. Must be a multiple of 4 for the packed layout. */
   readonly outChannels: number;
+  /**
+   * Kernel size. Odd, so the padding that keeps the layer same-resolution is
+   * `(kernel - 1) / 2`. Defaults to 3; the selected architecture uses 5.
+   */
+  readonly kernel?: number;
   /** Output pixels per invocation along x and y. */
   readonly blockX: number;
   readonly blockY: number;
@@ -37,13 +42,20 @@ export interface StemShaderConfig {
  *
  * ## Padding
  *
- * Zero padding, matching `Conv2d(..., padding=1)` in PyTorch and the interior
- * convolutions. Clamp-to-edge would avoid a dark border ring but would then
- * disagree with the reference implementation the weights were trained under,
- * which is the more expensive kind of wrong.
+ * Zero padding sized to keep the layer same-resolution: `(kernel - 1) / 2`,
+ * so 1 for a 3x3 and 2 for a 5x5. This matches `Conv2d(..., padding=pad)` in
+ * PyTorch. Clamp-to-edge would avoid a dark border ring but would then disagree
+ * with the reference the weights were trained under, which is the more
+ * expensive kind of wrong.
  */
 export function buildStemShader(config: StemShaderConfig): string {
   const { outChannels, blockX, blockY, tileX, tileY, useF16, activation } = config;
+  const kernel = config.kernel ?? 3;
+  if (kernel % 2 !== 1 || kernel < 1) {
+    throw new Error(`stem kernel must be odd and positive, got ${kernel}`);
+  }
+  const pad = (kernel - 1) / 2;
+  const taps = kernel * kernel;
 
   if (outChannels % 4 !== 0) {
     throw new Error(`stem requires outChannels % 4 === 0, got ${outChannels}`);
@@ -81,7 +93,7 @@ export function buildStemShader(config: StemShaderConfig): string {
 
   const weightLoads = each(
     outChannels,
-    (oc) => `      let w${oc} = weights[${oc}u * 9u + tap];`,
+    (oc) => `      let w${oc} = weights[${oc}u * TAPS + tap];`,
   ).join('\n');
 
   const stores = each(blockY, (m) => {
@@ -99,6 +111,9 @@ export function buildStemShader(config: StemShaderConfig): string {
 
   return /* wgsl */ `${enable}
 const OUT_C: u32 = ${outChannels}u;
+const KERNEL: i32 = ${kernel};
+const PAD: i32 = ${pad};
+const TAPS: u32 = ${taps}u;
 const BLOCK_X: u32 = ${blockX}u;
 const BLOCK_Y: u32 = ${blockY}u;
 
@@ -124,8 +139,8 @@ var<private> H: u32;
 
 // Zero outside the image, matching Conv2d(padding=1).
 fn fetch(px: i32, py: i32, kx: i32, ky: i32) -> ${V} {
-  let sx = px + kx - 1;
-  let sy = py + ky - 1;
+  let sx = px + kx - PAD;
+  let sy = py + ky - PAD;
   if (sx < 0 || sy < 0 || sx >= i32(W) || sy >= i32(H)) {
     return ${V}(${T}(0.0));
   }
@@ -152,9 +167,9 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
 
 ${accDecl}
 
-  for (var ky: i32 = 0; ky < 3; ky = ky + 1) {
-    for (var kx: i32 = 0; kx < 3; kx = kx + 1) {
-      let tap = u32(ky * 3 + kx);
+  for (var ky: i32 = 0; ky < KERNEL; ky = ky + 1) {
+    for (var kx: i32 = 0; kx < KERNEL; kx = kx + 1) {
+      let tap = u32(ky * KERNEL + kx);
 ${weightLoads}
 ${macBody}
     }
@@ -172,16 +187,21 @@ ${stores}
  * Runs once at model load. The alpha lane is explicitly zero so the fetch's
  * alpha can never contribute regardless of what the decoder put there.
  */
-export function packStemWeights(planar: Float32Array, outChannels: number): Float32Array<ArrayBuffer> {
-  const expected = outChannels * 3 * 9;
+export function packStemWeights(
+  planar: Float32Array,
+  outChannels: number,
+  kernel = 3,
+): Float32Array<ArrayBuffer> {
+  const taps = kernel * kernel;
+  const expected = outChannels * 3 * taps;
   if (planar.length !== expected) {
-    throw new Error(`stem weights must be ${expected} elements (oc*3*9), got ${planar.length}`);
+    throw new Error(`stem weights must be ${expected} elements (oc*3*${taps}), got ${planar.length}`);
   }
-  const out = new Float32Array(new ArrayBuffer(outChannels * 9 * 4 * 4));
+  const out = new Float32Array(new ArrayBuffer(outChannels * taps * 4 * 4));
   for (let oc = 0; oc < outChannels; oc++) {
     for (let ic = 0; ic < 3; ic++) {
-      for (let tap = 0; tap < 9; tap++) {
-        out[(oc * 9 + tap) * 4 + ic] = planar[(oc * 3 + ic) * 9 + tap] as number;
+      for (let tap = 0; tap < taps; tap++) {
+        out[(oc * taps + tap) * 4 + ic] = planar[(oc * 3 + ic) * taps + tap] as number;
       }
     }
   }

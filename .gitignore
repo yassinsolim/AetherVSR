@@ -3,3 +3,8 @@ dist/
 .DS_Store
 *.local
 .vite/
+
+# Training corpus: fetched by tools/fetch-corpus.py, never committed.
+# The manifest that records provenance and licences IS committed.
+data/corpus/*
+!data/corpus/manifest.json

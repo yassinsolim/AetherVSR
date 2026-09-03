@@ -26,6 +26,8 @@ export interface StemCase {
   readonly blockY: number;
   readonly tileX: number;
   readonly tileY: number;
+  /** Kernel size, odd. Defaults to 3. */
+  readonly kernel?: number;
 }
 
 export interface StemResult extends StemCase {
@@ -104,11 +106,13 @@ export class StemBench {
     const owned: GPUBuffer[] = [activations, params, biases];
 
     if (c.mode === 'fused') {
-      const weightElements = c.outChannels * 9 * 4;
+      const kernel = c.kernel ?? 3;
+      const taps = kernel * kernel;
+      const weightElements = c.outChannels * taps * 4;
       const weights = storage(weightElements * bytesPerElement);
-      const planar = new Float32Array(new ArrayBuffer(c.outChannels * 3 * 9 * 4));
+      const planar = new Float32Array(new ArrayBuffer(c.outChannels * 3 * taps * 4));
       for (let i = 0; i < planar.length; i++) planar[i] = Math.cos(i * 1.1) * 0.1;
-      uploadFloats(device, weights, packStemWeights(planar, c.outChannels), c.useF16);
+      uploadFloats(device, weights, packStemWeights(planar, c.outChannels, kernel), c.useF16);
       owned.push(weights);
       persistentBytes += weightElements * bytesPerElement;
 
@@ -122,6 +126,7 @@ export class StemBench {
           tileY: c.tileY,
           useF16: c.useF16,
           activation: 'relu',
+          kernel,
         }),
       });
       const pipeline = device.createComputePipeline({

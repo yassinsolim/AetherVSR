@@ -11,6 +11,8 @@ export interface StemVerifyCase {
   readonly tileX: number;
   readonly tileY: number;
   readonly activation: 'none' | 'relu';
+  /** Kernel size, odd. Defaults to 3. */
+  readonly kernel?: number;
   /** Per-channel input transform: `(sample - mean) * scale`. */
   readonly mean?: readonly [number, number, number];
   readonly scale?: readonly [number, number, number];
@@ -68,7 +70,9 @@ export async function verifyStem(
     height: c.height,
   });
 
-  const weightPlanar = new Float32Array(new ArrayBuffer(c.outChannels * 3 * 9 * 4));
+  const kernel = c.kernel ?? 3;
+  const taps = kernel * kernel;
+  const weightPlanar = new Float32Array(new ArrayBuffer(c.outChannels * 3 * taps * 4));
   for (let i = 0; i < weightPlanar.length; i++) weightPlanar[i] = Math.cos(i * 1.7) * 0.2;
   const biasData = new Float32Array(new ArrayBuffer(c.outChannels * 4));
   for (let i = 0; i < c.outChannels; i++) biasData[i] = (i % 3) * 0.05 - 0.05;
@@ -88,7 +92,7 @@ export async function verifyStem(
     return buf;
   };
 
-  const weights = upload(packStemWeights(weightPlanar, c.outChannels));
+  const weights = upload(packStemWeights(weightPlanar, c.outChannels, kernel));
   const biases = upload(biasData);
   const outBytes = Math.max(16, Math.ceil((outElements * bytesPerElement) / 16) * 16);
   const output = device.createBuffer({
@@ -120,6 +124,7 @@ export async function verifyStem(
       tileY: c.tileY,
       useF16,
       activation: c.activation,
+      kernel,
     }),
   });
   const pipeline = device.createComputePipeline({
@@ -177,7 +182,7 @@ export async function verifyStem(
     for (let p = 0; p < pixels; p++) actual[ch * pixels + p] = grouped[(g * pixels + p) * 4 + lane] as number;
   }
 
-  const expected = referenceStem(c, texels, weightPlanar, biasData, mean, scale);
+  const expected = referenceStem(c, texels, weightPlanar, biasData, mean, scale, kernel);
 
   let maxAbs = 0;
   let sumAbs = 0;
@@ -214,8 +219,11 @@ function referenceStem(
   biases: Float32Array,
   mean: readonly [number, number, number],
   scale: readonly [number, number, number],
+  kernel: number,
 ): Float32Array {
   const { width: W, height: H, outChannels: OC } = c;
+  const pad = (kernel - 1) / 2;
+  const taps = kernel * kernel;
   const out = new Float32Array(W * H * OC);
   const sample = (x: number, y: number, ch: number): number => {
     if (x < 0 || y < 0 || x >= W || y >= H) return 0;
@@ -227,14 +235,15 @@ function referenceStem(
       for (let x = 0; x < W; x++) {
         let acc = biases[oc] as number;
         for (let ic = 0; ic < 3; ic++) {
-          for (let ky = 0; ky < 3; ky++) {
-            for (let kx = 0; kx < 3; kx++) {
-              const w = weights[(oc * 3 + ic) * 9 + ky * 3 + kx] as number;
-              // Out-of-range taps contribute zero, which is also what the
-              // shader's fetch returns.
-              const inBounds = x + kx - 1 >= 0 && y + ky - 1 >= 0 && x + kx - 1 < W && y + ky - 1 < H;
-              if (!inBounds) continue;
-              acc += w * sample(x + kx - 1, y + ky - 1, ic);
+          for (let ky = 0; ky < kernel; ky++) {
+            for (let kx = 0; kx < kernel; kx++) {
+              const w = weights[(oc * 3 + ic) * taps + ky * kernel + kx] as number;
+              const sx = x + kx - pad;
+              const sy = y + ky - pad;
+              // Out-of-range taps contribute zero, which is what the shader's
+              // fetch returns.
+              if (sx < 0 || sy < 0 || sx >= W || sy >= H) continue;
+              acc += w * sample(sx, sy, ic);
             }
           }
         }
