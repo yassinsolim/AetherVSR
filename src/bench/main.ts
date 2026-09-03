@@ -17,7 +17,12 @@ import { evaluateScalers, evaluateAgainstReference } from './quality-bench.js';
 import type { QualityScores } from './quality.js';
 import { IngestBench, type IngestBenchConfig, type IngestBenchStats } from './ingest-bench.js';
 import type { BaselineFilter } from '../core/upscale/baseline.wgsl.js';
-import { runTemporalBench, type TemporalBenchConfig, type TemporalSequenceResult } from './temporal-bench.js';
+import {
+  runTemporalBench,
+  DEFAULT_TEMPORAL_BENCH_CONFIG,
+  type TemporalBenchConfig,
+  type TemporalSequenceResult,
+} from './temporal-bench.js';
 
 /**
  * Milestone 2 feasibility bench.
@@ -314,6 +319,28 @@ function main(gpu: GpuContext): void {
     }
     setStatus('quality evaluation complete');
     return { synthetic, natural: { provenance: manifest.provenance, perImage } };
+  };
+
+  w['aethervsrTemporalAll'] = async (
+    modelUrl = '/models/aethersr-c16d2.json',
+    panPxPerFrame?: number,
+  ): Promise<unknown> => {
+    setStatus('evaluating temporal behaviour of every stage…');
+    const { loadModel } = await import('../core/neural/model.js');
+    const { NeuralUpscaler } = await import('../core/upscale/neural-upscaler.js');
+    const model = await loadModel(modelUrl);
+    const neural = new NeuralUpscaler(model);
+    const base = DEFAULT_TEMPORAL_BENCH_CONFIG;
+    const out = await runTemporalBench(gpu.device, {
+      ...base,
+      ...(panPxPerFrame !== undefined
+        ? { sequenceConfig: { ...base.sequenceConfig, panPxPerFrame } }
+        : {}),
+      extra: [{ label: `neural-C${model.features}D${model.depth}`, upscaler: neural }],
+    });
+    neural.destroy();
+    setStatus('temporal evaluation complete');
+    return out;
   };
 
   w['aethervsrRoofline'] = async (useF16 = true): Promise<RooflineResult[]> => {

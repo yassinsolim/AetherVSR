@@ -1,5 +1,6 @@
 import type { Size } from '../core/types.js';
 import { BaselineScaler } from '../core/upscale/baseline-scaler.js';
+import type { Upscaler } from '../core/types.js';
 import type { BaselineFilter } from '../core/upscale/baseline.wgsl.js';
 import {
   DEFAULT_TEMPORAL_SEQUENCE_CONFIG,
@@ -46,7 +47,7 @@ export interface MotionCompensatedTemporalStats {
 
 export interface TemporalSequenceResult {
   readonly sequence: TemporalSequenceKind;
-  readonly filter: BaselineFilter;
+  readonly filter: string;
   readonly frameCount: number;
   readonly outputSize: Size;
   /** Raw consecutive-frame difference on the upscaled output; includes real motion. */
@@ -60,6 +61,8 @@ export interface TemporalSequenceResult {
 
 export interface TemporalBenchConfig {
   readonly filters: readonly BaselineFilter[];
+  /** Extra stages to evaluate alongside the baselines, e.g. the neural model. */
+  readonly extra?: readonly { readonly label: string; readonly upscaler: Upscaler }[];
   readonly sequences: readonly TemporalSequenceKind[];
   readonly sequenceConfig: TemporalSequenceConfig;
   readonly outputSize: Size;
@@ -90,7 +93,7 @@ function findIntegerStride(shiftPerInputFrame: number, frameCount: number): { st
 }
 
 function buildSequenceResult(
-  filter: BaselineFilter,
+  filter: string,
   sequence: TemporalSequenceKind,
   outputs: readonly Uint8Array[],
   sequenceConfig: TemporalSequenceConfig,
@@ -206,7 +209,7 @@ export async function runTemporalBench(
     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
   });
 
-  async function renderAndReadback(scaler: BaselineScaler, frame: ImageData): Promise<Uint8Array> {
+  async function renderAndReadback(scaler: Upscaler, frame: ImageData): Promise<Uint8Array> {
     const bitmap = await createImageBitmap(frame);
     device.queue.copyExternalImageToTexture(
       { source: bitmap },
@@ -237,8 +240,14 @@ export async function runTemporalBench(
 
   const results: TemporalSequenceResult[] = [];
 
-  for (const filter of filters) {
-    const scaler = new BaselineScaler(filter);
+  const stages: { label: string; upscaler: Upscaler; owned: boolean }[] = [
+    ...filters.map((f) => ({ label: f, upscaler: new BaselineScaler(f), owned: true })),
+    ...(config.extra ?? []).map((e) => ({ label: e.label, upscaler: e.upscaler, owned: false })),
+  ];
+
+  for (const stage of stages) {
+    const filter = stage.label;
+    const scaler = stage.upscaler;
     scaler.configure({
       device,
       source: { width: sequenceConfig.width, height: sequenceConfig.height },
@@ -254,7 +263,7 @@ export async function runTemporalBench(
       results.push(buildSequenceResult(filter, sequence, outputs, sequenceConfig, outputSize));
     }
 
-    scaler.destroy();
+    if (stage.owned) scaler.destroy();
   }
 
   lrTexture.destroy();
