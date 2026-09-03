@@ -32,6 +32,7 @@ from PIL import Image
 
 from aethersr import AetherSR, box_downsample2, count_parameters, export_weights
 from dataset import check_disjoint, load_split, split_files
+from degrade import degrade_tensor
 
 ARCHITECTURE_ID = "aethersr-resizeconv"
 ARCHITECTURE_VERSION = 2
@@ -164,6 +165,17 @@ def ssim(a: torch.Tensor, b: torch.Tensor) -> float:
     return float((numerator / denominator).mean())
 
 
+def make_lr(hr: torch.Tensor, profile: str, seed: int) -> torch.Tensor:
+    """HR -> LR under the named degradation profile.
+
+    `box` stays on the exact avg_pool2d path so the clean condition is
+    bit-identical to what Milestone 4 trained on and to `quality.ts`.
+    """
+    if profile == "box":
+        return box_downsample2(hr)
+    return degrade_tensor(hr, profile, seed).to(hr.device)
+
+
 def degradation_description(profile: str) -> str:
     """Human-readable degradation, recorded in the model file."""
     if profile == "box":
@@ -245,7 +257,10 @@ def main() -> int:
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
 
     val_hr_d = val_hr.to(device)
-    val_lr_d = box_downsample2(val_hr_d)
+    # Validation degradation is fixed for the run: a validation set that is
+    # re-randomised every epoch makes checkpoint selection partly a draw on the
+    # degradation, not on the model.
+    val_lr_d = make_lr(val_hr_d, args.degradation, seed=20260101)
 
     # Bilinear on the same split, so "did it learn anything" has an answer that
     # does not depend on the browser harness.
@@ -274,7 +289,10 @@ def main() -> int:
                 batch_hr = torch.flip(batch_hr, dims=[2])
             if random.random() < 0.5:
                 batch_hr = torch.rot90(batch_hr, 1, dims=[2, 3])
-            batch_lr = box_downsample2(batch_hr)
+            # Fresh degradation draw per batch for randomised profiles, so the
+            # model sees the distribution rather than one fixed sample of it.
+            # `box` ignores the seed and stays exact.
+            batch_lr = make_lr(batch_hr, args.degradation, seed=args.seed * 100_003 + epoch * 1_009 + batches)
 
             out = model(batch_lr)
             loss = F.l1_loss(out, batch_hr)

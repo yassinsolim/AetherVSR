@@ -1,0 +1,34 @@
+{
+ "schema": "aethervsr.seed-browser/1",
+ "note": "Synthetic regression and temporal metrics measured in Chrome for Testing 152 on Apple M5, one session, five clean-degradation seeds. Catmull-Rom reference values are fixed properties of the harness and identical across rows.",
+ "syntheticReference2560x1440": {
+  "catmullRomPsnrLuma": 19.448,
+  "perSeed": [
+   {"seed": 1, "psnrLuma": 20.621, "ssimLuma": 0.9537},
+   {"seed": 2, "psnrLuma": 20.509, "ssimLuma": 0.9524},
+   {"seed": 3, "psnrLuma": 20.477, "ssimLuma": 0.9516},
+   {"seed": 4, "psnrLuma": 20.541, "ssimLuma": 0.9527},
+   {"seed": 5, "psnrLuma": 20.561, "ssimLuma": 0.9528}
+  ]
+ },
+ "naturalEightImageRegression": {
+  "catmullRomPsnrLuma": 29.143,
+  "perSeed": [
+   {"seed": 1, "psnrLuma": 29.536},
+   {"seed": 2, "psnrLuma": 29.462},
+   {"seed": 3, "psnrLuma": 29.475},
+   {"seed": 4, "psnrLuma": 29.473},
+   {"seed": 5, "psnrLuma": 29.464}
+  ]
+ },
+ "temporal": {
+  "catmullRomSubPixelMcVariance": 17.236,
+  "perSeed": [
+   {"seed": 1, "staticMAD": 0, "integerPanMcMAD": 0.0101, "subPixelMcVariance": 49.642, "ratioVsCatmullRom": 2.880},
+   {"seed": 2, "staticMAD": 0, "integerPanMcMAD": 0.0083, "subPixelMcVariance": 53.704, "ratioVsCatmullRom": 3.116},
+   {"seed": 3, "staticMAD": 0, "integerPanMcMAD": 0.0070, "subPixelMcVariance": 54.714, "ratioVsCatmullRom": 3.174},
+   {"seed": 4, "staticMAD": 0, "integerPanMcMAD": 0.0074, "subPixelMcVariance": 52.146, "ratioVsCatmullRom": 3.025},
+   {"seed": 5, "staticMAD": 0, "integerPanMcMAD": 0.0066, "subPixelMcVariance": 54.098, "ratioVsCatmullRom": 3.139}
+  ]
+ }
+}
