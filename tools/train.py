@@ -36,6 +36,15 @@ ARCHITECTURE_VERSION = 2
 ACCEPTED_LICENCES = {"cc0", "cc0 1.0", "public domain", "pd", "cc-zero"}
 
 
+def _sha256_file(path: str) -> str:
+    """Streams the file so a large corpus does not have to fit in memory."""
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def validate_manifest(corpus: str, minimum: int) -> dict:
     """Refuse to train unless the corpus is complete and provably CC0."""
     path = os.path.join(corpus, "manifest.json")
@@ -57,10 +66,21 @@ def validate_manifest(corpus: str, minimum: int) -> dict:
             problems.append(f"{name}: licence {entry.get('licence')!r} is not accepted")
         if not entry.get("source_url"):
             problems.append(f"{name}: no source_url")
-        if not entry.get("sha256"):
+        declared = entry.get("sha256")
+        if not declared:
             problems.append(f"{name}: no sha256")
-        if not os.path.exists(os.path.join(corpus, name)):
+        path = os.path.join(corpus, name)
+        if not os.path.exists(path):
             problems.append(f"{name}: listed in manifest but absent on disk")
+        elif declared:
+            # The corpus images are gitignored, so the manifest is the only
+            # record of what was trained on. Checking the declared hash against
+            # the bytes on disk is the difference between a reproducibility
+            # claim and a reproducibility hope: without it, edited files train a
+            # different model under an unchanged corpus digest.
+            actual = _sha256_file(path)
+            if actual != declared:
+                problems.append(f"{name}: sha256 {actual[:12]}… does not match manifest {declared[:12]}…")
     if problems:
         head = "\n  ".join(problems[:12])
         more = f"\n  … and {len(problems) - 12} more" if len(problems) > 12 else ""
@@ -210,6 +230,9 @@ def main() -> int:
         model.load_state_dict(best_state)
     model.eval().cpu()
 
+    # Over verified file hashes: validate_manifest has already confirmed each
+    # one against the bytes actually read, so this digest identifies the
+    # content trained on rather than the strings describing it.
     corpus_digest = hashlib.sha256(
         "".join(sorted(e["sha256"] for e in manifest["images"])).encode()
     ).hexdigest()

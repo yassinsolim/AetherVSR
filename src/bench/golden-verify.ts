@@ -23,6 +23,8 @@ export interface StageComparison {
   readonly meanAbsError: number;
   readonly referenceRange: readonly [number, number];
   readonly elements: number;
+  /** Present only when a non-finite value was seen; its absence means none. */
+  readonly nonFinite?: number;
   readonly passed: boolean;
 }
 
@@ -352,14 +354,33 @@ function compare(
   expected: readonly number[],
   tolerance: number,
 ): StageComparison {
-  const n = Math.min(actual.length, expected.length);
+  // A truncated reference must fail loudly. Comparing the overlap silently
+  // turns a corrupt or partially-written vector file into a pass over whatever
+  // prefix happens to agree - which is precisely the regression this verifier
+  // exists to catch.
+  if (actual.length !== expected.length || expected.length === 0) {
+    return {
+      stage,
+      maxAbsError: Number.POSITIVE_INFINITY,
+      meanAbsError: Number.POSITIVE_INFINITY,
+      referenceRange: [Number.NaN, Number.NaN],
+      elements: 0,
+      passed: false,
+    };
+  }
+  const n = expected.length;
   let maxAbs = 0;
+  let nonFinite = 0;
   let sumAbs = 0;
   let lo = Infinity;
   let hi = -Infinity;
   for (let i = 0; i < n; i++) {
     const e = expected[i] as number;
-    const d = Math.abs((actual[i] as number) - e);
+    const a = actual[i] as number;
+    const d = Math.abs(a - e);
+    // NaN fails every comparison, so `d > maxAbs` silently skips it and a
+    // NaN-poisoned activation used to score a flawless match. Count them.
+    if (!Number.isFinite(e) || !Number.isFinite(a) || !Number.isFinite(d)) nonFinite++;
     if (d > maxAbs) maxAbs = d;
     sumAbs += d;
     if (e < lo) lo = e;
@@ -372,9 +393,10 @@ function compare(
     stage,
     maxAbsError: maxAbs,
     meanAbsError: n > 0 ? sumAbs / n : Number.NaN,
+    ...(nonFinite > 0 ? { nonFinite } : {}),
     referenceRange: [lo, hi],
     elements: n,
-    passed: n > 0 && !degenerate && maxAbs <= tolerance,
+    passed: n > 0 && nonFinite === 0 && !degenerate && maxAbs <= tolerance,
   };
 }
 

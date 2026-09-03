@@ -838,3 +838,64 @@ n times per frame drives its per-dispatch cost monotonically from 1.303 ms to
 0.346 ms, and the *preceding* ingest pass speeds up too — which only a raised
 clock explains. Two correct measurements added together produced a number that
 described no real configuration.
+
+## ADR-0026 — CC0 only, and publication is blocked pending counsel
+
+**Status:** accepted (Milestone 4). The publication block is **open**.
+
+### Corpus
+
+ADR-0022 described the training corpus as CC0. It was not: `tools/fetch-corpus.py`
+accepted `public domain` and `pd` alongside `cc0`, and five of the 500 images
+carried Commons' generic "Public domain" tag. Independent review found this.
+
+A bare public-domain tag is a claim about *some* jurisdiction — usually that a
+term expired, sometimes that it is a government work — and it is not a
+dedication the uploader made. It is not equivalent to CC0 and it is not
+uniformly true worldwide.
+
+The filter now accepts `cc0`, `cc0 1.0` and `cc-zero` only. The five files were
+removed and **the model was retrained on the remaining 495**, rather than
+restating the claim to match the corpus. Deleting a legal question is cheaper
+than deferring one, and 1% of the corpus is not worth an ambiguity.
+
+The retrained model is the one in the repository and every Milestone 4 figure
+was re-measured against it. It is *worse* on the sub-pixel temporal metric than
+the withdrawn model, and BENCHMARKS.md says so.
+
+`tools/train.py` now streams and hashes every corpus file and compares it to the
+committed manifest before sampling. Previously it checked only that a
+`sha256` string was non-empty and the path existed, while the recorded
+`corpusDigest` hashed the manifest's strings — so edited image bytes would have
+trained a different model under an unchanged digest. The manifest is written by
+the fetcher and committed; the trainer only reads it, so the comparison is
+against an independent record rather than self-consistent.
+
+### Publication
+
+**AetherVSR Milestone 4 must not be distributed until counsel clears the
+resize-convolution reconstruction head.**
+
+ADR-0022 selected that head after rejecting sub-pixel convolution over
+EP3259916B1, and stated plainly that the alternative "is not clearance either":
+a resize convolution is mathematically expressible as a constrained polyphase
+sub-pixel convolution, so not materialising an `r^2 * C` tensor reduces
+literal-match risk without establishing freedom to operate. That ADR made
+counsel a precondition of distribution.
+
+No such review has happened. The engineering is complete and independently
+reviewed; the legal precondition the project set for itself is not satisfied,
+and the fact that milestones 0-3 are already public does not satisfy it, because
+none of them shipped a model or a reconstruction head.
+
+Concretely, publication is held on:
+
+1. Whether the shipped resize-convolution head infringes EP3259916B1 or its
+   family in any jurisdiction AetherVSR distributes to.
+2. Whether distributing trained weights, as distinct from source, changes that
+   answer.
+
+Until both are answered, Milestone 4 stays on the local branch. Weakening this
+gate by editing the wording of ADR-0022 would be exactly the "silently change
+architecture" failure AGENTS.md prohibits; superseding it requires the answers
+above, not a rewrite.

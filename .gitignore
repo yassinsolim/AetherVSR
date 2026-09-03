@@ -9,6 +9,7 @@ dist/
 data/corpus/*
 !data/corpus/manifest.json
 
-# Natural-image evaluation crops, staged by tools/prepare-eval-set.py.
-public/eval/*
-!public/eval/manifest.json
+# The natural-image evaluation crops ARE committed. They are 3.4 MB of CC0
+# images, and a benchmark whose inputs 404 on a clean checkout is not
+# reproducible - independent review pointed out that the published numbers
+# could not be re-derived by anyone but us.

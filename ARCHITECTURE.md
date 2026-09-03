@@ -35,7 +35,7 @@ flowchart TD
     I["FrameImporter<br/>importExternalTexture / copyExternalImageToTexture"]
     U{"Upscaler interface"}
     B["BaselineScaler<br/>bilinear · Catmull-Rom · MILESTONE 1"]
-    N["Neural SR backend<br/>FUTURE — not implemented"]
+    N["Neural SR backend<br/>MILESTONE 4"]
     C["CanvasTarget<br/>GPUCanvasContext swap chain"]
     M["Metrics<br/>GPU timestamps · rate meters"]
 
@@ -189,34 +189,71 @@ import frame, claim a timestamp slot, create a command encoder, call
 `upscaler.encode()`, resolve timestamps, submit, start the timestamp readback.
 No awaits, no readbacks, no allocation beyond what WebGPU mandates.
 
-## Where the neural stage goes
+## The neural stage
 
-A neural backend is a new `Upscaler`. It will need more than the baseline does,
-and the interface already anticipates it:
+`NeuralUpscaler` (`src/core/upscale/neural-upscaler.ts`) is a second
+implementation of `Upscaler`, selected with `?upscaler=neural`. It is the whole
+of Milestone 4, and it required no change to acquisition, import or
+presentation — which was the point of the seam.
 
-- **Multiple passes** — `encode()` receives the command encoder, so an
-  implementation may record as many passes as it likes. `PassTiming` carries
-  separate begin and end indices precisely so a multi-pass model reports its
-  full cost rather than one convolution.
-- **Intermediate buffers** — allocated in `configure()`, where sizes are known.
-- **An ingest pass** — measurements in `BENCHMARKS.md` show the same nine-tap
-  kernel costs markedly more in its render pass when reading through
-  `texture_external` than through an ordinary `texture_2d<f32>` (3.90 ms vs
-  1.55 ms). The *explanation* — that a multi-planar external texture performs
-  plane sampling and colour conversion on every tap — is inferred from the
-  specification and was not measured, and the copy path's own upload cost is
-  not in that 1.55 ms. What is established is the render-pass difference, and
-  it is enough to expect that a model reading the source many times will want
-  one pass converting the external texture into a regular texture first. The
-  `FrameTexture` union already lets a stage see which kind it has.
-- **Weights and inference runtime** — outside the interface entirely. Whether
-  the backend is hand-written WGSL or ONNX Runtime Web is an implementation
-  detail of one `Upscaler`.
+The graph, at 1280x720 in, 2560x1440 out:
 
-The constraint that must hold: adding a backend changes `src/core/upscale/`
-plus its registration in the `FILTERS` list and construction site in
-`src/main.ts`. It must not require changes to acquisition, import or
-presentation.
+```
+GPUExternalTexture
+  → ingest pass            external texture → rgba8unorm texture, once per frame
+  → stem 5x5 3→16          texture-native, reads the image directly
+  → body 2 × 3x3 16→16     packed vec4 activations, ping-pong buffers
+  → resize-conv head       nearest 2x upsample then 3x3 16→3, writes a storage texture
+  → blit                   storage texture → swap-chain view
+```
+
+Each stage is its own compute pass so each can be timed, and WebGPU's ordering
+between passes in a command buffer means the ping-pong chain needs no explicit
+barrier. The head is a resize convolution rather than a pixel shuffle for the
+reasons in ADR-0022; the pixel-shuffle operator survives only under `src/bench/`
+and nothing in `src/core/` imports it.
+
+**Resources.** Everything is allocated in `configure()`: two activation buffers
+sized to the largest layer, the ingest texture, the output storage texture,
+weights, and a query set. The only per-frame GPU object is the bind group that
+references the external-texture-derived view, and only when that view changes —
+`GPUExternalTexture` is single-frame-valid by specification, so this is the one
+allocation the `Upscaler` contract permits.
+
+**Timing.** The pipeline's own span brackets the whole stage, from the first
+pass to presentation, and that is the published number. Per-pass spans are
+diagnostics on a separate query set, each aggregated over 240 samples; they are
+never summed to produce the whole-stage figure, because measurements taken in a
+tight loop and measurements taken in a live frame loop differ by up to 4x on
+small passes (see ADR-0025). On the copy-import path there is no ingest pass, so
+the stem opens the whole-stage span and gives up its own per-pass figure rather
+than leaving the span half-written.
+
+**Fallback.** `BudgetGuard` (`src/core/upscale/budget-guard.ts`) watches the
+measured whole-stage time and swaps in the baseline scaler when the network
+cannot hold the budget, recovering only via a probe that measures the network
+itself. See ADR-0024.
+
+## What a further backend would need
+
+The interface anticipates more than the current model uses. A different
+implementation may record as many passes as it likes, allocate intermediates in
+`configure()`, and choose its own inference runtime — hand-written WGSL or ONNX
+Runtime Web is an implementation detail of one `Upscaler`.
+
+One measured constraint is worth carrying forward: the same nine-tap kernel
+costs markedly more in its render pass when reading through `texture_external`
+than through an ordinary `texture_2d<f32>` (3.90 ms vs 1.55 ms). The
+*explanation* — that a multi-planar external texture performs plane sampling and
+colour conversion on every tap — is inferred from the specification and was not
+measured, and the copy path's own upload cost is not in that 1.55 ms. What is
+established is the render-pass difference, and it is why a model that reads the
+source many times wants an ingest pass first. `FrameTexture` lets a stage see
+which kind it has.
+
+The constraint that must hold: adding a backend changes `src/core/upscale/` plus
+its registration in `src/main.ts`. It must not require changes to acquisition,
+import or presentation.
 
 ## Milestone 2 feasibility bench — `bench.html`, `src/bench/`
 

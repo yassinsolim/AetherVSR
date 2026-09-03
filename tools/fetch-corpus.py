@@ -39,8 +39,12 @@ import urllib.request
 API = "https://commons.wikimedia.org/w/api.php"
 UA = "AetherVSR/0.1 (https://github.com/yassinsolim/AetherVSR) training-corpus-fetch"
 
-# Only these count as an unambiguous public-domain dedication for our purposes.
-ACCEPTED_LICENCES = {"cc0", "cc0 1.0", "public domain", "pd", "cc-zero"}
+# CC0 only. A bare "public domain" tag on Commons is a claim about *some*
+# jurisdiction - usually expiry of a term, sometimes a US-government work - and
+# it is not a dedication the uploader made. Independent review found five such
+# files in a corpus the ADR described as CC0, so the filter no longer accepts
+# the generic tags it used to.
+ACCEPTED_LICENCES = {"cc0", "cc0 1.0", "cc-zero"}
 
 
 def api_get(params: dict) -> dict:

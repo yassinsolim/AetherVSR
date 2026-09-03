@@ -1,7 +1,7 @@
 {
  "source": "Wikimedia Commons, Category:CC-Zero",
  "api": "https://commons.wikimedia.org/w/api.php",
- "licence_policy": "Every entry's own imageinfo.extmetadata licence field was checked and had to read CC0 or public domain. Category membership alone was not accepted.",
+ "licence_policy": "CC0 only. Generic public-domain tags are not accepted; see ADR-0026.",
  "accepted": [
   "cc-zero",
   "cc0",
@@ -9,7 +9,7 @@
   "pd",
   "public domain"
  ],
- "count": 500,
+ "count": 495,
  "rejected": {
   "licence": 0,
   "small": 26,
@@ -1096,18 +1096,6 @@
    "artist_html": "<a href=\"//commons.wikimedia.org/wiki/User:Ms_Sarah_Welch\" title=\"User:Ms Sarah Welch\">Ms Sarah Welch</a>",
    "sha256": "5d764c02b1d6a675c5b806bc21dc25c6f878a0798fd61db511a6d601d6a89914",
    "bytes": 184853
-  },
-  {
-   "file": "00090_a7f8f78c01.jpg",
-   "title": "File:\"9th century Hamsa as swans and other artwork, pillar in Avantiswami temple ruins 2, Avantipore, sketched in 1868.jpg",
-   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/%229th_century_Hamsa_as_swans_and_other_artwork%2C_pillar_in_Avantiswami_temple_ruins_2%2C_Avantipore%2C_sketched_in_1868.jpg/1920px-%229th_century_Hamsa_as_swans_and_other_artwork%2C_pillar_in_Avantiswami_temple_ruins_2%2C_Avantipore%2C_sketched_in_1868.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-   "descriptor_page": "",
-   "width": 1400,
-   "height": 2249,
-   "licence": "Public domain",
-   "artist_html": "<a href=\"//commons.wikimedia.org/wiki/User:Ms_Sarah_Welch\" title=\"User:Ms Sarah Welch\">Ms Sarah Welch</a>",
-   "sha256": "b2c951cc48b02b79766d42bb6a2612d6dc7e0fa480b5f68fdc42ecf209da7d79",
-   "bytes": 1313259
   },
   {
    "file": "00091_207183fb37.jpg",
@@ -2272,18 +2260,6 @@
    "artist_html": "<bdi><a href=\"https://en.wikipedia.org/wiki/en:Charles_Keene_(artist)\" class=\"extiw\" title=\"w:en:Charles Keene (artist)\"><span title=\"English artist and illustrator (1823\u20131891)\">Charles Keene</span></a></bdi>",
    "sha256": "e83b55e0e55d5e91841ccceba04b999099bb17bd1a03711e9fa9a329c32ccf0d",
    "bytes": 806505
-  },
-  {
-   "file": "00188_f4e5badbb0.jpg",
-   "title": "File:\"A Woman Living Here Has Registered to Vote\", 1919.jpg",
-   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/%22A_Woman_Living_Here_Has_Registered_to_Vote%22%2C_1919.jpg/1920px-%22A_Woman_Living_Here_Has_Registered_to_Vote%22%2C_1919.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-   "descriptor_page": "",
-   "width": 1400,
-   "height": 2570,
-   "licence": "Public domain",
-   "artist_html": "Americanization Society",
-   "sha256": "5e34cc705f9a2cb6e0bb06c2125536557a529fb178918e459ecdffd3ffc48376",
-   "bytes": 1930602
   },
   {
    "file": "00189_f714af4920.jpg",
@@ -4458,18 +4434,6 @@
    "bytes": 1477389
   },
   {
-   "file": "00370_64cab9ed1c.jpg",
-   "title": "File:\"Attestation d\u2019invalidit\u00e9\" van Fran\u00e7ois Van Goidsenoven, item 1.jpg",
-   "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/8d/%22Attestation_d%E2%80%99invalidit%C3%A9%22_van_Fran%C3%A7ois_Van_Goidsenoven%2C_item_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-   "descriptor_page": "",
-   "width": 1400,
-   "height": 1136,
-   "licence": "Public domain",
-   "artist_html": "",
-   "sha256": "c1954a656f2c86d914ee2040c238d9ac632462bf92bcdbd19a7b274bbd714144",
-   "bytes": 1017731
-  },
-  {
    "file": "00371_860835065c.jpg",
    "title": "File:\"Au d\u00e9pendez-moi \u00e7a\".JPG",
    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/%22Au_d%C3%A9pendez-moi_%C3%A7a%22.JPG/1920px-%22Au_d%C3%A9pendez-moi_%C3%A7a%22.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -4540,18 +4504,6 @@
    "artist_html": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Jizzakhlik&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Jizzakhlik (page does not exist)\">Jizzakhlik</a>",
    "sha256": "f94f52c74c155414b7e4de57d6869f598887f5b6db92e06838b292043a81444c",
    "bytes": 98862
-  },
-  {
-   "file": "00377_b87fbfa648.jpg",
-   "title": "File:\"Az\u0259rbaycan Nar\u0131\" d\u00f6\u015f ni\u015fan\u0131.png",
-   "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/af/%22Az%C9%99rbaycan_Nar%C4%B1%22_d%C3%B6%C5%9F_ni%C5%9Fan%C4%B1.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-   "descriptor_page": "",
-   "width": 1400,
-   "height": 2302,
-   "licence": "Public domain",
-   "artist_html": "<a href=\"//commons.wikimedia.org/wiki/User:Elshad_Iman_(El%C5%9Fad_%C4%B0man)\" title=\"User:Elshad Iman (El\u015fad \u0130man)\">El\u015fad \u0130man</a>",
-   "sha256": "91ef3ec9f2da7cf9f947a6ca07697342b46deaa25f343bba92d85ed11f84c580",
-   "bytes": 7913066
   },
   {
    "file": "00378_52d20d53ae.jpg",
@@ -5872,18 +5824,6 @@
    "artist_html": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:RSMartinJr&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:RSMartinJr (page does not exist)\">RSMartinJr</a>",
    "sha256": "a383949c161796b64fe0413f2ea1cc45c4405522406256eedbb2c6055ce77ece",
    "bytes": 588457
-  },
-  {
-   "file": "00488_393504eda5.jpg",
-   "title": "File:\"Balloon Bomb\" informational sign at a rest stop on OR 140, 30 miles west of Lakeview, Oregon.jpg",
-   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/%22Balloon_Bomb%22_informational_sign_at_a_rest_stop_on_OR_140%2C_30_miles_west_of_Lakeview%2C_Oregon.jpg/1920px-%22Balloon_Bomb%22_informational_sign_at_a_rest_stop_on_OR_140%2C_30_miles_west_of_Lakeview%2C_Oregon.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-   "descriptor_page": "",
-   "width": 1400,
-   "height": 1050,
-   "licence": "Public domain",
-   "artist_html": "Oregon Department of Transportation",
-   "sha256": "64242eb3af8adff92878a302ded01a2a6c98be8d0a7f6c0cb9bdce842db3eb9c",
-   "bytes": 397122
   },
   {
    "file": "00489_8b1de42ffd.jpg",
