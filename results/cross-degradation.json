@@ -1,0 +1,121 @@
+{
+ "schema": "aethervsr.cross-degradation/1",
+ "evaluationSet": "independent",
+ "images": 30,
+ "degradationSeed": 7,
+ "cell": "neural mean PSNR minus Catmull-Rom mean PSNR on identical inputs, mean +/- std over seeds",
+ "rows": {
+  "box": [
+   "seed1.json",
+   "seed2.json",
+   "seed3.json",
+   "seed4.json",
+   "seed5.json"
+  ],
+  "realistic": [
+   "seed1.json",
+   "seed2.json",
+   "seed3.json",
+   "seed4.json",
+   "seed5.json"
+  ]
+ },
+ "columns": [
+  "box",
+  "bicubic",
+  "lanczos",
+  "h264_high",
+  "h264_typical",
+  "h264_poor"
+ ],
+ "matrix": {
+  "box": {
+   "box": {
+    "deltaPsnrDbMean": 0.2963304360707601,
+    "deltaPsnrDbStd": 0.08849654597125586,
+    "neuralPsnrMean": 33.8129581451416,
+    "catmullPsnrMean": 33.51662770907084,
+    "seeds": 5
+   },
+   "bicubic": {
+    "deltaPsnrDbMean": 0.4567224820454915,
+    "deltaPsnrDbStd": 0.0844127728784051,
+    "neuralPsnrMean": 33.836959807078046,
+    "catmullPsnrMean": 33.38023732503255,
+    "seeds": 5
+   },
+   "lanczos": {
+    "deltaPsnrDbMean": 0.2009822686513265,
+    "deltaPsnrDbStd": 0.0894286494607195,
+    "neuralPsnrMean": 33.80734477043152,
+    "catmullPsnrMean": 33.60636250178019,
+    "seeds": 5
+   },
+   "h264_high": {
+    "deltaPsnrDbMean": 0.1959623654683431,
+    "deltaPsnrDbStd": 0.06137112019203562,
+    "neuralPsnrMean": 32.171531693140665,
+    "catmullPsnrMean": 31.97556932767232,
+    "seeds": 5
+   },
+   "h264_typical": {
+    "deltaPsnrDbMean": 0.1453820546468099,
+    "deltaPsnrDbStd": 0.07743645259078082,
+    "neuralPsnrMean": 31.44630495707194,
+    "catmullPsnrMean": 31.30092290242513,
+    "seeds": 5
+   },
+   "h264_poor": {
+    "deltaPsnrDbMean": 0.030820226669311522,
+    "deltaPsnrDbStd": 0.07839615217137896,
+    "neuralPsnrMean": 29.937521950403852,
+    "catmullPsnrMean": 29.90670172373454,
+    "seeds": 5
+   }
+  },
+  "realistic": {
+   "box": {
+    "deltaPsnrDbMean": 0.021377770105997722,
+    "deltaPsnrDbStd": 0.11646808614267276,
+    "neuralPsnrMean": 33.4842963218689,
+    "catmullPsnrMean": 33.4629185517629,
+    "seeds": 5
+   },
+   "bicubic": {
+    "deltaPsnrDbMean": 0.4180468877156575,
+    "deltaPsnrDbStd": 0.07681112093601147,
+    "neuralPsnrMean": 33.759003957112625,
+    "catmullPsnrMean": 33.34095706939697,
+    "seeds": 5
+   },
+   "lanczos": {
+    "deltaPsnrDbMean": 0.11126359303792317,
+    "deltaPsnrDbStd": 0.10627341371956414,
+    "neuralPsnrMean": 33.70389083226522,
+    "catmullPsnrMean": 33.5926272392273,
+    "seeds": 5
+   },
+   "h264_high": {
+    "deltaPsnrDbMean": 0.4479109287261963,
+    "deltaPsnrDbStd": 0.08358070136965956,
+    "neuralPsnrMean": 32.414193058013915,
+    "catmullPsnrMean": 31.96628212928772,
+    "seeds": 5
+   },
+   "h264_typical": {
+    "deltaPsnrDbMean": 0.4018890221913655,
+    "deltaPsnrDbStd": 0.04495947047787261,
+    "neuralPsnrMean": 31.676107533772786,
+    "catmullPsnrMean": 31.27421851158142,
+    "seeds": 5
+   },
+   "h264_poor": {
+    "deltaPsnrDbMean": 0.09710542360941568,
+    "deltaPsnrDbStd": 0.041076913074513846,
+    "neuralPsnrMean": 30.036637194951375,
+    "catmullPsnrMean": 29.939531771341954,
+    "seeds": 5
+   }
+  }
+ }
+}

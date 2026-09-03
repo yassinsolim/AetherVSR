@@ -412,10 +412,22 @@ def _u8_hwc_to_tensor(u8: np.ndarray) -> torch.Tensor:
 def _h264_round_trip(hr: torch.Tensor, kernel: str, crf: int) -> torch.Tensor:
     lr = _resize_downsample2(hr, kernel)
     grid, rows, cols, n = _tile_grid(lr)
+
+    # 4:2:0 subsamples chroma by two in both axes, so an odd-sided frame is not
+    # representable and libx264 refuses it outright. A single evaluation image
+    # of 1274x1280 tiles 1x1 into a 637x640 mosaic and aborted the run.
+    # Replicate-pad to even, encode, then crop the padding away.
+    _, gh, gw = grid.shape
+    pad_h, pad_w = gh % 2, gw % 2
+    if pad_h or pad_w:
+        grid = F.pad(grid.unsqueeze(0), (0, pad_w, 0, pad_h), mode="replicate").squeeze(0)
+
     frame_u8 = _tensor_to_u8_hwc(grid)
     bitstream = _ffmpeg_encode(frame_u8, crf)
     dec_u8 = _ffmpeg_decode(bitstream, frame_u8.shape[0], frame_u8.shape[1])
     dec = _u8_hwc_to_tensor(dec_u8)
+    if pad_h or pad_w:
+        dec = dec[:, :gh, :gw]
     return _untile_grid(dec, rows, cols, lr.shape[2], lr.shape[3], n)
 
 
