@@ -17,3 +17,7 @@ data/corpus/*
 # Python bytecode. tools/ is a build/analysis toolchain, not a package.
 __pycache__/
 *.py[cod]
+
+# Seed sweep weights: regenerate with tools/run-seeds.sh. The aggregated
+# results in results/ are committed; 5+ model files per configuration are not.
+models/

@@ -1,0 +1,341 @@
+{
+ "schema": "aethervsr.seed-aggregate/1",
+ "models": "models/box/seed*.json",
+ "degradationProfileAtEval": "box",
+ "runs": [
+  {
+   "model": "seed1.json",
+   "seed": 1,
+   "weightsSha256": "b6dcbd2e3a2e774b9a659b88e42b9a23335085e9120193a188570519a87ebdc5",
+   "valPsnrDbAtCheckpoint": 27.481,
+   "valSsimAtCheckpoint": 0.85966,
+   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "degradation": "box",
+   "scores": {
+    "val": {
+     "neuralPsnr": 29.57711097869006,
+     "neuralSsim": 0.8592107431455092,
+     "catmullPsnr": 29.12183561108329,
+     "catmullSsim": 0.8411120914600112,
+     "bilinearPsnr": 28.069349134510215,
+     "deltaPsnrDb": 0.4552753676067699,
+     "deltaSsim": 0.018098651685497978,
+     "wins": "85/88",
+     "images": 88
+    },
+    "test": {
+     "neuralPsnr": 29.33783757833787,
+     "neuralSsim": 0.8491838898187802,
+     "catmullPsnr": 28.936342221719247,
+     "catmullSsim": 0.8303365979665591,
+     "bilinearPsnr": 27.881836228900486,
+     "deltaPsnrDb": 0.4014953566186222,
+     "deltaSsim": 0.018847291852221077,
+     "wins": "79/81",
+     "images": 81
+    },
+    "independent": {
+     "neuralPsnr": 33.84126389026642,
+     "neuralSsim": 0.9121256202459336,
+     "catmullPsnr": 33.49113110701243,
+     "catmullSsim": 0.9022509713967641,
+     "bilinearPsnr": 32.424638430277504,
+     "deltaPsnrDb": 0.3501327832539876,
+     "deltaSsim": 0.009874648849169413,
+     "wins": "57/60",
+     "images": 60
+    }
+   }
+  },
+  {
+   "model": "seed2.json",
+   "seed": 2,
+   "weightsSha256": "1eb4007171629f6a36f0ff292f70ca9d6680c9382a6355371c1a8e4671df98ea",
+   "valPsnrDbAtCheckpoint": 27.388,
+   "valSsimAtCheckpoint": 0.85844,
+   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "degradation": "box",
+   "scores": {
+    "val": {
+     "neuralPsnr": 29.411754743619397,
+     "neuralSsim": 0.8580188846046274,
+     "catmullPsnr": 29.101552123373207,
+     "catmullSsim": 0.8411120914600112,
+     "bilinearPsnr": 28.077759512446143,
+     "deltaPsnrDb": 0.3102026202461936,
+     "deltaSsim": 0.016906793144616215,
+     "wins": "85/88",
+     "images": 88
+    },
+    "test": {
+     "neuralPsnr": 29.224987500979577,
+     "neuralSsim": 0.8481167392966188,
+     "catmullPsnr": 28.914671886114427,
+     "catmullSsim": 0.8303365979665591,
+     "bilinearPsnr": 27.961505048068954,
+     "deltaPsnrDb": 0.31031561486514997,
+     "deltaSsim": 0.017780141330059663,
+     "wins": "77/81",
+     "images": 81
+    },
+    "independent": {
+     "neuralPsnr": 33.73371903101603,
+     "neuralSsim": 0.9112591663996379,
+     "catmullPsnr": 33.42565087477366,
+     "catmullSsim": 0.9022509713967641,
+     "bilinearPsnr": 32.43503403663635,
+     "deltaPsnrDb": 0.3080681562423706,
+     "deltaSsim": 0.009008195002873738,
+     "wins": "59/60",
+     "images": 60
+    }
+   }
+  },
+  {
+   "model": "seed3.json",
+   "seed": 3,
+   "weightsSha256": "a80e238696b7f65bb8ae453cbf171f499acfc3fff2a1e4a09f9c7e927bd23dad",
+   "valPsnrDbAtCheckpoint": 27.4,
+   "valSsimAtCheckpoint": 0.85849,
+   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "degradation": "box",
+   "scores": {
+    "val": {
+     "neuralPsnr": 29.421840581026945,
+     "neuralSsim": 0.8581931760365312,
+     "catmullPsnr": 29.068779322234068,
+     "catmullSsim": 0.8411120914600112,
+     "bilinearPsnr": 28.085557831959292,
+     "deltaPsnrDb": 0.3530612587928772,
+     "deltaSsim": 0.017081084576520054,
+     "wins": "84/88",
+     "images": 88
+    },
+    "test": {
+     "neuralPsnr": 29.213255570258625,
+     "neuralSsim": 0.848228935106301,
+     "catmullPsnr": 28.93556288730951,
+     "catmullSsim": 0.8303365979665591,
+     "bilinearPsnr": 27.916590343286963,
+     "deltaPsnrDb": 0.27769268294911326,
+     "deltaSsim": 0.017892337139741876,
+     "wins": "77/81",
+     "images": 81
+    },
+    "independent": {
+     "neuralPsnr": 33.6877658367157,
+     "neuralSsim": 0.9112827678521475,
+     "catmullPsnr": 33.4104011853536,
+     "catmullSsim": 0.9022509713967641,
+     "bilinearPsnr": 32.47550209363302,
+     "deltaPsnrDb": 0.27736465136210126,
+     "deltaSsim": 0.0090317964553833,
+     "wins": "56/60",
+     "images": 60
+    }
+   }
+  },
+  {
+   "model": "seed4.json",
+   "seed": 4,
+   "weightsSha256": "cb8092a61173f785fb1f5cfa8f61594121f747b2eed3b265908a3e976e90bb30",
+   "valPsnrDbAtCheckpoint": 27.402,
+   "valSsimAtCheckpoint": 0.85865,
+   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "degradation": "box",
+   "scores": {
+    "val": {
+     "neuralPsnr": 29.471666433594443,
+     "neuralSsim": 0.8583285415714438,
+     "catmullPsnr": 29.151742431250486,
+     "catmullSsim": 0.8411120914600112,
+     "bilinearPsnr": 28.041516014120795,
+     "deltaPsnrDb": 0.31992400234395807,
+     "deltaSsim": 0.01721645011143251,
+     "wins": "85/88",
+     "images": 88
+    },
+    "test": {
+     "neuralPsnr": 29.218661770408538,
+     "neuralSsim": 0.848351737599314,
+     "catmullPsnr": 28.933743989026105,
+     "catmullSsim": 0.8303365979665591,
+     "bilinearPsnr": 27.897064509215177,
+     "deltaPsnrDb": 0.28491778138243123,
+     "deltaSsim": 0.018015139632754855,
+     "wins": "75/81",
+     "images": 81
+    },
+    "independent": {
+     "neuralPsnr": 33.70176033178965,
+     "neuralSsim": 0.9114921003580093,
+     "catmullPsnr": 33.46198749542236,
+     "catmullSsim": 0.9022509713967641,
+     "bilinearPsnr": 32.454193433125816,
+     "deltaPsnrDb": 0.23977283636728922,
+     "deltaSsim": 0.009241128961245218,
+     "wins": "55/60",
+     "images": 60
+    }
+   }
+  },
+  {
+   "model": "seed5.json",
+   "seed": 5,
+   "weightsSha256": "abd3e7db60e164149eb61eb03bb2b8378b38abc8079765d3e4bb405d1756e404",
+   "valPsnrDbAtCheckpoint": 27.399,
+   "valSsimAtCheckpoint": 0.85869,
+   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "degradation": "box",
+   "scores": {
+    "val": {
+     "neuralPsnr": 29.470811919732526,
+     "neuralSsim": 0.8582898127761754,
+     "catmullPsnr": 29.12301868200302,
+     "catmullSsim": 0.8411120914600112,
+     "bilinearPsnr": 28.086991079828955,
+     "deltaPsnrDb": 0.34779323772950604,
+     "deltaSsim": 0.01717772131616419,
+     "wins": "87/88",
+     "images": 88
+    },
+    "test": {
+     "neuralPsnr": 29.220776396033205,
+     "neuralSsim": 0.8483511393452868,
+     "catmullPsnr": 28.946740568420033,
+     "catmullSsim": 0.8303365979665591,
+     "bilinearPsnr": 27.963053591457413,
+     "deltaPsnrDb": 0.27403582761317125,
+     "deltaSsim": 0.018014541378727666,
+     "wins": "78/81",
+     "images": 81
+    },
+    "independent": {
+     "neuralPsnr": 33.76991065343221,
+     "neuralSsim": 0.9115968406200409,
+     "catmullPsnr": 33.4883858760198,
+     "catmullSsim": 0.9022509713967641,
+     "bilinearPsnr": 32.4344908396403,
+     "deltaPsnrDb": 0.28152477741241455,
+     "deltaSsim": 0.009345869223276774,
+     "wins": "60/60",
+     "images": 60
+    }
+   }
+  }
+ ],
+ "aggregate": {
+  "val": {
+   "neuralPsnr": {
+    "mean": 29.47063693133267,
+    "std": 0.06554770989434194,
+    "min": 29.411754743619397,
+    "max": 29.57711097869006,
+    "n": 5
+   },
+   "neuralSsim": {
+    "mean": 0.8584082316268574,
+    "std": 0.0004642839318098715,
+    "min": 0.8580188846046274,
+    "max": 0.8592107431455092,
+    "n": 5
+   },
+   "catmullPsnr": {
+    "mean": 29.113385633988816,
+    "std": 0.03068059910173505,
+    "min": 29.068779322234068,
+    "max": 29.151742431250486,
+    "n": 5
+   },
+   "deltaPsnrDb": {
+    "mean": 0.35725129734386096,
+    "std": 0.05771185890760554,
+    "min": 0.3102026202461936,
+    "max": 0.4552753676067699,
+    "n": 5
+   },
+   "deltaSsim": {
+    "mean": 0.017296140166846188,
+    "std": 0.0004642839318098766,
+    "min": 0.016906793144616215,
+    "max": 0.018098651685497978,
+    "n": 5
+   }
+  },
+  "test": {
+   "neuralPsnr": {
+    "mean": 29.24310376320356,
+    "std": 0.05312610386029486,
+    "min": 29.213255570258625,
+    "max": 29.33783757833787,
+    "n": 5
+   },
+   "neuralSsim": {
+    "mean": 0.8484464882332603,
+    "std": 0.0004236431032320325,
+    "min": 0.8481167392966188,
+    "max": 0.8491838898187802,
+    "n": 5
+   },
+   "catmullPsnr": {
+    "mean": 28.933412310517866,
+    "std": 0.01164222204247609,
+    "min": 28.914671886114427,
+    "max": 28.946740568420033,
+    "n": 5
+   },
+   "deltaPsnrDb": {
+    "mean": 0.3096914526856976,
+    "std": 0.05323844008224157,
+    "min": 0.27403582761317125,
+    "max": 0.4014953566186222,
+    "n": 5
+   },
+   "deltaSsim": {
+    "mean": 0.01810989026670103,
+    "std": 0.0004236431032320297,
+    "min": 0.017780141330059663,
+    "max": 0.018847291852221077,
+    "n": 5
+   }
+  },
+  "independent": {
+   "neuralPsnr": {
+    "mean": 33.746883948644,
+    "std": 0.06152684277246648,
+    "min": 33.6877658367157,
+    "max": 33.84126389026642,
+    "n": 5
+   },
+   "neuralSsim": {
+    "mean": 0.9115512990951539,
+    "std": 0.00035102487285856013,
+    "min": 0.9112591663996379,
+    "max": 0.9121256202459336,
+    "n": 5
+   },
+   "catmullPsnr": {
+    "mean": 33.45551130771637,
+    "std": 0.03646236739894226,
+    "min": 33.4104011853536,
+    "max": 33.49113110701243,
+    "n": 5
+   },
+   "deltaPsnrDb": {
+    "mean": 0.29137264092763265,
+    "std": 0.040887768880149784,
+    "min": 0.23977283636728922,
+    "max": 0.3501327832539876,
+    "n": 5
+   },
+   "deltaSsim": {
+    "mean": 0.009300327698389689,
+    "std": 0.00035102487285855526,
+    "min": 0.009008195002873738,
+    "max": 0.009874648849169413,
+    "n": 5
+   }
+  }
+ },
+ "note": "Every run is listed. The spread here is the noise floor against which any configuration change must be judged."
+}
