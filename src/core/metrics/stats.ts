@@ -170,3 +170,25 @@ export class RateMeter {
  * upscale stage alone must stay well under it; see AGENTS.md.
  */
 export const FRAME_BUDGET_60HZ_MS = 1000 / 60;
+
+export interface Aggregate {
+  readonly mean: number;
+  readonly p50: number;
+  readonly p95: number;
+  readonly max: number;
+  readonly samples: number;
+}
+
+const EMPTY_AGGREGATE: Aggregate = { mean: NaN, p50: NaN, p95: NaN, max: NaN, samples: 0 };
+
+export function summarise(window: SampleWindow): Aggregate {
+  if (window.size === 0) return EMPTY_AGGREGATE;
+  return {
+    mean: window.mean(),
+    p50: window.quantile(0.5),
+    p95: window.quantile(0.95),
+    max: window.max(),
+    samples: window.size,
+  };
+}
+

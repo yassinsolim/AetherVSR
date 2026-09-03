@@ -5,6 +5,7 @@ import { buildUpsampleHeadShader } from '../neural/upsample-head.wgsl.js';
 import { buildBlitShader } from '../neural/blit.wgsl.js';
 import { weightBytes, type PackedModel } from '../neural/model.js';
 import type { EncodeContext, Upscaler, UpscalerConfig } from '../types.js';
+import { SampleWindow, summarise, type Aggregate } from '../metrics/stats.js';
 
 /**
  * Device features the neural backend wants.
@@ -29,11 +30,19 @@ const DEFAULT_OPTIONS: NeuralUpscalerOptions = {
   ingestFormat: 'rgba8unorm',
 };
 
-/** Per-stage GPU times from the most recent resolved timestamp read. */
+/**
+ * Per-stage GPU times, aggregated over a rolling window.
+ *
+ * These were single-frame snapshots until independent review pointed out that
+ * publishing three decimal places of one arbitrary frame, with no n and no
+ * statistic, is not a measurement. `stem` is null on the copy-import path,
+ * where the stem pass spends its one `timestampWrites` opening the whole-stage
+ * span instead of timing itself.
+ */
 export interface NeuralStageTiming {
-  readonly stemMs: number;
-  readonly bodyMs: number;
-  readonly headMs: number;
+  readonly stem: Aggregate | null;
+  readonly body: Aggregate;
+  readonly head: Aggregate;
 }
 
 /** Persistent GPU allocation, reported rather than estimated. */
@@ -111,13 +120,16 @@ export class NeuralUpscaler implements Upscaler {
   private outputTexture: GPUTexture | null = null;
   private sampler: GPUSampler | null = null;
   private lastIngestView: GPUTextureView | null = null;
+  private stemTimedThisFrame = true;
+  private readonly stemWindow = new SampleWindow(240);
+  private readonly bodyWindow = new SampleWindow(240);
+  private readonly headWindow = new SampleWindow(240);
 
   private querySet: GPUQuerySet | null = null;
   private resolveBuf: GPUBuffer | null = null;
   private stagingBuf: GPUBuffer | null = null;
   private reading = false;
   private pendingRead = false;
-  private timing: NeuralStageTiming | null = null;
   private stemDispatch: [number, number] = [0, 0];
   private bodyDispatch: [number, number, number] = [0, 0, 0];
   private headDispatch: [number, number] = [0, 0];
@@ -146,7 +158,19 @@ export class NeuralUpscaler implements Upscaler {
    * overlap and the gaps between them are real time.
    */
   get stageTiming(): NeuralStageTiming | null {
-    return this.timing;
+    if (this.bodyWindow.size === 0) return null;
+    return {
+      stem: this.stemWindow.size > 0 ? summarise(this.stemWindow) : null,
+      body: summarise(this.bodyWindow),
+      head: summarise(this.headWindow),
+    };
+  }
+
+  /** Clears the rolling per-stage windows, so a run can be re-measured. */
+  resetStageTiming(): void {
+    this.stemWindow.reset();
+    this.bodyWindow.reset();
+    this.headWindow.reset();
   }
 
   configure(config: UpscalerConfig): void {
@@ -447,9 +471,29 @@ export class NeuralUpscaler implements Upscaler {
         ? { timestampWrites: { querySet: qs, beginningOfPassWriteIndex: begin, endOfPassWriteIndex: end } }
         : {};
 
+    // On the copy-import path the ingest pass does not exist, so nothing would
+    // ever write the pipeline's opening timestamp while the present pass still
+    // wrote its closing one. The resolved "span" was then the difference
+    // between an unwritten slot and a real timestamp - independent review saw a
+    // p50 of 1.6e8 ms and a spurious fallback. The stem opens the whole-stage
+    // span instead. A pass carries one `timestampWrites`, so the stem's own
+    // per-pass span is what gives way; `stageTiming.stemMs` is null there and
+    // the overlay says so, which is the right trade because the whole-stage
+    // figure is the published one.
+    const stemOpensWholeStage =
+      ctx.timing !== null && ctx.frame.kind !== 'external' && ctx.timing.beginIndex !== undefined;
+    this.stemTimedThisFrame = !stemOpensWholeStage && qs !== null;
+
     const stemPass = ctx.encoder.beginComputePass({
       label: 'aethervsr:nn:stem',
-      ...stamp(0, 1),
+      ...(stemOpensWholeStage && ctx.timing
+        ? {
+            timestampWrites: {
+              querySet: ctx.timing.querySet,
+              beginningOfPassWriteIndex: ctx.timing.beginIndex,
+            },
+          }
+        : stamp(0, 1)),
     });
     stemPass.setPipeline(this.stemPipeline);
     stemPass.setBindGroup(0, stemGroup);
@@ -543,10 +587,14 @@ export class NeuralUpscaler implements Upscaler {
         const end = t[b];
         return begin !== undefined && end !== undefined ? Number(end - begin) / 1_000_000 : Number.NaN;
       };
-      const stem = ms(0, 1);
-      if (stem > 0) {
-        this.timing = { stemMs: stem, bodyMs: ms(2, 3), headMs: ms(4, 5) };
-      }
+      // A pass that did not write its slots yields a nonsense difference, so
+      // only finite positive spans are recorded.
+      const push = (w: SampleWindow, v: number): void => {
+        if (Number.isFinite(v) && v > 0) w.push(v);
+      };
+      if (this.stemTimedThisFrame) push(this.stemWindow, ms(0, 1));
+      push(this.bodyWindow, ms(2, 3));
+      push(this.headWindow, ms(4, 5));
       this.reading = false;
       this.pendingRead = false;
     });
@@ -587,7 +635,7 @@ export class NeuralUpscaler implements Upscaler {
     this.querySet = null;
     this.resolveBuf = null;
     this.stagingBuf = null;
-    this.timing = null;
+    this.resetStageTiming();
     this.pendingRead = false;
     this.reading = false;
     this.ping = null;

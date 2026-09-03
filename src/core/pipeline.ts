@@ -2,6 +2,9 @@ import { FrameImporter } from './acquisition/frame-importer.js';
 import { VideoFrameSource, type FrameClockKind, type PlaybackQuality } from './acquisition/video-source.js';
 import type { GpuContext } from './gpu/device.js';
 import { GpuTimer } from './metrics/gpu-timer.js';
+import { summarise, type Aggregate } from './metrics/stats.js';
+
+export type { Aggregate } from './metrics/stats.js';
 import { RateMeter, SampleWindow } from './metrics/stats.js';
 import { CanvasTarget } from './present/canvas-target.js';
 import type { FrameTextureKind, FrameTick, Size, Upscaler } from './types.js';
@@ -75,27 +78,6 @@ export interface PipelineOptions {
   readonly forceCopyImport?: boolean;
 }
 
-export interface Aggregate {
-  readonly mean: number;
-  readonly p50: number;
-  readonly p95: number;
-  readonly max: number;
-  readonly samples: number;
-}
-
-const EMPTY_AGGREGATE: Aggregate = { mean: NaN, p50: NaN, p95: NaN, max: NaN, samples: 0 };
-
-function summarise(window: SampleWindow): Aggregate {
-  if (window.size === 0) return EMPTY_AGGREGATE;
-  return {
-    mean: window.mean(),
-    p50: window.quantile(0.5),
-    p95: window.quantile(0.95),
-    max: window.max(),
-    samples: window.size,
-  };
-}
-
 const ZERO_QUALITY: PlaybackQuality = {
   totalVideoFrames: 0,
   droppedVideoFrames: 0,
@@ -139,6 +121,8 @@ export class VideoPipeline {
   private readonly renderRate = new RateMeter(RATE_WINDOW_MS);
   private readonly cpuFrame = new SampleWindow(SAMPLE_CAPACITY);
   private readonly gpuPass = new SampleWindow(SAMPLE_CAPACITY);
+  /** Receives every resolved whole-stage GPU sample, in milliseconds. */
+  onGpuPassSample: ((ms: number) => void) | null = null;
   private readonly callbackLatency = new SampleWindow(SAMPLE_CAPACITY);
   private readonly decode = new SampleWindow(SAMPLE_CAPACITY);
 
@@ -196,7 +180,12 @@ export class VideoPipeline {
     );
     this.target = new CanvasTarget(canvas);
     this.timer = gpu.capabilities.timestampQuery
-      ? new GpuTimer(gpu.device, (ms) => this.gpuPass.push(ms))
+      ? new GpuTimer(gpu.device, (ms) => {
+          this.gpuPass.push(ms);
+          // Raw per-frame evidence, not the trailing aggregate. A controller
+          // that medians an already-medianed window reacts seconds late.
+          this.onGpuPassSample?.(ms);
+        })
       : null;
   }
 

@@ -7,7 +7,7 @@ import {
 import { VideoPipeline, type PipelineStats } from './core/pipeline.js';
 import { BaselineScaler, UPSCALER_OPTIONAL_FEATURES } from './core/upscale/baseline-scaler.js';
 import { NeuralUpscaler, NEURAL_OPTIONAL_FEATURES } from './core/upscale/neural-upscaler.js';
-import { BudgetGuard } from './core/upscale/budget-guard.js';
+import { BudgetGuard, type BudgetDecision } from './core/upscale/budget-guard.js';
 import { loadModel, type PackedModel } from './core/neural/model.js';
 import type { BaselineFilter } from './core/upscale/baseline.wgsl.js';
 import { DiagnosticOverlay, OVERLAY_INTERVAL_MS } from './ui/overlay.js';
@@ -192,6 +192,7 @@ function main(gpu: GpuContext): void {
     budget: {
       state: guard.current,
       forced: guard.isForced,
+      probing: guard.isProbing,
       lastReason: lastBudgetReason,
       lastMedianMs: lastBudgetMedian,
     },
@@ -206,17 +207,7 @@ function main(gpu: GpuContext): void {
   let lastBudgetMedian = Number.NaN;
   let userChoseNeural = params.get('upscaler') === NEURAL_VALUE;
 
-  (window as unknown as Record<string, unknown>)['aethervsrForceOverBudget'] = (on: boolean) => {
-    guard.setForced(on);
-    return { forced: guard.isForced, state: guard.current };
-  };
-
-  setInterval(() => {
-    if (!userChoseNeural || !neuralModel) return;
-    const stats = pipeline.stats(performance.now());
-    // No GPU timing means no evidence, and the guard must not act on a guess.
-    if (!stats.gpuPassMs) return;
-    const decision = guard.record(stats.gpuPassMs.p50);
+  function applyBudgetDecision(decision: BudgetDecision): void {
     lastBudgetReason = decision.reason;
     lastBudgetMedian = decision.medianMs;
     if (!decision.changed) return;
@@ -225,10 +216,31 @@ function main(gpu: GpuContext): void {
       pipeline.setUpscaler(new BaselineScaler(DEFAULT_FILTER));
       setStatus(`neural stage over budget (${decision.reason}) — using ${DEFAULT_FILTER}`, 'warn');
     } else {
-      neuralInstance = new NeuralUpscaler(neuralModel);
+      neuralInstance = new NeuralUpscaler(neuralModel!);
       pipeline.setUpscaler(neuralInstance);
-      setStatus(`neural stage back within budget (${decision.reason})`, 'info');
+      setStatus(decision.reason, 'info');
     }
+  }
+
+  (window as unknown as Record<string, unknown>)['aethervsrForceOverBudget'] = (on: boolean) => {
+    applyBudgetDecision(guard.setForced(on, performance.now()));
+    return { forced: guard.isForced, state: guard.current };
+  };
+
+  // Every resolved whole-stage sample, and only ever one measured while the
+  // neural stage was the thing running. Handing the guard the baseline's
+  // cheaper timings is what made an earlier version cycle.
+  pipeline.onGpuPassSample = (ms) => {
+    if (!userChoseNeural || !neuralModel || !neuralInstance) return;
+    applyBudgetDecision(guard.record(ms, performance.now()));
+  };
+
+  // While in fallback nothing neural is being measured, so the only thing that
+  // can change the state is the probe timer.
+  setInterval(() => {
+    if (!userChoseNeural || !neuralModel) return;
+    if (guard.current !== 'fallback') return;
+    applyBudgetDecision(guard.tick(performance.now()));
   }, 250);
 
   resetButton.addEventListener('click', () => pipeline.resetMeasurements());
