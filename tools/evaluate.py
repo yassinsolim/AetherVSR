@@ -84,9 +84,49 @@ def ssim(a: torch.Tensor, b: torch.Tensor) -> float:
     return float((((2 * mu_xy + c1) * (2 * sxy + c2)) / ((mu_xx + mu_yy + c1) * (sxx + syy + c2))).mean())
 
 
-def catmull_rom_2x(lr: torch.Tensor) -> torch.Tensor:
-    """Catmull-Rom bicubic 2x, matching the production baseline's kernel (a=-0.5)."""
-    return F.interpolate(lr, scale_factor=2, mode="bicubic", align_corners=False).clamp(0, 1)
+def _keys_weights(t: torch.Tensor, a: float) -> torch.Tensor:
+    """Keys cubic taps for fractional offsets t in [0,1), shape (..., 4)."""
+    def far(x: torch.Tensor) -> torch.Tensor:
+        return a * x**3 - 5 * a * x**2 + 8 * a * x - 4 * a
+
+    def near(x: torch.Tensor) -> torch.Tensor:
+        return (a + 2) * x**3 - (a + 3) * x**2 + 1
+
+    return torch.stack([far(t + 1.0), near(t), near(1.0 - t), far(2.0 - t)], dim=-1)
+
+
+def catmull_rom_2x(lr: torch.Tensor, a: float = -0.5) -> torch.Tensor:
+    """True Catmull-Rom 2x, matching the production WGSL baseline.
+
+    `F.interpolate(mode="bicubic")` is Keys with **a = -0.75**, not -0.5, so it
+    is a visibly sharper filter than the one AetherVSR ships. Scoring the neural
+    stage against it compares against a baseline that is not in the product -
+    exactly the hidden resampling mismatch a reviewer should hunt for.
+    `src/core/upscale/baseline.wgsl.ts` documents the shipped kernel as
+    "B = 0, C = 0.5", which is Keys a = -0.5.
+    """
+    n, c, h, w = lr.shape
+    device, dtype = lr.device, lr.dtype
+
+    def axis(size_out: int, size_in: int) -> tuple[torch.Tensor, torch.Tensor]:
+        # Half-pixel centres: what align_corners=False and the WGSL sampler use.
+        pos = (torch.arange(size_out, device=device, dtype=dtype) + 0.5) * (size_in / size_out) - 0.5
+        base = torch.floor(pos)
+        return base.long(), pos - base
+
+    yb, yt = axis(h * 2, h)
+    xb, xt = axis(w * 2, w)
+    wy, wx = _keys_weights(yt, a), _keys_weights(xt, a)
+
+    padded = F.pad(lr, (2, 2, 2, 2), mode="replicate")
+    out = torch.zeros(n, c, h * 2, w * 2, device=device, dtype=dtype)
+    for dy in range(4):
+        band = padded.index_select(2, (yb + dy - 1 + 2).clamp(0, h + 3))
+        acc = torch.zeros(n, c, h * 2, w * 2, device=device, dtype=dtype)
+        for dx in range(4):
+            acc = acc + band.index_select(3, (xb + dx - 1 + 2).clamp(0, w + 3)) * wx[:, dx].view(1, 1, 1, -1)
+        out = out + acc * wy[:, dy].view(1, 1, -1, 1)
+    return out.clamp(0, 1)
 
 
 def load_image(path: str, max_side: int = 1280) -> torch.Tensor | None:

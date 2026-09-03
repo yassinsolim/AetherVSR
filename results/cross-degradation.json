@@ -31,89 +31,89 @@
  "matrix": {
   "box": {
    "box": {
-    "deltaPsnrDbMean": 0.2963304360707601,
-    "deltaPsnrDbStd": 0.08849654597125586,
-    "neuralPsnrMean": 33.8129581451416,
-    "catmullPsnrMean": 33.51662770907084,
+    "deltaPsnrDbMean": 0.41621921857198074,
+    "deltaPsnrDbStd": 0.08537709659468931,
+    "neuralPsnrMean": 33.815763298670454,
+    "catmullPsnrMean": 33.39954408009847,
     "seeds": 5
    },
    "bicubic": {
-    "deltaPsnrDbMean": 0.4567224820454915,
-    "deltaPsnrDbStd": 0.0844127728784051,
+    "deltaPsnrDbMean": 0.6167752424875895,
+    "deltaPsnrDbStd": 0.09113762131633976,
     "neuralPsnrMean": 33.836959807078046,
-    "catmullPsnrMean": 33.38023732503255,
+    "catmullPsnrMean": 33.220184564590454,
     "seeds": 5
    },
    "lanczos": {
-    "deltaPsnrDbMean": 0.2009822686513265,
-    "deltaPsnrDbStd": 0.0894286494607195,
-    "neuralPsnrMean": 33.80734477043152,
-    "catmullPsnrMean": 33.60636250178019,
+    "deltaPsnrDbMean": 0.34403247833251954,
+    "deltaPsnrDbStd": 0.09004625256093353,
+    "neuralPsnrMean": 33.80420735677083,
+    "catmullPsnrMean": 33.460174878438316,
     "seeds": 5
    },
    "h264_high": {
-    "deltaPsnrDbMean": 0.1959623654683431,
-    "deltaPsnrDbStd": 0.06137112019203562,
+    "deltaPsnrDbMean": 0.2919476985931396,
+    "deltaPsnrDbStd": 0.06137112019203561,
     "neuralPsnrMean": 32.171531693140665,
-    "catmullPsnrMean": 31.97556932767232,
+    "catmullPsnrMean": 31.879583994547527,
     "seeds": 5
    },
    "h264_typical": {
-    "deltaPsnrDbMean": 0.1453820546468099,
-    "deltaPsnrDbStd": 0.07743645259078082,
-    "neuralPsnrMean": 31.44630495707194,
-    "catmullPsnrMean": 31.30092290242513,
+    "deltaPsnrDbMean": 0.18025008837381998,
+    "deltaPsnrDbStd": 0.052095341617983355,
+    "neuralPsnrMean": 31.471570094426472,
+    "catmullPsnrMean": 31.291320006052654,
     "seeds": 5
    },
    "h264_poor": {
-    "deltaPsnrDbMean": 0.030820226669311522,
-    "deltaPsnrDbStd": 0.07839615217137896,
-    "neuralPsnrMean": 29.937521950403852,
-    "catmullPsnrMean": 29.90670172373454,
+    "deltaPsnrDbMean": 0.04171212514241536,
+    "deltaPsnrDbStd": 0.035861974630838275,
+    "neuralPsnrMean": 29.956037918726604,
+    "catmullPsnrMean": 29.914325793584187,
     "seeds": 5
    }
   },
   "realistic": {
    "box": {
-    "deltaPsnrDbMean": 0.021377770105997722,
-    "deltaPsnrDbStd": 0.11646808614267276,
-    "neuralPsnrMean": 33.4842963218689,
-    "catmullPsnrMean": 33.4629185517629,
+    "deltaPsnrDbMean": 0.09098922411600749,
+    "deltaPsnrDbStd": 0.07514503443033518,
+    "neuralPsnrMean": 33.49053330421448,
+    "catmullPsnrMean": 33.39954408009847,
     "seeds": 5
    },
    "bicubic": {
-    "deltaPsnrDbMean": 0.4180468877156575,
-    "deltaPsnrDbStd": 0.07681112093601147,
-    "neuralPsnrMean": 33.759003957112625,
-    "catmullPsnrMean": 33.34095706939697,
+    "deltaPsnrDbMean": 0.5450114409128826,
+    "deltaPsnrDbStd": 0.07019171358855561,
+    "neuralPsnrMean": 33.765196005503334,
+    "catmullPsnrMean": 33.220184564590454,
     "seeds": 5
    },
    "lanczos": {
-    "deltaPsnrDbMean": 0.11126359303792317,
-    "deltaPsnrDbStd": 0.10627341371956414,
-    "neuralPsnrMean": 33.70389083226522,
-    "catmullPsnrMean": 33.5926272392273,
+    "deltaPsnrDbMean": 0.27192368507385256,
+    "deltaPsnrDbStd": 0.07816960350871399,
+    "neuralPsnrMean": 33.73209856351217,
+    "catmullPsnrMean": 33.460174878438316,
     "seeds": 5
    },
    "h264_high": {
-    "deltaPsnrDbMean": 0.4479109287261963,
-    "deltaPsnrDbStd": 0.08358070136965956,
-    "neuralPsnrMean": 32.414193058013915,
-    "catmullPsnrMean": 31.96628212928772,
+    "deltaPsnrDbMean": 0.5715927759806314,
+    "deltaPsnrDbStd": 0.05522943017357676,
+    "neuralPsnrMean": 32.45117677052816,
+    "catmullPsnrMean": 31.879583994547527,
     "seeds": 5
    },
    "h264_typical": {
-    "deltaPsnrDbMean": 0.4018890221913655,
-    "deltaPsnrDbStd": 0.04495947047787261,
-    "neuralPsnrMean": 31.676107533772786,
-    "catmullPsnrMean": 31.27421851158142,
+    "deltaPsnrDbMean": 0.3965887705485026,
+    "deltaPsnrDbStd": 0.03812925023084094,
+    "neuralPsnrMean": 31.687908776601155,
+    "catmullPsnrMean": 31.291320006052654,
     "seeds": 5
    },
    "h264_poor": {
-    "deltaPsnrDbMean": 0.09710542360941568,
-    "deltaPsnrDbStd": 0.041076913074513846,
-    "neuralPsnrMean": 30.036637194951375,
-    "catmullPsnrMean": 29.939531771341954,
+    "deltaPsnrDbMean": 0.14737898508707684,
+    "deltaPsnrDbStd": 0.023624709733554922,
+    "neuralPsnrMean": 30.061704778671263,
+    "catmullPsnrMean": 29.914325793584187,
     "seeds": 5
    }
   }

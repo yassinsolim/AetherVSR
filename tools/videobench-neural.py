@@ -24,7 +24,7 @@ import torch
 import torch.nn.functional as F
 from PIL import Image
 
-from evaluate import load_model, psnr, ssim
+from evaluate import catmull_rom_2x, load_model, psnr, ssim
 
 
 def load_png(path: str) -> torch.Tensor:
@@ -96,9 +96,12 @@ def main() -> int:
                 lr = load_png(lr_path).to(device)
                 with torch.no_grad():
                     out = model(lr).clamp(0, 1)
-                # Catmull-Rom on the identical decoded frame, so the comparison
-                # cannot be moved by a decode or geometry difference.
-                cat = F.interpolate(lr, scale_factor=2, mode="bicubic", align_corners=False).clamp(0, 1)
+                # The *production* Catmull-Rom (Keys a=-0.5), verified against
+                # the shipped WGSL to within 8-bit rounding. `F.interpolate`
+                # bicubic is a=-0.75 and differs from the shipped filter by up
+                # to 17.6/255, which would have compared the neural stage
+                # against a baseline the product does not contain.
+                cat = catmull_rom_2x(lr)
                 if out.shape != ref.shape:
                     raise SystemExit(
                         f"geometry mismatch {category}/{tier} frame {idx}: "

@@ -1,0 +1,41 @@
+{
+ "schema": "aethervsr.kernel-parity/1",
+ "why": "Every Milestone 4.5 delta is neural minus Catmull-Rom. If the Python Catmull-Rom is not the filter the product ships, every one of those numbers compares the neural stage against a baseline that does not exist. This records the check.",
+ "defect": {
+  "found": "tools/evaluate.py and tools/videobench-neural.py used torch F.interpolate(mode='bicubic'), which is Keys cubic with a = -0.75.",
+  "shipped": "src/core/upscale/baseline.wgsl.ts documents the production filter as 'B = 0, C = 0.5', i.e. Keys a = -0.5 (Catmull-Rom).",
+  "consequence": "a = -0.75 is a sharper filter than the product ships, so the neural stage was being scored against a stronger opponent than the one it replaces.",
+  "invalidated": [
+   "all seed aggregate deltas (val, test, independent) measured before the fix",
+   "the first cross-degradation matrix",
+   "the first ground-truth video deltas"
+  ],
+  "action": "Kernel reimplemented as separable Keys a = -0.5, then every affected evaluation was rerun. No pre-fix delta is carried forward."
+ },
+ "fixture": {
+  "input": "32x32 deterministic pseudo-random RGB image, LCG seed 12345, alpha 255",
+  "path": "uploaded to a GPU texture, upscaled 2x by the production BaselineScaler('catmull-rom') through its real render pass, read back via copyTextureToBuffer",
+  "comparison": "the same 32x32 LR array upscaled by tools/evaluate.py catmull_rom_2x, compared per channel in 8-bit units",
+  "scope": "single image, interior and full frame both measured; borders included because replicate padding and the WGSL sampler's clamp-to-edge address mode agree at this scale. Not a multi-image or multi-geometry sweep."
+ },
+ "measured": {
+  "python_a_minus_0_5_vs_production_wgsl": {
+   "maxAbsDiff255": 0.557,
+   "meanAbsDiff255": 0.2475,
+   "reading": "Below one 8-bit quantisation step. The production output is quantised to rgba8unorm, so a max near 0.5/255 is rounding, not disagreement."
+  },
+  "pytorch_bicubic_a_minus_0_75_vs_production_wgsl": {
+   "maxAbsDiff255": 17.588,
+   "meanAbsDiff255": 4.2205,
+   "reading": "Thirty times the quantisation step. A different filter, not a rounding difference."
+  }
+ },
+ "kernel_check": {
+  "phase_0_25_taps_a_minus_0_5": [-0.0703, 0.8672, 0.2266, -0.0234],
+  "tapSum": 1.0,
+  "impulseNegativeLobeObserved": -0.061,
+  "impulseNegativeLobePredicted": -0.0610,
+  "constantImagePreserved": true
+ },
+ "tolerance": "Parity is asserted at <= 1.0/255 max absolute difference on this fixture. Anything larger would mean the Python baseline is not the shipped filter."
+}
