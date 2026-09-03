@@ -13,7 +13,7 @@ import type { ModelFile } from '../core/neural/model.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
-import { evaluateScalers } from './quality-bench.js';
+import { evaluateScalers, evaluateAgainstReference } from './quality-bench.js';
 import type { QualityScores } from './quality.js';
 import { IngestBench, type IngestBenchConfig, type IngestBenchStats } from './ingest-bench.js';
 import type { BaselineFilter } from '../core/upscale/baseline.wgsl.js';
@@ -275,6 +275,45 @@ function main(gpu: GpuContext): void {
     const result = await verifyGolden(gpu.device, model, golden, useF16);
     setStatus(result.passed ? 'golden comparison passed' : 'golden comparison FAILED');
     return result;
+  };
+
+  w['aethervsrQualityAll'] = async (modelUrl = '/models/aethersr-c16d2.json'): Promise<unknown> => {
+    setStatus('evaluating image quality: synthetic reference and natural images…');
+    const { loadModel } = await import('../core/neural/model.js');
+    const { NeuralUpscaler } = await import('../core/upscale/neural-upscaler.js');
+    const model = await loadModel(modelUrl);
+    const filters: BaselineFilter[] = ['bilinear', 'catmull-rom'];
+
+    const neural = new NeuralUpscaler(model);
+    const synthetic = await evaluateScalers(gpu.device, filters, { width: 2560, height: 1440 }, [
+      { label: `neural-C${model.features}D${model.depth}`, upscaler: neural },
+    ]);
+    neural.destroy();
+
+    // Natural images, each scored on its own so per-image results are visible
+    // and a single flattering picture cannot carry an average.
+    const manifest = (await (await fetch('/eval/manifest.json')).json()) as {
+      images: { file: string; licence: string }[];
+      provenance: string;
+    };
+    const perImage: unknown[] = [];
+    for (const entry of manifest.images) {
+      const bitmap = await createImageBitmap(await (await fetch(`/eval/${entry.file}`)).blob());
+      const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const ctx2d = canvas.getContext('2d');
+      if (!ctx2d) throw new Error('2d context unavailable for evaluation staging');
+      ctx2d.drawImage(bitmap, 0, 0);
+      const reference = ctx2d.getImageData(0, 0, bitmap.width, bitmap.height);
+      bitmap.close();
+      const nn = new NeuralUpscaler(model);
+      const scores = await evaluateAgainstReference(gpu.device, reference, filters, [
+        { label: `neural-C${model.features}D${model.depth}`, upscaler: nn },
+      ]);
+      nn.destroy();
+      perImage.push({ file: entry.file, licence: entry.licence, scores });
+    }
+    setStatus('quality evaluation complete');
+    return { synthetic, natural: { provenance: manifest.provenance, perImage } };
   };
 
   w['aethervsrRoofline'] = async (useF16 = true): Promise<RooflineResult[]> => {

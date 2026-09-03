@@ -1,0 +1,73 @@
+{
+ "purpose": "natural-image evaluation set for 2x super-resolution",
+ "count": 8,
+ "size": 512,
+ "seed": 4242,
+ "provenance": "Centre crops of images drawn from the CC0 training corpus. Not an independent test set: the same photographs were seen during training, though at different crops. Reported alongside the deterministic generated reference, never instead of it.",
+ "images": [
+  {
+   "file": "eval00.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/%22A_Seaport%2C%22_title_page_from_%22Various_Ships_and_Views_of_Amsterdam%2C_part_III%22_MET_DP832775.jpg/1920px-%22A_Seaport%2C%22_title_page_from_%22Various_Ships_and_Views_of_Amsterdam%2C_part_III%22_MET_DP832775.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "title": "File:\"A Seaport,\" title page from \"Various Ships and Views of Amsterdam, part III\" MET DP832775.jpg",
+   "corpus_sha256": "dceccbd209ffdf053c14084ac5691122562cb950adcff442d5d6d23401091445"
+  },
+  {
+   "file": "eval01.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/0b/%22_A_Lion%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_sf13-160-8r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+   "title": "File:\" A Lion\", Folio from a Dispersed Nuzhatnama-i \u2018Ala\u2019i of Shahmardan ibn Abi\u2019l Khayr MET sf13-160-8r.jpg",
+   "corpus_sha256": "68d220cb1c822137204290a03d6d2c96934e0e4963651e6f49fc199f6e693ea6"
+  },
+  {
+   "file": "eval02.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/%221726-1985_Openbare_Werken_Alkmaar%22_tekstdia_voor_presentatie_Tussen_ongeveer_de_jaren_1960_en_1990_-_RAA-DMGA-00427_-_RAA_Elsinga.jpg/1920px-%221726-1985_Openbare_Werken_Alkmaar%22_tekstdia_voor_presentatie_Tussen_ongeveer_de_jaren_1960_en_1990_-_RAA-DMGA-00427_-_RAA_Elsinga.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "title": "File:\"1726-1985 Openbare Werken Alkmaar\" tekstdia voor presentatie Tussen ongeveer de jaren 1960 en 1990 - RAA-DMGA-00427 - RAA Elsinga.jpg",
+   "corpus_sha256": "423a3cee64f51e7f6d8f7e781020b4e190ee0eff605880977b0ad1d5fe5edc17"
+  },
+  {
+   "file": "eval03.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/%221._Mai_im_Grunewald%22_Demonstration_in_Berlin_at_1st_of_May_2018_08.jpg/1920px-%221._Mai_im_Grunewald%22_Demonstration_in_Berlin_at_1st_of_May_2018_08.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "title": "File:\"1. Mai im Grunewald\" Demonstration in Berlin at 1st of May 2018 08.jpg",
+   "corpus_sha256": "15fa46404562551da73b51677eaa91e5e762dcd8845de6e84f121400e77aea04"
+  },
+  {
+   "file": "eval04.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/ce/%22Bahram_Gur_in_the_Sandal_Palace_on_Thursday%22%2C_Folio_230_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-7-f230r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+   "title": "File:\"Bahram Gur in the Sandal Palace on Thursday\", Folio 230 from a Khamsa (Quintet) of Nizami MET sf13-228-7-f230r.jpg",
+   "corpus_sha256": "34fb467cbbae73437164f3a89e9494741c9412f33fd3048a7afec7d71c0b0f94"
+  },
+  {
+   "file": "eval05.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c1/%22A_Gathering_of_Court_Women%22%2C_Folio_from_the_Davis_Album_MET_DP159389_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+   "title": "File:\"A Gathering of Court Women\", Folio from the Davis Album MET DP159389 (cropped).jpg",
+   "corpus_sha256": "a3db94e9ab1bfce7695ba08e0504e124bf190ab6fb10123e6abca1bbb2941d7a"
+  },
+  {
+   "file": "eval06.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/%22Allow_Me_to_Examine_the_Young_Lady%22_%28The_Mistress_of_the_Parsonage%2C_in_Harper%27s_Weekly%29_MET_DP875121.jpg/1920px-%22Allow_Me_to_Examine_the_Young_Lady%22_%28The_Mistress_of_the_Parsonage%2C_in_Harper%27s_Weekly%29_MET_DP875121.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "title": "File:\"Allow Me to Examine the Young Lady\" (The Mistress of the Parsonage, in Harper's Weekly) MET DP875121.jpg",
+   "corpus_sha256": "7d5bbb791c283a073b4f3f21f3e03608eb3e087305f1c719e46425c908604dbd"
+  },
+  {
+   "file": "eval07.png",
+   "size": 512,
+   "licence": "CC0",
+   "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP331524.jpg/1920px-%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP331524.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "title": "File:\"A Scene of Conviviality at Court\", Folio from a Divan (Collected Works) of Mir 'Ali Shir Nava'i MET DP331524.jpg",
+   "corpus_sha256": "ce49bc73b8a803b8a52077d03ea848129de9afc205bf4402aa2131a39d70429d"
+  }
+ ]
+}

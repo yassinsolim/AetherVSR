@@ -1,4 +1,4 @@
-import type { Size } from '../core/types.js';
+import type { Size, Upscaler } from '../core/types.js';
 import { BaselineScaler } from '../core/upscale/baseline-scaler.js';
 import type { BaselineFilter } from '../core/upscale/baseline.wgsl.js';
 import { boxDownsample2x, generateReference, score, type QualityScores } from './quality.js';
@@ -17,8 +17,27 @@ export async function evaluateScalers(
   device: GPUDevice,
   filters: readonly BaselineFilter[],
   hr: Size = { width: 2560, height: 1440 },
+  extra: readonly { readonly label: string; readonly upscaler: Upscaler }[] = [],
 ): Promise<QualityScores[]> {
   const reference = generateReference(hr.width, hr.height);
+  return evaluateAgainstReference(device, reference, filters, extra);
+}
+
+/**
+ * Scores every scaler against one high-resolution reference.
+ *
+ * The reference is downsampled by an exact 2x box filter - the same degradation
+ * the model was trained to invert, and the same one `quality.ts` has always
+ * used - so a scaler is being asked to undo a known operation rather than to
+ * guess at an unknown one.
+ */
+export async function evaluateAgainstReference(
+  device: GPUDevice,
+  reference: ImageData,
+  filters: readonly BaselineFilter[],
+  extra: readonly { readonly label: string; readonly upscaler: Upscaler }[] = [],
+): Promise<QualityScores[]> {
+  const hr: Size = { width: reference.width, height: reference.height };
   const lowRes = boxDownsample2x(reference);
   const lrBitmap = await createImageBitmap(lowRes);
 
@@ -55,6 +74,36 @@ export async function evaluateScalers(
 
   const results: QualityScores[] = [];
 
+  const runOne = async (label: string, scaler: Upscaler, ownsScaler: boolean): Promise<void> => {
+    scaler.configure({
+      device,
+      source: { width: lowRes.width, height: lowRes.height },
+      target: hr,
+      targetFormat: format,
+      sourceKind: 'sampled',
+    });
+    const encoder = device.createCommandEncoder();
+    scaler.encode({ encoder, frame: { kind: 'sampled', view: lrView }, target: targetView, timing: null });
+    encoder.copyTextureToBuffer(
+      { texture: target },
+      { buffer: readback, bytesPerRow, rowsPerImage: hr.height },
+      { width: hr.width, height: hr.height },
+    );
+    device.queue.submit([encoder.finish()]);
+    await readback.mapAsync(GPUMapMode.READ);
+    const padded = new Uint8Array(readback.getMappedRange().slice(0));
+    readback.unmap();
+    const tight = new Uint8Array(unpaddedBytesPerRow * hr.height);
+    for (let y = 0; y < hr.height; y++) {
+      tight.set(
+        padded.subarray(y * bytesPerRow, y * bytesPerRow + unpaddedBytesPerRow),
+        y * unpaddedBytesPerRow,
+      );
+    }
+    results.push(score(label, reference, tight));
+    if (ownsScaler) scaler.destroy();
+  };
+
   for (const filter of filters) {
     const scaler = new BaselineScaler(filter);
     scaler.configure({
@@ -64,28 +113,12 @@ export async function evaluateScalers(
       targetFormat: format,
       sourceKind: 'sampled',
     });
-
-    const encoder = device.createCommandEncoder();
-    scaler.encode({ encoder, frame: { kind: 'sampled', view: lrView }, target: targetView, timing: null });
-    encoder.copyTextureToBuffer(
-      { texture: target },
-      { buffer: readback, bytesPerRow, rowsPerImage: hr.height },
-      { width: hr.width, height: hr.height },
-    );
-    device.queue.submit([encoder.finish()]);
-
-    await readback.mapAsync(GPUMapMode.READ);
-    const padded = new Uint8Array(readback.getMappedRange().slice(0));
-    readback.unmap();
-
-    // Strip the row padding introduced for the copy alignment.
-    const tight = new Uint8Array(unpaddedBytesPerRow * hr.height);
-    for (let y = 0; y < hr.height; y++) {
-      tight.set(padded.subarray(y * bytesPerRow, y * bytesPerRow + unpaddedBytesPerRow), y * unpaddedBytesPerRow);
-    }
-
-    results.push(score(`baseline-${filter}`, reference, tight));
     scaler.destroy();
+    await runOne(`baseline-${filter}`, new BaselineScaler(filter), true);
+  }
+
+  for (const item of extra) {
+    await runOne(item.label, item.upscaler, false);
   }
 
   // A control: the LR image itself, nearest-neighbour expanded on the CPU.
