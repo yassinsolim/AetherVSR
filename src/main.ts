@@ -110,6 +110,14 @@ function main(gpu: GpuContext): void {
   const requested = FILTERS.find((f) => f.id === params.get('filter'));
   const initialFilter: BaselineFilter = requested?.id ?? DEFAULT_FILTER;
   const forceCopyImport = params.get('import') === 'copy';
+  // `shader-f16` is optional, so every adapter that withholds it runs the fp32
+  // graph instead. On hardware that grants f16 that path is otherwise
+  // unreachable and therefore untested, which is how it once shipped a silent
+  // 2x regression. `?precision=fp32` forces it so the fallback can be exercised
+  // on any machine. Harness only: it narrows what the stage may use and can
+  // never turn f16 on where the device did not offer it.
+  const forceFp32 = params.get('precision') === 'fp32';
+  const neuralOptions = forceFp32 ? { useF16: false } : {};
   // Relative paths only: this is a dev harness, not a URL loader.
   const clipParam = params.get('clip');
   const clip = clipParam !== null && clipParam.startsWith('/') ? clipParam : DEFAULT_CLIP;
@@ -154,7 +162,7 @@ function main(gpu: GpuContext): void {
       upscalerSelect.append(option);
       if (params.get('upscaler') === NEURAL_VALUE) {
         upscalerSelect.value = NEURAL_VALUE;
-        neuralInstance = new NeuralUpscaler(model);
+        neuralInstance = new NeuralUpscaler(model, neuralOptions);
         pipeline.setUpscaler(neuralInstance);
       }
     })
@@ -169,7 +177,7 @@ function main(gpu: GpuContext): void {
       if (!neuralModel) return;
       userChoseNeural = true;
       guard.reset();
-      neuralInstance = new NeuralUpscaler(neuralModel);
+      neuralInstance = new NeuralUpscaler(neuralModel, neuralOptions);
       pipeline.setUpscaler(neuralInstance);
       return;
     }
@@ -216,7 +224,7 @@ function main(gpu: GpuContext): void {
       pipeline.setUpscaler(new BaselineScaler(DEFAULT_FILTER));
       setStatus(`neural stage over budget (${decision.reason}) — using ${DEFAULT_FILTER}`, 'warn');
     } else {
-      neuralInstance = new NeuralUpscaler(neuralModel!);
+      neuralInstance = new NeuralUpscaler(neuralModel!, neuralOptions);
       pipeline.setUpscaler(neuralInstance);
       setStatus(decision.reason, 'info');
     }

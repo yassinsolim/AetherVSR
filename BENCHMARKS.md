@@ -974,6 +974,33 @@ non-neural control drops essentially as much, **the drops are a decoder/machine
 condition rather than a property of the neural stage**, and GPU time is
 unaffected. Both figures are reported instead of only the favourable one.
 
+#### Precision fallback, and cross-session variance
+
+`shader-f16` is optional, so an adapter that withholds it runs the fp32 graph.
+On hardware that grants f16 that path is unreachable, which is how it once
+shipped a silent 2x regression unnoticed - so `?precision=fp32` forces it. Both
+rows below were measured back to back in one session:
+
+| Precision | Whole stage p50 | Share of budget | Activation buffer | Total GPU | Presented |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| f16 (granted) | 6.22 ms | 37.9% | 29.49 MB | 77.43 MB | 60.7 fps |
+| fp32 (forced) | 8.87 ms | 53.3% | 58.98 MB | 136.42 MB | 60.7 fps |
+
+The activation buffer doubling exactly is the check that the fallback is real
+rather than a flag that changes nothing. **fp32 costs 1.43x and still holds
+60 fps**, and at 8.87 ms it sits below the guard's 10 ms threshold, so an
+adapter without f16 keeps the neural stage rather than dropping to the baseline.
+
+**That f16 figure is 6.22 ms against the 5.34 ms published above.** Same
+machine, same build, same clip, different browser session roughly an hour apart
+- a 16% spread. The 5.34 ms row stands as measured, and this one is reported
+beside it rather than quietly replacing it, because the honest reading is that
+whole-stage figures on this machine carry session-to-session variance of that
+order. Comparisons within a session (f16 against fp32 here, neural against the
+baseline control above) are sound; comparisons across sessions are not, which is
+the same trap Milestone 3 recorded when an fp32 baseline was quoted from one
+session into another.
+
 #### The bug worth recording
 
 The first in-pipeline run showed 9.30 ms and 25 fps. The activation buffers were
