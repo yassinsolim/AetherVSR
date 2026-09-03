@@ -1,4 +1,4 @@
-import { buildPixelShuffleShader } from '../core/neural/pixel-shuffle.wgsl.js';
+import { buildPixelShuffleShader } from './pixel-shuffle.wgsl.js';
 import { floatToHalf } from './conv-bench.js';
 
 export interface ShuffleVerifyCase {

@@ -1,3 +1,19 @@
+/**
+ * Pixel shuffle (depth-to-space) — **NOT USED IN PRODUCTION. DO NOT ADOPT
+ * WITHOUT LEGAL REVIEW.**
+ *
+ * This implements the reconstruction step of sub-pixel convolution, which
+ * ADR-0022 rejected: EP3259916B1 ("Visual processing using sub-pixel
+ * convolutions", Magic Pony / Sony) is an active European patent in force to
+ * approximately 2036, and it reads on periodic-shuffle upscaling of the kind
+ * this file performs. AetherVSR's production head is a resize convolution
+ * instead — see `src/core/neural/upsample-head.wgsl.ts`.
+ *
+ * It is retained only as a verified benchmark operator, so that the cost of the
+ * rejected approach can be measured honestly rather than guessed at, and it
+ * lives under `src/bench/` so it cannot be reached from the video path. Nothing
+ * in `src/core/` imports it.
+ */
 export interface PixelShuffleShaderConfig {
   /** Output colour channels. 3 for RGB. */
   readonly outChannels: number;
