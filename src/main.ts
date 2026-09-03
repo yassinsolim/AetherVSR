@@ -110,14 +110,7 @@ function main(gpu: GpuContext): void {
   const requested = FILTERS.find((f) => f.id === params.get('filter'));
   const initialFilter: BaselineFilter = requested?.id ?? DEFAULT_FILTER;
   const forceCopyImport = params.get('import') === 'copy';
-  // `shader-f16` is optional, so every adapter that withholds it runs the fp32
-  // graph instead. On hardware that grants f16 that path is otherwise
-  // unreachable and therefore untested, which is how it once shipped a silent
-  // 2x regression. `?precision=fp32` forces it so the fallback can be exercised
-  // on any machine. Harness only: it narrows what the stage may use and can
-  // never turn f16 on where the device did not offer it.
-  const forceFp32 = params.get('precision') === 'fp32';
-  const neuralOptions = forceFp32 ? { useF16: false } : {};
+
   // Relative paths only: this is a dev harness, not a URL loader.
   const clipParam = params.get('clip');
   const clip = clipParam !== null && clipParam.startsWith('/') ? clipParam : DEFAULT_CLIP;
@@ -162,7 +155,7 @@ function main(gpu: GpuContext): void {
       upscalerSelect.append(option);
       if (params.get('upscaler') === NEURAL_VALUE) {
         upscalerSelect.value = NEURAL_VALUE;
-        neuralInstance = new NeuralUpscaler(model, neuralOptions);
+        neuralInstance = new NeuralUpscaler(model);
         pipeline.setUpscaler(neuralInstance);
       }
     })
@@ -177,7 +170,7 @@ function main(gpu: GpuContext): void {
       if (!neuralModel) return;
       userChoseNeural = true;
       guard.reset();
-      neuralInstance = new NeuralUpscaler(neuralModel, neuralOptions);
+      neuralInstance = new NeuralUpscaler(neuralModel);
       pipeline.setUpscaler(neuralInstance);
       return;
     }
@@ -224,7 +217,7 @@ function main(gpu: GpuContext): void {
       pipeline.setUpscaler(new BaselineScaler(DEFAULT_FILTER));
       setStatus(`neural stage over budget (${decision.reason}) — using ${DEFAULT_FILTER}`, 'warn');
     } else {
-      neuralInstance = new NeuralUpscaler(neuralModel!, neuralOptions);
+      neuralInstance = new NeuralUpscaler(neuralModel!);
       pipeline.setUpscaler(neuralInstance);
       setStatus(decision.reason, 'info');
     }
@@ -448,8 +441,25 @@ function benchmarkRecord(
 // before an upscaler is chosen. Without shader-f16 here the neural backend
 // silently runs in fp32 - twice the activation memory and, measured, roughly
 // twice the convolution time - while still reporting itself as working.
+/** Features the harness deliberately does not request, so fallbacks can be tested. */
+const withheldFeatures = new Set(
+  (new URLSearchParams(location.search).get('withhold') ?? '')
+    .split(',')
+    .map((f) => f.trim())
+    .filter((f) => f.length > 0),
+);
+
 acquireGpu({
-  optionalFeatures: [...UPSCALER_OPTIONAL_FEATURES, ...NEURAL_OPTIONAL_FEATURES],
+  // `?withhold=shader-f16` drops a feature from the request, so the device is
+  // created genuinely without it. That exercises the real detection path -
+  // `device.features.has('shader-f16')` returning false - rather than
+  // short-circuiting it with an option, which would leave the branch that
+  // every f16-less adapter actually takes untested. On hardware that grants
+  // f16 there is otherwise no way to reach it, and that is how the stage once
+  // ran fp32 silently at 9.30 ms with no error at any layer (ADR-0023).
+  optionalFeatures: [...UPSCALER_OPTIONAL_FEATURES, ...NEURAL_OPTIONAL_FEATURES].filter(
+    (f) => !withheldFeatures.has(f),
+  ),
 })
   .then(main)
   .catch((err: unknown) => {

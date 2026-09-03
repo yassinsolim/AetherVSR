@@ -977,29 +977,40 @@ unaffected. Both figures are reported instead of only the favourable one.
 #### Precision fallback, and cross-session variance
 
 `shader-f16` is optional, so an adapter that withholds it runs the fp32 graph.
-On hardware that grants f16 that path is unreachable, which is how it once
-shipped a silent 2x regression unnoticed - so `?precision=fp32` forces it. Both
-rows below were measured back to back in one session:
+On hardware that grants f16 that branch is unreachable, which is how it once
+shipped a silent 2x regression - so `?withhold=shader-f16` drops the feature
+from the device request. The device is then created genuinely without it and
+`device.features.has('shader-f16')` really returns false, which exercises the
+detection path every f16-less adapter takes rather than short-circuiting it.
 
-| Precision | Whole stage p50 | Share of budget | Activation buffer | Total GPU | Presented |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| f16 (granted) | 6.22 ms | 37.9% | 29.49 MB | 77.43 MB | 60.7 fps |
-| fp32 (forced) | 8.87 ms | 53.3% | 58.98 MB | 136.42 MB | 60.7 fps |
+Both rows measured back to back in one session, on an adapter that *does* offer
+`shader-f16`:
+
+| Device | Whole stage p50 | Share of budget | Activation buffer | Total GPU | Presented | Record says |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| f16 granted | 6.35 ms | 38.9% | 29.49 MB | 77.43 MB | 60.6 fps | `f16` |
+| f16 withheld | 8.87 ms | 53.7% | 58.98 MB | 136.42 MB | 60.7 fps | `fp32` |
 
 The activation buffer doubling exactly is the check that the fallback is real
-rather than a flag that changes nothing. **fp32 costs 1.43x and still holds
-60 fps**, and at 8.87 ms it sits below the guard's 10 ms threshold, so an
+rather than a flag that changes nothing. **fp32 costs 1.40x and still holds
+60 fps**, and at 8.87 ms p50 it sits below the guard's 10 ms threshold, so an
 adapter without f16 keeps the neural stage rather than dropping to the baseline.
+Its p95 of 10.20 ms does cross that line, so on a slower f16-less device this is
+the configuration that would fall back first.
 
-**That f16 figure is 6.22 ms against the 5.34 ms published above.** Same
-machine, same build, same clip, different browser session roughly an hour apart
-- a 16% spread. The 5.34 ms row stands as measured, and this one is reported
-beside it rather than quietly replacing it, because the honest reading is that
-whole-stage figures on this machine carry session-to-session variance of that
-order. Comparisons within a session (f16 against fp32 here, neural against the
-baseline control above) are sound; comparisons across sessions are not, which is
-the same trap Milestone 3 recorded when an fp32 baseline was quoted from one
-session into another.
+The exported record carries `pipeline.neuralPrecision`, because `upscalerId` is
+identical in both rows and `environment.adapterFeatures` describes the adapter -
+which still lists `shader-f16` on the withheld run - so without it an fp32
+record is indistinguishable from an f16 one at 1.4x the cost.
+
+**That f16 figure is 6.35 ms against the 5.34 ms published above.** Same
+machine, same build, same clip, a different browser session - a 19% spread. The
+5.34 ms row stands as measured and this one is reported beside it rather than
+quietly replacing it, because the honest reading is that whole-stage figures on
+this machine carry session-to-session variance of that order. Comparisons within
+a session (f16 against fp32 here, neural against the baseline control above) are
+sound; comparisons across sessions are not, which is the trap Milestone 3
+recorded when an fp32 baseline was quoted from one session into another.
 
 #### The bug worth recording
 
