@@ -13,3 +13,7 @@ data/corpus/*
 # images, and a benchmark whose inputs 404 on a clean checkout is not
 # reproducible - independent review pointed out that the published numbers
 # could not be re-derived by anyone but us.
+
+# Python bytecode. tools/ is a build/analysis toolchain, not a package.
+__pycache__/
+*.py[cod]
