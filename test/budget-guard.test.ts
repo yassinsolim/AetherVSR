@@ -154,6 +154,31 @@ describe('BudgetGuard', () => {
     expect(d.state).toBe('fallback');
   });
 
+  /**
+   * Sign-off review found the residual: patience was reset on every qualifying
+   * evaluation, so an alternating stream - one good window, one bad, forever -
+   * accumulated neither counter and probed without bound.
+   */
+  it('abandons a probe on an alternating stream that never sustains recovery', () => {
+    const guard = new BudgetGuard({ window: 3, dwell: 3, probePatience: 60, probeBackoffMs: 50 });
+    let now = 0;
+    while (guard.current === 'neural') {
+      now += 16.67;
+      guard.record(14, now);
+    }
+    now += 100;
+    expect(guard.tick(now).changed).toBe(true);
+    let ended = false;
+    for (let i = 0; i < 2000 && !ended; i++) {
+      now += 16.67;
+      // One qualifying window, one not, forever: neither counter accumulated
+      // under the old reset, so the probe ran without bound.
+      ended = guard.record(i % 2 === 0 ? 6.5 : 8.5, now).state === 'fallback';
+    }
+    expect(ended).toBe(true);
+    expect(guard.isProbing).toBe(false);
+  });
+
   it('a failing probe returns to fallback rather than sticking', () => {
     const guard = new BudgetGuard({ window: 4, dwell: 1, probeBackoffMs: 50 });
     let now = 0;

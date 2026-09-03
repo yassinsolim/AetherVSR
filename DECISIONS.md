@@ -794,7 +794,10 @@ WebGPU devices expose only the features named when the device is created, and
 device creation happens during startup — before any upscaler exists to ask for
 anything. The neural stage silently ran in fp32 for its first production
 measurement: correct output, 59 MB of activations instead of 29.5, 9.30 ms
-instead of 5.48, 25 fps instead of 59.7, and no error at any layer.
+instead of 5.48, 25 fps instead of 59.7, and no error at any layer. Those three
+figures are from the session that exposed the bug, on the since-withdrawn
+500-image model; they are kept because they are what the incident looked like,
+and the shipped model's re-measured figure is 5.34 ms.
 
 The harness now requests `shader-f16` as an optional feature at acquisition and
 the shaders branch on whether it was granted. Optional features are free when

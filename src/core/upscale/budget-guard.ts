@@ -35,10 +35,14 @@ export interface BudgetGuardOptions {
   /** Consecutive qualifying evaluations required before a state change. */
   readonly dwell: number;
   /**
-   * Full windows a probe may run without confirming recovery before it is
+   * Total non-qualifying evaluations a probe may accumulate before it is
    * abandoned. Without this a probe whose median sits between `recoverMs` and
    * `failMs` never ends: it neither confirms nor fails, and the network runs
    * unconfirmed indefinitely while the guard reports `probing`.
+   *
+   * The count is cumulative, not consecutive. Clearing it on each qualifying
+   * evaluation let an alternating stream - one good window, one bad, forever -
+   * probe without bound, because neither counter ever accumulated.
    */
   readonly probePatience: number;
   /** Wait before the first probe after falling back, in ms. */
@@ -178,7 +182,6 @@ export class BudgetGuard {
     if (this.probing) {
       if (median <= this.options.recoverMs) {
         this.qualifying++;
-        this.probeMisses = 0;
         if (this.qualifying >= this.options.dwell) {
           this.probing = false;
           this.qualifying = 0;

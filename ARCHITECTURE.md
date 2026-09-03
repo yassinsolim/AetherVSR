@@ -13,9 +13,10 @@ ONNX Runtime Web probe, a device roofline probe and a temporal-behaviour
 harness — which are reachable only from `bench.html` and never from the
 video path.
 
-**What Milestone 3 settled about the future neural stage.** Its kernels will be
-hand-written WGSL rather than a third-party runtime, and they will look like
-`src/bench/conv-blocked.wgsl.ts`: workgroup-tiled with a halo, input channels
+**What Milestone 3 settled about the neural stage, and Milestone 4 built.** Its
+kernels are hand-written WGSL rather than a third-party runtime, and they took
+the shape `src/bench/conv-blocked.wgsl.ts` established - see
+`src/core/neural/conv.wgsl.ts`: workgroup-tiled with a halo, input channels
 packed into `vec4`, several output channels accumulated per invocation, and
 weights pre-arranged tap-major at load time. That shape is not a preference; it
 is 8.3x faster than the naive kernel it replaced, and each part of it was

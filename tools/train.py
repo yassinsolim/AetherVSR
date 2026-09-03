@@ -10,7 +10,7 @@ it again.
         --epochs 60 --out public/models/aethersr-c16d2.json
 
 The corpus manifest is validated before a single patch is read: every entry
-must carry a CC0/public-domain licence string, a source URL and a SHA-256, and
+must carry a CC0 licence string, a source URL and a SHA-256, and
 the file it names must exist on disk. Training from a partial or unaudited
 corpus would make the weights' provenance unprovable, which is the one thing
 this model file has to be able to demonstrate.

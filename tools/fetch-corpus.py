@@ -55,7 +55,7 @@ def api_get(params: dict) -> dict:
 
 
 def licence_ok(meta: dict) -> tuple[bool, str]:
-    """True only when the file's own metadata says CC0 or public domain."""
+    """True only when the file's own metadata says CC0."""
     short = (meta.get("LicenseShortName", {}).get("value") or "").strip()
     normalised = short.lower().replace("\u2013", "-")
     if normalised in ACCEPTED_LICENCES:
@@ -162,8 +162,9 @@ def main() -> int:
         "source": "Wikimedia Commons, Category:CC-Zero",
         "api": API,
         "licence_policy": (
-            "Every entry's own imageinfo.extmetadata licence field was checked and had to "
-            "read CC0 or public domain. Category membership alone was not accepted."
+            "CC0 only. Generic public-domain tags are not accepted; see ADR-0026. "
+            "Every entry's own imageinfo.extmetadata licence field was checked; "
+            "category membership alone was not accepted."
         ),
         "accepted": sorted(ACCEPTED_LICENCES),
         "count": len(entries),
