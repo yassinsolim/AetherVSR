@@ -7,6 +7,7 @@ import { StemBench, type StemCase, type StemResult } from './stem-bench.js';
 import { verifyStem, type StemVerifyCase, type StemVerifyResult } from './stem-verify.js';
 import { BridgeBench, type BridgeBenchConfig } from './bridge-bench.js';
 import { verifyPixelShuffle, type ShuffleVerifyCase, type ShuffleVerifyResult } from './shuffle-verify.js';
+import { HeadBench, verifyUpsampleHead, type HeadCase, type HeadResult, type HeadVerifyResult } from './head-bench.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
@@ -236,6 +237,25 @@ function main(gpu: GpuContext): void {
     const out: ShuffleVerifyResult[] = [];
     for (const c of cases) out.push(await verifyPixelShuffle(gpu.device, c, tolerance));
     setStatus('pixel-shuffle verification complete');
+    return out;
+  };
+
+  w['aethervsrHeadBench'] = async (cases: readonly HeadCase[]): Promise<HeadResult[]> => {
+    setStatus(`running ${cases.length} reconstruction-head cases…`);
+    const bench = new HeadBench(gpu.device);
+    const results = await bench.run(cases);
+    setStatus('head bench complete');
+    return results;
+  };
+
+  w['aethervsrHeadVerify'] = async (
+    cases: readonly { width: number; height: number; inChannels: number; useF16?: boolean }[],
+    tolerance?: number,
+  ): Promise<HeadVerifyResult[]> => {
+    setStatus(`verifying ${cases.length} reconstruction-head cases…`);
+    const out: HeadVerifyResult[] = [];
+    for (const c of cases) out.push(await verifyUpsampleHead(gpu.device, c, tolerance));
+    setStatus('head verification complete');
     return out;
   };
 
