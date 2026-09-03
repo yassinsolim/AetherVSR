@@ -867,6 +867,201 @@ and the convolution sits below both of them. The limiting behaviour is the
 interaction of memory traffic and register pressure in this implementation, not
 a demonstrated property of the M5.
 
+## Milestone 4 — First neural upscaler
+
+Same machine and browser as above (Apple M5 base, 24 GB, macOS 26.6.2, Chrome
+for Testing 152.0.7977.42). All GPU figures are timestamp-query spans; nothing
+is inferred by subtraction.
+
+### Chainability — the assumption Milestone 3 left untested
+
+Milestone 3's 1.067 ms convolution was an isolated dispatch whose input layout
+was reset externally: it read packed `vec4` activations and wrote scalar planar
+output, so layers could not actually be connected. Two ways to close that, both
+measured at 1280x720 C16 fp16 with preallocated ping-pong buffers:
+
+| Layers | packed output | scalar output + repack pass |
+| ---: | ---: | ---: |
+| 1 | 1.046 ms | 1.557 ms |
+| 3 | 3.143 ms | 4.708 ms |
+| 5 | 5.518 ms | 8.213 ms |
+| 7 | 7.683 ms | 11.525 ms |
+
+Writing the packed layout directly wins outright, and is marginally *faster*
+than the scalar kernel it replaces because a whole-`vec4` store beats four
+scalar stores. **Chaining costs about 3%**: the mean incremental cost across
+1..8 layers is **1.102 ms** against 1.067 ms isolated, and layers 1-4 are linear
+at 1.048 ms.
+
+### GPU clock ramp
+
+The stem measures 0.310 ms in a tight loop and 1.306 ms in a 60 fps pipeline.
+Encoding it n times per frame resolves why:
+
+| Dispatches per frame | Stage time | Per dispatch |
+| ---: | ---: | ---: |
+| 1 | 1.303 ms | 1.303 ms |
+| 2 | 2.600 | 1.300 |
+| 4 | 3.867 | 0.967 |
+| 8 | 4.817 | 0.602 |
+| 16 | 5.530 | 0.346 |
+
+Per-dispatch cost falls monotonically toward the tight-loop figure. The decisive
+evidence that this is clock ramp rather than a barrier is that the *ingest* pass
+also speeds up, 0.244 -> 0.140 ms, despite running **before** the added work: it
+can only be benefiting from a clock the previous frame raised.
+
+The practical consequence cuts both ways, and the second half is the useful one:
+a small stage pays a large relative penalty, while a stage near the budget does
+enough work per frame to run close to tight-loop efficiency. The whole-stage
+measurement below confirms it — the assembled prediction was 4.92 ms and the
+measured result 5.48 ms.
+
+### Whole neural stage, 720p60 production run
+
+`?upscaler=neural`, 31 s after warm-up, window foregrounded, output 2560x1440.
+
+| Metric | Value |
+| --- | ---: |
+| Presented FPS | 59.7 mean |
+| Rendered FPS | 59.5 mean (1846 frames in 31.0 s) |
+| Skipped callbacks | 5 |
+| Decoder drops | 5 / 1853 decoded |
+| **Whole stage** | **5.50 ms avg · p50 5.48 · p95 6.36 · max 7.45** |
+| Share of 16.67 ms | 33.0% |
+
+Per-pass, measured separately and never summed into the whole-stage figure:
+
+| Pass | In-pipeline | Tight-loop |
+| --- | ---: | ---: |
+| ingest | (inside the whole-stage span) | 0.245 ms |
+| stem 5x5 3->16 | 0.753 ms | 0.740 ms |
+| body 2 x 3x3 16->16 | 2.174 ms | 2.204 ms |
+| resize-conv head 16->RGB | 2.130 ms | 1.726 ms |
+
+**The bug worth recording.** The first in-pipeline run showed 9.30 ms and 25
+fps. The activation buffers were 59 MB where fp16 needs 29.5: the device had
+never been asked for `shader-f16`, because features must be requested at device
+creation and that happens before any upscaler exists. The network ran in fp32 —
+correct output, twice the memory, roughly twice the convolution time, and no
+error anywhere.
+
+### Persistent GPU memory, 1280x720 source
+
+| Resource | Bytes |
+| --- | ---: |
+| Weights | 12 kB |
+| Activation ping | 29.49 MB |
+| Activation pong | 29.49 MB |
+| Ingest texture | 3.69 MB |
+| Output texture | 14.75 MB |
+| Uniforms | 64 B |
+| **Total** | **77.43 MB** |
+
+Nothing is allocated per frame. The only bind group rebuilt during playback is
+the one referencing the external-texture-derived ingest view, and only when that
+view changes.
+
+### Numerical correctness against the reference implementation
+
+`tools/aethersr.py` is the trusted definition; the WGSL graph is checked against
+it stage by stage, so a mismatch names the layer that diverged and two errors
+cannot cancel. 24x16 input, all borders exercised:
+
+| Stage | fp32 max | fp16 max |
+| --- | ---: | ---: |
+| stem | 2.98e-7 | 1.98e-3 |
+| body.0 | 3.58e-7 | 1.89e-3 |
+| body.1 | 3.73e-7 | 1.95e-3 |
+| output | 1.96e-3 | 2.85e-3 |
+
+Output tolerance is 8-bit storage-texture quantisation; anything tighter would
+be measuring the texture format.
+
+Component operators were verified independently before assembly: the packed
+convolution across tail dimensions, residual and both precisions; the 5x5 stem
+including a 3x3 image *smaller than its kernel*; the chained graph against a CPU
+reference running the same layers with distinct per-layer weights; and the
+resize-convolution head against a reference plus a structural check that the
+four sub-pixel positions in each 2x2 block differ.
+
+### Image quality
+
+Deterministic generated reference at 2560x1440 — the project's regression
+benchmark, identical on every machine:
+
+| Stage | PSNR (luma) | SSIM |
+| --- | ---: | ---: |
+| control-nearest | 16.924 dB | 0.8796 |
+| bilinear | 17.507 | 0.8620 |
+| Catmull-Rom | 19.448 | 0.9252 |
+| **neural C16D2** | **21.649** | **0.9618** |
+
+**+2.20 dB and +0.037 SSIM over Catmull-Rom.**
+
+Natural images, eight 512x512 CC0 crops, mean:
+
+| Stage | PSNR (luma) | SSIM |
+| --- | ---: | ---: |
+| bilinear | 28.429 dB | 0.7557 |
+| control-nearest | 28.577 | 0.8005 |
+| Catmull-Rom | 29.143 | 0.7935 |
+| **neural C16D2** | **29.673** | **0.8253** |
+
++0.53 dB and +0.032 SSIM, winning 7 of 8 images. The exception is a nearly flat
+image where every stage scores about 53 dB and the comparison has no signal.
+
+**This natural set is not independent.** The photographs come from the CC0
+training corpus and only the crops differ. It is reported alongside the
+synthetic reference, never instead of it.
+
+### Temporal behaviour
+
+| Sequence | Stage | Frame-to-frame MAD | Motion-comp. MAD | Motion-comp. variance |
+| --- | --- | ---: | ---: | ---: |
+| static | bilinear | 0 | — | — |
+| static | Catmull-Rom | 0 | — | — |
+| static | **neural** | **0** | — | — |
+| integer pan | bilinear | 19.747 | 0.0040 | 0.0019 |
+| integer pan | Catmull-Rom | 21.450 | 0.0048 | 0.0013 |
+| integer pan | **neural** | 26.845 | **0.0129** | 0.0041 |
+| sub-pixel | bilinear | 5.003 | 2.837 | 9.062 |
+| sub-pixel | Catmull-Rom | 5.438 | 3.819 | 17.236 |
+| sub-pixel | **neural** | 6.870 | 5.306 | 30.375 |
+
+**Static control is exactly zero** — the network introduces no flicker of its
+own on unchanging input.
+
+**The shift-invariance gate passes.** 0.0129 code values out of 255 is 0.005% of
+full scale, not the "obvious instability" the criterion excludes. It is not
+exactly zero because the network's receptive field is about 11 low-resolution
+pixels against Catmull-Rom's 4, so boundary influence reaches further into the
+frame than the strip motion compensation excludes.
+
+**Sub-pixel response is 1.76x Catmull-Rom's.** Milestone 3 established this
+metric measures sensitivity to sub-pixel content change rather than instability,
+and that a sharper reconstruction legitimately responds more. As a ratio the
+trade is favourable:
+
+| Comparison | Quality gain | Variance cost |
+| --- | ---: | ---: |
+| Catmull-Rom over bilinear | +1.94 dB | 1.90x |
+| neural over Catmull-Rom | +2.20 dB | 1.76x |
+
+### Budget fallback
+
+Exercised on the live 720p60 clip rather than asserted:
+
+| State | Stage | GPU time | Presented |
+| --- | --- | ---: | ---: |
+| within budget | neural | 5.14 ms p50 | 59.7 fps |
+| forced over budget | Catmull-Rom | 3.34 ms p50 | 59.8 fps |
+| released | neural | 5.14 ms p50 | 59.7 fps |
+
+Playback held ~59.7 fps across both switches. Fall back above 10 ms, recover
+below 7, on a 30-frame median with a 3-evaluation dwell; sitting exactly between
+the thresholds for 500 evaluations produces zero state changes.
+
 ## Reproducing
 
 ```bash

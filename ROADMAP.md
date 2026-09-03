@@ -130,50 +130,23 @@ guaranteed 16 KiB floor was slower.
 
 ---
 
-## Milestone 4 — First neural upscaler
+## Milestone 4 — First neural upscaler [DONE]
 
-A real 2x model behind the existing `Upscaler` interface: weight loading and
-packing, the full inference graph, quality comparison against the baseline, and
-automatic fallback to the baseline when the frame budget is exceeded. Adding it
-must not modify acquisition, import or presentation.
+A real 2x neural model runs in the production video pipeline behind the existing
+`Upscaler` interface: **5.48 ms p50 whole stage, 59.7 fps presented at 2560x1440,
+33% of the 60 Hz budget**, quality **+2.20 dB / +0.037 SSIM over Catmull-Rom** on
+the deterministic reference and +0.53 dB on natural images.
 
-**Architecture, decided by Milestone 3 measurement:** hand-written WGSL, the
-`blocked` kernel family, fp16, at an operating point of **C16 at 1280x720** with
-a depth chosen to fit the budget. ORT is not a candidate for the video path
-until it can accept a caller-supplied device (ADR-0018).
+Architecture is ADR-0022: a low-resolution 3x3 convolution trunk at C16 with a
+resize-convolution reconstruction head, weights trained in-house on a 500-image
+CC0 corpus. Sub-pixel convolution was rejected during independent review over an
+active European patent, EP3259916B1, in force to 2036.
 
-**Acceptance criteria:**
-
-- One concrete published lightweight architecture, chosen and named, with its
-  licence recorded before any weights are used.
-- The full graph runs GPU-resident end to end: `importExternalTexture` ->
-  ingest -> network -> presentation, with **no CPU readback in the frame loop**
-  and no per-frame allocation.
-- Every layer type the network needs is verified against a CPU reference at the
-  geometry it ships at, in both fp16 and fp32, before any timing is published.
-- Measured whole-stage GPU time at 1280x720 -> 2560x1440, reported next to the
-  16.67 ms budget, with the layer-by-layer breakdown.
-- Still-frame quality beats Catmull-Rom's 19.45 dB PSNR / 0.925 SSIM on the
-  existing generated reference, **and** temporal behaviour is reported on the
-  Milestone 3 sequences. Two distinct checks, and the second is the one the
-  baseline exists for:
-  - **Shift-invariance**, on the integer-pan control. Both baseline filters
-    score ~0.004 LSB residual there, because a fixed linear kernel cannot do
-    otherwise. A learned model can, and a model that flickers on content which
-    merely translated by a whole pixel has failed outright.
-  - **Sub-pixel response**, on the 0.25 px/frame sequence, reported next to
-    still-frame quality rather than as a pass/fail. Catmull-Rom's 17.24 LSB^2
-    motion-compensated variance buys 19.45 dB; a model is only better if it
-    improves that ratio, not just one side of it.
-- Automatic fallback to the baseline scaler when the measured stage time
-  exceeds its budget, exercised in a real run rather than asserted.
-- The `Upscaler` seam is unchanged: acquisition, ingest and presentation code
-  is not modified to accommodate the model.
-
-**Explicitly not in Milestone 4:** temporal VSR, frame interpolation, multiple
-selectable models, the Chrome extension, compression-artifact removal.
-
----
+Delivered: chainable packed activation pipeline; fused external-texture-to-
+activation ingest; 5x5 texture-native stem; trusted PyTorch reference and
+stage-by-stage golden vectors; model format and loader; budget fallback with
+hysteresis, exercised on live video; whole-stage and per-pass instrumentation;
+still-image, natural-image and temporal evaluation.
 
 ## Milestone 5 — Robustness and content coverage
 

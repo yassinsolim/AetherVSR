@@ -4,8 +4,9 @@ AetherVSR upscales web video on the GPU, locally, in real time. This document
 describes what exists today (Milestone 1: a non-neural WebGPU baseline) and the
 boundary through which a neural stage will later arrive.
 
-Nothing in the production video pipeline currently performs neural
-inference. Milestones 2 and 3 added isolated neural/inference benchmark
+The neural stage now exists in the production video pipeline (Milestone 4) and
+runs behind the same `Upscaler` interface as the baseline scalers, selectable at
+runtime and automatically replaced by them when it cannot hold the frame budget. Milestones 2 and 3 added isolated neural/inference benchmark
 experiments under `src/bench/` — convolution throughput harnesses, an
 ONNX Runtime Web probe, a device roofline probe and a temporal-behaviour
 harness — which are reachable only from `bench.html` and never from the

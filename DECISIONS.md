@@ -785,3 +785,56 @@ described as upstream.
 **Biggest risk.** A C16 trunk may not beat Catmull-Rom by a worthwhile margin.
 That is a quality question no architecture reasoning settles, and Milestone 4
 fails honestly if it comes out that way.
+
+## ADR-0023 — Request `shader-f16` at device creation, unconditionally
+
+**Status:** accepted (Milestone 4)
+
+WebGPU devices expose only the features named when the device is created, and
+device creation happens during startup — before any upscaler exists to ask for
+anything. The neural stage silently ran in fp32 for its first production
+measurement: correct output, 59 MB of activations instead of 29.5, 9.30 ms
+instead of 5.48, 25 fps instead of 59.7, and no error at any layer.
+
+The harness now requests `shader-f16` as an optional feature at acquisition and
+the shaders branch on whether it was granted. Optional features are free when
+absent, so there is no cost to asking early, and the alternative — recreating
+the device when a stage wants a feature — would invalidate every resource.
+
+**Recorded because the failure mode is invisible.** A missing optional feature
+is not an error; it is a slower correct answer. Any future stage wanting a
+feature must add it to the acquisition list, not request it at use.
+
+## ADR-0024 — Fall back on measured stage time, not on a frame-rate symptom
+
+**Status:** accepted (Milestone 4)
+
+`BudgetGuard` watches the median whole-stage GPU time over a 30-frame window and
+switches to the baseline scaler above 10 ms, recovering below 7 after 3
+consecutive qualifying evaluations.
+
+Dropped frames were rejected as the trigger: they are caused by decode stalls,
+compositor scheduling and background throttling as readily as by the upscaler,
+so the signal does not identify what to fix. Median rather than mean, because
+one 40 ms hitch must not trip a switch. Separated thresholds, because a single
+one dithers when the stage sits near it.
+
+Milestone 6 owns dynamic quality selection. This is deliberately a mechanism
+with a forced-failure entry point, not a controller, and it is verified by
+forcing an over-budget condition on live video and observing recovery.
+
+## ADR-0025 — Publish per-pass timings only alongside a whole-stage span
+
+**Status:** accepted (Milestone 4)
+
+The neural stage writes one timestamp span covering ingest through presentation,
+plus separate per-pass spans. The whole-stage figure is the published number;
+per-pass figures are diagnostics and are never summed to produce it.
+
+Summing passes was measurably wrong. Tight-loop per-pass measurements
+underestimate in-pipeline cost by up to 4.2x on small passes, because a GPU that
+has just idled through a frame interval runs at a lower clock. Encoding a pass
+n times per frame drives its per-dispatch cost monotonically from 1.303 ms to
+0.346 ms, and the *preceding* ingest pass speeds up too — which only a raised
+clock explains. Two correct measurements added together produced a number that
+described no real configuration.
