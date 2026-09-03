@@ -1,4 +1,4 @@
-import { buildBlockedConvShader } from './conv-blocked.wgsl.js';
+import { buildBlockedConvShader } from '../core/neural/conv.wgsl.js';
 import { buildRepackShader } from './repack.wgsl.js';
 import { floatToHalf } from './conv-bench.js';
 import type { Activation } from './conv.wgsl.js';

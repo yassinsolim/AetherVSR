@@ -1,3 +1,5 @@
+import type { Activation } from './activation.js';
+
 export interface StemShaderConfig {
   /** Output feature width. Must be a multiple of 4 for the packed layout. */
   readonly outChannels: number;
@@ -13,7 +15,7 @@ export interface StemShaderConfig {
   readonly tileY: number;
   readonly useF16: boolean;
   /** `relu` matches most SR stems; `none` leaves the projection linear. */
-  readonly activation: 'none' | 'relu';
+  readonly activation: Activation;
 }
 
 /**
@@ -70,8 +72,16 @@ export function buildStemShader(config: StemShaderConfig): string {
   const groups = outChannels / 4;
   const each = <R,>(n: number, f: (k: number) => R): R[] => Array.from({ length: n }, (_, k) => f(k));
 
-  const activate = (expr: string): string =>
-    activation === 'relu' ? `max(${expr}, ${T}(0.0))` : expr;
+  const activate = (expr: string): string => {
+    switch (activation) {
+      case 'relu':
+        return `max(${expr}, ${T}(0.0))`;
+      case 'tanh':
+        return `tanh(${expr})`;
+      case 'none':
+        return expr;
+    }
+  };
 
   // acc[oc][m][i]. Flattened to scalars so they stay in registers.
   const accDecl = each(outChannels, (oc) =>

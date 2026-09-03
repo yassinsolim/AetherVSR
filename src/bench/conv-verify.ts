@@ -2,7 +2,7 @@ import { floatToHalf, type ConvVariant } from './conv-bench.js';
 import { buildConvShader, type Activation } from './conv.wgsl.js';
 import { buildTiledConvShader } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packActivations, packWeights } from './conv-packed.wgsl.js';
-import { buildBlockedConvShader } from './conv-blocked.wgsl.js';
+import { buildBlockedConvShader } from '../core/neural/conv.wgsl.js';
 import { buildMatrixConvShader, toMatrixWeights } from './conv-matrix.wgsl.js';
 import { toTapMajorWeights } from './conv-packed.wgsl.js';
 

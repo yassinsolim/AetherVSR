@@ -1,7 +1,7 @@
 import { buildConvShader, convMacCount, type Activation, type ConvShaderConfig } from './conv.wgsl.js';
 import { buildTiledConvShader, tiledSharedBytes } from './conv-tiled.wgsl.js';
 import { buildPackedConvShader, packedSharedBytes } from './conv-packed.wgsl.js';
-import { buildBlockedConvShader, blockedSharedBytes } from './conv-blocked.wgsl.js';
+import { buildBlockedConvShader, blockedSharedBytes } from '../core/neural/conv.wgsl.js';
 import { buildMatrixConvShader, matrixSharedBytes, matrixWeightIndex } from './conv-matrix.wgsl.js';
 
 /**

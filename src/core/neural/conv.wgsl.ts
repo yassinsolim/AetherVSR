@@ -1,6 +1,23 @@
-import type { PackedConvShaderConfig } from './conv-packed.wgsl.js';
+import type { Activation } from './activation.js';
 
-export interface BlockedConvShaderConfig extends PackedConvShaderConfig {
+/**
+ * The convolution the production graph runs.
+ *
+ * Self-contained rather than extending the benchmark's tiled/packed config
+ * types: those describe Milestone 3 experiments that exist only to be measured
+ * against this one, and production code must not depend on `src/bench`.
+ */
+export interface BlockedConvShaderConfig {
+  readonly inChannels: number;
+  readonly outChannels: number;
+  /** Workgroup dimensions in invocations. */
+  readonly tileX: number;
+  readonly tileY: number;
+  /** Output pixels each invocation computes. */
+  readonly blockX: number;
+  readonly activation: Activation;
+  readonly useF16: boolean;
+  readonly residual: boolean;
   /** Output channels each invocation accumulates simultaneously. */
   readonly outBlock: number;
   /** Output rows each invocation computes. 1 restores pure horizontal blocking. */

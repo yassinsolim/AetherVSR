@@ -1,6 +1,6 @@
 import { buildStemShader, packStemWeights } from '../core/neural/stem.wgsl.js';
 import { buildRgbPackShader } from '../core/neural/rgb-pack.wgsl.js';
-import { buildBlockedConvShader } from './conv-blocked.wgsl.js';
+import { buildBlockedConvShader } from '../core/neural/conv.wgsl.js';
 import { floatToHalf } from './conv-bench.js';
 import { packWeights, toTapMajorWeights } from './conv-packed.wgsl.js';
 import type { IngestFormat } from '../core/ingest/external-texture-ingest.js';

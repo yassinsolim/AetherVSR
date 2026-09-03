@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildTiledConvShader, tiledSharedBytes } from '../src/bench/conv-tiled.wgsl.js';
 import { buildPackedConvShader, packedSharedBytes } from '../src/bench/conv-packed.wgsl.js';
-import { buildBlockedConvShader, blockedSharedBytes } from '../src/bench/conv-blocked.wgsl.js';
+import { buildBlockedConvShader, blockedSharedBytes } from '../src/core/neural/conv.wgsl.js';
 import { buildMatrixConvShader } from '../src/bench/conv-matrix.wgsl.js';
 
 /**
