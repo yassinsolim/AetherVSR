@@ -1064,7 +1064,7 @@ synthetic reference, never instead of it. The crops themselves are committed
 | static | **neural** | **0** | — | — |
 | integer pan | bilinear | 19.747 | 0.0040 | 0.0019 |
 | integer pan | Catmull-Rom | 21.450 | 0.0048 | 0.0013 |
-| integer pan | **neural** | 26.845 | **0.0069** | 0.0017 |
+| integer pan | **neural** | 23.556 | **0.0069** | 0.0017 |
 | sub-pixel | bilinear | 5.003 | 2.837 | 9.062 |
 | sub-pixel | Catmull-Rom | 5.438 | 3.819 | 17.236 |
 | sub-pixel | **neural** | 5.979 | 6.631 | 56.051 |

@@ -1,12 +1,13 @@
 # ARCHITECTURE.md
 
 AetherVSR upscales web video on the GPU, locally, in real time. This document
-describes what exists today (Milestone 1: a non-neural WebGPU baseline) and the
-boundary through which a neural stage will later arrive.
+describes what exists today: a WebGPU video pipeline with two interchangeable
+upscaling stages - the non-neural baseline scalers of Milestone 1 and the C16D2
+neural network of Milestone 4.
 
-The neural stage now exists in the production video pipeline (Milestone 4) and
-runs behind the same `Upscaler` interface as the baseline scalers, selectable at
-runtime and automatically replaced by them when it cannot hold the frame budget. Milestones 2 and 3 added isolated neural/inference benchmark
+Both run behind the same `Upscaler` interface, are selectable at runtime, and
+the neural stage is automatically replaced by a baseline when it cannot hold the
+frame budget. Milestones 2 and 3 added isolated neural/inference benchmark
 experiments under `src/bench/` — convolution throughput harnesses, an
 ONNX Runtime Web probe, a device roofline probe and a temporal-behaviour
 harness — which are reachable only from `bench.html` and never from the
@@ -39,21 +40,23 @@ flowchart TD
     C["CanvasTarget<br/>GPUCanvasContext swap chain"]
     M["Metrics<br/>GPU timestamps · rate meters"]
 
-    G["ExternalTextureIngest<br/>one conversion pass · MILESTONE 2"]
+    G["ExternalTextureIngest<br/>one conversion pass"]
 
     V --> S --> I --> U
     U --> B
-    I -.-> G
-    G -.-> N
-    U -.-> N
+    I --> G
+    G --> N
+    U --> N
     B --> C
-    N -.-> C
+    N --> C
     S -.observes.-> M
     B -.timestamps.-> M
+    N -.timestamps.-> M
 ```
 
-The solid path is implemented. The dashed path is the seam Milestone 2+ plugs
-into.
+Every path shown is implemented. `U` dispatches to exactly one of `B` or `N` per
+frame; the budget guard decides which. Dotted edges are observation, not data
+flow.
 
 ## Stages
 

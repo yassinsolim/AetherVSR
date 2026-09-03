@@ -133,14 +133,24 @@ guaranteed 16 KiB floor was slower.
 ## Milestone 4 — First neural upscaler [DONE]
 
 A real 2x neural model runs in the production video pipeline behind the existing
-`Upscaler` interface: **5.48 ms p50 whole stage, 59.7 fps presented at 2560x1440,
-33% of the 60 Hz budget**, quality **+2.20 dB / +0.037 SSIM over Catmull-Rom** on
-the deterministic reference and +0.53 dB on natural images.
+`Upscaler` interface: **5.34 ms p50 whole stage, 59.7 fps presented at 2560x1440,
+32.7% of the 60 Hz budget**, quality **+1.11 dB / +0.027 SSIM over Catmull-Rom**
+on the deterministic reference and +0.35 dB on natural images.
+
+It is *worse* than the baselines on sub-pixel temporal response - 3.25x
+Catmull-Rom's motion-compensated variance - and BENCHMARKS.md records that,
+along with the fact that only one training seed was run, so the variance behind
+these figures is unquantified.
 
 Architecture is ADR-0022: a low-resolution 3x3 convolution trunk at C16 with a
-resize-convolution reconstruction head, weights trained in-house on a 500-image
+resize-convolution reconstruction head, weights trained in-house on a 495-image
 CC0 corpus. Sub-pixel convolution was rejected during independent review over an
 active European patent, EP3259916B1, in force to 2036.
+
+**Not published.** ADR-0026 holds distribution pending counsel on freedom to
+operate for the resize-convolution head. The engineering is complete and
+independently reviewed; the legal precondition the project set for itself is
+not met, and the work stays on the local branch until it is.
 
 Delivered: chainable packed activation pipeline; fused external-texture-to-
 activation ingest; 5x5 texture-native stem; trusted PyTorch reference and

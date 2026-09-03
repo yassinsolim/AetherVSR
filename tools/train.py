@@ -33,7 +33,11 @@ from aethersr import AetherSR, box_downsample2, count_parameters, export_weights
 
 ARCHITECTURE_ID = "aethersr-resizeconv"
 ARCHITECTURE_VERSION = 2
-ACCEPTED_LICENCES = {"cc0", "cc0 1.0", "public domain", "pd", "cc-zero"}
+# Must match tools/fetch-corpus.py. This is the enforcement point that an
+# edited or re-fetched manifest passes through, so leaving the generic tags
+# here would have let exactly the corpus ADR-0026 rejects train and still be
+# described as CC0.
+ACCEPTED_LICENCES = {"cc0", "cc0 1.0", "cc-zero"}
 
 
 def _sha256_file(path: str) -> str:

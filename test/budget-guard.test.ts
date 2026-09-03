@@ -131,6 +131,29 @@ describe('BudgetGuard', () => {
     expect(guard.isProbing).toBe(false);
   });
 
+  /**
+   * Confirmation review found this: a probe whose median sat between the
+   * thresholds entered neither branch, so the guard stayed `probing` forever
+   * and the network ran unconfirmed - bypassing the documented rule that
+   * recovery requires dropping below recoverMs.
+   */
+  it('abandons a probe that never reaches the recovery threshold', () => {
+    const guard = new BudgetGuard({ window: 4, dwell: 2, probePatience: 5, probeBackoffMs: 50 });
+    let now = 0;
+    while (guard.current === 'neural') {
+      now += 16.67;
+      guard.record(14, now);
+    }
+    now += 100;
+    expect(guard.tick(now).changed).toBe(true);
+    expect(guard.isProbing).toBe(true);
+    // 8.5 ms is between recoverMs 7 and failMs 10: neither confirms nor fails.
+    const d = feed(guard, 8.5, 60, now + 16.67);
+    expect(guard.current).toBe('fallback');
+    expect(guard.isProbing).toBe(false);
+    expect(d.state).toBe('fallback');
+  });
+
   it('a failing probe returns to fallback rather than sticking', () => {
     const guard = new BudgetGuard({ window: 4, dwell: 1, probeBackoffMs: 50 });
     let now = 0;

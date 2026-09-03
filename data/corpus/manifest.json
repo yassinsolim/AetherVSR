@@ -5,13 +5,11 @@
  "accepted": [
   "cc-zero",
   "cc0",
-  "cc0 1.0",
-  "pd",
-  "public domain"
+  "cc0 1.0"
  ],
  "count": 495,
  "rejected": {
-  "licence": 0,
+  "licence": 5,
   "small": 26,
   "error": 29,
   "type": 1
@@ -5957,5 +5955,6 @@
    "sha256": "e73b9ea9b0c0a98b6d4ae35ff7315c6899152e3e653123a8de6af72641e123b0",
    "bytes": 1437082
   }
- ]
+ ],
+ "note": "Fetched with a filter that also accepted generic public-domain tags, then filtered down to CC0 in place; the five removed files are counted under rejected.licence. tools/fetch-corpus.py now rejects them at fetch time, so a fresh fetch reproduces this file directly. See ADR-0026."
 }
