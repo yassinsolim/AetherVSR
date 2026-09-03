@@ -844,7 +844,10 @@ described no real configuration.
 
 ## ADR-0026 — CC0 only, and publication is blocked pending counsel
 
-**Status:** accepted (Milestone 4). The publication block is **open**.
+**Status:** accepted (Milestone 4). The corpus decision stands. **The
+publication block is closed — superseded by ADR-0027**, in which the project
+owner accepted the residual risk. The block's reasoning is preserved below as
+written, because it is why the question was asked at all.
 
 ### Corpus
 
@@ -902,3 +905,54 @@ Until both are answered, Milestone 4 stays on the local branch. Weakening this
 gate by editing the wording of ADR-0022 would be exactly the "silently change
 architecture" failure AGENTS.md prohibits; superseding it requires the answers
 above, not a rewrite.
+
+## ADR-0027 — Publication approved by the project owner on accepted risk
+
+**Status:** accepted (Milestone 4). Supersedes the publication block in
+ADR-0026, which is now **closed**. The corpus half of ADR-0026 stands unchanged.
+
+ADR-0022 made counsel a precondition of distributing the resize-convolution
+head, and ADR-0026 held Milestone 4 on the local branch because no such review
+existed. The project owner has reviewed the question and authorised publication
+on accepted risk.
+
+**This is not a legal clearance and does not claim to be one.** No attorney
+reviewed this repository. What changed is who is accepting the residual risk,
+not what is known about it.
+
+### The reasoning placed before the owner
+
+- **The patented technique is not the one implemented.** EP3259916B1's claims
+  are directed at sub-pixel convolution: producing an `r^2 * C` tensor and
+  rearranging it by periodic shuffle. AetherVSR's head is a nearest-neighbour
+  upsample followed by an ordinary 3x3 convolution. It never materialises an
+  `r^2 * C` tensor and performs no shuffle.
+- **Resize convolution has abundant independent prior art.** It is standard
+  practice and was the explicit recommendation of Odena, Dumoulin and Olah,
+  "Deconvolution and Checkerboard Artifacts" (Distill, 2016), among others. It
+  did not originate with, and does not depend on, the patented method.
+- **ADR-0022's own caution proves less than it appears to.** That a resize
+  convolution is *expressible* as a constrained polyphase sub-pixel convolution
+  is a statement about linear algebra: almost any upsampler can be written as a
+  constrained linear operator. Expressibility is not a reading of the claims.
+- **The rejected operator is quarantined.** `pixel-shuffle.wgsl.ts` lives under
+  `src/bench/`, carries a header explaining why it was rejected, and is imported
+  by nothing under `src/core/`. Machine-checked:
+  `grep -rn "pixel-shuffle" --include=*.ts src/core/ | wc -l` returns 0.
+- **Milestones 0-3 were already public.** What publication adds is the head and
+  12 kB of weights.
+
+### What would reopen this
+
+New information about the claims, a change to the reconstruction head that
+reintroduces an `r^2 * C` tensor or a periodic shuffle, or any commercial
+distribution — which is a materially different posture from an open research
+repository and was not what was weighed here.
+
+### Process note
+
+The block was raised by an independent review agent, not by the engineer who
+wrote the code, and it stopped a design that had already been implemented and
+benchmarked. It was worth the delay: the first architecture was withdrawn on the
+strength of it. Recording that here so the cost of the gate is not mistaken for
+wasted effort the next time one fires.

@@ -869,10 +869,12 @@ a demonstrated property of the M5.
 
 ## Milestone 4 — First neural upscaler
 
-> **Distribution of this model is blocked.** ADR-0022 records that freedom to
-> operate for the resize-convolution head is unresolved and requires counsel
-> before any distribution, and ADR-0026 records that no such clearance exists.
-> Nothing in this section is a legal clearance; it is measurement only.
+> **On the reconstruction head.** Sub-pixel convolution was rejected during
+> architecture review over EP3259916B1 (ADR-0022); the head here is a resize
+> convolution, which is a different technique with independent prior art.
+> Publication was authorised by the project owner on accepted risk, not on legal
+> advice — see ADR-0027. Nothing in this section is a legal clearance; it is
+> measurement only.
 
 Apple M5 base, 24 GB, macOS 26.6.2, Chrome for Testing 152.0.7977.42, adapter
 `apple / metal-3`, `shader-f16` and `timestamp-query` granted. All GPU figures

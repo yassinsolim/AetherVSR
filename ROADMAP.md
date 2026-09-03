@@ -147,10 +147,9 @@ resize-convolution reconstruction head, weights trained in-house on a 495-image
 CC0 corpus. Sub-pixel convolution was rejected during independent review over an
 active European patent, EP3259916B1, in force to 2036.
 
-**Not published.** ADR-0026 holds distribution pending counsel on freedom to
-operate for the resize-convolution head. The engineering is complete and
-independently reviewed; the legal precondition the project set for itself is
-not met, and the work stays on the local branch until it is.
+Published. Distribution was held while the freedom-to-operate question raised in
+ADR-0022 was resolved, and released by the project owner on accepted risk rather
+than on legal advice — ADR-0027 records the reasoning and what would reopen it.
 
 Delivered: chainable packed activation pipeline; fused external-texture-to-
 activation ingest; 5x5 texture-native stem; trusted PyTorch reference and
