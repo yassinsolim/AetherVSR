@@ -157,6 +157,16 @@ export class NeuralUpscaler implements Upscaler {
    * timestamp to the last, not the sum of the stages: separate passes can
    * overlap and the gaps between them are real time.
    */
+  /**
+   * The precision the stage actually resolved to, after intersecting the
+   * requested option with what the device granted. A benchmark record that
+   * cannot distinguish an fp32 run from an f16 one is the ADR-0023 ambiguity
+   * in a different costume: same label, 1.4x the cost.
+   */
+  get resolvedPrecision(): 'f16' | 'fp32' {
+    return this.useF16 ? 'f16' : 'fp32';
+  }
+
   get stageTiming(): NeuralStageTiming | null {
     if (this.bodyWindow.size === 0) return null;
     return {

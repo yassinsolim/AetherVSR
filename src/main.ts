@@ -254,7 +254,12 @@ function main(gpu: GpuContext): void {
   resetButton.addEventListener('click', () => pipeline.resetMeasurements());
 
   exportButton.addEventListener('click', () => {
-    const payload = benchmarkRecord(gpu, pipeline.stats(performance.now()), activeClip);
+    const payload = benchmarkRecord(
+      gpu,
+      pipeline.stats(performance.now()),
+      activeClip,
+      neuralInstance?.resolvedPrecision ?? null,
+    );
     const json = JSON.stringify(payload, null, 2);
     void navigator.clipboard
       .writeText(json)
@@ -348,7 +353,12 @@ function main(gpu: GpuContext): void {
  * by hand; `manualFields` names them explicitly so a pasted record is never
  * mistaken for complete. See BENCHMARKS.md.
  */
-function benchmarkRecord(gpu: GpuContext, stats: PipelineStats, clip: string): unknown {
+function benchmarkRecord(
+  gpu: GpuContext,
+  stats: PipelineStats,
+  clip: string,
+  neuralPrecision: 'f16' | 'fp32' | null,
+): unknown {
   return {
     schema: 'aethervsr.benchmark/1',
     capturedAt: new Date().toISOString(),
@@ -390,6 +400,10 @@ function benchmarkRecord(gpu: GpuContext, stats: PipelineStats, clip: string): u
     pipeline: {
       clock: stats.clock,
       importPath: stats.importPath,
+      // `upscalerId` is identical in both precisions and `adapterFeatures`
+      // reports the adapter's capability, not what the stage used, so without
+      // this an fp32 run is indistinguishable from an f16 one at 1.4x the cost.
+      neuralPrecision,
       upscaler: stats.upscalerId,
       neural: stats.neural,
       source: stats.sourceSize,
