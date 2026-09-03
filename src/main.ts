@@ -6,10 +6,13 @@ import {
 } from './core/gpu/device.js';
 import { VideoPipeline, type PipelineStats } from './core/pipeline.js';
 import { BaselineScaler, UPSCALER_OPTIONAL_FEATURES } from './core/upscale/baseline-scaler.js';
+import { NeuralUpscaler } from './core/upscale/neural-upscaler.js';
+import { loadModel, type PackedModel } from './core/neural/model.js';
 import type { BaselineFilter } from './core/upscale/baseline.wgsl.js';
 import { DiagnosticOverlay, OVERLAY_INTERVAL_MS } from './ui/overlay.js';
 
 /** Clip shipped with the repo so benchmarks are reproducible. See tools/. */
+const DEFAULT_MODEL = '/models/aethersr-c16d2.json';
 const DEFAULT_CLIP = '/media/aethervsr-testclip-720p30-vp9.webm';
 
 const FILTERS: readonly { readonly id: BaselineFilter; readonly label: string }[] = [
@@ -134,7 +137,36 @@ function main(gpu: GpuContext): void {
     option.selected = filter.id === initialFilter;
     upscalerSelect.append(option);
   }
+  // The neural backend is offered only once its weights have loaded, so the
+  // menu never lists a stage that would fail on selection.
+  const NEURAL_VALUE = 'neural';
+  let neuralModel: PackedModel | null = null;
+  const modelParam = params.get('model');
+  const modelUrl = modelParam !== null && modelParam.startsWith('/') ? modelParam : DEFAULT_MODEL;
+  void loadModel(modelUrl)
+    .then((model) => {
+      neuralModel = model;
+      const option = document.createElement('option');
+      option.value = NEURAL_VALUE;
+      option.textContent = `Neural C${model.features}D${model.depth} (2x)`;
+      upscalerSelect.append(option);
+      if (params.get('upscaler') === NEURAL_VALUE) {
+        upscalerSelect.value = NEURAL_VALUE;
+        pipeline.setUpscaler(new NeuralUpscaler(model));
+      }
+    })
+    .catch((err: unknown) => {
+      // A missing model is not a harness failure: the baseline still works and
+      // saying so is more useful than an empty menu entry that throws.
+      console.warn('neural model unavailable:', err);
+    });
+
   upscalerSelect.addEventListener('change', () => {
+    if (upscalerSelect.value === NEURAL_VALUE) {
+      if (!neuralModel) return;
+      pipeline.setUpscaler(new NeuralUpscaler(neuralModel));
+      return;
+    }
     const chosen = FILTERS.find((f) => f.id === upscalerSelect.value);
     if (!chosen) return;
     // Exercises the Milestone 1 seam: the processing stage is reconfigured

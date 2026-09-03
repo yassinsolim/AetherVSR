@@ -15,6 +15,7 @@ export interface HeadCase {
   readonly blockY: number;
   readonly tileX: number;
   readonly tileY: number;
+  readonly globalResidual?: boolean;
 }
 
 export interface HeadResult extends HeadCase {
@@ -156,6 +157,7 @@ export async function verifyUpsampleHead(
       blockY: 2,
       tileX: 8,
       tileY: 8,
+      globalResidual: false,
     }),
   });
   const pipeline = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } });
@@ -289,6 +291,7 @@ export class HeadBench {
         blockY: c.blockY,
         tileX: c.tileX,
         tileY: c.tileY,
+        globalResidual: c.globalResidual ?? false,
       }),
     });
     const pipeline = device.createComputePipeline({

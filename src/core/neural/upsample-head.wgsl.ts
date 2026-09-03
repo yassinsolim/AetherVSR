@@ -10,6 +10,18 @@ export interface UpsampleHeadShaderConfig {
   readonly blockY: number;
   readonly tileX: number;
   readonly tileY: number;
+  /**
+   * Add a nearest-upsampled copy of the source image to the head's output, so
+   * the network learns a residual rather than the whole picture.
+   *
+   * Standard practice in super-resolution and worth far more than its cost
+   * here: the head already runs at high resolution, so this is one extra
+   * texture fetch per output pixel. Nearest rather than bilinear because it is
+   * exactly reproducible in the reference implementation and exactly
+   * shift-equivariant in whole low-resolution pixels, which the temporal gate
+   * checks.
+   */
+  readonly globalResidual: boolean;
 }
 
 /**
@@ -46,6 +58,7 @@ export interface UpsampleHeadShaderConfig {
  */
 export function buildUpsampleHeadShader(config: UpsampleHeadShaderConfig): string {
   const { inChannels, scale, useF16, format, blockX, blockY, tileX, tileY } = config;
+  const globalResidual = config.globalResidual;
 
   if (inChannels % 4 !== 0) {
     throw new Error(`upsample head requires inChannels % 4 === 0, got ${inChannels}`);
@@ -85,7 +98,12 @@ export function buildUpsampleHeadShader(config: UpsampleHeadShaderConfig): strin
 
   const stores = each(blockY, (m) =>
     each(blockX, (i) => {
-      const c = `vec4f(f32(acc0_${m}_${i}), f32(acc1_${m}_${i}), f32(acc2_${m}_${i}), 1.0)`;
+      const base = globalResidual
+        ? `+ residual(i32(outX + ${i}u), i32(outY + ${m}u))`
+        : '';
+      const c =
+        `vec4f(f32(acc0_${m}_${i}), f32(acc1_${m}_${i}), f32(acc2_${m}_${i}), 0.0) ` +
+        `${base} + vec4f(0.0, 0.0, 0.0, 1.0)`;
       return (
         `    if (outX + ${i}u < OW && outY + ${m}u < OH) { ` +
         `textureStore(dst, vec2i(i32(outX + ${i}u), i32(outY + ${m}u)), ` +
@@ -112,6 +130,7 @@ struct Params {
 @group(0) @binding(2) var<storage, read> biases: array<${T}>;
 @group(0) @binding(3) var dst: texture_storage_2d<${format}, write>;
 @group(0) @binding(4) var<uniform> params: Params;
+${globalResidual ? '@group(0) @binding(5) var source: texture_2d<f32>;' : ''}
 
 var<private> W: u32;
 var<private> H: u32;
@@ -129,6 +148,17 @@ fn fetch(hx: i32, hy: i32, cg: u32) -> ${V} {
   let lx = u32(hx) / 2u;
   let ly = u32(hy) / 2u;
   return features[cg * W * H + ly * W + lx];
+}
+
+${
+  globalResidual
+    ? `// Nearest upsample of the source: the low-resolution pixel under this
+// output. Alpha is dropped so only RGB is added.
+fn residual(hx: i32, hy: i32) -> vec4f {
+  let t = textureLoad(source, vec2i(hx / 2, hy / 2), 0);
+  return vec4f(t.r, t.g, t.b, 0.0);
+}`
+    : ''
 }
 
 @compute @workgroup_size(${tileX}, ${tileY}, 1)

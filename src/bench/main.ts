@@ -8,6 +8,8 @@ import { verifyStem, type StemVerifyCase, type StemVerifyResult } from './stem-v
 import { BridgeBench, type BridgeBenchConfig } from './bridge-bench.js';
 import { verifyPixelShuffle, type ShuffleVerifyCase, type ShuffleVerifyResult } from './shuffle-verify.js';
 import { HeadBench, verifyUpsampleHead, type HeadCase, type HeadResult, type HeadVerifyResult } from './head-bench.js';
+import { verifyGolden, type GoldenVectors, type GoldenResult } from './golden-verify.js';
+import type { ModelFile } from '../core/neural/model.js';
 import { verifyConv, type ConvVerifyCase, type ConvVerifyResult } from './conv-verify.js';
 import { deferred, delay } from './deferred.js';
 import { probeOrt, type OrtProbeConfig, type OrtProbeResult } from './ort-bench.js';
@@ -257,6 +259,22 @@ function main(gpu: GpuContext): void {
     for (const c of cases) out.push(await verifyUpsampleHead(gpu.device, c, tolerance));
     setStatus('head verification complete');
     return out;
+  };
+
+  w['aethervsrGolden'] = async (
+    modelUrl: string,
+    goldenUrl: string,
+    useF16 = true,
+  ): Promise<GoldenResult> => {
+    setStatus('comparing the WGSL graph against the reference implementation…');
+    const [modelRes, goldenRes] = await Promise.all([fetch(modelUrl), fetch(goldenUrl)]);
+    if (!modelRes.ok) throw new Error(`model fetch failed: ${modelRes.status}`);
+    if (!goldenRes.ok) throw new Error(`golden fetch failed: ${goldenRes.status}`);
+    const model = (await modelRes.json()) as ModelFile;
+    const golden = (await goldenRes.json()) as GoldenVectors;
+    const result = await verifyGolden(gpu.device, model, golden, useF16);
+    setStatus(result.passed ? 'golden comparison passed' : 'golden comparison FAILED');
+    return result;
   };
 
   w['aethervsrRoofline'] = async (useF16 = true): Promise<RooflineResult[]> => {

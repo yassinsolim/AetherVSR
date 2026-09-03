@@ -262,6 +262,7 @@ export class NeuralUpscaler implements Upscaler {
         blockY: 4,
         tileX: 8,
         tileY: 4,
+        globalResidual: true,
       }),
     });
     this.headPipeline = device.createComputePipeline({
@@ -306,18 +307,6 @@ export class NeuralUpscaler implements Upscaler {
 
     // The stem writes ping; after `depth` body layers the result is in ping for
     // even depth and pong for odd.
-    const finalBuffer = this.model.depth % 2 === 0 ? this.ping : this.pong;
-    this.headGroup = device.createBindGroup({
-      label: 'aethervsr:nn:head',
-      layout: this.headPipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: { buffer: finalBuffer } },
-        { binding: 1, resource: { buffer: this.headWeights } },
-        { binding: 2, resource: { buffer: this.headBias } },
-        { binding: 3, resource: this.outputTexture.createView() },
-        { binding: 4, resource: { buffer: this.headParams } },
-      ],
-    });
     this.blitGroup = device.createBindGroup({
       label: 'aethervsr:nn:blit',
       layout: this.blitPipeline.getBindGroupLayout(0),
@@ -368,6 +357,20 @@ export class NeuralUpscaler implements Upscaler {
           { binding: 2, resource: { buffer: this.stemBias as GPUBuffer } },
           { binding: 3, resource: { buffer: this.ping as GPUBuffer } },
           { binding: 4, resource: { buffer: this.stemParams as GPUBuffer } },
+        ],
+      });
+      // The head reads the same view for its global residual, so both groups
+      // are rebuilt together and only when the view actually changes.
+      this.headGroup = device.createBindGroup({
+        label: 'aethervsr:nn:head',
+        layout: this.headPipeline.getBindGroupLayout(0),
+        entries: [
+          { binding: 0, resource: { buffer: this.finalBuffer() } },
+          { binding: 1, resource: { buffer: this.headWeights as GPUBuffer } },
+          { binding: 2, resource: { buffer: this.headBias as GPUBuffer } },
+          { binding: 3, resource: (this.outputTexture as GPUTexture).createView() },
+          { binding: 4, resource: { buffer: this.headParams as GPUBuffer } },
+          { binding: 5, resource: view },
         ],
       });
       this.lastIngestView = view;
@@ -427,6 +430,13 @@ export class NeuralUpscaler implements Upscaler {
   destroy(): void {
     this.destroyResources();
     this.ingest.destroy();
+  }
+
+  /** Where the trunk leaves its result: ping for even depth, pong for odd. */
+  private finalBuffer(): GPUBuffer {
+    const buf = this.model.depth % 2 === 0 ? this.ping : this.pong;
+    if (!buf) throw new Error('activations not allocated');
+    return buf;
   }
 
   private destroyResources(): void {

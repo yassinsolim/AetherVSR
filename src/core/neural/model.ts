@@ -48,11 +48,12 @@ export interface ModelLayer {
   readonly activation?: 'tanh' | 'relu' | 'none';
   readonly scale?: number;
   readonly clamp?: readonly number[];
+  readonly residual?: string;
 }
 
 /** The architecture id this loader understands. */
 export const SUPPORTED_ARCHITECTURE = 'aethersr-resizeconv';
-export const SUPPORTED_ARCHITECTURE_VERSION = 1;
+export const SUPPORTED_ARCHITECTURE_VERSION = 2;
 
 /**
  * Weights already rearranged into the exact orders the WGSL kernels read.
