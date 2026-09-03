@@ -613,3 +613,175 @@ divides exactly and did not move. Every *throughput* figure in the Milestone 3
 section was re-measured after the fix regardless of whether it was expected to
 change; millisecond timings were unaffected either way, since only the
 denominator moved.
+
+## ADR-0022 — First neural upscaler: low-resolution convolution trunk with a resize-convolution head, C16, weights trained in-house on a CC0 corpus
+
+**Status:** accepted (Milestone 4), superseding a rejected first draft
+
+**Context.** Milestone 4 needs one real 2x neural upscaler that beats Catmull-Rom
+(19.45 dB / 0.925 SSIM) inside a <=8 ms whole-stage budget on a base Apple M5.
+A research pass covered SPAN/SPAN-F, RLFN/RLFN-S/RLFN-NTIRE, RFDN/E-RFDN,
+IMDN/IMDN-RTC, EFDN, FMEN, RepRFN, ESPCN and FSRCNN, with code and weight
+licences established separately from primary sources.
+
+An earlier version of this ADR selected a canonical ESPCN with a pixel-shuffle
+head. An independent gate rejected it and found four errors of fact in the
+reasoning. This version records the corrections rather than quietly dropping
+them, because three of them cut against conclusions that felt obvious.
+
+### What the candidates actually cost
+
+Costed against our measured per-width throughput at 1280x720. Figures marked
+*checked* were independently re-derived from the published source by the gate.
+
+| Architecture | MACs | Est. convolution time |
+| --- | ---: | ---: |
+| FSRCNN-S (d32,s5,m1) | 9.88 GMAC *checked* | ~5.0 ms |
+| IMDN-RTC (nf12) | 18.34 GMAC *checked* | ~9.2 ms |
+| ESPCN (64/32 canonical) | 24.60 GMAC *checked* | ~12.4 ms |
+| SPAN-F (C32) | ~125.2 GMAC *checked* | ~63 ms |
+| RLFN (C52) | ~461.7 GMAC *checked, corrected from 511.4* | ~230 ms |
+| SPAN (C48) | 377.6 GMAC *checked* | ~190 ms |
+
+The modern efficiency-challenge architectures are out of budget by a wide
+margin - though "an order of magnitude" was an overstatement for IMDN-RTC
+(9.2 ms against an 8 ms budget) and SPAN-F, and that wording has been removed.
+Only the 2016-era architectures are in range.
+
+### Corrections to the first draft
+
+1. **The FSRCNN-S width argument was wrong.** The draft rejected it partly
+   because its `s=5` bottleneck sits where our kernels are least efficient.
+   That path is 5.1% of its MACs; the C32->RGB deconvolution is 72.5%. A
+   packed `s=8` variant costs 10.38 GMAC and about 5.34 ms - competitive, not
+   disqualified. The width argument is withdrawn.
+2. **Pixel shuffle is not checkerboard-safe.** Aitken et al. (arXiv:1707.02937)
+   documents checkerboard artefacts from ordinary sub-pixel convolution with
+   independently initialised phase kernels. Conversely a stride-2 transposed
+   convolution *is* exactly shift-equivariant away from boundaries. Both of the
+   draft's temporal arguments pointed the wrong way and are withdrawn.
+3. **A transposed convolution is not a mandatory primitive for FSRCNN-S.** Its
+   9x9 stride-2 deconvolution polyphase-decomposes into four low-resolution
+   convolutions plus an interleave - which is sub-pixel convolution, so that
+   route does not sidestep the issue below.
+4. **The licence inventory was too categorical.** Saying no candidate has usable
+   x2 weights overstated it: ByteDance/RLFN ships `rlfn_s_x2.pth` and
+   `rlfn_x2.pth` under an unqualified root Apache-2.0, and fannymonori/TF-ESPCN
+   ships `ESPCN_x2.pb` likewise. Whether a repository-wide grant reaches the
+   binary weights is a question for counsel, not something to record as NOT
+   FOUND. Neither rescues this target - RLFN is hundreds of GMAC and TF-ESPCN is
+   a luminance 64/32 model - but the inventory must be accurate.
+   Flickr2K is likewise "no dataset-wide grant found; rights remain
+   image-specific", not "academic only" as the draft claimed. DIV2K and LSDIR
+   *do* state academic research use only.
+
+### The blocking constraint: sub-pixel convolution is patented and active
+
+**EP3259916B1, "Visual processing using sub-pixel convolutions"** (Magic Pony
+Technology Ltd; inventors Wang, Bishop, Shi, Caballero, Aitken, Totz; priority
+2015-02-19; granted 2021-05-26). Verified from the primary record: status
+**Active**, anticipated expiry **2036-02-19**. Its inventors are the ESPCN
+authors and its subject is the low-resolution feature trunk followed by an
+`r^2 * C` convolution and periodic shuffle.
+
+**This ADR does not assert that any particular implementation infringes.**
+Patent scope is claim-, jurisdiction- and use-specific and that determination
+needs counsel, not an engineering document. What is recorded here is that an
+active patent exists squarely over the technique the draft selected, that no
+licence or non-assertion pledge was found, and that freedom to operate is
+therefore *unresolved*.
+
+Given that it is unresolved and that an alternative exists at comparable cost,
+the engineering decision is to choose the alternative. That is risk reduction,
+not a legal conclusion, and it is cheap.
+
+**The alternative is not clearance either.** A resize-convolution is
+mathematically expressible as a constrained polyphase sub-pixel convolution -
+one whose phase kernels are tied rather than independent. Not materialising an
+`r^2 * C` tensor and not performing a shuffle reduces literal-match risk; it
+does not establish freedom to operate. FTO remains **unresolved** and is a
+matter for counsel before any distribution.
+
+**Decision.** Implement:
+
+```
+ingest texture
+  -> 5x5 texture-native stem, 3 -> C16, tanh
+  -> D x (3x3 convolution, C16 -> C16, tanh)
+  -> resize-convolution head: nearest 2x upsample + 3x3 convolution, C16 -> RGB
+  -> output texture
+```
+
+The trunk is a plain stack of low-resolution 3x3 convolutions - the generic
+part of the ESPCN/FSRCNN lineage, and not what the patent is about. The
+reconstruction is a **resize-convolution**: a fixed nearest-neighbour upsample
+followed by an ordinary convolution, evaluated directly at high resolution.
+There is no `r^2 * C` convolution and no periodic shuffle anywhere in the graph.
+Because the four phases share one kernel rather than being independently
+parameterised, the head is also structurally immune to the uneven-overlap and
+independent-phase mechanisms that produce checkerboard artefacts, and it is
+exactly shift-equivariant away from boundaries.
+
+**Why this head rather than a direct transposed convolution**, which the gate
+recommended:
+
+| | resize-convolution | direct transposed conv (FSRCNN-S) |
+| --- | --- | --- |
+| Head cost | **1.726 ms, measured** | ~3.6 ms, estimated, unmeasured |
+| New operators | none beyond a 5x5 stem | 5x5 stem, 1x1 conv, PReLU, HR-gather deconvolution |
+| Largest unknown | the 5x5 stem | the deconvolution, estimated at 3-5 days with checkerboard risk |
+| Whole stage, D=2 | **5.04 ms** | ~5.59 ms |
+
+Everything in the left column except the stem is measured. The right column's
+dominant term is not.
+
+**Budget.** Every term marked measured or estimated.
+
+| Term | Cost | Basis |
+| --- | ---: | --- |
+| ingest | 0.245 ms | **measured**, in-pipeline p50 |
+| stem 5x5 3->16 | 0.86 ms | *estimated* — 3x3 measures 0.310 ms and 5x5 is 25/9 the taps. Scaled linearly: an earlier draft applied a sublinear discount that nothing justified |
+| body, per layer | 1.102 ms | **measured**, mean incremental over 1..8 chained layers |
+| resize-conv head | 1.726 ms | **measured**, 1.593 GMAC at 923 GMAC/s |
+
+| Body depth | Estimated whole stage |
+| ---: | ---: |
+| 2 | 5.04 ms |
+| 3 | 6.14 ms |
+
+**These figures are optimistic and the milestone does not pass on them.** They
+are assembled from tight-loop measurements, and the clock-ramp experiment shows
+2.48 ms of tight-loop work taking 4.817 ms in-pipeline at 60 fps. A stage of
+this size does more work per frame than that experiment's smallest points, so it
+should sit closer to tight-loop efficiency — but "should" is exactly why the
+whole stage gets its own instrumented measurement on real video before any depth
+is fixed, and why the phrase "genuine headroom" has been removed.
+
+**Training corpus, decided before training rather than recorded after.**
+Wikimedia Commons `Category:CC-Zero`, fetched by a reproducible script that
+records per-image URL, dimensions, SHA-256 and the licence string returned by
+the API, and that **rejects any image whose licence metadata is not CC0**. CC0
+is an explicit public-domain dedication permitting commercial use and
+derivatives. DIV2K, LSDIR and Flickr2K are not used. No images are committed;
+the manifest is.
+
+**Training-to-inference contract, frozen before training.** The weights are only
+correct with respect to a specific degradation and colour handling, so these are
+fixed and recorded with the model: HR sourced at native resolution, LR produced
+by a box downsample by exactly 2 matching `boxDownsample2` in `quality.ts`; RGB
+in [0,1], no dataset mean subtracted (the stem's mean/scale are identity);
+zero padding sized to keep every layer same-resolution, which is
+`padding=2` for the 5x5 stem and `padding=1` for the 3x3 body and head - not a
+uniform 1, as an earlier draft said; tanh
+activations in the trunk; linear head with the output clamped to [0,1] at write
+time, matching the shader; channel order RGB throughout. A golden export
+compares the PyTorch forward pass against the WebGPU graph on identical input
+before any quality claim is made.
+
+**Weight provenance.** Trained in-house from this architecture. No third-party
+checkpoint is downloaded, converted or shipped, and the weights are never
+described as upstream.
+
+**Biggest risk.** A C16 trunk may not beat Catmull-Rom by a worthwhile margin.
+That is a quality question no architecture reasoning settles, and Milestone 4
+fails honestly if it comes out that way.
