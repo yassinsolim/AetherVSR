@@ -7,6 +7,7 @@ import {
 import { VideoPipeline, type PipelineStats } from './core/pipeline.js';
 import { BaselineScaler, UPSCALER_OPTIONAL_FEATURES } from './core/upscale/baseline-scaler.js';
 import { NeuralUpscaler, NEURAL_OPTIONAL_FEATURES } from './core/upscale/neural-upscaler.js';
+import { BudgetGuard } from './core/upscale/budget-guard.js';
 import { loadModel, type PackedModel } from './core/neural/model.js';
 import type { BaselineFilter } from './core/upscale/baseline.wgsl.js';
 import { DiagnosticOverlay, OVERLAY_INTERVAL_MS } from './ui/overlay.js';
@@ -166,6 +167,8 @@ function main(gpu: GpuContext): void {
   upscalerSelect.addEventListener('change', () => {
     if (upscalerSelect.value === NEURAL_VALUE) {
       if (!neuralModel) return;
+      userChoseNeural = true;
+      guard.reset();
       neuralInstance = new NeuralUpscaler(neuralModel);
       pipeline.setUpscaler(neuralInstance);
       return;
@@ -174,6 +177,8 @@ function main(gpu: GpuContext): void {
     if (!chosen) return;
     // Exercises the Milestone 1 seam: the processing stage is reconfigured
     // while acquisition and presentation keep running untouched.
+    userChoseNeural = false;
+    guard.reset();
     neuralInstance = null;
     pipeline.setUpscaler(new BaselineScaler(chosen.id));
   });
@@ -184,7 +189,47 @@ function main(gpu: GpuContext): void {
     id: neuralInstance?.id ?? null,
     timing: neuralInstance?.stageTiming ?? null,
     memory: neuralInstance?.memoryReport ?? null,
+    budget: {
+      state: guard.current,
+      forced: guard.isForced,
+      lastReason: lastBudgetReason,
+      lastMedianMs: lastBudgetMedian,
+    },
   });
+
+  // --- frame-budget fallback ------------------------------------------------
+  // Watches the measured whole-stage time and drops to the baseline scaler when
+  // the neural stage cannot hold the budget. Deliberately not a quality
+  // controller - that is Milestone 6 - just a switch that cannot oscillate.
+  const guard = new BudgetGuard();
+  let lastBudgetReason = 'warming up';
+  let lastBudgetMedian = Number.NaN;
+  let userChoseNeural = params.get('upscaler') === NEURAL_VALUE;
+
+  (window as unknown as Record<string, unknown>)['aethervsrForceOverBudget'] = (on: boolean) => {
+    guard.setForced(on);
+    return { forced: guard.isForced, state: guard.current };
+  };
+
+  setInterval(() => {
+    if (!userChoseNeural || !neuralModel) return;
+    const stats = pipeline.stats(performance.now());
+    // No GPU timing means no evidence, and the guard must not act on a guess.
+    if (!stats.gpuPassMs) return;
+    const decision = guard.record(stats.gpuPassMs.p50);
+    lastBudgetReason = decision.reason;
+    lastBudgetMedian = decision.medianMs;
+    if (!decision.changed) return;
+    if (decision.state === 'fallback') {
+      neuralInstance = null;
+      pipeline.setUpscaler(new BaselineScaler(DEFAULT_FILTER));
+      setStatus(`neural stage over budget (${decision.reason}) — using ${DEFAULT_FILTER}`, 'warn');
+    } else {
+      neuralInstance = new NeuralUpscaler(neuralModel);
+      pipeline.setUpscaler(neuralInstance);
+      setStatus(`neural stage back within budget (${decision.reason})`, 'info');
+    }
+  }, 250);
 
   resetButton.addEventListener('click', () => pipeline.resetMeasurements());
 
