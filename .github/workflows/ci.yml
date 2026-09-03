@@ -1,0 +1,50 @@
+name: CI
+
+# A correctness gate, not a substitute for hardware verification. Everything
+# here runs on a GPU-less Linux runner: typecheck, lint, unit tests and the
+# production build. The GPU numerical checks, the WebGPU benchmarks and model
+# training remain on-device tasks and are documented in BENCHMARKS.md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # package.json engines allows ^20.19 || >=22.12; 22 is the current LTS.
+          node-version: '22'
+          cache: npm
+
+      # `npm ci` rather than `npm install`: package-lock.json is committed, and
+      # a gate that resolves fresh dependency versions is not reproducing what
+      # was tested locally.
+      - name: Install
+        run: npm ci
+
+      # Separate steps so a failure names the stage that failed rather than
+      # collapsing four different problems into one red cross.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
