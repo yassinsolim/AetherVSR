@@ -46,3 +46,8 @@ data/captured/sources/
 data/captured/clips/
 # Looped captured clips for the live browser runtime test; regenerated on demand.
 public/media/captured/
+data/captured/gopdiag/
+
+# Captured training video: fetched from pinned URLs, never redistributed.
+data/captured-train/sources/
+data/captured-train/clips/

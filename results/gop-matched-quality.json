@@ -1,0 +1,43 @@
+{
+ "schema": "aethervsr.gop-matched-quality/1",
+ "question": "At equal delivered input quality, is GOP-compressed input harder for the model than all-I?",
+ "answer": "No. GOP input is easier at every matched-quality point tested.",
+ "matched": [
+  {
+   "inputPsnr": 24.78750527401765,
+   "allIDelta": -0.0442810704310735,
+   "gopDelta": -0.0019393364588419584,
+   "gopMinusAllI": 0.042341733972231545
+  },
+  {
+   "inputPsnr": 25.960503458976746,
+   "allIDelta": -0.0647980272769928,
+   "gopDelta": -0.0019393364588419584,
+   "gopMinusAllI": 0.06285869081815083
+  },
+  {
+   "inputPsnr": 27.231544663508732,
+   "allIDelta": -0.06442256768544516,
+   "gopDelta": 0.02930837705551234,
+   "gopMinusAllI": 0.0937309447409575
+  },
+  {
+   "inputPsnr": 28.483515292406082,
+   "allIDelta": -0.014283597469329834,
+   "gopDelta": 0.1402116429135286,
+   "gopMinusAllI": 0.15449524038285845
+  },
+  {
+   "inputPsnr": 29.566953758398693,
+   "allIDelta": 0.13476967811584473,
+   "gopDelta": 0.3413749036801108,
+   "gopMinusAllI": 0.20660522556426608
+  },
+  {
+   "inputPsnr": 30.326921572287876,
+   "allIDelta": 0.3581523497899374,
+   "gopDelta": 0.5759360785471852,
+   "gopMinusAllI": 0.21778372875724783
+  }
+ ]
+}
