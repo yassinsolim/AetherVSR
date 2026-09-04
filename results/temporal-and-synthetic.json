@@ -1,38 +1,136 @@
 {
- "schema": "aethervsr.temporal-synthetic/1",
- "environment": "Chrome for Testing 152.0.7977.42, Apple M5, one session per condition",
- "catmullRomReference": {"syntheticPsnrLuma": 19.448, "syntheticSsim": 0.9252, "naturalEightPsnrLuma": 29.143, "subPixelMcVariance": 17.236},
- "box": {
-  "synthetic": [
-   {"seed": 1, "psnrLuma": 20.621, "ssimLuma": 0.9537, "naturalEight": 29.536},
-   {"seed": 2, "psnrLuma": 20.509, "ssimLuma": 0.9524, "naturalEight": 29.462},
-   {"seed": 3, "psnrLuma": 20.477, "ssimLuma": 0.9516, "naturalEight": 29.475},
-   {"seed": 4, "psnrLuma": 20.541, "ssimLuma": 0.9527, "naturalEight": 29.473},
-   {"seed": 5, "psnrLuma": 20.561, "ssimLuma": 0.9528, "naturalEight": 29.464}
-  ],
-  "temporal": [
-   {"seed": 1, "staticMAD": 0, "integerPanMcMAD": 0.0101, "subPixelMcVariance": 49.642, "ratioVsCatmullRom": 2.880},
-   {"seed": 2, "staticMAD": 0, "integerPanMcMAD": 0.0083, "subPixelMcVariance": 53.704, "ratioVsCatmullRom": 3.116},
-   {"seed": 3, "staticMAD": 0, "integerPanMcMAD": 0.0070, "subPixelMcVariance": 54.714, "ratioVsCatmullRom": 3.174},
-   {"seed": 4, "staticMAD": 0, "integerPanMcMAD": 0.0074, "subPixelMcVariance": 52.146, "ratioVsCatmullRom": 3.025},
-   {"seed": 5, "staticMAD": 0, "integerPanMcMAD": 0.0066, "subPixelMcVariance": 54.098, "ratioVsCatmullRom": 3.139}
-  ]
+ "schema": "aethervsr.regression-and-temporal/2",
+ "split": "corpus-v3.json",
+ "device": "browser (WebGPU); models trained on v3",
+ "category": "REGRESSION / DEVELOPMENT \u2014 the synthetic reference is a fixed procedural image and the eight-image natural set overlaps the training corpus at source level. Neither is generalisation evidence.",
+ "catmullRomReference": {
+  "syntheticPsnrLuma": 19.448,
+  "syntheticSsim": 0.9252,
+  "subPixelMcVariance": 17.236
  },
- "realistic": {
-  "synthetic": [
-   {"seed": 1, "psnrLuma": 21.003, "ssimLuma": 0.9609, "naturalEight": 29.316},
-   {"seed": 2, "psnrLuma": 21.016, "ssimLuma": 0.9608, "naturalEight": 29.292},
-   {"seed": 3, "psnrLuma": 21.044, "ssimLuma": 0.9606, "naturalEight": 29.323},
-   {"seed": 4, "psnrLuma": 21.074, "ssimLuma": 0.9615, "naturalEight": 29.240},
-   {"seed": 5, "psnrLuma": 21.186, "ssimLuma": 0.9627, "naturalEight": 29.053}
-  ],
-  "temporal": [
-   {"seed": 1, "staticMAD": 0, "integerPanMcMAD": 0.0113, "subPixelMcVariance": 47.063, "ratioVsCatmullRom": 2.731},
-   {"seed": 2, "staticMAD": 0, "integerPanMcMAD": 0.0099, "subPixelMcVariance": 49.654, "ratioVsCatmullRom": 2.881},
-   {"seed": 3, "staticMAD": 0, "integerPanMcMAD": 0.0102, "subPixelMcVariance": 49.802, "ratioVsCatmullRom": 2.889},
-   {"seed": 4, "staticMAD": 0, "integerPanMcMAD": 0.0137, "subPixelMcVariance": 53.925, "ratioVsCatmullRom": 3.129},
-   {"seed": 5, "staticMAD": 0, "integerPanMcMAD": 0.0119, "subPixelMcVariance": 52.702, "ratioVsCatmullRom": 3.058}
-  ]
+ "synthetic": {
+  "box": {
+   "perSeed": [
+    {
+     "seed": 1,
+     "psnrLuma": 20.37,
+     "ssimLuma": 0.9503
+    },
+    {
+     "seed": 2,
+     "psnrLuma": 20.456,
+     "ssimLuma": 0.9515
+    },
+    {
+     "seed": 3,
+     "psnrLuma": 20.421,
+     "ssimLuma": 0.9508
+    },
+    {
+     "seed": 4,
+     "psnrLuma": 20.54,
+     "ssimLuma": 0.9524
+    },
+    {
+     "seed": 5,
+     "psnrLuma": 20.523,
+     "ssimLuma": 0.9521
+    }
+   ],
+   "mean": 20.462,
+   "std": 0.071
+  },
+  "realistic": {
+   "perSeed": [
+    {
+     "seed": 1,
+     "psnrLuma": 21.025,
+     "ssimLuma": 0.9609
+    },
+    {
+     "seed": 2,
+     "psnrLuma": 20.962,
+     "ssimLuma": 0.9602
+    },
+    {
+     "seed": 3,
+     "psnrLuma": 21.044,
+     "ssimLuma": 0.9606
+    },
+    {
+     "seed": 4,
+     "psnrLuma": 21.059,
+     "ssimLuma": 0.961
+    },
+    {
+     "seed": 5,
+     "psnrLuma": 21.137,
+     "ssimLuma": 0.9616
+    }
+   ],
+   "mean": 21.045,
+   "std": 0.063
+  }
  },
- "note": "The synthetic reference and the eight-image natural set are REGRESSION artefacts: the natural set overlaps the training corpus at source level. They detect change; they are not generalisation evidence. Both conditions score exactly 0 on the static control and pass the integer-pan shift gate."
+ "temporalSubPixelRatio": {
+  "box": {
+   "perSeed": [
+    {
+     "seed": 1,
+     "ratio": 3.038
+    },
+    {
+     "seed": 2,
+     "ratio": 3.12
+    },
+    {
+     "seed": 3,
+     "ratio": 3.146
+    },
+    {
+     "seed": 4,
+     "ratio": 3.154
+    },
+    {
+     "seed": 5,
+     "ratio": 3.167
+    }
+   ],
+   "mean": 3.125,
+   "std": 0.052
+  },
+  "realistic": {
+   "perSeed": [
+    {
+     "seed": 1,
+     "ratio": 3.039
+    },
+    {
+     "seed": 2,
+     "ratio": 2.937
+    },
+    {
+     "seed": 3,
+     "ratio": 2.905
+    },
+    {
+     "seed": 4,
+     "ratio": 3.059
+    },
+    {
+     "seed": 5,
+     "ratio": 2.904
+    }
+   ],
+   "mean": 2.969,
+   "std": 0.075
+  },
+  "exactPermutationP": 0.0238,
+  "floorAtThisN": 0.0079
+ },
+ "staticControl": {
+  "allTenModels": 0,
+  "note": "exactly zero frame-to-frame MAD"
+ },
+ "whyThisIsRegressionOnly": "On the synthetic reference the realistic-trained models score 0.58 dB HIGHER than the clean-trained ones (21.045 vs 20.462). On genuinely unseen photographs under the same clean box degradation the ordering reverses: realistic +0.054 dB against box +0.383 dB. The two disagree about which model is better on clean input, and the independent corpus is the one that answers the generalisation question. That disagreement is the clearest available demonstration that the synthetic reference detects change without measuring generalisation, and it is why the categories are never averaged together."
 }

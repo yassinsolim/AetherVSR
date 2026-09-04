@@ -1191,6 +1191,27 @@ cpu   catmull 33.392189225   bilinear 32.479516387
 It had already left a corrupted row in a committed result file. All scoring is
 pinned to CPU.
 
+### Three evidentiary categories, never mixed
+
+| Category | What it is | What it can support |
+| --- | --- | --- |
+| **REGRESSION** | the synthetic reference; the eight-image natural set | detecting change between builds |
+| **SOURCE-DISJOINT** | `val` and `test` clusters of the training corpus | no scene shared with training; same corpus and curation |
+| **HELD-OUT INDEPENDENT** | 60 CC0 Met images, three overlap checks | the generalisation question |
+
+These are never averaged together, and this milestone produced a clean
+demonstration of why. On the synthetic reference the realistic-trained models
+score **0.58 dB higher** than the clean-trained ones (21.045 ± 0.063 against
+20.462 ± 0.071, Catmull-Rom 19.448). On genuinely unseen photographs under the
+*same* clean box degradation the ordering **reverses**: realistic +0.054 dB
+against box +0.383 dB.
+
+The two disagree about which model is better on clean input. The independent
+corpus is the one that answers the generalisation question; the synthetic
+reference detects change without measuring generalisation. Had only the
+synthetic number been reported, this milestone would have concluded the opposite
+of what it concludes.
+
 ### Dataset
 
 Split unit is the **perceptual cluster**, not the image: union-find over dHash,
