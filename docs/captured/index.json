@@ -1,0 +1,56 @@
+{
+ "model": "aethersr-c16d2-realistic.json",
+ "condition": "h264_typical",
+ "cropRule": "highest gradient energy in the reference, 128 px, 3x nearest zoom",
+ "clipRule": "measured delta ranked; worst, median and best clip selected before viewing",
+ "panelOrder": [
+  "720p input (nearest)",
+  "Catmull-Rom",
+  "AetherVSR",
+  "reference"
+ ],
+ "images": [
+  {
+   "role": "loss",
+   "file": "loss-faces-video-production-i-m-a-defender-la-h264_typical.png",
+   "clip": "faces-video-production-i-m-a-defender-la",
+   "category": "faces",
+   "deltaPsnrDb": -0.16132891178131104,
+   "frame": "frame_0013.png",
+   "crop": [
+    1024,
+    64,
+    128,
+    128
+   ]
+  },
+  {
+   "role": "tie",
+   "file": "tie-nature-piz-neir-aerial-video-4k-webm-h264_typical.png",
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "deltaPsnrDb": 0.34631868203481037,
+   "frame": "frame_0013.png",
+   "crop": [
+    768,
+    576,
+    128,
+    128
+   ]
+  },
+  {
+   "role": "win",
+   "file": "win-lowlight-hofer-weihnachtsmarkt-am-abend--h264_typical.png",
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "deltaPsnrDb": 0.7004684209823608,
+   "frame": "frame_0013.png",
+   "crop": [
+    1664,
+    896,
+    128,
+    128
+   ]
+  }
+ ]
+}
