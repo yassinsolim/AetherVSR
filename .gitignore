@@ -44,3 +44,5 @@ data/eval-independent/*
 # tools/fetch-captured.py rebuilds it; the manifest pins URL + SHA-256.
 data/captured/sources/
 data/captured/clips/
+# Looped captured clips for the live browser runtime test; regenerated on demand.
+public/media/captured/
