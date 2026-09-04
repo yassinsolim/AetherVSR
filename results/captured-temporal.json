@@ -3,335 +3,468 @@
  "model": "aethersr-c16d2-realistic.json",
  "condition": "h264_typical",
  "method": "Dense Farneback flow estimated on the HR reference only; each method's own output is warped by that flow and the residual measured. Flow error inflates every method equally, so only ratios between methods are interpreted.",
- "control": "catmullOverReferenceResidual shows how much of the residual is flow error rather than upscaler behaviour; a ratio near 1 would mean the metric cannot resolve anything.",
+ "controls": {
+  "flowError": "catmullOverReferenceResidual: how much residual is flow error rather than upscaler behaviour.",
+  "sharpness": "Blurring the reference cannot change the footage's real temporal consistency, so any residual drop measures the metric's response to spatial frequency. If the blur control moves the score as much as the methods do, the ratio cannot be read as a temporal cost."
+ },
  "perClip": {
   "faces-video-production-i-m-a-defender-pr": {
    "reference": {
-    "mcResidual": 6.394423209263054,
+    "mcResidual": 1.2278070615244692,
     "staticRegionVariance": 0.899570147745015
    },
    "neural": {
-    "mcResidual": 6.220272112383761,
+    "mcResidual": 1.3172779968855055,
     "staticRegionVariance": 0.8554233099249277
    },
    "catmull_rom": {
-    "mcResidual": 6.100766590542414,
+    "mcResidual": 1.2237081355415285,
     "staticRegionVariance": 0.8322207821025089
    },
    "bilinear": {
-    "mcResidual": 5.965111708141524,
+    "mcResidual": 1.159622221592475,
     "staticRegionVariance": 0.8161105962300842
    },
-   "neuralOverCatmullResidual": 1.0195886074426463,
-   "neuralOverReferenceResidual": 0.9727651593927948,
-   "catmullOverReferenceResidual": 0.9540761364847975
+   "reference_blur0p5": {
+    "mcResidual": 1.1690427856784398
+   },
+   "reference_blur1p0": {
+    "mcResidual": 1.0689592273688917
+   },
+   "blurControl0p5OverReference": 0.9521388354184358,
+   "blurControl1p0OverReference": 0.8706247592693034,
+   "neuralOverCatmullResidual": 1.076464198141961,
+   "neuralOverReferenceResidual": 1.0728705170093642,
+   "catmullOverReferenceResidual": 0.9966615878737076
   },
   "faces-video-production-i-m-a-defender-la": {
    "reference": {
-    "mcResidual": 10.091611342642203,
+    "mcResidual": 3.9791887275509494,
     "staticRegionVariance": 7.238752042414324
    },
    "neural": {
-    "mcResidual": 9.94860024665567,
+    "mcResidual": 4.026159295642918,
     "staticRegionVariance": 7.200348956341093
    },
    "catmull_rom": {
-    "mcResidual": 9.803007490509613,
+    "mcResidual": 3.9038800241594966,
     "staticRegionVariance": 7.115319054573774
    },
    "bilinear": {
-    "mcResidual": 9.640847781842405,
+    "mcResidual": 3.8027190825139936,
     "staticRegionVariance": 7.091581431979483
    },
-   "neuralOverCatmullResidual": 1.014851845853123,
-   "neuralOverReferenceResidual": 0.9858287154418802,
-   "catmullOverReferenceResidual": 0.9714016084910948
+   "reference_blur0p5": {
+    "mcResidual": 3.915000589180801
+   },
+   "reference_blur1p0": {
+    "mcResidual": 3.772665738874242
+   },
+   "blurControl0p5OverReference": 0.9838690389511497,
+   "blurControl1p0OverReference": 0.9480992225257396,
+   "neuralOverCatmullResidual": 1.0313224972915882,
+   "neuralOverReferenceResidual": 1.011804056381331,
+   "catmullOverReferenceResidual": 0.9810743574764289
   },
   "faces-video-production-challenging-train": {
    "reference": {
-    "mcResidual": 8.084094513842667,
+    "mcResidual": 4.232146084054627,
     "staticRegionVariance": 73.17698363815857
    },
    "neural": {
-    "mcResidual": 7.9328432223674925,
+    "mcResidual": 4.331505128521133,
     "staticRegionVariance": 73.9118598015471
    },
    "catmull_rom": {
-    "mcResidual": 7.737476852383804,
+    "mcResidual": 4.1984032105485145,
     "staticRegionVariance": 73.21467250737955
    },
    "bilinear": {
-    "mcResidual": 7.549048036336899,
+    "mcResidual": 4.113473619249734,
     "staticRegionVariance": 73.17412796311758
    },
-   "neuralOverCatmullResidual": 1.0252493640641394,
-   "neuralOverReferenceResidual": 0.981290261857258,
-   "catmullOverReferenceResidual": 0.9571235020984307
+   "reference_blur0p5": {
+    "mcResidual": 4.159287153319879
+   },
+   "reference_blur1p0": {
+    "mcResidual": 4.030423800333995
+   },
+   "blurControl0p5OverReference": 0.982784400800989,
+   "blurControl1p0OverReference": 0.9523356992612667,
+   "neuralOverCatmullResidual": 1.0317029859443227,
+   "neuralOverReferenceResidual": 1.0234772246735193,
+   "catmullOverReferenceResidual": 0.9920270064322105
   },
   "motion-2023-maplefest-in-bowmanville-on-2": {
    "reference": {
-    "mcResidual": 10.93216661973433,
+    "mcResidual": 2.1458043401891533,
     "staticRegionVariance": 11.580990357832475
    },
    "neural": {
-    "mcResidual": 9.284302711486816,
+    "mcResidual": 3.2359707788987593,
     "staticRegionVariance": 5.795771620490334
    },
    "catmull_rom": {
-    "mcResidual": 7.7968689745122735,
+    "mcResidual": 2.3821597316048364,
     "staticRegionVariance": 3.534774346785112
    },
    "bilinear": {
-    "mcResidual": 6.703493898565119,
+    "mcResidual": 1.8819105950268833,
     "staticRegionVariance": 2.410059679638256
    },
-   "neuralOverCatmullResidual": 1.1907732118927377,
-   "neuralOverReferenceResidual": 0.8492646548880025,
-   "catmullOverReferenceResidual": 0.7132043670499554
+   "reference_blur0p5": {
+    "mcResidual": 1.571964675729925
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.7624690424312245
+   },
+   "blurControl0p5OverReference": 0.7325759605795913,
+   "blurControl1p0OverReference": 0.3553301799939563,
+   "neuralOverCatmullResidual": 1.358418890205452,
+   "neuralOverReferenceResidual": 1.5080455931100911,
+   "catmullOverReferenceResidual": 1.110147690070777
   },
   "motion-rogla-slovenia-ostru-ica-1-4k-pov-": {
    "reference": {
-    "mcResidual": 13.736803418237038,
+    "mcResidual": 5.63813811917366,
     "staticRegionVariance": 15.642904581332749
    },
    "neural": {
-    "mcResidual": 13.287566593763502,
+    "mcResidual": 5.662580538541079,
     "staticRegionVariance": 15.242533107372848
    },
    "catmull_rom": {
-    "mcResidual": 12.750719245523214,
+    "mcResidual": 5.291036376560276,
     "staticRegionVariance": 14.915099001743577
    },
    "bilinear": {
-    "mcResidual": 12.243421402844517,
+    "mcResidual": 5.014427869834683,
     "staticRegionVariance": 14.75815280357545
    },
-   "neuralOverCatmullResidual": 1.042103299265159,
-   "neuralOverReferenceResidual": 0.9672968440476387,
-   "catmullOverReferenceResidual": 0.9282158925412958
+   "reference_blur0p5": {
+    "mcResidual": 5.380800687836944
+   },
+   "reference_blur1p0": {
+    "mcResidual": 4.907850705213522
+   },
+   "blurControl0p5OverReference": 0.9543577284030011,
+   "blurControl1p0OverReference": 0.8704736566355755,
+   "neuralOverCatmullResidual": 1.0702214340515166,
+   "neuralOverReferenceResidual": 1.0043351934363398,
+   "catmullOverReferenceResidual": 0.938436814551777
   },
   "motion-aerial-drone-chase-of-a-train-webm": {
    "reference": {
-    "mcResidual": 3.742229613390836,
+    "mcResidual": 1.3153693784366955,
     "staticRegionVariance": 1.0633921189741655
    },
    "neural": {
-    "mcResidual": 3.2565513090653853,
+    "mcResidual": 1.3019026626240124,
     "staticRegionVariance": 0.7370217496698553
    },
    "catmull_rom": {
-    "mcResidual": 3.058091792193326,
+    "mcResidual": 1.1474685072898865,
     "staticRegionVariance": 0.6455403214151209
    },
    "bilinear": {
-    "mcResidual": 2.8955670270052822,
+    "mcResidual": 1.0529916178096423,
     "staticRegionVariance": 0.5914308239113201
    },
-   "neuralOverCatmullResidual": 1.064896520561837,
-   "neuralOverReferenceResidual": 0.8702168614700857,
-   "catmullOverReferenceResidual": 0.817184434982435
+   "reference_blur0p5": {
+    "mcResidual": 1.210595732385462
+   },
+   "reference_blur1p0": {
+    "mcResidual": 1.0180256800218062
+   },
+   "blurControl0p5OverReference": 0.920346597869143,
+   "blurControl1p0OverReference": 0.7739466166011256,
+   "neuralOverCatmullResidual": 1.1345868355889537,
+   "neuralOverReferenceResidual": 0.9897620272803612,
+   "catmullOverReferenceResidual": 0.8723545842717141
   },
   "urban-funchal-madeira-amazing-view-from-": {
    "reference": {
-    "mcResidual": 0.9021904360164296,
+    "mcResidual": 0.576240368864753,
     "staticRegionVariance": 2.6810203032060103
    },
    "neural": {
-    "mcResidual": 0.519210390069268,
+    "mcResidual": 0.4674343385479667,
     "staticRegionVariance": 0.898604542016983
    },
    "catmull_rom": {
-    "mcResidual": 0.40142580054023047,
+    "mcResidual": 0.3533434583382173,
     "staticRegionVariance": 0.5541626133702018
    },
    "bilinear": {
-    "mcResidual": 0.3347570313648744,
+    "mcResidual": 0.2916187969121066,
     "staticRegionVariance": 0.3824681240049275
    },
-   "neuralOverCatmullResidual": 1.293415593543129,
-   "neuralOverReferenceResidual": 0.5754997718240196,
-   "catmullOverReferenceResidual": 0.44494575038137535
+   "reference_blur0p5": {
+    "mcResidual": 0.4522114639932459
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.2794282382184809
+   },
+   "blurControl0p5OverReference": 0.7847618605481328,
+   "blurControl1p0OverReference": 0.4849161102145281,
+   "neuralOverCatmullResidual": 1.322889464959452,
+   "neuralOverReferenceResidual": 0.8111794379641531,
+   "catmullOverReferenceResidual": 0.613187616539842
   },
   "urban-aerial-video-of-charlotte-nc-4k-dr": {
    "reference": {
-    "mcResidual": 8.528442946347324,
+    "mcResidual": 3.2829829237677832,
     "staticRegionVariance": 60.84969585592096
    },
    "neural": {
-    "mcResidual": 7.52678230675784,
+    "mcResidual": 4.0566416003487324,
     "staticRegionVariance": 60.68499462712895
    },
    "catmull_rom": {
-    "mcResidual": 6.576479099013588,
+    "mcResidual": 3.398890321904963,
     "staticRegionVariance": 59.55896272442558
    },
    "bilinear": {
-    "mcResidual": 5.925918611613187,
+    "mcResidual": 3.0442859584634956,
     "staticRegionVariance": 59.266388616778634
    },
-   "neuralOverCatmullResidual": 1.1445003007592298,
-   "neuralOverReferenceResidual": 0.8825505844512346,
-   "catmullOverReferenceResidual": 0.7711230690509867
+   "reference_blur0p5": {
+    "mcResidual": 2.918368924747814
+   },
+   "reference_blur1p0": {
+    "mcResidual": 2.3506953066045586
+   },
+   "blurControl0p5OverReference": 0.8889381981306462,
+   "blurControl1p0OverReference": 0.7160242258911096,
+   "neuralOverCatmullResidual": 1.1935194184421702,
+   "neuralOverReferenceResidual": 1.235657234455866,
+   "catmullOverReferenceResidual": 1.0353055135614766
   },
   "urban-drone-footage-in-new-orleans-2022-": {
    "reference": {
-    "mcResidual": 5.832121307140121,
+    "mcResidual": 2.0607423565009166,
     "staticRegionVariance": 0.45965599742802704
    },
    "neural": {
-    "mcResidual": 5.284425634552132,
+    "mcResidual": 2.230715809897943,
     "staticRegionVariance": 0.3790371472185308
    },
    "catmull_rom": {
-    "mcResidual": 4.482435139065439,
+    "mcResidual": 1.7721871483055027,
     "staticRegionVariance": 0.25633407587354834
    },
    "bilinear": {
-    "mcResidual": 3.8660950233990494,
+    "mcResidual": 1.4619559672745792,
     "staticRegionVariance": 0.19072671708735553
    },
-   "neuralOverCatmullResidual": 1.178918483057828,
-   "neuralOverReferenceResidual": 0.9060898009927436,
-   "catmullOverReferenceResidual": 0.7685771442335578
+   "reference_blur0p5": {
+    "mcResidual": 1.7613625425305641
+   },
+   "reference_blur1p0": {
+    "mcResidual": 1.1949269230112392
+   },
+   "blurControl0p5OverReference": 0.8547223465243413,
+   "blurControl1p0OverReference": 0.5798526532158013,
+   "neuralOverCatmullResidual": 1.2587360268529584,
+   "neuralOverReferenceResidual": 1.082481661456038,
+   "catmullOverReferenceResidual": 0.8599751165956657
   },
   "nature-4k-drone-flight-peninsula-state-pa": {
    "reference": {
-    "mcResidual": 4.627460479736328,
+    "mcResidual": 0.9043878425251354,
     "staticRegionVariance": 1.9439433975653215
    },
    "neural": {
-    "mcResidual": 4.4077559384432705,
+    "mcResidual": 1.0284300988370723,
     "staticRegionVariance": 1.5316740762103687
    },
    "catmull_rom": {
-    "mcResidual": 4.253587354313243,
+    "mcResidual": 0.9050955501469699,
     "staticRegionVariance": 1.391775288365104
    },
    "bilinear": {
-    "mcResidual": 4.072039690884677,
+    "mcResidual": 0.8331896987828341,
     "staticRegionVariance": 1.2897246859290383
    },
-   "neuralOverCatmullResidual": 1.0362443677038151,
-   "neuralOverReferenceResidual": 0.9525215737108627,
-   "catmullOverReferenceResidual": 0.9192055497696248
+   "reference_blur0p5": {
+    "mcResidual": 0.8372973041100935
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.7400096167217601
+   },
+   "blurControl0p5OverReference": 0.9258166294808665,
+   "blurControl1p0OverReference": 0.8182436582247546,
+   "neuralOverCatmullResidual": 1.1362668821762247,
+   "neuralOverReferenceResidual": 1.1371560413346549,
+   "catmullOverReferenceResidual": 1.0007825266866244
   },
   "nature-the-beautiful-blue-river-dji-phant": {
    "reference": {
-    "mcResidual": 38.081328310210004,
+    "mcResidual": 4.80288536386268,
     "staticRegionVariance": 12.849814675071023
    },
    "neural": {
-    "mcResidual": 37.89724048938263,
+    "mcResidual": 4.4602280709553845,
     "staticRegionVariance": 12.328152997927232
    },
    "catmull_rom": {
-    "mcResidual": 37.383385790342636,
+    "mcResidual": 3.9407015158371492,
     "staticRegionVariance": 12.001479851928623
    },
    "bilinear": {
-    "mcResidual": 36.985529668967835,
+    "mcResidual": 3.6185691471804273,
     "staticRegionVariance": 11.804066320711916
    },
-   "neuralOverCatmullResidual": 1.01374553663817,
-   "neuralOverReferenceResidual": 0.9951659296301906,
-   "catmullOverReferenceResidual": 0.9816723168324923
+   "reference_blur0p5": {
+    "mcResidual": 4.443717256923926
+   },
+   "reference_blur1p0": {
+    "mcResidual": 3.794776126326972
+   },
+   "blurControl0p5OverReference": 0.9252182636626796,
+   "blurControl1p0OverReference": 0.7901034146846793,
+   "neuralOverCatmullResidual": 1.1318360583846119,
+   "neuralOverReferenceResidual": 0.9286559501325019,
+   "catmullOverReferenceResidual": 0.8204862738318354
   },
   "nature-piz-neir-aerial-video-4k-webm": {
    "reference": {
-    "mcResidual": 16.437976143576883,
+    "mcResidual": 2.302375327457081,
     "staticRegionVariance": 7.822255633094094
    },
    "neural": {
-    "mcResidual": 15.29655716635964,
+    "mcResidual": 3.0770326310938056,
     "staticRegionVariance": 7.158616716211492
    },
    "catmull_rom": {
-    "mcResidual": 14.15430701862682,
+    "mcResidual": 2.398516156456687,
     "staticRegionVariance": 6.876593589782715
    },
    "bilinear": {
-    "mcResidual": 13.170913349498402,
+    "mcResidual": 1.9794201417402788,
     "staticRegionVariance": 6.671732794154774
    },
-   "neuralOverCatmullResidual": 1.080699828414746,
-   "neuralOverReferenceResidual": 0.9305620736246627,
-   "catmullOverReferenceResidual": 0.8610735832073584
+   "reference_blur0p5": {
+    "mcResidual": 1.8565148440274326
+   },
+   "reference_blur1p0": {
+    "mcResidual": 1.1961554939096624
+   },
+   "blurControl0p5OverReference": 0.8063476106121712,
+   "blurControl1p0OverReference": 0.5195310597906675,
+   "neuralOverCatmullResidual": 1.2828900997020953,
+   "neuralOverReferenceResidual": 1.3364600438505894,
+   "catmullOverReferenceResidual": 1.0417572356049312
   },
   "lowlight-hofer-weihnachtsmarkt-am-abend-202": {
    "reference": {
-    "mcResidual": 3.2807375734502617,
+    "mcResidual": 1.1105497479438782,
     "staticRegionVariance": 1.469548593867909
    },
    "neural": {
-    "mcResidual": 2.853227225216952,
+    "mcResidual": 1.1830167878757825,
     "staticRegionVariance": 0.78268747438084
    },
    "catmull_rom": {
-    "mcResidual": 2.4951158545233985,
+    "mcResidual": 0.905724666335366,
     "staticRegionVariance": 0.5911486636508595
    },
    "bilinear": {
-    "mcResidual": 2.222004706209356,
+    "mcResidual": 0.7494811767881567,
     "staticRegionVariance": 0.4760989248752594
    },
-   "neuralOverCatmullResidual": 1.1435249469656221,
-   "neuralOverReferenceResidual": 0.8696907818251038,
-   "catmullOverReferenceResidual": 0.7605350317304879
+   "reference_blur0p5": {
+    "mcResidual": 0.9010902101343329
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.5910118438980796
+   },
+   "blurControl0p5OverReference": 0.8113911257038704,
+   "blurControl1p0OverReference": 0.5321795308965722,
+   "neuralOverCatmullResidual": 1.3061549848944298,
+   "neuralOverReferenceResidual": 1.0652533036598073,
+   "catmullOverReferenceResidual": 0.8155642446565454
   },
   "texture-snowex-field-campaign-4k-b-roll-fr": {
    "reference": {
-    "mcResidual": 7.548501144755971,
+    "mcResidual": 1.2501375783573498,
     "staticRegionVariance": 1.0518242174928838
    },
    "neural": {
-    "mcResidual": 6.709080045873469,
+    "mcResidual": 1.309037295254794,
     "staticRegionVariance": 0.6291430782188069
    },
    "catmull_rom": {
-    "mcResidual": 6.018204212188721,
+    "mcResidual": 1.0452778664502231,
     "staticRegionVariance": 0.499701126055284
    },
    "bilinear": {
-    "mcResidual": 5.366691936146129,
+    "mcResidual": 0.8741572986949574,
     "staticRegionVariance": 0.43064206025817175
    },
-   "neuralOverCatmullResidual": 1.1147976720838937,
-   "neuralOverReferenceResidual": 0.8887963209138999,
-   "catmullOverReferenceResidual": 0.7972714180973047
+   "reference_blur0p5": {
+    "mcResidual": 1.0945500514724038
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.8334104039452293
+   },
+   "blurControl0p5OverReference": 0.8755436764892834,
+   "blurControl1p0OverReference": 0.6666549493219059,
+   "neuralOverCatmullResidual": 1.2523342713648966,
+   "neuralOverReferenceResidual": 1.0471145879598602,
+   "catmullOverReferenceResidual": 0.8361302664173111
   },
   "texture-4k-drone-footage-of-a-barge-on-the": {
    "reference": {
-    "mcResidual": 0.24567096886331088,
+    "mcResidual": 0.11723895983283873,
     "staticRegionVariance": 0.11758711527694356
    },
    "neural": {
-    "mcResidual": 0.21126627109267496,
+    "mcResidual": 0.1455865434624932,
     "staticRegionVariance": 0.10515001009811055
    },
    "catmull_rom": {
-    "mcResidual": 0.17881602387536655,
+    "mcResidual": 0.11645225570960478,
     "staticRegionVariance": 0.07818172618069431
    },
    "bilinear": {
-    "mcResidual": 0.16063607145439496,
+    "mcResidual": 0.10262195495041934,
     "staticRegionVariance": 0.06462308374995535
    },
-   "neuralOverCatmullResidual": 1.1814728149862341,
-   "neuralOverReferenceResidual": 0.8599561929119172,
-   "catmullOverReferenceResidual": 0.7278679475345667
+   "reference_blur0p5": {
+    "mcResidual": 0.10273791571176037
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.08135053495339858
+   },
+   "blurControl0p5OverReference": 0.8763120711600121,
+   "blurControl1p0OverReference": 0.6938865294385889,
+   "neuralOverCatmullResidual": 1.2501822534510636,
+   "neuralOverReferenceResidual": 1.2417932031303667,
+   "catmullOverReferenceResidual": 0.9932897381181508
   }
  },
  "aggregate": {
   "neuralOverCatmullResidual": {
-   "mean": 1.102985492882154,
-   "median": 1.080699828414746,
-   "min": 1.01374553663817,
-   "max": 1.293415593543129,
+   "mean": 1.1891684200967798,
+   "median": 1.1935194184421702,
+   "min": 1.0313224972915882,
+   "max": 1.358418890205452,
    "clipsWorseThanCatmull": 15,
    "clips": 15
   },
   "catmullOverReferenceResidual": {
-   "mean": 0.8248985168323842
+   "mean": 0.9271453715125998
+  },
+  "blurControl0p5OverReference": {
+   "mean": 0.8850082896222876,
+   "min": 0.7325759605795913,
+   "max": 0.9838690389511497
+  },
+  "blurControl1p0OverReference": {
+   "mean": 0.704813484397705,
+   "min": 0.3553301799939563,
+   "max": 0.9523356992612667
   }
  }
 }

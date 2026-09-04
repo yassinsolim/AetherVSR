@@ -60,11 +60,28 @@ def to_luma(t: torch.Tensor) -> np.ndarray:
     return (0.2126 * a[..., 0] + 0.7152 * a[..., 1] + 0.0722 * a[..., 2]).astype(np.float32)
 
 
-def warp(img: np.ndarray, flow: np.ndarray) -> np.ndarray:
+def warp_forward(img: np.ndarray, flow: np.ndarray) -> np.ndarray:
+    """Resamples `img` (at time t) back onto the time t-1 grid.
+
+    `calcOpticalFlowFarneback(prev, cur)` returns FORWARD flow: the pixel at
+    (x, y) in prev appears at (x+u, y+v) in cur. So the frame that can be
+    compared against prev is cur sampled at grid+flow - not prev sampled at
+    grid+flow, which displaces prev a second time in the same direction and
+    roughly doubles the apparent motion.
+
+    Independent review caught the original as anti-compensating: it scored
+    *worse* than plain frame differencing on every clip tested (10.826 against
+    6.789 on maplefest), which is only possible if the compensation is moving
+    pixels the wrong way.
+    """
     h, w = img.shape
     gx, gy = np.meshgrid(np.arange(w, dtype=np.float32), np.arange(h, dtype=np.float32))
     return cv2.remap(img, gx + flow[..., 0], gy + flow[..., 1], cv2.INTER_LINEAR,
                      borderMode=cv2.BORDER_REPLICATE)
+
+
+def gaussian(img: np.ndarray, sigma: float) -> np.ndarray:
+    return cv2.GaussianBlur(img, (0, 0), sigmaX=sigma, sigmaY=sigma, borderType=cv2.BORDER_REPLICATE)
 
 
 def main() -> int:
@@ -95,7 +112,8 @@ def main() -> int:
         names = sorted(os.listdir(mdir))[: args.frames]
 
         methods = ("reference", "neural", "catmull_rom", "bilinear")
-        residual = {m: [] for m in methods}
+        controls = ("reference_blur0p5", "reference_blur1p0")
+        residual: dict[str, list[float]] = {m: [] for m in (*methods, *controls)}
         static_var = {m: [] for m in methods}
 
         prev = None
@@ -120,15 +138,34 @@ def main() -> int:
                 mag = np.linalg.norm(flow, axis=2)
                 still = mag < 0.25
                 for m in methods:
-                    warped = warp(prev[m], flow)
-                    residual[m].append(float(np.mean(np.abs(cur[m] - warped)) * 255.0))
+                    # Bring frame t back onto the t-1 grid and compare there.
+                    warped = warp_forward(cur[m], flow)
+                    residual[m].append(float(np.mean(np.abs(prev[m] - warped)) * 255.0))
                     if still.sum() > 1000:
                         static_var[m].append(float(np.mean((cur[m][still] - prev[m][still]) ** 2) * 255.0 * 255.0))
+
+                # Sharpness control. Blurring the reference cannot change the
+                # footage's true temporal consistency - it is the same footage -
+                # so any residual drop is the metric responding to spatial
+                # frequency rather than to instability. Without this the ratio
+                # cannot be read as a temporal cost at all.
+                for sigma, key in ((0.5, "reference_blur0p5"), (1.0, "reference_blur1p0")):
+                    warped = warp_forward(gaussian(cur["reference"], sigma), flow)
+                    residual[key].append(
+                        float(np.mean(np.abs(gaussian(prev["reference"], sigma) - warped)) * 255.0)
+                    )
             prev = cur
 
         if not residual["neural"]:
             continue
-        entry = {m: {"mcResidual": st.fmean(residual[m])} for m in methods}
+        entry = {m: {"mcResidual": st.fmean(residual[m])} for m in (*methods, *controls)}
+        # How much of a residual gap is purchasable by blurring alone.
+        entry["blurControl0p5OverReference"] = (
+            entry["reference_blur0p5"]["mcResidual"] / entry["reference"]["mcResidual"]
+        )
+        entry["blurControl1p0OverReference"] = (
+            entry["reference_blur1p0"]["mcResidual"] / entry["reference"]["mcResidual"]
+        )
         for m in methods:
             if static_var[m]:
                 entry[m]["staticRegionVariance"] = st.fmean(static_var[m])
@@ -145,6 +182,8 @@ def main() -> int:
 
     ratios = [v["neuralOverCatmullResidual"] for v in per_clip.values()]
     cat_ratio = [v["catmullOverReferenceResidual"] for v in per_clip.values()]
+    blur05 = [v["blurControl0p5OverReference"] for v in per_clip.values()]
+    blur10 = [v["blurControl1p0OverReference"] for v in per_clip.values()]
     report = {
         "schema": "aethervsr.captured-temporal/1",
         "model": os.path.basename(args.model),
@@ -154,10 +193,18 @@ def main() -> int:
             "is warped by that flow and the residual measured. Flow error inflates every method "
             "equally, so only ratios between methods are interpreted."
         ),
-        "control": (
-            "catmullOverReferenceResidual shows how much of the residual is flow error rather "
-            "than upscaler behaviour; a ratio near 1 would mean the metric cannot resolve anything."
-        ),
+        "controls": {
+            "flowError": (
+                "catmullOverReferenceResidual: how much residual is flow error rather than "
+                "upscaler behaviour."
+            ),
+            "sharpness": (
+                "Blurring the reference cannot change the footage's real temporal consistency, so "
+                "any residual drop measures the metric's response to spatial frequency. If the "
+                "blur control moves the score as much as the methods do, the ratio cannot be read "
+                "as a temporal cost."
+            ),
+        },
         "perClip": per_clip,
         "aggregate": {
             "neuralOverCatmullResidual": {
@@ -166,6 +213,8 @@ def main() -> int:
                 "clipsWorseThanCatmull": sum(1 for r in ratios if r > 1.0), "clips": len(ratios),
             },
             "catmullOverReferenceResidual": {"mean": st.fmean(cat_ratio)},
+            "blurControl0p5OverReference": {"mean": st.fmean(blur05), "min": min(blur05), "max": max(blur05)},
+            "blurControl1p0OverReference": {"mean": st.fmean(blur10), "min": min(blur10), "max": max(blur10)},
         },
     }
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
