@@ -57,11 +57,26 @@ def main() -> int:
     ap.add_argument("--categories", default="natural,texture,motion,text,animation")
     ap.add_argument("--tiers", default="h264-high,h264-medium,h264-low,vp9-medium,av1-medium")
     ap.add_argument("--out", default="")
+    ap.add_argument(
+        "--device",
+        default="cpu",
+        choices=("cpu", "mps"),
+        help="cpu by default: MPS is not run-to-run reproducible here (see comment)",
+    )
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
     model, payload = load_model(args.model)
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    # CPU, deliberately, and not because MPS is unavailable.
+    #
+    # Independent review reproduced MPS returning different numbers for the
+    # *same* deterministic computation: repeating a model-free baseline
+    # (box downsample, then bilinear/Catmull-Rom/nearest) over 60 images gave
+    # 3 of 60 images deviating from CPU by 0.44 to 2.51 dB, a different three
+    # each run. That is larger than every effect this milestone reports, and it
+    # left a provably corrupted row in a committed result file. A measurement
+    # has to be a property of the model, not of the backend that ran it.
+    device = args.device
     model = model.to(device)
 
     with open(os.path.join(args.root, "manifest.json"), encoding="utf-8") as fh:

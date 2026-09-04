@@ -841,6 +841,35 @@ def compare_sequences_psnr_ssim(
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+VMAF_VALIDITY_NOTE = (
+    "DIAGNOSTIC ONLY - NOT A QUALITY CLAIM. The default vmaf_v0.6.1 model is "
+    "trained for 1080p viewing and is being fed 2560x1440 synthetic frames. On "
+    "this corpus it ranks nearest-neighbour ABOVE Lanczos in all five text "
+    "cells (80.18 against 77.48), which PSNR, SSIM and visual inspection all "
+    "contradict. A metric that prefers nearest-neighbour cannot support a "
+    "quality conclusion here, so these numbers are recorded for reference and "
+    "no conclusion in BENCHMARKS.md rests on them."
+)
+
+
+def vmaf_sanity_failures(scores_by_scaler: dict[str, float]) -> list[str]:
+    """Names orderings that disqualify VMAF as a quality metric on a cell.
+
+    Nearest-neighbour outranking a real reconstruction filter is not a subtle
+    calibration issue; it means the metric is not measuring what the word
+    "quality" is being used for.
+    """
+    problems = []
+    near = scores_by_scaler.get("nearest")
+    if near is None:
+        return problems
+    for better in ("bicubic", "lanczos"):
+        value = scores_by_scaler.get(better)
+        if value is not None and near > value:
+            problems.append(f"nearest {near:.2f} outranks {better} {value:.2f}")
+    return problems
+
+
 def compute_vmaf(distorted_dir: str, reference_dir: str, count: int, fps: int) -> list[float]:
     """Computes VMAF only after the caller has verified sequence geometry and
     the RGB/full <-> BT.709/limited color contract. Both inputs undergo the

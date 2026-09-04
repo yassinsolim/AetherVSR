@@ -10860,5 +10860,33 @@
     }
    }
   }
+ },
+ "vmaf_validity": {
+  "status": "DIAGNOSTIC ONLY - NOT A QUALITY CLAIM",
+  "reason": "Default vmaf_v0.6.1 is calibrated for 1080p viewing and is being fed 2560x1440 synthetic frames. Independent review found it ranks nearest-neighbour above Lanczos, which PSNR, SSIM and visual inspection all contradict.",
+  "sanityRule": "nearest-neighbour must not outrank bicubic or lanczos",
+  "sanityFailures": {
+   "natural/h264-high": "nearest 80.96 > bicubic 80.87",
+   "natural/h264-medium": "nearest 72.42 > bicubic 72.37",
+   "natural/h264-low": "nearest 66.07 > bicubic 66.01, lanczos 66.07",
+   "natural/vp9-medium": "nearest 75.22 > bicubic 75.13",
+   "natural/av1-medium": "nearest 68.85 > bicubic 68.84",
+   "motion/h264-high": "nearest 87.32 > bicubic 86.88",
+   "motion/h264-medium": "nearest 79.72 > bicubic 79.13",
+   "motion/h264-low": "nearest 67.44 > bicubic 66.92",
+   "motion/vp9-medium": "nearest 80.29 > bicubic 79.79",
+   "motion/av1-medium": "nearest 71.11 > bicubic 70.67",
+   "text/h264-high": "nearest 80.18 > bicubic 76.19, lanczos 77.48",
+   "text/h264-medium": "nearest 79.19 > bicubic 75.44, lanczos 76.72",
+   "text/h264-low": "nearest 76.29 > bicubic 72.35, lanczos 73.77",
+   "text/vp9-medium": "nearest 79.70 > bicubic 75.65, lanczos 76.80",
+   "text/av1-medium": "nearest 81.05 > bicubic 77.44, lanczos 78.32",
+   "animation/h264-high": "nearest 82.84 > bicubic 81.23",
+   "animation/h264-medium": "nearest 81.62 > bicubic 79.97",
+   "animation/h264-low": "nearest 80.03 > bicubic 78.48",
+   "animation/vp9-medium": "nearest 82.76 > bicubic 81.15",
+   "animation/av1-medium": "nearest 82.00 > bicubic 80.49"
+  },
+  "failingCells": 20
  }
 }

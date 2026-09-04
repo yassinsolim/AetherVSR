@@ -30,7 +30,7 @@ for seed in "${SEEDS[@]}"; do
   echo "== training seed $seed (profile $PROFILE) =="
   "$PY" tools/train.py \
     --corpus data/corpus \
-    --split data/splits/corpus-v2.json \
+    --split data/splits/corpus-v3.json \
     --degradation "$PROFILE" \
     --out "$out" \
     --channels 16 \

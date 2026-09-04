@@ -2,7 +2,7 @@
  "schema": "aethervsr.split/1",
  "salt": "aethervsr/split/v2-clustered",
  "unit": "perceptual cluster of source images (dHash <= threshold, or shared normalised title)",
- "clusters": 401,
+ "clusters": 277,
  "phashThreshold": 10,
  "ratios": {
   "train": 0.7,
@@ -10,9 +10,9 @@
   "test": 0.15
  },
  "counts": {
-  "train": 335,
-  "val": 85,
-  "test": 75
+  "train": 329,
+  "val": 94,
+  "test": 72
  },
  "total": 495,
  "policy": "Validation selects checkpoints and tunes hyperparameters. Test is evaluated once on a frozen model and never informs any choice. See DECISIONS.md ADR-0028.",
@@ -175,12 +175,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00456_be91a813bf.jpg",
-    "sha256": "17a50dcd92ae405dbea44034cbe92171fa3277128a37478813d967fb70cd8476",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/%22Bahram_Gur_Shows_His_Skill_Hunting%2C_while_Fitna_Watches%22%2C_Folio_from_a_Haft_Paykar_%28Seven_Portraits%29_of_Nizami_MET_78213.jpg/1920px-%22Bahram_Gur_Shows_His_Skill_Hunting%2C_while_Fitna_Watches%22%2C_Folio_from_a_Haft_Paykar_%28Seven_Portraits%29_of_Nizami_MET_78213.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00426_34b323630d.jpg",
     "sha256": "17f33ae4440f6fd1cdcd0070c89079856267d934e34317b8e4818f3a8ae65098",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/%22Bahram_Gur_in_the_Sandal_Palace_on_Thursday%22%2C_Folio_230_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187681.jpg/1920px-%22Bahram_Gur_in_the_Sandal_Palace_on_Thursday%22%2C_Folio_230_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187681.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -244,12 +238,6 @@
     "file": "00078_1204834dca.jpg",
     "sha256": "1d12430d16ff4440b7ecf2858aed0a73fc847f75db436981c2dea9e773f7426a",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/%221._Mai_im_Grunewald%22_Demonstration_in_Berlin_at_1st_of_May_2018_10.jpg/1920px-%221._Mai_im_Grunewald%22_Demonstration_in_Berlin_at_1st_of_May_2018_10.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00063_f86a5fa311.jpg",
-    "sha256": "1d4867509d57a1995c14261f9d1aefc44f5ac4e00cb78b5ca27392bb570aa9d0",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf23-264-2b.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -349,6 +337,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00417_bf8e88088d.jpg",
+    "sha256": "2c479360a95b3a1158b14c90432f88cd9a45f6143c91ede78125c954fd43b800",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4787.jpg/1920px-%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4787.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00142_6e589f9984.jpg",
     "sha256": "2cd7bcc74bcf8bf90f43171c28e06f941a2e3d5f7aa52e0790feeaf094f74486",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/%22A_peine_si%2C_par_les_hublots_et_les_fenetres_eclairees%2C_je_pus_voir...%22_MET_DP865322.jpg/1920px-%22A_peine_si%2C_par_les_hublots_et_les_fenetres_eclairees%2C_je_pus_voir...%22_MET_DP865322.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -403,12 +397,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00094_a253c6305c.jpg",
-    "sha256": "368edd0b498044f93d12128222a155db04cd5f7b41c16f1a0c1db57f6369660e",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/%22A_Bathhouse_Keeper_is_Consumed_by_Passion_for_his_Beloved%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DP120806.jpg/1920px-%22A_Bathhouse_Keeper_is_Consumed_by_Passion_for_his_Beloved%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DP120806.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00008_3b47829760.jpg",
     "sha256": "36a5663d8c631e478d70cc1fdfcccbf8ee8e5e57b486b66945ec88f8f91837c0",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/%21Defurovy_La%C5%BEany_-_n%C3%A1m%C4%9Bst%C3%AD.jpg/1920px-%21Defurovy_La%C5%BEany_-_n%C3%A1m%C4%9Bst%C3%AD.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -424,6 +412,12 @@
     "file": "00318_d4c0c29210.jpg",
     "sha256": "384d09c94c41f01c52e1bbe225b86c52ba3276bc179de47450cce9b29edd63e0",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/%22ANDROMEDA%22_%22JOHN_BELL%22_from_-Sculptures_of_Andromeda%2C_the_Toilet_of_Atalanta%2C_Corinna%2C_and_a_Naiad-_MET_DP323119_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00414_ca7626f298.jpg",
+    "sha256": "38575257f3bdd48ff4c3f1017678d5e94f93a33624d083edd5fd4169b87d4349",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/21/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_43914.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -454,12 +448,6 @@
     "file": "00249_debeff36d6.jpg",
     "sha256": "3ae6f4fd791bd6d89728f83589470dd313e900174ee9897cbb5ebdacf281a112",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/%22Akshobhya_Seated_on_a_Lotus_Emerging_from_Vessel_Overflowing_with_Foliage_%28Purnagata%29%2C_Nepal_or_Southern_Tibet%2C_15th_century%2C_Gilt_copper_worked_in_repousse%22_art_at_Art_Institute_of_Chicago_-_DSC_8242.jpg/1920px-thumbnail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00219_009f383ca5.jpg",
-    "sha256": "3b8f77bf8ffa1460bab467df2d66b83e552113afbb0836e39cbaacdd8ff7fbdd",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/%22Abundance%22_Textile_MET_DP293539.jpg/1920px-%22Abundance%22_Textile_MET_DP293539.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -511,27 +499,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00221_0fe9614e64.jpg",
-    "sha256": "40d1dab599f7fef5136a650661022e98e5212c1c815aa9ef7ce01f9720f1f541",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/%22Abundance%22_Textile_MET_DP293541.jpg/1920px-%22Abundance%22_Textile_MET_DP293541.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00119_3b4dcfbc79.jpg",
     "sha256": "41c52f9ef444e90f0e269d333d4082c8fda63bae28d9f048a20639dbaedccc2a",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/%22A_little_drop_to_the_nose...%22_The_Doctor_in_The_White_Boys_at_St._John%27s%2C_2021.jpg/1920px-%22A_little_drop_to_the_nose...%22_The_Doctor_in_The_White_Boys_at_St._John%27s%2C_2021.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00103_c45cef8fb0.jpg",
-    "sha256": "41ca49c87fce0ef6b3f19915d49ef00094c8d44884f10b0932e8503ed76f9222",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/%22A_Fire-Worshipper_Received_at_the_Board_of_Abraham_the_Patriarch%22%2C_Folio_from_a_Bustan_%28Orchard%29_of_Sa%27di_MET_43297.jpg/1920px-%22A_Fire-Worshipper_Received_at_the_Board_of_Abraham_the_Patriarch%22%2C_Folio_from_a_Bustan_%28Orchard%29_of_Sa%27di_MET_43297.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00466_36a35ebcb9.jpg",
-    "sha256": "4218c20ec821de36d5cb3a32f0495fa2fd217acc6e2c80f869b1ccedf5483fbe",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/%22Bahram_Gur_Slays_the_Rhino-Wolf%22%2C_Folio_586r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107178.jpg/1920px-%22Bahram_Gur_Slays_the_Rhino-Wolf%22%2C_Folio_586r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107178.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -601,9 +571,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00105_57f493c618.jpg",
-    "sha256": "4a343417ec404d4c487684350cc129434e0138984991de966a8d705dc9f8f6c8",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/6f/%22A_Fire-Worshipper_Received_at_the_Board_of_Abraham_the_Patriarch%22%2C_Folio_from_a_Bustan_%28Orchard%29_of_Sa%27di_MET_sf13-228-23-f47v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "file": "00275_b73e0f1a06.jpg",
+    "sha256": "49cc45f2c50ba4d54faa0e8c7d098ab4d3adc755cf8d6fd93e3448f765e1981b",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_30608.jpg/1920px-%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_30608.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -721,12 +691,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00394_977c7c3b29.jpg",
-    "sha256": "5414852c34c2aa7035f57d95c5cd8bae44543146b754ece68455b8e4596c6d9b",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/%22Bahram_Gur_and_the_Indian_Princess_in_the_Dark_Palace_on_Saturday%22%2C_Folio_23v_from_a_Haft_Paikar_%28Seven_Portraits%29_of_the_Khamsa_%28Quintet%29_of_Nizami_MET_43298.jpg/1920px-thumbnail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00121_26554dfab5.jpg",
     "sha256": "54166ac1abd02b2a15d74c2055035e14bae8a24ff8074b163e42185882360654",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/%22A_Little_Help_From_Our_Friends%22_%281966%3B_Robert_Hieronimus%2C_muralist%29%2C_Venable_Avenue_and_Greenmount_Avenue_%28southeast_corner%29%2C_Baltimore%2C_MD_21218_%2825787211717%29.jpg/1920px-thumbnail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -745,9 +709,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00162_c3ea14e0e8.jpg",
-    "sha256": "57382aff8eb01d8c365f1cfff96c1ac01cc5964fded50eda9a38d87c78bc46ce",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247745.jpg/1920px-%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247745.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00258_53c21b4b13.jpg",
+    "sha256": "5a15c409f4e34e743b3175dc2389b78c19779761bf837116b9e0a7ea217e09f0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/57/%22Alexander_and_the_Circle_of_Seven_Sages%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-9-f260b-v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -775,6 +739,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00416_c435b12180.jpg",
+    "sha256": "5e255a3e11223e8526b44c7a3660433abbaa0322d5a4620c48b9064f416d6826",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164646.jpg/1920px-%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164646.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00371_860835065c.jpg",
     "sha256": "5eb4e2161af1e4283691fdc730e037270cc5b7b58624d48d1ee1dba96bff62c0",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/%22Au_d%C3%A9pendez-moi_%C3%A7a%22.JPG/1920px-%22Au_d%C3%A9pendez-moi_%C3%A7a%22.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -790,12 +760,6 @@
     "file": "00332_9055b7883e.jpg",
     "sha256": "6041a6901735d5f31ab7613439d37829cf5d483a8dad57a669fe45afc4befd41",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/%22Aqsawlaq%22_national_food.jpg/1920px-%22Aqsawlaq%22_national_food.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00065_779e9f4394.jpg",
-    "sha256": "60d34c78a851a7c822c31a4162f05d92c99ce46eab0491cee595cc395e423b4f",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf23-264-2d.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -835,15 +799,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00270_8acc62396f.jpg",
-    "sha256": "6528a15653ee75e2755dc4815b7ffeaa30af2b7dcdea13e6ced90010410fb8dc",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212332.jpg/1920px-%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212332.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00257_d29d07a2f0.jpg",
     "sha256": "65ee53446c4271a223afe07fc9a3cf0b613e44ba5d1f232d0e73f2a2b1c14123",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/76/%22Alexander_and_the_Circle_of_Seven_Sages%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-9-f260b-r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00247_2e63bbc646.jpg",
+    "sha256": "660c0d94fa8266bf03c592e8ff711c078aa18ebaf02e752227219a593687671e",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/66/%22Akbar_With_Lion_and_Calf%22%2C_Folio_from_the_Shah_Jahan_Album_MET_sf55-121-10-22a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -901,9 +865,27 @@
     "licence": "CC0"
    },
    {
+    "file": "00442_2665c48fc2.jpg",
+    "sha256": "70932ae3a6a44b48a54ce803baeb7f40a650813d34b7d5d6d82ec7e4e58adff4",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187673.jpg/1920px-%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187673.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00044_2684c5edad.jpg",
     "sha256": "70d4c0dd166b697f6fd26bc43c99ae0274ceefadea71bc12195063eba0deb34a",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/%22_Reflections%22_Clun_lake_%281293823%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00480_8a2c4690d6.jpg",
+    "sha256": "71078458dcf6ebd20dc30c344f0da3b1ba7a83187f292ac330f20d1531707645",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/%22Balarama_and_Krishna_Fighting_the_Enemy%22%2C_Folio_from_a_Harivamsa_%28The_Legend_of_Hari_%28Krishna%29%29_MET_DT4802.jpg/1920px-%22Balarama_and_Krishna_Fighting_the_Enemy%22%2C_Folio_from_a_Harivamsa_%28The_Legend_of_Hari_%28Krishna%29%29_MET_DT4802.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00410_d04960c49d.jpg",
+    "sha256": "71b24d6c295ef0c8efc8075b26ab26e56b0cb70af4e7d5f77f732de238b31e7a",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/%22Bahram_Gur_in_the_Dark_Palace_on_Saturday%22%2C_Folio_207_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-7-8.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -928,12 +910,6 @@
     "file": "00067_6e2937c362.jpg",
     "sha256": "74dec2e614c6fe245905c15d1245eccccff4f063f7b6f35280ff4781278ae75e",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/16/%22...common_values_that_bind_them_in_harmony.%22_%2812677533805%29.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00449_2eee2930f7.jpg",
-    "sha256": "7577ca9f0251a8f1bd94e096f7aa15bf9a7bbe56aefb62b5b92e9fc0c8d47668",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/2d/%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP260240.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -967,12 +943,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00215_ebfba968c3.jpg",
-    "sha256": "78442722cbaa1e38e4b95a2ef9facda9570b5dad5c19cabd06ad04b1cf794b73",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/%22Abundance%22_Textile_MET_DP293533.jpg/1920px-%22Abundance%22_Textile_MET_DP293533.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00232_e2ad006cc1.jpg",
     "sha256": "786eac0e971f4d3eaa5119a1c0c1a4f6768165f4c7e219c745004b0c9983a844",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/%22Afraid_of_Figs%22_Original_press_photo%2C_2011.jpg/1920px-%22Afraid_of_Figs%22_Original_press_photo%2C_2011.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -982,12 +952,6 @@
     "file": "00043_9b0f718833.jpg",
     "sha256": "79d584a032a9fb2db52a6eeb21ef2271ff75e6a06b6c75db11aef0d2c1ca13ea",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/%22_Pulpit_rock%22_Wollabury_Rock_Clun_%281293588%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00164_3403c71b86.jpg",
-    "sha256": "7b9307b00ff1a6a9b6d24701377046f0eb6414a49a73e44b82adf9ec13b690c8",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/dd/%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_sf63-210-4v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1003,21 +967,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00183_5d1752f6a1.jpg",
-    "sha256": "7c8edc4b18166ecd15179b3c8a77b05684ab9211ac7b63db1f412134bd5fed3d",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/35/%22A_Tournament_at_Arms%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_sf13-228-21-f186-r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00288_234b31e60d.jpg",
     "sha256": "7d5bbb791c283a073b4f3f21f3e03608eb3e087305f1c719e46425c908604dbd",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/%22Allow_Me_to_Examine_the_Young_Lady%22_%28The_Mistress_of_the_Parsonage%2C_in_Harper%27s_Weekly%29_MET_DP875121.jpg/1920px-%22Allow_Me_to_Examine_the_Young_Lady%22_%28The_Mistress_of_the_Parsonage%2C_in_Harper%27s_Weekly%29_MET_DP875121.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00424_055f03e61e.jpg",
-    "sha256": "7da33a322e465cb3debf3c0debdd419f40058c48ecbc76cc17874cf7ea0db0ae",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/%22Bahram_Gur_in_the_Red_Palace_on_Tuesday%22%2C_Folio_220_from_a_Khamsa_%28Quintet%29_of_Nizami_of_Ganja_MET_DP-22880-001.jpg/1920px-%22Bahram_Gur_in_the_Red_Palace_on_Tuesday%22%2C_Folio_220_from_a_Khamsa_%28Quintet%29_of_Nizami_of_Ganja_MET_DP-22880-001.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1048,6 +1000,12 @@
     "file": "00337_df586b586e.jpg",
     "sha256": "80e7972e434c05a1cf2272da35d682dcd4c1e583b01d6546b9cad543695ebc32",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/%22Are_you_going_to_drink_my_milk%2C_odd_human%3F%22_%2823463302349%29.jpg/1920px-%22Are_you_going_to_drink_my_milk%2C_odd_human%3F%22_%2823463302349%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00387_1693a9ffdd.jpg",
+    "sha256": "81b2c0d312d102412f632c30211748cb27e0d4f3aacbcf8965469acdc2b4a390",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/%22Bahram_Chubina_Slays_the_Lion-Ape%22%2C_Folio_715v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107187.jpg/1920px-%22Bahram_Chubina_Slays_the_Lion-Ape%22%2C_Folio_715v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107187.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1099,18 +1057,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00349_65a36bc046.jpg",
-    "sha256": "85f3a196066bd1da0de564c907d754ca89a9310fd8af3e12944c66f93246a30c",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/%22Arrow_of_Gold%22_MET_DP145114.jpg/1920px-%22Arrow_of_Gold%22_MET_DP145114.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00472_78cbd5b87e.jpg",
-    "sha256": "864be3e0aab00d72d248c66b34ee0326bcbf27ddc52dbf3e909e419ebd02c82b",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/%22Bahram_Recovers_the_Crown_of_Rivniz%22%2C_Folio_245r_from_the_Shahnama_%28Book_of_Kings%29_of_of_Abu%27l_Qasim_Firdausi%2C_commissioned_by_Shah_Tahmasp_MET_DP107153.jpg/1920px-%22Bahram_Recovers_the_Crown_of_Rivniz%22%2C_Folio_245r_from_the_Shahnama_%28Book_of_Kings%29_of_of_Abu%27l_Qasim_Firdausi%2C_commissioned_by_Shah_Tahmasp_MET_DP107153.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00315_d1fcbf6fce.jpg",
     "sha256": "86b44b06dd353cda8488a1fc9a49d2890b1b20aaf31330994beb3ae84d6d1792",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/%22Ancienne_%C3%A9glise_des_J%C3%A9suites%22_Umbau_Januar_2024%2C_Sicht_vom_Eingang_aus.jpg/1920px-%22Ancienne_%C3%A9glise_des_J%C3%A9suites%22_Umbau_Januar_2024%2C_Sicht_vom_Eingang_aus.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -1120,12 +1066,6 @@
     "file": "00383_94ee5ef952.jpg",
     "sha256": "86bdff17b9148506346a436f824908b486033abc3c55cfe42709803982625240",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/%22Bahram_Chubina_Kills_the_Lion-Shaped_Ape_Monster%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_MET_DP215670.jpg/1920px-%22Bahram_Chubina_Kills_the_Lion-Shaped_Ape_Monster%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_MET_DP215670.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00259_b4c557a57f.jpg",
-    "sha256": "86eb9deb18dfcc1bc2798e366442083fea1517c2bfe9ecc7e6aee6f9aff2c271",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_16325.jpg/1920px-%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_16325.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1153,6 +1093,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00225_240f918bd8.jpg",
+    "sha256": "89764926562954d017a2c892030f622c6ec13914f614a05ba37582e0a8dfca87",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/%22Adam_Makes_a_Pilgrimage%22%2C_Folio_from_a_Majma_al-Tavarikh_%28Compendium_of_Histories%29_MET_163175.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
     "file": "00038_9dbc88080f.jpg",
     "sha256": "89ece17d140197274823ce6517de0faf2ffc3dab79fa404081c8a7a3f430476b",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/02/%22_Oakfield%22_%28Aston_on_Clun%29_%281295009%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -1171,15 +1117,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00468_17a882b730.jpg",
-    "sha256": "8b2596843bf8ce0dfd315a772c49a1bcf691320756a894b223799714221debf4",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/%22Bahram_Gur_Slays_the_Rhino-Wolf%22%2C_Folio_586r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_sf1970-301-65.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00220_6b382514f4.jpg",
-    "sha256": "8b4a7f7e6692d00bf89b8f5890aea983f2bf47d10b633847a9791f8388567529",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/%22Abundance%22_Textile_MET_DP293540.jpg/1920px-%22Abundance%22_Textile_MET_DP293540.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00475_9ed1b00ce4.jpg",
+    "sha256": "8b2badd1870bc08ed7ccf01c0ea05d047ef2dc7f60e32a467d987d608e820239",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107205.jpg/1920px-%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107205.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1219,12 +1159,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00213_5eecc8ae9f.jpg",
-    "sha256": "8f113ae3c13354cacf2137f409d8b25ff51f1e9e6006ba2d0883b0d0e7445023",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/%22Abundance%22_Textile_MET_DP281946.jpg/1920px-%22Abundance%22_Textile_MET_DP281946.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00464_a92b6b29f1.jpg",
     "sha256": "8f9b1f3bee5ba43de7937b65bf20104d955ae7860ab7e4f4dd3b15d018d7490e",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/03/%22Bahram_Gur_Slays_the_Dragon%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_MET_sf1975-192-22r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -1234,6 +1168,18 @@
     "file": "00005_a831eb51dd.jpg",
     "sha256": "9059fb070d298ca814774f3aaa748dabfc8b6b45cd1c6951943123673bd7eaf6",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/%21941_Lincoln_Continental_Coupe%2C_Series_57_-_Automobile_Driving_Museum_-_El_Segundo%2C_CA_-_DSC01972.jpg/1920px-%21941_Lincoln_Continental_Coupe%2C_Series_57_-_Automobile_Driving_Museum_-_El_Segundo%2C_CA_-_DSC01972.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00363_963f10ad5e.jpg",
+    "sha256": "9176bdcf18edebdca8adeeeaa6265c513ef15ac1c2ff3d8e54cebd12d2cd82e0",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/%22Asvatthama_Fires_the_Narayana_Weapon_%28Cosmic_Fire%29_at_the_Pandavas%22%2C_Folio_from_a_Razmnama_MET_DP372510.jpg/1920px-%22Asvatthama_Fires_the_Narayana_Weapon_%28Cosmic_Fire%29_at_the_Pandavas%22%2C_Folio_from_a_Razmnama_MET_DP372510.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00445_ba8c3f5f3b.jpg",
+    "sha256": "91da9b8b74efb91e2d9b03f6871137a776d377d8fc5a09b9d01db0d46d7caada",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164644.jpg/1920px-%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164644.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1252,12 +1198,6 @@
     "file": "00408_0dfeaa1b71.jpg",
     "sha256": "949e3ca74c63d504a309af774f10c7990071985f4958293e486e53c5fe508ba9",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/%22Bahram_Gur_in_the_Dark_Palace_on_Saturday%22%2C_Folio_207_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187672.jpg/1920px-%22Bahram_Gur_in_the_Dark_Palace_on_Saturday%22%2C_Folio_207_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187672.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00235_0433b4c373.jpg",
-    "sha256": "959c1a82e5a10b9868884a2e32cdd4b31b21ba3d32aa95741570298febbbb5e7",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP260201.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1303,6 +1243,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00443_382d826a1c.jpg",
+    "sha256": "9c0683ba4fcec935fb64c52b3755754e1219ca89ad10eb88feec8b5d1e2d7911",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_43911.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
     "file": "00339_d9244a16d1.jpg",
     "sha256": "9c57c56d4e9c0f56c41274690f24749c546df7c99b3206c8ba05cc143cdf73a2",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/%22Arhat%2C_probably_Vajriputra%2C_China_or_Tibet%2C_late_17th_-_early_18th_century%2C_ink_and_colors_on_cotton%22_art_at_Chicago_Art_Institute_-_DSC_8217.jpg/1920px-%22Arhat%2C_probably_Vajriputra%2C_China_or_Tibet%2C_late_17th_-_early_18th_century%2C_ink_and_colors_on_cotton%22_art_at_Chicago_Art_Institute_-_DSC_8217.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -1312,18 +1258,6 @@
     "file": "00292_1251cf2c39.jpg",
     "sha256": "9eae7aae08d58e8dec64d85debc8fcf47d72aa0dce417f65b9f0fff33500c261",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/%22Allusion_to_Sura_27-16%22%2C_Folio_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_sf63-210-47r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00217_10fea12e68.jpg",
-    "sha256": "9ef8f46044a15bf70db22546e4e94bb6b15fa34d120fca311d6d670493155390",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/%22Abundance%22_Textile_MET_DP293536.jpg/1920px-%22Abundance%22_Textile_MET_DP293536.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00264_3c98c41dc0.jpg",
-    "sha256": "9fac60f5dfa63f8af45bbe37afcb864b75b27d1b77b6545f1041f897ceddde2b",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/%22Alexander_Executes_Janusiyar_and_Mahiyar%2C_the_Slayers_of_Darius%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_of_Firdausi_MET_sf40-38-1r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1366,6 +1300,12 @@
     "file": "00143_a184273f2d.jpg",
     "sha256": "a65ef586298a017dac72eee306fc07369e4307160ce072bd3772c8506a5b3ee8",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/%22A_peine_si%2C_par_les_hublots_et_les_fenetres_eclairees%2C_je_pus_voir...%22_MET_DP865325.jpg/1920px-%22A_peine_si%2C_par_les_hublots_et_les_fenetres_eclairees%2C_je_pus_voir...%22_MET_DP865325.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00227_ca6061f725.jpg",
+    "sha256": "a7d4c4896006568675f6e1b0c7f901759aa7ad5a88bfc8db05620d52e1bfe363",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/%22Adam_Makes_a_Pilgrimage%22%2C_Folio_from_a_Majma_al-Tavarikh_%28Compendium_of_Histories%29_MET_sf57-51-37-5v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1429,12 +1369,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00451_29cc390f93.jpg",
-    "sha256": "b052629b79306dfb1b04d8e637272e2de53c96dbd7b12c893cafcee83c89a192",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/31/%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_sf1970-301-62.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00381_84ec786231.jpg",
     "sha256": "b065fe6ae32d5f797da7a4990b9d26d75bfc7fc9259b51415307aca853af3507",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/%22Bahia%22_MET_2005.211_label.jpg/1920px-%22Bahia%22_MET_2005.211_label.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -1444,6 +1378,12 @@
     "file": "00439_599494f9fd.jpg",
     "sha256": "b14307e410b2fd24baa3e355c329a68ccb7e3550ee7b4408ca7f8113451310c9",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/%22Bahram_Gur_in_the_White_Palace_on_Friday%22%2C_Folio_235_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164649.jpg/1920px-%22Bahram_Gur_in_the_White_Palace_on_Friday%22%2C_Folio_235_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164649.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00474_e333e5b728.jpg",
+    "sha256": "b1e56e212bbe11d99175d91aee8effd1ed4b6db80640219d61fc4dda2ad62f4e",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107174.jpg/1920px-%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107174.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1465,12 +1405,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00095_dfda29b0aa.jpg",
-    "sha256": "b494c1f0a7f8a7f6d82827457dc9f406cafe87ae82ddef4402ee19867310be6c",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/%22A_Bull%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_18890.jpg/1920px-%22A_Bull%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_18890.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00333_252415964f.jpg",
     "sha256": "b507a90e8eedad6daa169982a4138c7cc47da880642d208981a5c3ef8f188a12",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/%22Aquatic_Birds_at_a_Pool%22%2C_Folio_from_the_Davis_Album_MET_DT4887.jpg/1920px-%22Aquatic_Birds_at_a_Pool%22%2C_Folio_from_the_Davis_Album_MET_DT4887.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -1486,12 +1420,6 @@
     "file": "00144_842d0c37fb.jpg",
     "sha256": "b7815cb4461d69df8230c9d5f704486ab39477d5e640823eceabafb3da5e6302",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/%22A_peine_si%2C_par_les_hublots_et_les_fenetres_eclairees%2C_je_pus_voir...%22_MET_DP865334.jpg/1920px-%22A_peine_si%2C_par_les_hublots_et_les_fenetres_eclairees%2C_je_pus_voir...%22_MET_DP865334.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00448_91c76930c6.jpg",
-    "sha256": "b979c68ee212f9c05e55d9a63ffc5a262fc9aaf473baae48a796137fe1915971",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107175.jpg/1920px-%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107175.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1525,6 +1453,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00359_0e6dbd6eac.jpg",
+    "sha256": "bd1d3228c2a4d204e1755706c264a9b4b2a26e827bd831198eaa486a49908980",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/%22Assad_Ibn_Kariba_Launches_a_Night_Attack_on_the_Camp_of_Malik_Iraj%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf18-44-1c.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
     "file": "00077_b9b0ba3d18.jpg",
     "sha256": "bdb71d966316ed2533b0b0cd0228703e2ce4e597a0ecd227a1b068d6e3c56afb",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/%221._Mai_im_Grunewald%22_Demonstration_in_Berlin_at_1st_of_May_2018_09.jpg/1920px-%221._Mai_im_Grunewald%22_Demonstration_in_Berlin_at_1st_of_May_2018_09.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -1543,6 +1477,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00373_facc98256f.jpg",
+    "sha256": "c2c7d577c52133b607774d6e687254262439923ca7ad8770b241acf5e48a89d4",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/%22Avec_des_gestes_lents_et_charmants%2C_Clara_lissa_l%27or_roux_de_ses_cheveux...%22_MET_DP865308.jpg/1920px-%22Avec_des_gestes_lents_et_charmants%2C_Clara_lissa_l%27or_roux_de_ses_cheveux...%22_MET_DP865308.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00066_52b85364dd.jpg",
     "sha256": "c470c6ead75202e39a9e47095d94236664542a1215e6ddfcf7f1c4178f865700",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/%22%28Brom%29fietsers_richting_Poeldijk_oversteken%22_%2810522505706%29.jpg/1920px-%22%28Brom%29fietsers_richting_Poeldijk_oversteken%22_%2810522505706%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -1558,6 +1498,12 @@
     "file": "00241_c2bf270862.jpg",
     "sha256": "c5107e66e177fbf8e89762e7aa67d1b34235e01a7fa2c56ce045ee0acfeef5a4",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/62/%22Akbar_Hunting_with_Cheetahs%22%2C_Folio_from_an_Akbarnama_MET_sf30-95-174-8a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00419_b98c178327.jpg",
+    "sha256": "c60f3cf00d7e08097fdb42ec1199028b179d777ee4971004242788a8fa01ea41",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c2/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-7-12b.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1627,15 +1573,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00364_a8887b11fc.jpg",
-    "sha256": "cc6aeae57eb0c17e8410cd18bd44b830d4c208922008c62c708b50cc8fa0a0b1",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/51/%22At_the_Railroad_Station%22_MET_58.512.1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "file": "00334_6d73212208.jpg",
+    "sha256": "cc0ad4b9adadf5aa68bdf43c7a9a77906fa9bd15530e2ef4fd61bbc852954280",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/%22Aquatic_Birds_at_a_Pool%22%2C_Folio_from_the_Davis_Album_MET_sf30-95-174-3a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
-    "file": "00170_6a6227e2ba.jpg",
-    "sha256": "ce49bc73b8a803b8a52077d03ea848129de9afc205bf4402aa2131a39d70429d",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP331524.jpg/1920px-%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP331524.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00364_a8887b11fc.jpg",
+    "sha256": "cc6aeae57eb0c17e8410cd18bd44b830d4c208922008c62c708b50cc8fa0a0b1",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/51/%22At_the_Railroad_Station%22_MET_58.512.1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1687,6 +1633,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00274_3e3c03d6fa.jpg",
+    "sha256": "d4a01e340ab741a1594af6ec78ea0585eedda23fe728b9876675ed5aa869f1e5",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212335.jpg/1920px-%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212335.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00438_a488d8e297.jpg",
     "sha256": "d51f01d291d62e2f8ffd9e241e63a1caa82e8ffd85405c90ddf3dbd10d4d8c00",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/%22Bahram_Gur_in_the_White_Palace_on_Friday%22%2C_Folio_235_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_43915.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -1720,6 +1672,12 @@
     "file": "00223_fef0c215dd.jpg",
     "sha256": "d89045dd5e124b0abf78d38bf0cf11c2444d699b23788af5eaa4352d29333704",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/%22Action_antifasciste%22_T-shirt_and_%22Solidaires_antifasciste%22_flag_at_demonstration_against_RN_in_Lannion_%2818371%29.jpg/1920px-%22Action_antifasciste%22_T-shirt_and_%22Solidaires_antifasciste%22_flag_at_demonstration_against_RN_in_Lannion_%2818371%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00177_22b1b60fc0.jpg",
+    "sha256": "d8ece7816e4a6275555b8fe0c6455eda681213dbe8a0903f9a63b6dffb917582",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/%22A_soldier_was_signaling_to_them_to_stay_away%22_from_L%27Illustration_MET_DP874202.jpg/1920px-%22A_soldier_was_signaling_to_them_to_stay_away%22_from_L%27Illustration_MET_DP874202.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1831,12 +1789,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00261_a2abdf593a.jpg",
-    "sha256": "e31629ed93848196986e078e5be1af9f099b562eff8c2ba24dba63f68e441160",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4789.jpg/1920px-%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4789.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00469_7e44e45ccd.jpg",
     "sha256": "e3b0e5fe28bd58d878b40003c2ab9dafaecbb5c6254e2bb3ad3c7441058c24da",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/%22Bahram_Gur%27s_Skill_with_the_Bow%22%2C_Folio_17v_from_a_Haft_Paikar_%28Seven_Portraits%29_of_the_Khamsa_%28Quintet%29_of_Nizami_MET_DP159380.jpg/1920px-%22Bahram_Gur%27s_Skill_with_the_Bow%22%2C_Folio_17v_from_a_Haft_Paikar_%28Seven_Portraits%29_of_the_Khamsa_%28Quintet%29_of_Nizami_MET_DP159380.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -1849,15 +1801,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00184_aec9805871.jpg",
-    "sha256": "e3bfdf5b9f7a658a919d0cae7e016793dadff00e096e75dcc3d868905453b083",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/92/%22A_Tournament_at_Arms%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_sf13-228-21-f186-v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00134_d3d131bb37.jpg",
     "sha256": "e453c21fd2e3bb219153c59a178d0e8718de95034f7c0805dcc4356826613dd9",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/%22A_Muslim_Pilgrim_Learns_a_Lesson_in_Piety_from_a_Brahman%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_73718.jpg/1920px-%22A_Muslim_Pilgrim_Learns_a_Lesson_in_Piety_from_a_Brahman%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_73718.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00398_c3d8a7161a.jpg",
+    "sha256": "e4a1b5fed627bd6fd247b3c1cc826999438931afcc245ade4436fbf8179393b7",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/%22Bahram_Gur_Exhibiting_his_Prowess_in_Wrestling_at_the_Court_of_Shangul%2C_King_of_India%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_MET_95315.jpg/1920px-%22Bahram_Gur_Exhibiting_his_Prowess_in_Wrestling_at_the_Court_of_Shangul%2C_King_of_India%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_MET_95315.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -1882,6 +1834,12 @@
     "file": "00187_93f63b5be4.jpg",
     "sha256": "e83b55e0e55d5e91841ccceba04b999099bb17bd1a03711e9fa9a329c32ccf0d",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/%22A_Wolf_in_Sheep%27s_Clothing%22_MET_DP804676.jpg/1920px-%22A_Wolf_in_Sheep%27s_Clothing%22_MET_DP804676.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00152_88b48bee4b.jpg",
+    "sha256": "ea94b2e31a750975a572901cf39f73ceedd303120b2e518699111b9b36d0a88a",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e4/%22A_Raja_and_a_Guest_Seated_on_a_Terrace_Listening_to_Musicians_Perform%22%2C_Folio_from_a_manuscript_of_the_Raga_Darshan_of_Anup_MET_DP273288.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1912,6 +1870,12 @@
     "file": "00009_1f2a967b56.jpg",
     "sha256": "ef1f145cdcc3dc3c20c68fa4e957034b2a0a074ee63fd685dfb9c8271618d48c",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/%21Irinka_1932.jpg/1920px-%21Irinka_1932.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00481_cf05beb4a5.jpg",
+    "sha256": "f020703928cb441ee6c972085762c161a67f4744295d8c1871de137bd3aa5f36",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/%22Balarama_and_Krishna_Fighting_the_Enemy%22%2C_Folio_from_a_Harivamsa_%28The_Legend_of_Hari_%28Krishna%29%29_MET_sf28-63-2a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -1981,12 +1945,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00218_de2c443982.jpg",
-    "sha256": "f8710f4db9f28aa98a4eb1bca5e197dd7aa00398549cd6315a5437bc4452dfff",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/%22Abundance%22_Textile_MET_DP293538.jpg/1920px-%22Abundance%22_Textile_MET_DP293538.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00149_c954a3e68f.jpg",
     "sha256": "f931c1e8de6298daefba8a0a59f86cb71d9546a3f5d012aaeef538943068d74b",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/%22A_Prince_out_Hawking_with_a_Group_of_Attendants_and_a_Leopard%22%2C_Folio_from_a_manuscript_of_the_Raga_Darshan_of_Anup_MET_TR.491.3a.2006.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -2026,6 +1984,12 @@
     "file": "00085_ae933f534e.jpg",
     "sha256": "ff21505ceb024fa3e27272f764f0cc934b445564cd78bd6d0a8edfbb0f739f44",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/%223_colonnes%2C_1_grosse_boule%22_%28restaur%C3%A9%29_de_Jacques_Guilmot.jpg/1920px-%223_colonnes%2C_1_grosse_boule%22_%28restaur%C3%A9%29_de_Jacques_Guilmot.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00246_9458ea7ee0.jpg",
+    "sha256": "ffe44c85eaf52eee8a7905f5ea85a35b785cfeda9023adba61d31869f2d96813",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/%22Akbar_With_Lion_and_Calf%22%2C_Folio_from_the_Shah_Jahan_Album_MET_DT200628.jpg/1920px-%22Akbar_With_Lion_and_Calf%22%2C_Folio_from_the_Shah_Jahan_Album_MET_DT200628.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    }
   ],
@@ -2085,6 +2049,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00456_be91a813bf.jpg",
+    "sha256": "17a50dcd92ae405dbea44034cbe92171fa3277128a37478813d967fb70cd8476",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/%22Bahram_Gur_Shows_His_Skill_Hunting%2C_while_Fitna_Watches%22%2C_Folio_from_a_Haft_Paykar_%28Seven_Portraits%29_of_Nizami_MET_78213.jpg/1920px-%22Bahram_Gur_Shows_His_Skill_Hunting%2C_while_Fitna_Watches%22%2C_Folio_from_a_Haft_Paykar_%28Seven_Portraits%29_of_Nizami_MET_78213.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00059_09c8cb44c3.jpg",
     "sha256": "1942537e7bb0230d73c756df83ad263b87ab020647f31f14c5e6bc10555ed928",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_55120.jpg/1920px-%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_55120.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -2094,6 +2064,12 @@
     "file": "00490_38614afc28.jpg",
     "sha256": "1c1ae9ab65b702bad8ec866fe2ea9482315d71d981f8bde2748a4583083e3b38",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/ee/%22Bamiyan_Ware%22_bowl_MET_1993.24.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00063_f86a5fa311.jpg",
+    "sha256": "1d4867509d57a1995c14261f9d1aefc44f5ac4e00cb78b5ca27392bb570aa9d0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf23-264-2b.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2127,6 +2103,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00094_a253c6305c.jpg",
+    "sha256": "368edd0b498044f93d12128222a155db04cd5f7b41c16f1a0c1db57f6369660e",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/%22A_Bathhouse_Keeper_is_Consumed_by_Passion_for_his_Beloved%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DP120806.jpg/1920px-%22A_Bathhouse_Keeper_is_Consumed_by_Passion_for_his_Beloved%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DP120806.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00450_aff63fcb97.jpg",
     "sha256": "39ee553861fd44ac022a29311635f5a7acfb68b06d6261b14f831c01193914fe",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DT11256.jpg/1920px-%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DT11256.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -2136,6 +2118,12 @@
     "file": "00061_87c825a576.jpg",
     "sha256": "3ad93ee54f2b5e702b05ce7723b23bebe9d34571319ac42e081762fc5e1491e5",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_DP235937.jpg/1920px-%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_DP235937.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00219_009f383ca5.jpg",
+    "sha256": "3b8f77bf8ffa1460bab467df2d66b83e552113afbb0836e39cbaacdd8ff7fbdd",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/%22Abundance%22_Textile_MET_DP293539.jpg/1920px-%22Abundance%22_Textile_MET_DP293539.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2151,9 +2139,21 @@
     "licence": "CC0"
    },
    {
-    "file": "00161_3ee9bb129b.jpg",
-    "sha256": "4067e885682b0d3bafaf991eddea8cb567c1457e32bff91f0e0fc769c3923b0e",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247741.jpg/1920px-%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247741.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00221_0fe9614e64.jpg",
+    "sha256": "40d1dab599f7fef5136a650661022e98e5212c1c815aa9ef7ce01f9720f1f541",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/%22Abundance%22_Textile_MET_DP293541.jpg/1920px-%22Abundance%22_Textile_MET_DP293541.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00103_c45cef8fb0.jpg",
+    "sha256": "41ca49c87fce0ef6b3f19915d49ef00094c8d44884f10b0932e8503ed76f9222",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/%22A_Fire-Worshipper_Received_at_the_Board_of_Abraham_the_Patriarch%22%2C_Folio_from_a_Bustan_%28Orchard%29_of_Sa%27di_MET_43297.jpg/1920px-%22A_Fire-Worshipper_Received_at_the_Board_of_Abraham_the_Patriarch%22%2C_Folio_from_a_Bustan_%28Orchard%29_of_Sa%27di_MET_43297.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00466_36a35ebcb9.jpg",
+    "sha256": "4218c20ec821de36d5cb3a32f0495fa2fd217acc6e2c80f869b1ccedf5483fbe",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/%22Bahram_Gur_Slays_the_Rhino-Wolf%22%2C_Folio_586r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107178.jpg/1920px-%22Bahram_Gur_Slays_the_Rhino-Wolf%22%2C_Folio_586r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107178.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2169,9 +2169,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00275_b73e0f1a06.jpg",
-    "sha256": "49cc45f2c50ba4d54faa0e8c7d098ab4d3adc755cf8d6fd93e3448f765e1981b",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_30608.jpg/1920px-%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_30608.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00459_8d8c4ffb40.jpg",
+    "sha256": "44d968568feb91542b23ad0d8826151ff34d0b0ee81f6a4252e578452a731f1e",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/86/%22Bahram_Gur_Shows_His_Skill_Hunting%2C_while_Fitna_Watches%22%2C_Folio_from_a_Haft_Paykar_%28Seven_Portraits%29_of_Nizami_MET_sf30-56v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00105_57f493c618.jpg",
+    "sha256": "4a343417ec404d4c487684350cc129434e0138984991de966a8d705dc9f8f6c8",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/6f/%22A_Fire-Worshipper_Received_at_the_Board_of_Abraham_the_Patriarch%22%2C_Folio_from_a_Bustan_%28Orchard%29_of_Sa%27di_MET_sf13-228-23-f47v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2199,15 +2205,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00062_66f934c7d1.jpg",
-    "sha256": "5476f2f88d77ee89c59e267903371897199f2d649ecf322fcb5a3d2dcb0b29b7",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/86/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf23-264-2a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "file": "00394_977c7c3b29.jpg",
+    "sha256": "5414852c34c2aa7035f57d95c5cd8bae44543146b754ece68455b8e4596c6d9b",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/%22Bahram_Gur_and_the_Indian_Princess_in_the_Dark_Palace_on_Saturday%22%2C_Folio_23v_from_a_Haft_Paikar_%28Seven_Portraits%29_of_the_Khamsa_%28Quintet%29_of_Nizami_MET_43298.jpg/1920px-thumbnail.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
-    "file": "00416_c435b12180.jpg",
-    "sha256": "5e255a3e11223e8526b44c7a3660433abbaa0322d5a4620c48b9064f416d6826",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164646.jpg/1920px-%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164646.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00062_66f934c7d1.jpg",
+    "sha256": "5476f2f88d77ee89c59e267903371897199f2d649ecf322fcb5a3d2dcb0b29b7",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/86/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf23-264-2a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2217,15 +2223,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00234_ce108bb1cb.jpg",
-    "sha256": "62b3a6461e568caf32a8701885ae1f85a7fa30f155c816d7d83a38b473a68110",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107197.jpg/1920px-%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107197.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00065_779e9f4394.jpg",
+    "sha256": "60d34c78a851a7c822c31a4162f05d92c99ce46eab0491cee595cc395e423b4f",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf23-264-2d.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
-    "file": "00480_8a2c4690d6.jpg",
-    "sha256": "71078458dcf6ebd20dc30c344f0da3b1ba7a83187f292ac330f20d1531707645",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/%22Balarama_and_Krishna_Fighting_the_Enemy%22%2C_Folio_from_a_Harivamsa_%28The_Legend_of_Hari_%28Krishna%29%29_MET_DT4802.jpg/1920px-%22Balarama_and_Krishna_Fighting_the_Enemy%22%2C_Folio_from_a_Harivamsa_%28The_Legend_of_Hari_%28Krishna%29%29_MET_DT4802.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00234_ce108bb1cb.jpg",
+    "sha256": "62b3a6461e568caf32a8701885ae1f85a7fa30f155c816d7d83a38b473a68110",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107197.jpg/1920px-%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107197.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2241,6 +2247,18 @@
     "licence": "CC0"
    },
    {
+    "file": "00449_2eee2930f7.jpg",
+    "sha256": "7577ca9f0251a8f1bd94e096f7aa15bf9a7bbe56aefb62b5b92e9fc0c8d47668",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/2d/%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP260240.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00215_ebfba968c3.jpg",
+    "sha256": "78442722cbaa1e38e4b95a2ef9facda9570b5dad5c19cabd06ad04b1cf794b73",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/%22Abundance%22_Textile_MET_DP293533.jpg/1920px-%22Abundance%22_Textile_MET_DP293533.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00233_2806fa33e7.jpg",
     "sha256": "7b135c82500c7054ce0cf179d403fd79d8ffe5d320dc06136a81676e37d30f74",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107132.jpg/1920px-%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107132.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -2253,9 +2271,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00263_eb49da193b.jpg",
-    "sha256": "7d8e7847d72be6fbe919cb88e9de6f0edd7e969aebf6426fe254e54853768e36",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/%22Alexander_Executes_Janusiyar_and_Mahiyar%2C_the_Slayers_of_Darius%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_of_Firdausi_MET_DP215675.jpg/1920px-%22Alexander_Executes_Janusiyar_and_Mahiyar%2C_the_Slayers_of_Darius%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_of_Firdausi_MET_DP215675.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00424_055f03e61e.jpg",
+    "sha256": "7da33a322e465cb3debf3c0debdd419f40058c48ecbc76cc17874cf7ea0db0ae",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/%22Bahram_Gur_in_the_Red_Palace_on_Tuesday%22%2C_Folio_220_from_a_Khamsa_%28Quintet%29_of_Nizami_of_Ganja_MET_DP-22880-001.jpg/1920px-%22Bahram_Gur_in_the_Red_Palace_on_Tuesday%22%2C_Folio_220_from_a_Khamsa_%28Quintet%29_of_Nizami_of_Ganja_MET_DP-22880-001.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2271,9 +2289,27 @@
     "licence": "CC0"
    },
    {
-    "file": "00475_9ed1b00ce4.jpg",
-    "sha256": "8b2badd1870bc08ed7ccf01c0ea05d047ef2dc7f60e32a467d987d608e820239",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107205.jpg/1920px-%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107205.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00349_65a36bc046.jpg",
+    "sha256": "85f3a196066bd1da0de564c907d754ca89a9310fd8af3e12944c66f93246a30c",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/%22Arrow_of_Gold%22_MET_DP145114.jpg/1920px-%22Arrow_of_Gold%22_MET_DP145114.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00472_78cbd5b87e.jpg",
+    "sha256": "864be3e0aab00d72d248c66b34ee0326bcbf27ddc52dbf3e909e419ebd02c82b",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/%22Bahram_Recovers_the_Crown_of_Rivniz%22%2C_Folio_245r_from_the_Shahnama_%28Book_of_Kings%29_of_of_Abu%27l_Qasim_Firdausi%2C_commissioned_by_Shah_Tahmasp_MET_DP107153.jpg/1920px-%22Bahram_Recovers_the_Crown_of_Rivniz%22%2C_Folio_245r_from_the_Shahnama_%28Book_of_Kings%29_of_of_Abu%27l_Qasim_Firdausi%2C_commissioned_by_Shah_Tahmasp_MET_DP107153.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00468_17a882b730.jpg",
+    "sha256": "8b2596843bf8ce0dfd315a772c49a1bcf691320756a894b223799714221debf4",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/%22Bahram_Gur_Slays_the_Rhino-Wolf%22%2C_Folio_586r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_sf1970-301-65.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00220_6b382514f4.jpg",
+    "sha256": "8b4a7f7e6692d00bf89b8f5890aea983f2bf47d10b633847a9791f8388567529",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/%22Abundance%22_Textile_MET_DP293540.jpg/1920px-%22Abundance%22_Textile_MET_DP293540.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2295,6 +2331,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00213_5eecc8ae9f.jpg",
+    "sha256": "8f113ae3c13354cacf2137f409d8b25ff51f1e9e6006ba2d0883b0d0e7445023",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/%22Abundance%22_Textile_MET_DP281946.jpg/1920px-%22Abundance%22_Textile_MET_DP281946.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00064_4992d9a58e.jpg",
     "sha256": "941d3857ebbdea282fbe5b5926457a6b9717c11973eb030db25c953db0981073",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/72/%22%27Umar_Walks_around_Fulad_Castle%2C_Meets_a_Foot_Soldier_and_Kicks_Him_to_the_Ground%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf23-264-2c.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -2307,9 +2349,21 @@
     "licence": "CC0"
    },
    {
+    "file": "00235_0433b4c373.jpg",
+    "sha256": "959c1a82e5a10b9868884a2e32cdd4b31b21ba3d32aa95741570298febbbb5e7",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/%22Afrasiyab_on_the_Iranian_Throne%22%2C_Folio_105r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP260201.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
     "file": "00347_dd92e56a29.jpg",
     "sha256": "96325b1b974e078d03b44e5dd69ebedde685f5d4eb2311287c10cd192f99ada0",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/%22Arrow_of_Gold%22_MET_DP145112.jpg/1920px-%22Arrow_of_Gold%22_MET_DP145112.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00217_10fea12e68.jpg",
+    "sha256": "9ef8f46044a15bf70db22546e4e94bb6b15fa34d120fca311d6d670493155390",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/%22Abundance%22_Textile_MET_DP293536.jpg/1920px-%22Abundance%22_Textile_MET_DP293536.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2349,15 +2403,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00169_5208ec442b.jpg",
-    "sha256": "a8241a79fb211e635249148b3c75a1b8cb7020ce92d9fe2a05245739db4aa4d5",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP328562.jpg/1920px-%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP328562.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00348_e37c8f08f9.jpg",
     "sha256": "a826e4f454d99b82f2cc6a8a578f7aacbcb5f82847dd687821a753f6ee8ac3c6",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/%22Arrow_of_Gold%22_MET_DP145113.jpg/1920px-%22Arrow_of_Gold%22_MET_DP145113.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00451_29cc390f93.jpg",
+    "sha256": "b052629b79306dfb1b04d8e637272e2de53c96dbd7b12c893cafcee83c89a192",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/31/%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_sf1970-301-62.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2367,27 +2421,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00474_e333e5b728.jpg",
-    "sha256": "b1e56e212bbe11d99175d91aee8effd1ed4b6db80640219d61fc4dda2ad62f4e",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107174.jpg/1920px-%22Bahrum_Gur_Before_His_Father%2C_Yazdigird_I%22%2C_Folio_551v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107174.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00421_2566bb4869.jpg",
     "sha256": "b8002d13bc2bb37dc2fd0c5e5bce14408e8c19f3ec4cc823e100253baaf78866",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/%22Bahram_Gur_in_the_Red_Palace_on_Tuesday%22%2C_Folio_220_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_215675.jpg/1920px-%22Bahram_Gur_in_the_Red_Palace_on_Tuesday%22%2C_Folio_220_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_215675.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
-    "file": "00359_0e6dbd6eac.jpg",
-    "sha256": "bd1d3228c2a4d204e1755706c264a9b4b2a26e827bd831198eaa486a49908980",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/%22Assad_Ibn_Kariba_Launches_a_Night_Attack_on_the_Camp_of_Malik_Iraj%22%2C_Folio_from_a_Hamzanama_%28The_Adventures_of_Hamza%29_MET_sf18-44-1c.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00272_e1a1da95d2.jpg",
-    "sha256": "c07a761a32c6d62f066208504edec2771e17a49b72a396c1fd41138fc84e134c",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/26/%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DT4792.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "file": "00448_91c76930c6.jpg",
+    "sha256": "b979c68ee212f9c05e55d9a63ffc5a262fc9aaf473baae48a796137fe1915971",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107175.jpg/1920px-%22Bahram_Gur_Pins_the_Coupling_Onagers%22%2C_Folio_568r_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107175.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2397,21 +2439,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00097_c2589f6bdf.jpg",
-    "sha256": "c39f2cd2ecd76ce684c6ee3cae54581cc31706293033c452215f7843de633fcf",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/%22A_Bull%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_sf13-160-7v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00054_71d0073f8a.jpg",
     "sha256": "c44f76c28c1ea29195e5e7dd476aafe4cedecd5920c97431cfca39b3724d5eb7",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/%22_%C3%89tangs_%22_du_marais_entour%C3%A9s_de_buissons_d%27azal%C3%A9es_en_fleurs_et_vus_depuis_le_nord-est_-_B485.jpg/1920px-%22_%C3%89tangs_%22_du_marais_entour%C3%A9s_de_buissons_d%27azal%C3%A9es_en_fleurs_et_vus_depuis_le_nord-est_-_B485.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00419_b98c178327.jpg",
-    "sha256": "c60f3cf00d7e08097fdb42ec1199028b179d777ee4971004242788a8fa01ea41",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c2/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-7-12b.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2433,15 +2463,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00334_6d73212208.jpg",
-    "sha256": "cc0ad4b9adadf5aa68bdf43c7a9a77906fa9bd15530e2ef4fd61bbc852954280",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/%22Aquatic_Birds_at_a_Pool%22%2C_Folio_from_the_Davis_Album_MET_sf30-95-174-3a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00274_3e3c03d6fa.jpg",
-    "sha256": "d4a01e340ab741a1594af6ec78ea0585eedda23fe728b9876675ed5aa869f1e5",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212335.jpg/1920px-%22Alexander_Visits_the_Sage_Plato_in_his_Mountain_Cave%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212335.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00492_35a2e5ffe3.jpg",
+    "sha256": "ce8f848b95449eee77e0fde24fe228babd3001985b4382619d79537a0db5e3af",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/%22Bamiyan_Ware%22_bowl_MET_DP120831.jpg/1920px-%22Bamiyan_Ware%22_bowl_MET_DP120831.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2451,21 +2475,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00171_ec74783827.jpg",
-    "sha256": "db6e3964f4824b34bb9ec14d1165fa253de5fa564f61376cc03438f6c4927a5b",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/55/%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_sf13-228-21-f224-r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00112_09a2d84281.jpg",
     "sha256": "dda22c82376639b48519f2e311ecf7051eb4caec9bca4c7706bf9a1d71a8fd8d",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/%22A_King_Offers_to_Make_Amends_to_a_Bereaved_Mother%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_30607.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00271_505500929f.jpg",
-    "sha256": "de6750fef1c287c36aaeac5296a57e96eb80d4e18f16ec210b62147977dd637b",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/ed/%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DP120802.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2493,15 +2505,21 @@
     "licence": "CC0"
    },
    {
-    "file": "00481_cf05beb4a5.jpg",
-    "sha256": "f020703928cb441ee6c972085762c161a67f4744295d8c1871de137bd3aa5f36",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/%22Balarama_and_Krishna_Fighting_the_Enemy%22%2C_Folio_from_a_Harivamsa_%28The_Legend_of_Hari_%28Krishna%29%29_MET_sf28-63-2a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00297_6b5c57e592.jpg",
     "sha256": "f70bd2a3d49d0f89ca806b5d2f9a600df7694028681cfb56719563287a7823ae",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/%22Amduat%22_Papyrus_of_Henettawy%2C_daughter_of_Isetemkheb_MET_25.3.28_EGDP015978-5982_Stitiched.jpg/1920px-%22Amduat%22_Papyrus_of_Henettawy%2C_daughter_of_Isetemkheb_MET_25.3.28_EGDP015978-5982_Stitiched.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00218_de2c443982.jpg",
+    "sha256": "f8710f4db9f28aa98a4eb1bca5e197dd7aa00398549cd6315a5437bc4452dfff",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/%22Abundance%22_Textile_MET_DP293538.jpg/1920px-%22Abundance%22_Textile_MET_DP293538.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00491_c5b874b370.jpg",
+    "sha256": "f87e24769af746644da582afbd25a653bc6a0fe44d43bae1c74d8d761d31c5ea",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/%22Bamiyan_Ware%22_bowl_MET_Cbowl1993.24.jpg/1920px-%22Bamiyan_Ware%22_bowl_MET_Cbowl1993.24.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2579,12 +2597,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00417_bf8e88088d.jpg",
-    "sha256": "2c479360a95b3a1158b14c90432f88cd9a45f6143c91ede78125c954fd43b800",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4787.jpg/1920px-%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4787.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00163_b68343451a.jpg",
     "sha256": "3160c0edf03494cb097c9803cd2c601bebebc0ab1852643bd2478f9092102ed7",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d9/%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_sf63-210-4r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -2597,15 +2609,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00414_ca7626f298.jpg",
-    "sha256": "38575257f3bdd48ff4c3f1017678d5e94f93a33624d083edd5fd4169b87d4349",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/21/%22Bahram_Gur_in_the_Green_Palace_on_Monday%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_43914.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00131_64268f90be.jpg",
     "sha256": "3f817c009b563797e70f10c2206bf8fdda2c97066f5c76b6fe565483c44ab141",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/%22A_Map_of_Spain_%26_Portugal%22%2C_1794.jpg/1920px-%22A_Map_of_Spain_%26_Portugal%22%2C_1794.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00161_3ee9bb129b.jpg",
+    "sha256": "4067e885682b0d3bafaf991eddea8cb567c1457e32bff91f0e0fc769c3923b0e",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247741.jpg/1920px-%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247741.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2624,12 +2636,6 @@
     "file": "00007_c544f729b5.jpg",
     "sha256": "44127ca236cc9e9f8770317ea970105e9e7ff687ff89947a4e49aa1a4985d5dc",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/%21941_Lincoln_Continental_Coupe%2C_Series_57_-_Automobile_Driving_Museum_-_El_Segundo%2C_CA_-_DSC01976.jpg/1920px-%21941_Lincoln_Continental_Coupe%2C_Series_57_-_Automobile_Driving_Museum_-_El_Segundo%2C_CA_-_DSC01976.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00459_8d8c4ffb40.jpg",
-    "sha256": "44d968568feb91542b23ad0d8826151ff34d0b0ee81f6a4252e578452a731f1e",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/86/%22Bahram_Gur_Shows_His_Skill_Hunting%2C_while_Fitna_Watches%22%2C_Folio_from_a_Haft_Paykar_%28Seven_Portraits%29_of_Nizami_MET_sf30-56v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2657,6 +2663,12 @@
     "licence": "CC0"
    },
    {
+    "file": "00162_c3ea14e0e8.jpg",
+    "sha256": "57382aff8eb01d8c365f1cfff96c1ac01cc5964fded50eda9a38d87c78bc46ce",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247745.jpg/1920px-%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_DP247745.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00322_2a720d002a.jpg",
     "sha256": "57d91b2321443aaa8df97e44435afc2f00ef0ee549b35b36517346d9133b7621",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/%22Anne_Penland%22_Historical_Marker.jpg/1920px-%22Anne_Penland%22_Historical_Marker.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -2666,12 +2678,6 @@
     "file": "00013_042074e29c.jpg",
     "sha256": "57eb19e662df400c0966d431f35b5e06fe8001313e0a861e4fa3e678d4738116",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/%21Khwa_ttu.jpg/1920px-%21Khwa_ttu.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00258_53c21b4b13.jpg",
-    "sha256": "5a15c409f4e34e743b3175dc2389b78c19779761bf837116b9e0a7ea217e09f0",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/57/%22Alexander_and_the_Circle_of_Seven_Sages%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-9-f260b-v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2693,9 +2699,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00247_2e63bbc646.jpg",
-    "sha256": "660c0d94fa8266bf03c592e8ff711c078aa18ebaf02e752227219a593687671e",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/66/%22Akbar_With_Lion_and_Calf%22%2C_Folio_from_the_Shah_Jahan_Album_MET_sf55-121-10-22a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "file": "00270_8acc62396f.jpg",
+    "sha256": "6528a15653ee75e2755dc4815b7ffeaa30af2b7dcdea13e6ced90010410fb8dc",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212332.jpg/1920px-%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_212332.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2735,18 +2741,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00442_2665c48fc2.jpg",
-    "sha256": "70932ae3a6a44b48a54ce803baeb7f40a650813d34b7d5d6d82ec7e4e58adff4",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187673.jpg/1920px-%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_187673.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00410_d04960c49d.jpg",
-    "sha256": "71b24d6c295ef0c8efc8075b26ab26e56b0cb70af4e7d5f77f732de238b31e7a",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/%22Bahram_Gur_in_the_Dark_Palace_on_Saturday%22%2C_Folio_207_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_sf13-228-7-8.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00096_5efc1aa382.jpg",
     "sha256": "72d1b8c6d3e677ba26694cc26a808f7622ad9051f8b78d444b416727c607ec9e",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/fc/%22A_Bull%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_sf13-160-7r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
@@ -2765,9 +2759,21 @@
     "licence": "CC0"
    },
    {
-    "file": "00387_1693a9ffdd.jpg",
-    "sha256": "81b2c0d312d102412f632c30211748cb27e0d4f3aacbcf8965469acdc2b4a390",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/%22Bahram_Chubina_Slays_the_Lion-Ape%22%2C_Folio_715v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107187.jpg/1920px-%22Bahram_Chubina_Slays_the_Lion-Ape%22%2C_Folio_715v_from_the_Shahnama_%28Book_of_Kings%29_of_Shah_Tahmasp_MET_DP107187.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00164_3403c71b86.jpg",
+    "sha256": "7b9307b00ff1a6a9b6d24701377046f0eb6414a49a73e44b82adf9ec13b690c8",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/dd/%22A_Ruffian_Spares_the_Life_of_a_Poor_Man%22%2C_Folio_4v_from_a_Mantiq_al-tair_%28Language_of_the_Birds%29_MET_sf63-210-4v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00183_5d1752f6a1.jpg",
+    "sha256": "7c8edc4b18166ecd15179b3c8a77b05684ab9211ac7b63db1f412134bd5fed3d",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/35/%22A_Tournament_at_Arms%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_sf13-228-21-f186-r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00263_eb49da193b.jpg",
+    "sha256": "7d8e7847d72be6fbe919cb88e9de6f0edd7e969aebf6426fe254e54853768e36",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/%22Alexander_Executes_Janusiyar_and_Mahiyar%2C_the_Slayers_of_Darius%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_of_Firdausi_MET_DP215675.jpg/1920px-%22Alexander_Executes_Janusiyar_and_Mahiyar%2C_the_Slayers_of_Darius%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_of_Firdausi_MET_DP215675.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2777,21 +2783,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00225_240f918bd8.jpg",
-    "sha256": "89764926562954d017a2c892030f622c6ec13914f614a05ba37582e0a8dfca87",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/%22Adam_Makes_a_Pilgrimage%22%2C_Folio_from_a_Majma_al-Tavarikh_%28Compendium_of_Histories%29_MET_163175.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00363_963f10ad5e.jpg",
-    "sha256": "9176bdcf18edebdca8adeeeaa6265c513ef15ac1c2ff3d8e54cebd12d2cd82e0",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/%22Asvatthama_Fires_the_Narayana_Weapon_%28Cosmic_Fire%29_at_the_Pandavas%22%2C_Folio_from_a_Razmnama_MET_DP372510.jpg/1920px-%22Asvatthama_Fires_the_Narayana_Weapon_%28Cosmic_Fire%29_at_the_Pandavas%22%2C_Folio_from_a_Razmnama_MET_DP372510.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00445_ba8c3f5f3b.jpg",
-    "sha256": "91da9b8b74efb91e2d9b03f6871137a776d377d8fc5a09b9d01db0d46d7caada",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164644.jpg/1920px-%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DP164644.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00259_b4c557a57f.jpg",
+    "sha256": "86eb9deb18dfcc1bc2798e366442083fea1517c2bfe9ecc7e6aee6f9aff2c271",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_16325.jpg/1920px-%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_16325.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2813,12 +2807,6 @@
     "licence": "CC0"
    },
    {
-    "file": "00443_382d826a1c.jpg",
-    "sha256": "9c0683ba4fcec935fb64c52b3755754e1219ca89ad10eb88feec8b5d1e2d7911",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/%22Bahram_Gur_in_the_Yellow_Palace_on_Sunday%22%2C_Folio_213_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_43911.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
     "file": "00050_e6d53cb8d6.jpg",
     "sha256": "9dd2296e28f4a0dfd0eb73b0debc85f097ead81417b7d3c0ec0623853e1d072e",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/%22_Vieille_R%C3%A9moise%22_-_A11772.jpg/1920px-%22_Vieille_R%C3%A9moise%22_-_A11772.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -2828,6 +2816,12 @@
     "file": "00331_45b1231901.jpg",
     "sha256": "9f3f85bd4fa6516a4c3ba7a66c47464a13c2ebd1cf0219e6e0268bdd0449028b",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/%22Apr%C3%A8s_l%27orgie%22_%28%27Despu%C3%A9s_de_la_org%C3%ADa%27%29%2C_1909._De_Fidencio_Lucano_Nava.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
+    "file": "00264_3c98c41dc0.jpg",
+    "sha256": "9fac60f5dfa63f8af45bbe37afcb864b75b27d1b77b6545f1041f897ceddde2b",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/%22Alexander_Executes_Janusiyar_and_Mahiyar%2C_the_Slayers_of_Darius%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_of_Firdausi_MET_sf40-38-1r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2843,9 +2837,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00227_ca6061f725.jpg",
-    "sha256": "a7d4c4896006568675f6e1b0c7f901759aa7ad5a88bfc8db05620d52e1bfe363",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/%22Adam_Makes_a_Pilgrimage%22%2C_Folio_from_a_Majma_al-Tavarikh_%28Compendium_of_Histories%29_MET_sf57-51-37-5v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "file": "00169_5208ec442b.jpg",
+    "sha256": "a8241a79fb211e635249148b3c75a1b8cb7020ce92d9fe2a05245739db4aa4d5",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP328562.jpg/1920px-%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP328562.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2867,9 +2861,21 @@
     "licence": "CC0"
    },
    {
+    "file": "00095_dfda29b0aa.jpg",
+    "sha256": "b494c1f0a7f8a7f6d82827457dc9f406cafe87ae82ddef4402ee19867310be6c",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/%22A_Bull%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_18890.jpg/1920px-%22A_Bull%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_18890.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
     "file": "00325_16deaea7d2.jpg",
     "sha256": "bb4643252fbbc373b9dec7eabb134eae0a0cd64c75752fc9a3566985320bf112",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/%22Anthurium%22_flower.jpg/1920px-%22Anthurium%22_flower.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00272_e1a1da95d2.jpg",
+    "sha256": "c07a761a32c6d62f066208504edec2771e17a49b72a396c1fd41138fc84e134c",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/26/%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DT4792.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2879,9 +2885,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00373_facc98256f.jpg",
-    "sha256": "c2c7d577c52133b607774d6e687254262439923ca7ad8770b241acf5e48a89d4",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/%22Avec_des_gestes_lents_et_charmants%2C_Clara_lissa_l%27or_roux_de_ses_cheveux...%22_MET_DP865308.jpg/1920px-%22Avec_des_gestes_lents_et_charmants%2C_Clara_lissa_l%27or_roux_de_ses_cheveux...%22_MET_DP865308.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00097_c2589f6bdf.jpg",
+    "sha256": "c39f2cd2ecd76ce684c6ee3cae54581cc31706293033c452215f7843de633fcf",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/%22A_Bull%22%2C_Folio_from_a_Dispersed_Nuzhatnama-i_%E2%80%98Ala%E2%80%99i_of_Shahmardan_ibn_Abi%E2%80%99l_Khayr_MET_sf13-160-7v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2903,15 +2909,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00492_35a2e5ffe3.jpg",
-    "sha256": "ce8f848b95449eee77e0fde24fe228babd3001985b4382619d79537a0db5e3af",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/%22Bamiyan_Ware%22_bowl_MET_DP120831.jpg/1920px-%22Bamiyan_Ware%22_bowl_MET_DP120831.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
-    "file": "00177_22b1b60fc0.jpg",
-    "sha256": "d8ece7816e4a6275555b8fe0c6455eda681213dbe8a0903f9a63b6dffb917582",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/%22A_soldier_was_signaling_to_them_to_stay_away%22_from_L%27Illustration_MET_DP874202.jpg/1920px-%22A_soldier_was_signaling_to_them_to_stay_away%22_from_L%27Illustration_MET_DP874202.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00170_6a6227e2ba.jpg",
+    "sha256": "ce49bc73b8a803b8a52077d03ea848129de9afc205bf4402aa2131a39d70429d",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP331524.jpg/1920px-%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_DP331524.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    },
    {
@@ -2933,9 +2933,21 @@
     "licence": "CC0"
    },
    {
+    "file": "00171_ec74783827.jpg",
+    "sha256": "db6e3964f4824b34bb9ec14d1165fa253de5fa564f61376cc03438f6c4927a5b",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/55/%22A_Scene_of_Conviviality_at_Court%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_sf13-228-21-f224-r.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "licence": "CC0"
+   },
+   {
     "file": "00174_f3fa29629e.jpg",
     "sha256": "dceccbd209ffdf053c14084ac5691122562cb950adcff442d5d6d23401091445",
     "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/%22A_Seaport%2C%22_title_page_from_%22Various_Ships_and_Views_of_Amsterdam%2C_part_III%22_MET_DP832775.jpg/1920px-%22A_Seaport%2C%22_title_page_from_%22Various_Ships_and_Views_of_Amsterdam%2C_part_III%22_MET_DP832775.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00271_505500929f.jpg",
+    "sha256": "de6750fef1c287c36aaeac5296a57e96eb80d4e18f16ec210b62147977dd637b",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/ed/%22Alexander_is_Lowered_into_the_Sea%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Amir_Khusrau_Dihlavi_MET_DP120802.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2951,9 +2963,15 @@
     "licence": "CC0"
    },
    {
-    "file": "00398_c3d8a7161a.jpg",
-    "sha256": "e4a1b5fed627bd6fd247b3c1cc826999438931afcc245ade4436fbf8179393b7",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/%22Bahram_Gur_Exhibiting_his_Prowess_in_Wrestling_at_the_Court_of_Shangul%2C_King_of_India%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_MET_95315.jpg/1920px-%22Bahram_Gur_Exhibiting_his_Prowess_in_Wrestling_at_the_Court_of_Shangul%2C_King_of_India%22%2C_Folio_from_a_Shahnama_%28Book_of_Kings%29_MET_95315.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "file": "00261_a2abdf593a.jpg",
+    "sha256": "e31629ed93848196986e078e5be1af9f099b562eff8c2ba24dba63f68e441160",
+    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4789.jpg/1920px-%22Alexander_at_a_Banquet%22%2C_Folio_from_a_Khamsa_%28Quintet%29_of_Nizami_MET_DT4789.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "licence": "CC0"
+   },
+   {
+    "file": "00184_aec9805871.jpg",
+    "sha256": "e3bfdf5b9f7a658a919d0cae7e016793dadff00e096e75dcc3d868905453b083",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/92/%22A_Tournament_at_Arms%22%2C_Folio_from_a_Divan_%28Collected_Works%29_of_Mir_%27Ali_Shir_Nava%27i_MET_sf13-228-21-f186-v.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
     "licence": "CC0"
    },
    {
@@ -2969,27 +2987,9 @@
     "licence": "CC0"
    },
    {
-    "file": "00152_88b48bee4b.jpg",
-    "sha256": "ea94b2e31a750975a572901cf39f73ceedd303120b2e518699111b9b36d0a88a",
-    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e4/%22A_Raja_and_a_Guest_Seated_on_a_Terrace_Listening_to_Musicians_Perform%22%2C_Folio_from_a_manuscript_of_the_Raga_Darshan_of_Anup_MET_DP273288.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00491_c5b874b370.jpg",
-    "sha256": "f87e24769af746644da582afbd25a653bc6a0fe44d43bae1c74d8d761d31c5ea",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/%22Bamiyan_Ware%22_bowl_MET_Cbowl1993.24.jpg/1920px-%22Bamiyan_Ware%22_bowl_MET_Cbowl1993.24.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-    "licence": "CC0"
-   },
-   {
     "file": "00151_70c120136f.jpg",
     "sha256": "f88f86291c80994952509c9e8e2e64050376b7ffb3da69df60799a3ead0bb955",
     "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/%22A_professional_wildlife_shot_capturing_a_Black_Drongo_%28Dicrurus_macrocercus%29_perched_on_a_branch%2C_holding_insects_in_its_beak_to_feed_its_chicks_inside_a_finely_woven_nest.%22.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-    "licence": "CC0"
-   },
-   {
-    "file": "00246_9458ea7ee0.jpg",
-    "sha256": "ffe44c85eaf52eee8a7905f5ea85a35b785cfeda9023adba61d31869f2d96813",
-    "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/%22Akbar_With_Lion_and_Calf%22%2C_Folio_from_the_Shah_Jahan_Album_MET_DT200628.jpg/1920px-%22Akbar_With_Lion_and_Calf%22%2C_Folio_from_the_Shah_Jahan_Album_MET_DT200628.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
     "licence": "CC0"
    }
   ]

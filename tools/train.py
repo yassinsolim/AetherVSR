@@ -206,7 +206,7 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=20260902)
     ap.add_argument(
         "--split",
-        default="data/splits/corpus-v2.json",
+        default="data/splits/corpus-v3.json",
         help="source-level split manifest; patches are drawn within each split",
     )
     ap.add_argument(

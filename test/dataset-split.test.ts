@@ -33,7 +33,7 @@ interface SplitManifest {
 }
 
 const split = JSON.parse(
-  readFileSync(new URL('../data/splits/corpus-v2.json', import.meta.url), 'utf8'),
+  readFileSync(new URL('../data/splits/corpus-v3.json', import.meta.url), 'utf8'),
 ) as SplitManifest;
 
 const NAMES = ['train', 'val', 'test'] as const;

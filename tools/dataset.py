@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -100,6 +101,45 @@ def dhash(image, size: int = 8) -> int:
     return bits
 
 
+def phash(image, size: int = 8, factor: int = 4) -> int:
+    """64-bit DCT perceptual hash.
+
+    Complementary to dHash rather than redundant: dHash compares adjacent
+    pixels and is sensitive to local gradient, while a DCT hash summarises
+    low-frequency structure. Independent review found seven cross-split pairs -
+    the same Met folio rephotographed with a different crop, mount and colour
+    balance - that sat at dHash 11-18 but pHash 2-8, so one hash alone does not
+    close this.
+    """
+    n = size * factor
+    small = image.convert("L").resize((n, n), Image.Resampling.LANCZOS)
+    px = list(small.getdata())
+    rows = [[float(px[r * n + c]) for c in range(n)] for r in range(n)]
+
+    cos = _dct_table(n)
+    tmp = [[sum(rows[r][x] * cos[x][u] for x in range(n)) for u in range(n)] for r in range(n)]
+    out = [[sum(tmp[y][u] * cos[y][v] for y in range(n)) for u in range(size)] for v in range(size)]
+
+    flat = [out[v][u] for v in range(size) for u in range(size)]
+    rest = sorted(flat[1:])
+    median = rest[len(rest) // 2]
+    bits = 0
+    for value in flat:
+        bits = (bits << 1) | (1 if value > median else 0)
+    return bits
+
+
+_DCT_CACHE: dict[int, list[list[float]]] = {}
+
+
+def _dct_table(n: int) -> list[list[float]]:
+    table = _DCT_CACHE.get(n)
+    if table is None:
+        table = [[math.cos((2 * x + 1) * u * math.pi / (2 * n)) for u in range(n)] for x in range(n)]
+        _DCT_CACHE[n] = table
+    return table
+
+
 def hamming(a: int, b: int) -> int:
     return bin(a ^ b).count("1")
 
@@ -114,6 +154,12 @@ def _title_key(entry: dict) -> str:
     """
     title = (entry.get("title") or "").strip().lower()
     title = re.sub(r"^file:", "", title)
+    # The corpus's dominant duplicate family is one artwork rephotographed under
+    # different Met photo ids - "... MET DT4791.jpg" against "... MET 30607.jpg".
+    # Without stripping that token the title signal matched almost nothing:
+    # review measured it grouping 56 of 495 images while 38 same-artwork groups
+    # straddled splits.
+    title = re.split(r"\s+met\s+\S+$", title)[0]
     title = re.sub(r"\.(jpe?g|png|tiff?)$", "", title)
     title = re.sub(r"[\s_-]*(\(\d+\)|\bdetail\b|\bplate\b\s*\d*|\bfolio\b\s*\S*|\bp?g?\.?\s*\d+)\s*$", "", title)
     return re.sub(r"[^a-z0-9]+", " ", title).strip()
@@ -132,18 +178,33 @@ def cluster_sources(
     data and buys a split that cannot leak a scene.
     """
     hashes: dict[str, int] = {}
+    perceptual: dict[str, int] = {}
     titles: dict[str, str] = {}
+    unhashed: list[str] = []
     for entry in entries:
         identity = source_identity(entry)
         path = os.path.join(corpus, entry["file"])
         titles[identity] = _title_key(entry)
-        if not os.path.exists(path):
-            continue
         try:
             with Image.open(path) as im:
+                im.load()
                 hashes[identity] = dhash(im)
-        except Exception:  # noqa: BLE001
-            continue
+                perceptual[identity] = phash(im)
+        except Exception as exc:  # noqa: BLE001
+            unhashed.append(f"{entry['file']}: {type(exc).__name__} {exc}")
+
+    # Refuse to emit a split built from a corpus we could not read. Skipping
+    # silently made the split depend on gitignored pixels: on a clone without
+    # the images it produced a *different*, near-duplicate-leaking split and
+    # exited zero, while every committed check still reported healthy.
+    if unhashed:
+        head = "\n  ".join(unhashed[:10])
+        more = f"\n  … and {len(unhashed) - 10} more" if len(unhashed) > 10 else ""
+        raise SystemExit(
+            f"cannot cluster: {len(unhashed)} of {len(entries)} corpus images unreadable.\n"
+            f"  {head}{more}\n"
+            "Fetch the corpus first; a split built without pixels cannot detect duplicates."
+        )
 
     ids = [source_identity(e) for e in entries]
     parent = {i: i for i in ids}
@@ -171,8 +232,13 @@ def cluster_sources(
     hashed = [i for i in ids if i in hashes]
     for a in range(len(hashed)):
         for b in range(a + 1, len(hashed)):
-            if hamming(hashes[hashed[a]], hashes[hashed[b]]) <= threshold:
-                union(hashed[a], hashed[b])
+            ia, ib = hashed[a], hashed[b]
+            # Either hash agreeing is enough to call it the same scene.
+            if (
+                hamming(hashes[ia], hashes[ib]) <= threshold
+                or hamming(perceptual[ia], perceptual[ib]) <= threshold
+            ):
+                union(ia, ib)
 
     mapping = {i: find(i) for i in ids}
     return mapping, hashes, len(set(mapping.values()))
@@ -301,7 +367,7 @@ def check_disjoint(split: dict) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Build a source-level dataset split.")
     ap.add_argument("--manifest", default="data/corpus/manifest.json")
-    ap.add_argument("--out", default="data/splits/corpus-v2.json")
+    ap.add_argument("--out", default="data/splits/corpus-v3.json")
     ap.add_argument("--salt", default=DEFAULT_SALT)
     ap.add_argument("--train", type=float, default=DEFAULT_RATIOS.train)
     ap.add_argument("--val", type=float, default=DEFAULT_RATIOS.val)
