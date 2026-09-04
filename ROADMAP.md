@@ -157,7 +157,7 @@ stage-by-stage golden vectors; model format and loader; budget fallback with
 hysteresis, exercised on live video; whole-stage and per-pass instrumentation;
 still-image, natural-image and temporal evaluation.
 
-## Milestone 4.5 — Generalization and real-world video validation [IN REVIEW]
+## Milestone 4.5 — Generalization and real-world video validation [DONE]
 
 Milestone 4 proved engineering feasibility. Whether the quality result
 generalizes is a separate question, which is why this milestone sits between
@@ -192,8 +192,11 @@ matrix with exact permutation statistics; ground-truth video benchmark with
 alignment proof and scope-sensitivity analysis; deterministic visual crops;
 GitHub Actions CI.
 
-Status is IN REVIEW until the confirmation round closes and the final gate
-passes.
+Closed after three independent audits and a confirmation round: no P0 or P1
+outstanding, gate green, CI green on the published commit. What remains open is
+recorded as the next milestone's first item, not as a caveat here — this
+benchmark contains no captured footage, so it cannot settle whether the model
+helps on real video either way.
 
 ## Milestone 5 — Robustness and content coverage
 
