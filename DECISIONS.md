@@ -1036,3 +1036,51 @@ The finding behind this decision matters more than the decision: the network was
 never too small to help on compressed video. It had been trained to invert a
 degradation that compressed video does not have. Architecture was held fixed
 precisely so that could be established.
+
+## ADR-0031 — Public claims are bounded by the captured-footage corpus
+
+**Status:** accepted (Milestone 5)
+
+The README previously read "Real-time, local, GPU-accelerated video
+super-resolution for web video" and, three milestones out of date, "Milestone 2
+complete — there is still no AI inference in this codebase". Both were wrong in
+opposite directions: the headline over-claimed, the status under-claimed.
+
+Public claims now state the measured scope and its limits together:
+
+- **+0.72 dB at high quality, +0.36 dB at typical**, 9/10 captured clips each,
+  against the Catmull-Rom the product actually ships.
+- **No improvement at poor quality**, and no faces in the corpus at all.
+- **1.24x Catmull-Rom's motion-compensated residual** on 10/10 clips.
+
+The rule this fixes into the project: a claim about "web video" requires
+captured-footage evidence. Synthetic proxies and unseen photographs are not
+sufficient, because Milestone 4.5 demonstrated a synthetic benchmark ranking two
+models in the opposite order from real photographs, and Milestone 5 found a
+single clip with a rendered HUD supplying 77-99% of its own measured advantage.
+
+## ADR-0032 — Metric sanity controls run before model numbers
+
+**Status:** accepted (Milestone 5)
+
+Milestone 4.5 published VMAF for 25 cells and then discovered it ranked
+nearest-neighbour above Lanczos in 20 of them. Milestone 5 ran the control
+first, on captured footage, and VMAF failed it on 10 of 10 clips — the same
+pathology on an entirely different corpus.
+
+Every metric used for a conclusion must first reproduce an ordering that is not
+in dispute: on real footage, `nearest <= bilinear <= Catmull-Rom <= Lanczos`.
+
+    PSNR-Y   10/10   usable, carries the conclusions
+    SSIM      6/10   diagnostic only
+    VMAF      0/10   diagnostic only
+
+A metric that cannot rank four conventional filters correctly cannot be trusted
+to rank a neural model against them, however sophisticated it is.
+
+The same principle applied to the temporal metric and caught two defects: an
+inverted warp that made "motion compensation" score worse than no compensation
+at all, and an unstated sharpness confound — blurring the reference, which
+cannot change the footage's real stability, buys a 14.9% residual reduction.
+Without that control the 24.3% neural excess would have been reported as pure
+temporal instability.

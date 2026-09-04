@@ -1,25 +1,40 @@
 # AetherVSR
 
-Real-time, local, GPU-accelerated video super-resolution for web video.
+Real-time 2x neural video super-resolution in the browser, with measured gains
+on selected captured-content and degradation classes. Broad web-video
+improvement remains under validation.
 
 AetherVSR upscales video in the browser using WebGPU, entirely on your machine —
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 2 complete — feasibility spike. There is still no AI
-inference in this codebase, by design.** What exists is a working, measured, zero-readback video → WebGPU → canvas
-pipeline with a conventional GPU scaler, a clean seam for a neural upscaler to
-arrive through, and a measured answer to whether a neural stage is currently
-affordable. See `ROADMAP.md`.
+**Status: Milestone 5 complete — captured-footage validation.** A 6,291-parameter
+neural upscaler runs in the production pipeline at **5.5 ms p50, ~33% of a 60 Hz
+frame budget**, 2560x1440 output from a 1280x720 source, with automatic fallback
+to a conventional scaler when it cannot hold the budget.
 
-**The Milestone 2 headline: not with the kernel we have.** A SPAN-Lite
-C16-class model is ≈30.5 GMAC per 720p frame (a published-architecture figure,
-not measured by us); the best 3x3 convolution throughput measured here is
-247 GMAC/s, so that model would take ≈123 ms against a 16.67 ms budget. Our
-kernel is deliberately naive — no shared-memory tiling — so that ≈15x gap is a
-statement about one workload and one implementation, not about the hardware.
-Closing it is Milestone 3. Details and scoping in `BENCHMARKS.md`.
+## What the evidence supports
 
+Measured on 10 independently sourced captured clips under controlled 720p H.264,
+against the production Catmull-Rom baseline this project actually ships:
+
+| Input quality | Gain over Catmull-Rom | Clips won | p |
+| --- | ---: | ---: | ---: |
+| high (CRF 18) | **+0.72 dB** | 9/10 | 0.004 |
+| typical (CRF 26) | **+0.36 dB** | 9/10 | 0.006 |
+| poor (CRF 34) | +0.05 dB | 7/10 | 0.22, not significant |
+
+**What it does not support.** The corpus is predominantly aerial, web-sourced
+4K footage and **contains no faces**; low-light is a single clip. At heavily
+compressed input the model adds nothing measurable. It is also consistently less
+temporally stable than Catmull-Rom — 1.24x the motion-compensated residual on
+10/10 clips — though a substantial part of that is the metric responding to a
+sharper image rather than to invented shimmer.
+
+So: a real, reproducible improvement on lightly-to-typically compressed video of
+the kind this corpus contains, not a general "better web video" claim. The
+distinction is deliberate; `BENCHMARKS.md` gives the full evidence, including
+every clip that was excluded and why.
 
 ## Evaluation methodology
 

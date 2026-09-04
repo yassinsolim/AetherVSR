@@ -1335,6 +1335,199 @@ was consulted. Every seed's results are published, not only the selected one.
 
 Unchanged footprint, as expected for identical architecture.
 
+## Milestone 5 — Captured-footage validation
+
+Milestone 4.5 established gains on unseen still photographs and **failed to
+establish any video gain**: its benchmark was procedurally generated, and the
+only positive result came from a near-Nyquist zone plate that is adversarial by
+construction. This milestone replaces synthetic proxies with genuinely captured
+camera footage.
+
+### Corpus
+
+10 clips from Wikimedia Commons video, 10 independent creators, all CC0 /
+CC BY / CC BY-SA / public domain **verified against the Commons API at fetch
+time** rather than trusted from a hand-written manifest.
+
+| Category | Clips |
+| --- | ---: |
+| motion | 3 |
+| nature | 2 |
+| texture | 2 |
+| urban | 2 |
+| lowlight | 1 |
+
+Sources are never redistributed: 2.4 GB, gitignored, refetched from pinned URLs
+with SHA-256 enforced. Independence from the training corpus and the Milestone
+4.5 still set is exact — zero hash collisions, and the medium differs entirely.
+
+**What this corpus cannot support.** Seven of ten clips are aerial or airborne.
+Several are Commons VP9 transcodes of YouTube deliveries, so already
+twice-compressed rather than camera originals. `lowlight` is n=1 and `texture`
+n=2. Two clips carry very little motion. **There is no faces category at all** —
+see the exclusions below. This supports a claim about predominantly aerial,
+web-sourced 4K footage, not about captured video in general.
+
+### Clips excluded, and why
+
+Removed for documented defects, never for their scores. Every removal is
+recorded in the manifest and the sensitivity is published.
+
+| Clip | Reason |
+| --- | --- |
+| Peninsula State Park | Burned-in telemetry HUD and a rendered OpenStreetMap inset. Masking 11.5% of frame area collapsed its advantage by 77% / 95% / 99% — the Milestone 4.5 zone-plate failure recurring. |
+| Charlotte aerial | Growing chroma-smeared decode corruption reaching ~38% of frame 18, reproduced from the pinned source, plus a burned-in channel logo. |
+| 3 × faces (one series) | 9:16 vertical, active picture 1214 px wide. A 2560×1440 master needs a 2.11× upscale, so the reference is interpolated rather than captured. |
+
+The faces removal is the one that changed the headline, so both versions are on
+the record in `results/captured-faces-sensitivity.json`:
+
+| | h264_high | h264_typical | h264_poor |
+| --- | ---: | ---: | ---: |
+| with faces (13 clips) | +0.269 (p=0.31) | +0.129 (p=0.37) | −0.021 (p=0.70) |
+| without faces (10 clips) | +0.721 (p=0.004) | +0.363 (p=0.006) | +0.055 (p=0.22) |
+
+Those three clips were measuring a 2.11× stretch, which is why they read −1.24 dB.
+**Faces are unmeasured by this milestone, not shown to be fine.**
+
+### Alignment
+
+A one-frame or one-pixel error would dominate PSNR and could manufacture either
+result. Four checks, all 10 clips passing:
+
+| Check | Result |
+| --- | --- |
+| frame correspondence | decoded[i] beats master[i±1] by +1.31 … +24.27 dB |
+| luma slope | 0.9946 … 1.0008 — no limited/full range error |
+| luma intercept | within ±0.0016 — no black-level error |
+| shuffle control | reversing frame order costs 7.86 … 37.47 dB |
+
+The shuffle control is what gives the correspondence check teeth: if misaligning
+the sequence did not hurt, the benchmark would not be measuring correspondence
+at all.
+
+Reference frames are deduplicated by hash. Rate conversion had duplicated the
+first frame on 4 of 15 clips, which silently disabled the off-by-one check at
+that index by comparing a decoded frame against two identical references.
+
+### Metric sanity, run before any model number
+
+Control: on real footage `nearest ≤ bilinear ≤ Catmull-Rom ≤ Lanczos` is not in
+dispute.
+
+| Metric | Clips respecting the order | Verdict |
+| --- | ---: | --- |
+| PSNR-Y | 10/10 | **usable — carries the conclusions** |
+| SSIM | 6/10 | diagnostic only |
+| VMAF | 0/10 | diagnostic only |
+
+VMAF has now failed this control on two entirely different corpora — synthetic
+in Milestone 4.5, captured here — so the pathology belongs to the metric as
+configured, not to the content. No conclusion rests on it.
+
+### Result
+
+Paired at clip level. Frames within a clip are averaged first, because 24 frames
+of one drone shot are one scene sampled repeatedly and not 24 independent
+observations.
+
+| Condition | Δ dB | CI95 | wins | permutation p |
+| --- | ---: | --- | ---: | ---: |
+| **h264_high** | **+0.7214** | [+0.457, +0.972] | 9/10 | **0.0039** |
+| **h264_typical** | **+0.3627** | [+0.192, +0.525] | 9/10 | **0.0059** |
+| h264_poor | +0.0545 | [−0.017, +0.135] | 7/10 | 0.2188 |
+
+Leave-one-out at typical moves the mean only between +0.316 and +0.416, so no
+single clip carries the result.
+
+Baseline ladder at typical quality, corpus mean PSNR:
+
+```
+nearest 30.926 < bilinear 31.667 < Catmull-Rom 32.268 < Lanczos 32.486 < neural 32.566
+```
+
+The model beats offline Lanczos at high and typical and loses to it at poor.
+Lanczos is not implementable at the browser's per-frame budget, so that is a
+bound on what conventional filtering could contribute, not an alternative.
+
+### Where the gains are
+
+| Category | n | h264_high | h264_typical | h264_poor |
+| --- | ---: | ---: | ---: | ---: |
+| lowlight | 1 | +1.056 | +0.781 | +0.348 |
+| urban | 2 | +0.979 | +0.516 | +0.083 |
+| motion | 3 | +0.700 | +0.319 | +0.045 |
+| texture | 2 | +0.572 | +0.253 | −0.022 |
+| nature | 2 | +0.478 | +0.175 | −0.029 |
+
+**The gain is strongly compression-dependent** and falls monotonically from high
+to poor quality in every category. At CRF 34 the model contributes essentially
+nothing: heavy compression removes the information a 6,291-parameter network
+would need.
+
+### Temporal behaviour on captured motion
+
+| | |
+| --- | ---: |
+| neural / Catmull-Rom motion-compensated residual | **1.243** |
+| clips where neural is less stable | **10/10** |
+| purchasable by blurring the reference (σ=0.5) | 0.851 |
+
+The direction is unambiguous — the neural stage is less temporally stable than
+Catmull-Rom on every captured clip. The magnitude is not cleanly interpretable:
+blurring the reference, which cannot change the footage's real stability, buys a
+14.9% residual reduction against the neural's 24.3% excess, so a substantial
+part of that excess is the metric responding to sharpness rather than to
+invented shimmer.
+
+Two corrections were needed to get here. The warp direction was inverted, making
+the "motion compensation" score worse than no compensation at all; and the
+original claim that flow error affects all methods equally was false in the
+direction that mattered. Both were found by independent review.
+
+The synthetic harness's ~3× sub-pixel figure does **not** transfer: on real
+motion it is 1.24×.
+
+### Production runtime on captured clips
+
+| Condition | GPU p50 | p95 | budget | drops | skips | fallback |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| h264_typical | 6.30 ms | 8.67 | 38.6% | 0/623 | 0 | neural |
+| h264_poor | 6.13 ms | 8.49 | 38.0% | 0/624 | 0 | neural |
+
+Zero drops, zero skipped callbacks, guard never leaves the neural state, memory
+unchanged at 77.43 MB, precision f16. Presented FPS reads 24 because the sources
+are 24 fps, not because of a throughput limit.
+
+### Box-trained vs realistic-trained
+
+| Condition | box | realistic | difference | perm p |
+| --- | ---: | ---: | ---: | ---: |
+| h264_high | +0.5151 | +0.6439 | +0.1288 | 0.081 |
+| h264_typical | +0.2214 | +0.2978 | +0.0764 | 0.099 |
+| h264_poor | +0.0229 | +0.0464 | +0.0235 | 0.303 |
+
+*(measured on the 15-clip corpus before the purity exclusions)*
+
+Realistic training is ahead in all three conditions and on 11 of 15 clips in
+each, but none reaches p < 0.05, and with one seed per arm the smaller gaps are
+the same order as the 0.018–0.034 dB seed variance measured on stills. The
+box-trained model beats Catmull-Rom on captured footage on its own, so realistic
+training **improves** the captured-video gain rather than creating it.
+
+### Verdict
+
+**PARTIALLY.** On independently sourced, realistically degraded captured 720p
+video, the shipped model improves on production Catmull-Rom by +0.72 dB at high
+quality and +0.36 dB at typical quality, winning 9 of 10 clips in both, with
+confidence intervals excluding zero. At poor quality it does not improve
+anything measurable. Every category gains at high and typical quality.
+
+The claim is bounded by what the corpus is: predominantly aerial, web-sourced
+4K footage with no faces, no low-light beyond a single clip, and a consistent
+temporal cost of roughly 1.24× Catmull-Rom's motion-compensated residual.
+
+
 ## Reproducing
 
 ```bash

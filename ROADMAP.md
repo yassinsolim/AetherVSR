@@ -198,14 +198,37 @@ recorded as the next milestone's first item, not as a caveat here — this
 benchmark contains no captured footage, so it cannot settle whether the model
 helps on real video either way.
 
-## Milestone 5 — Robustness and content coverage
+## Milestone 5 — Captured-footage validation [DONE]
 
-Non-square pixel aspect ratios, resolution changes mid-stream, seeking, HDR and
-10-bit sources, cross-origin and DRM behaviour (both expected to be
-unsupported — the task is to fail clearly and prove where), tiling for large
-inputs, and memory ceilings on constrained GPUs.
+Milestone 4.5 could not answer the web-video question: its benchmark was
+procedurally generated and its only positive result came from an adversarial
+zone plate. This milestone answers it with genuinely captured camera footage.
 
----
+**Verdict: PARTIALLY.** On 10 independently sourced captured clips under
+controlled 720p H.264, the shipped model beats production Catmull-Rom by
+**+0.72 dB at high quality** (9/10 clips, p=0.004) and **+0.36 dB at typical
+quality** (9/10, p=0.006), with both confidence intervals excluding zero. At
+poor quality it adds nothing measurable (+0.05, p=0.22). Every category gains at
+high and typical.
+
+Bounded by what the corpus is: predominantly aerial, web-sourced 4K footage,
+**no faces**, lowlight n=1, and a consistent temporal cost of 1.24x
+Catmull-Rom's motion-compensated residual on 10/10 clips.
+
+Three rounds of independent review found the Milestone 4.5 failure mode
+recurring - a clip with a burned-in telemetry HUD and rendered map inset, where
+77-99% of its advantage came from synthetic pixels - plus an inverted optical-flow
+warp, a provenance pin that was silently rewritten on mismatch, duplicated
+reference frames that disabled an alignment check, and a metric ordering VMAF
+fails on captured footage exactly as it did on synthetic. All were fixed and
+every affected result regenerated.
+
+Delivered: captured corpus with API-verified licences and enforced hash pinning;
+aligned preparation pipeline with a four-check alignment proof including a
+shuffle control; metric sanity gate run before any model number; clip-level
+paired statistics with bootstrap CIs and exact permutation tests; temporal
+analysis with a sharpness confound control; deterministic visual comparisons;
+production runtime validation; repository size guard.
 
 ## Milestone 6 — Dynamic quality selection
 
