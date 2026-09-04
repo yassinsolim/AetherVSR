@@ -1438,8 +1438,48 @@ punish blur hard enough that an aliased-but-sharp result scores above a smooth
 one. That is a different pathology from the synthetic corpus, where nearest
 outranked Lanczos outright.
 
-Either way it cannot rank four conventional filters correctly, so it stays
-diagnostic-only and no conclusion rests on it.
+**Cause, isolated rather than guessed.** VMAF's ordering tracks *sharpness*,
+not fidelity. Measuring gradient energy on one clip's four upscales:
+
+| Method | sharpness | PSNR | VMAF |
+| --- | ---: | ---: | ---: |
+| nearest | 5.981 | 24.987 | 69.63 |
+| bilinear | 4.967 | 25.552 | 57.95 |
+| Catmull-Rom | 5.897 | 26.324 | 70.92 |
+| Lanczos | 6.357 | 26.621 | 74.59 |
+| *reference* | *9.160* | | |
+
+```
+by sharpness:  bilinear < catmull_rom < nearest  < lanczos
+by VMAF:       bilinear < nearest     < catmull_rom < lanczos
+by PSNR:       nearest  < bilinear    < catmull_rom < lanczos
+```
+
+VMAF follows the sharpness ordering, not the fidelity one. Bilinear is the
+blurriest option by a clear margin and VMAF buries it 12 points below
+nearest-neighbour, whose aliasing registers as retained detail. That is its
+detail-loss feature behaving as designed on a control that happens to include
+the blurriest possible reconstruction — not an inversion, and not a defect in
+the model.
+
+**It is not, therefore, evidence against the verdict.** Asked the question the
+milestone actually rests on — is the neural output better than Catmull-Rom —
+VMAF agrees with PSNR on the sign for **6 of 6 clips tested**, by +4.51 to
++11.71 points:
+
+| Clip | PSNR Δ | VMAF Δ |
+| --- | ---: | ---: |
+| maplefest | +0.519 | +8.04 |
+| rogla POV | +0.399 | +7.03 |
+| train chase | +0.165 | +11.71 |
+| Funchal | +0.527 | +10.19 |
+| New Orleans | +0.533 | +8.38 |
+| blue river | +0.007 | +4.51 |
+
+So VMAF corroborates the result while failing the four-filter control. It stays
+diagnostic-only — a metric that cannot rank four conventional filters should not
+be used to *select* a model — but it does not contradict anything reported here,
+and saying only "VMAF failed" would have left a misleading impression.
 
 ### Result
 

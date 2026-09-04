@@ -268,5 +268,35 @@
   "catmull_rom>lanczos": "0/10",
   "nearest>lanczos": "0/10",
   "reading": "VMAF orders the three reconstruction filters correctly and puts nearest below Lanczos. Its only inversion is bilinear scoring below nearest, on every clip - its detail-loss features appear to punish blur hard enough that an aliased but sharp result outranks a smooth one. Distinct from the Milestone 4.5 synthetic corpus, where nearest outranked Lanczos outright."
+ },
+ "vmafCause": {
+  "finding": "VMAF tracks retained high-frequency energy rather than fidelity.",
+  "evidence": {
+   "sharpnessOrder": [
+    "bilinear",
+    "catmull_rom",
+    "nearest",
+    "lanczos"
+   ],
+   "vmafOrder": [
+    "bilinear",
+    "nearest",
+    "catmull_rom",
+    "lanczos"
+   ],
+   "psnrOrder": [
+    "nearest",
+    "bilinear",
+    "catmull_rom",
+    "lanczos"
+   ],
+   "note": "VMAF matches the sharpness ordering, not the PSNR ordering."
+  },
+  "notInverted": "nearest never outranks Lanczos; the three reconstruction filters order correctly.",
+  "agreementOnTheDecisiveComparison": {
+   "question": "does VMAF agree with PSNR on the sign of neural minus Catmull-Rom?",
+   "result": "6/6 clips agree, VMAF deltas +4.51 to +11.71",
+   "reading": "VMAF corroborates the verdict while failing the four-filter control."
+  }
  }
 }
