@@ -1,0 +1,56 @@
+{
+ "schema": "aethervsr.frozen-testset/1",
+ "frozenAt": "Milestone 5.5, before any new training",
+ "purpose": "The Milestone 5 captured corpus is now a held-out benchmark. It is frozen so that nothing in Milestone 5.5 can train on it, sample it for augmentation, select epochs or seeds by its scores, tune a degradation distribution against it, or add and remove clips based on results.",
+ "rules": [
+  "No clip in this list may appear in any training corpus.",
+  "No frame from these clips may be used for augmentation.",
+  "Checkpoints and hyperparameters are selected on validation only.",
+  "The test set is evaluated once per frozen candidate.",
+  "Clips are never added or removed on the basis of model results.",
+  "Any new coverage corpus (e.g. faces) is a SEPARATE evaluation set and is never merged into this ten-clip headline."
+ ],
+ "clipCount": 10,
+ "clipIds": [
+  "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+  "motion-2023-maplefest-in-bowmanville-on-2",
+  "motion-aerial-drone-chase-of-a-train-webm",
+  "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+  "nature-piz-neir-aerial-video-4k-webm",
+  "nature-the-beautiful-blue-river-dji-phant",
+  "texture-4k-drone-footage-of-a-barge-on-the",
+  "texture-snowex-field-campaign-4k-b-roll-fr",
+  "urban-drone-footage-in-new-orleans-2022-",
+  "urban-funchal-madeira-amazing-view-from-"
+ ],
+ "sourceSha256": {
+  "lowlight-hofer-weihnachtsmarkt-am-abend-202": "3eeb9cf839be6bbb63a94d30397ed36ee3b36b951d6bd79c52bf4b7e8c7ebceb",
+  "motion-2023-maplefest-in-bowmanville-on-2": "9a528f468ec0eee5546261ded4c72a6091306ac4b6f2cb1cd2a394716d92507f",
+  "motion-aerial-drone-chase-of-a-train-webm": "4caea995eec6a48a0d8cf86ed10ec65b34fa1c9dd8cd8f03bf0e5a4ab383aaa4",
+  "motion-rogla-slovenia-ostru-ica-1-4k-pov-": "2fe4fc092c6097be0200a14789b8c8fb045bc33429f02dc799f45bab3ca94aa4",
+  "nature-piz-neir-aerial-video-4k-webm": "a040baf5890722e5f0b41243b7ec9eeb852bb2e9b8c9763d9b853f4bae068357",
+  "nature-the-beautiful-blue-river-dji-phant": "48b7889aa445064fe6ac02027afad22b27c456bbbbaaa8b34e8ce3b8834e0356",
+  "texture-4k-drone-footage-of-a-barge-on-the": "b32ddc5258a926ed19acc42fd2f9650c92f09f7dce0bc1aa0e9d50505316daab",
+  "texture-snowex-field-campaign-4k-b-roll-fr": "aded2be2008eabe83a60ad5fce94944d2538e194c36bffc6bd6d74336a988f08",
+  "urban-drone-footage-in-new-orleans-2022-": "0d0fdf2f3533a893a2b5e2127c7faa3437bf9cdbf34ab721cb9b47d77669d8c4",
+  "urban-funchal-madeira-amazing-view-from-": "8b5861a1c1115ffc396bd4f1c8c971425027175455f4d9ee79440884914afaf0"
+ },
+ "testsetDigest": "eadceb4dcf76e5c35057766ab82c639012c8ede7997c592e313988cdf6c56dca",
+ "milestone5Headline": {
+  "h264_high": {
+   "deltaDb": 0.7214,
+   "wins": "9/10",
+   "permutationP": 0.0039
+  },
+  "h264_typical": {
+   "deltaDb": 0.3627,
+   "wins": "9/10",
+   "permutationP": 0.0059
+  },
+  "h264_poor": {
+   "deltaDb": 0.0545,
+   "wins": "7/10",
+   "permutationP": 0.2188
+  }
+ }
+}
