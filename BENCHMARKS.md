@@ -1421,9 +1421,25 @@ dispute.
 | SSIM | 6/10 | diagnostic only |
 | VMAF | 0/10 | diagnostic only |
 
-VMAF has now failed this control on two entirely different corpora — synthetic
-in Milestone 4.5, captured here — so the pathology belongs to the metric as
-configured, not to the content. No conclusion rests on it.
+VMAF fails the control on all 10 clips, but the failure is specific and worth
+stating precisely rather than repeating Milestone 4.5's phrasing:
+
+| Pair | Inverted on |
+| --- | ---: |
+| nearest > bilinear | **10/10** |
+| bilinear > Catmull-Rom | 0/10 |
+| Catmull-Rom > Lanczos | 0/10 |
+| nearest > Lanczos | 0/10 |
+
+VMAF ranks the three reconstruction filters correctly and places nearest below
+Lanczos. Its single failure is that it penalises **bilinear** below
+nearest-neighbour on every clip — plausibly because its detail-loss features
+punish blur hard enough that an aliased-but-sharp result scores above a smooth
+one. That is a different pathology from the synthetic corpus, where nearest
+outranked Lanczos outright.
+
+Either way it cannot rank four conventional filters correctly, so it stays
+diagnostic-only and no conclusion rests on it.
 
 ### Result
 

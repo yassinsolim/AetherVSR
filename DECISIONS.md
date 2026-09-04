@@ -1065,8 +1065,10 @@ single clip with a rendered HUD supplying 77-99% of its own measured advantage.
 
 Milestone 4.5 published VMAF for 25 cells and then discovered it ranked
 nearest-neighbour above Lanczos in 20 of them. Milestone 5 ran the control
-first, on captured footage, and VMAF failed it on 10 of 10 clips — the same
-pathology on an entirely different corpus.
+first, on captured footage, and VMAF failed it on 10 of 10 clips - by a
+*different* route: here it ranks the three reconstruction filters correctly and
+places nearest below Lanczos, but penalises bilinear below nearest on every
+clip. Two corpora, two distinct failure patterns, one conclusion.
 
 Every metric used for a conclusion must first reproduce an ordering that is not
 in dispute: on real footage, `nearest <= bilinear <= Catmull-Rom <= Lanczos`.

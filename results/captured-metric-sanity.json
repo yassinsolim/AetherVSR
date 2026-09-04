@@ -261,5 +261,12 @@
     "lanczos": 84.39374114285714
    }
   }
+ },
+ "vmafFailurePattern": {
+  "nearest>bilinear": "10/10 clips",
+  "bilinear>catmull_rom": "0/10",
+  "catmull_rom>lanczos": "0/10",
+  "nearest>lanczos": "0/10",
+  "reading": "VMAF orders the three reconstruction filters correctly and puts nearest below Lanczos. Its only inversion is bilinear scoring below nearest, on every clip - its detail-loss features appear to punish blur hard enough that an aliased but sharp result outranks a smooth one. Distinct from the Milestone 4.5 synthetic corpus, where nearest outranked Lanczos outright."
  }
 }
