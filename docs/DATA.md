@@ -12,9 +12,19 @@ one is allowed to support.
 | Natural regression set | `public/eval/` | crops of the training corpus | CC0 | regression only — **overlaps training** |
 | Video benchmark | `data/video/` | procedurally generated | n/a, synthetic | ground-truth video test |
 
-Corpus images are gitignored; manifests recording provenance, licence and
-SHA-256 are committed. The natural regression crops and the video corpus are
-committed so those benchmarks run from a clean checkout.
+**Only manifests are committed, never the image corpora.** Each manifest pins
+what was used by URL and SHA-256, and each corpus has a deterministic producer,
+so a clone rebuilds rather than downloads:
+
+| Corpus | Size | Rebuild with |
+| --- | ---: | --- |
+| `data/corpus/` | — | `tools/fetch-corpus.py` |
+| `data/eval-independent/` | 170 MB | `tools/fetch-independent-eval.py` |
+| `data/video/` | 227 MB | `tools/videobench.py --prepare` (seed 424242) |
+
+The one exception is `public/eval/` — 3.4 MB of CC0 crops, committed because the
+browser regression bench should run from a clean checkout without a Python step
+and the size is trivial.
 
 **The video corpus is synthetic.** It is deterministic, licence-clean and
 deliberately high-frequency, but it is not captured footage, and results on it

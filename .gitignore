@@ -23,3 +23,19 @@ __pycache__/
 # Root-anchored: an unanchored `models/` also swallowed public/models, which
 # holds the shipped weights.
 /models/
+
+# Generated and refetchable image corpora. Both are large and both have a
+# deterministic producer with pinned hashes, so committing them buys nothing a
+# clone cannot rebuild - and costs every clone ~400 MB.
+#
+#   data/video/       227 MB, procedurally generated from seed 424242 by
+#                     tools/videobench.py --prepare
+#   data/eval-independent/  170 MB, refetched by tools/fetch-independent-eval.py
+#                     against the URLs and SHA-256 in its manifest
+#
+# The manifests and scores stay tracked: they are what pin the content.
+data/video/**
+!data/video/manifest.json
+!data/video/baseline_scores.json
+data/eval-independent/*
+!data/eval-independent/manifest.json
