@@ -1,0 +1,76 @@
+{
+ "schema": "aethervsr.m45-final/1",
+ "split": "corpus-v3.json (perceptual clusters; dHash and DCT pHash both clean)",
+ "device": "cpu (MPS is not run-to-run reproducible on this machine)",
+ "seeds": 5,
+ "temporal": {
+  "staticMAD": {
+   "box": 0,
+   "realistic": 0,
+   "note": "exactly zero for all ten models"
+  },
+  "subPixelRatioVsCatmullRom": {
+   "box": {
+    "runs": [
+     3.038,
+     3.12,
+     3.146,
+     3.154,
+     3.167
+    ],
+    "mean": 3.125,
+    "std": 0.052
+   },
+   "realistic": {
+    "runs": [
+     3.039,
+     2.937,
+     2.905,
+     3.059,
+     2.904
+    ],
+    "mean": 2.969,
+    "std": 0.075
+   },
+   "exactPermutationP": 0.0238,
+   "floorAtThisN": 0.0079,
+   "reading": "Suggestive, not decisive: p=0.024 is one of several comparisons made in this milestone and does not survive correction for that multiplicity. Both conditions remain about 3x Catmull-Rom's sub-pixel response, so this is a small shift, not a qualitative change."
+  }
+ },
+ "videoScopeSensitivity": {
+  "allFiveCategories": {
+   "box": -0.197,
+   "realistic": 0.083
+  },
+  "excludingTexture": {
+   "box": -0.036,
+   "realistic": -0.012
+  },
+  "excludingTextureAndText": {
+   "box": -0.147,
+   "realistic": -0.086
+  },
+  "reading": "The realistic model's positive overall figure rests entirely on `texture`, which independent review identified as a near-Nyquist zone plate that is adversarial by construction. Excluding it, both conditions are essentially neutral. Excluding synthetic hard-edged text as well, both are negative. No video improvement is established on content resembling real capture."
+ },
+ "production": {
+  "model": "aethersr-c16d2-realistic.json (realistic seed 5, chosen on validation)",
+  "wholeStageMs": {
+   "avg": 5.53,
+   "p50": 5.46,
+   "p95": 6.56,
+   "max": 7.81,
+   "n": 240
+  },
+  "budgetShare": "33.2%",
+  "presentedFps": 59.5,
+  "parameters": 6291,
+  "memoryMB": {
+   "weights": 0.01,
+   "activationPing": 29.49,
+   "activationPong": 29.49,
+   "ingestTexture": 3.69,
+   "outputTexture": 14.75,
+   "total": 77.43
+  }
+ }
+}

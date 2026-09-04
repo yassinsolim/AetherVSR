@@ -159,50 +159,40 @@ still-image, natural-image and temporal evaluation.
 
 ## Milestone 4.5 — Generalization and real-world video validation [IN REVIEW]
 
-Milestone 4 proved engineering feasibility. It did not prove the quality result
-generalizes, and those are separate questions - which is why this milestone
-exists between them.
+Milestone 4 proved engineering feasibility. Whether the quality result
+generalizes is a separate question, which is why this milestone sits between
+them. The answer is **conditional**.
 
-Independent review of the published Milestone 4 repository found two evaluation
-defects, and executing this milestone surfaced a third:
+**Established.** Against the production Catmull-Rom, on genuinely unseen
+photographs from a different institution, the model gains **+0.387 ± 0.034 dB**
+across five seeds. Training on realistic web-video degradation roughly doubles
+the advantage on compressed input (+0.149 → +0.343 dB at typical CRF, exact
+permutation p = 0.0079, the floor at this sample size) while giving up most of
+the clean-condition gain. Same architecture throughout — **the limitation was
+the training data, not the network**.
 
-1. **Source-level leakage.** Patches were pooled across photographs and then
-   split, so 100% of validation patches came from images that were also trained
-   on. The split is now by source image, enforced in CI.
-2. **Same-corpus natural evaluation.** The eight-image natural set overlaps the
-   training corpus. It is retained as a regression artefact and relabelled; a
-   60-image independently sourced CC0 test corpus now carries the
-   generalisation claim.
-3. **Wrong baseline kernel.** Every delta was measured against PyTorch bicubic
-   (Keys a = -0.75) rather than the shipped Catmull-Rom (a = -0.5). All affected
-   results were rerun.
+**Not established.** On the ground-truth video benchmark the apparent win rests
+entirely on one category that independent review identified as adversarial by
+construction. Excluding it both conditions are neutral; excluding synthetic text
+as well, both are negative. The corpus contains no captured footage, so it
+cannot settle the question either way.
 
-Results, five seeds throughout: seed variance is 0.05-0.07 dB, so Milestone 4's
-attribution of a 1.1 dB swing to seed noise was wrong by twenty-fold. The
-advantage over Catmull-Rom survives on genuinely unseen photographs at
-**+0.420 +/- 0.064 dB**. Training on realistic web-video degradation roughly
-doubles the advantage on compressed input (+0.180 -> +0.397 dB) at the cost of
-the clean-condition gain - **the limitation was the training data, not the
-architecture**, which was held fixed to establish exactly that.
+Nine methodology defects were found and fixed, three by me and six by
+independent review, including a patch-level split that leaked 100% of validation
+sources, a baseline that was the wrong filter, perceptual duplicates straddling
+splits under two different hashes, and an MPS backend that returned different
+answers for identical model-free computations. Every affected result was
+regenerated; nothing measured before the fixes is carried forward.
 
-On a ground-truth video benchmark the picture is mixed and reported per category
-rather than aggregated: clear wins on text and texture, neutral on animation,
-small losses on natural and motion.
+Delivered: cluster-level split with CI-enforced disjointness; independent CC0
+test corpus with three overlap checks; reproducible degradation pipeline with
+measured CRF tiers; five-seed variance for two conditions; cross-degradation
+matrix with exact permutation statistics; ground-truth video benchmark with
+alignment proof and scope-sensitivity analysis; deterministic visual crops;
+GitHub Actions CI.
 
-**That benchmark's footage is procedurally generated, not captured.** It is
-deterministic, licence-clean and deliberately challenging, but it is not
-photography, and its texture category may be adversarial in ways real camera
-content is not. Validation against genuinely captured footage is outstanding and
-is the first item of the next milestone.
-
-Status is IN REVIEW rather than DONE until independent review closes and the
-final gate passes.
-
-Delivered: source-level split with CI-enforced disjointness; independent test
-corpus with exact, URL and perceptual overlap checks; reproducible degradation
-pipeline with measured CRF tiers; five-seed variance for two training
-conditions; cross-degradation matrix; ground-truth video benchmark with
-alignment proof; deterministic visual crops; GitHub Actions CI.
+Status is IN REVIEW until the confirmation round closes and the final gate
+passes.
 
 ## Milestone 5 — Robustness and content coverage
 

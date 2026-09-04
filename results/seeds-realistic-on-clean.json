@@ -6,21 +6,21 @@
   {
    "model": "seed1.json",
    "seed": 1,
-   "weightsSha256": "d305ab2cc72b4efc911802a83334ff2774ed4356396778c6a7cefcd106b8acb3",
-   "valPsnrDbAtCheckpoint": 26.593,
-   "valSsimAtCheckpoint": 0.80263,
-   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "weightsSha256": "a82c1d1d951e125c5389e6ec1a4ae73bab7eef311810242977208cc0bc1f80ef",
+   "valPsnrDbAtCheckpoint": 25.587,
+   "valSsimAtCheckpoint": 0.80007,
+   "splitDigest": "8fb88e7d7cf593fc44b61d69e0966fe6aa262e0f036be99b36d6c57419298773",
    "degradation": "realistic",
    "scores": {
     "independent": {
-     "neuralPsnr": 33.54634169737498,
-     "neuralSsim": 0.9088227421045303,
-     "catmullPsnr": 33.39218930403391,
-     "catmullSsim": 0.9004229674736659,
-     "bilinearPsnr": 32.47951622804006,
-     "deltaPsnrDb": 0.15415239334106445,
-     "deltaSsim": 0.008399774630864462,
-     "wins": "43/60",
+     "neuralPsnr": 33.45526794592539,
+     "neuralSsim": 0.9077428768078486,
+     "catmullPsnr": 33.39218922456106,
+     "catmullSsim": 0.9004238754510879,
+     "bilinearPsnr": 32.47951638698578,
+     "deltaPsnrDb": 0.06307872136433919,
+     "deltaSsim": 0.00731900135676066,
+     "wins": "37/60",
      "images": 60
     }
    }
@@ -28,21 +28,21 @@
   {
    "model": "seed2.json",
    "seed": 2,
-   "weightsSha256": "e8dc5c73806972ee79df3d293fb256174fdffa6313d9455d968ca8c30f415752",
-   "valPsnrDbAtCheckpoint": 26.537,
-   "valSsimAtCheckpoint": 0.80145,
-   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "weightsSha256": "34550b05dfabec43a872acb8c854d9e86875b2b9b3b01f5a8632738296a1f93a",
+   "valPsnrDbAtCheckpoint": 25.55,
+   "valSsimAtCheckpoint": 0.79865,
+   "splitDigest": "8fb88e7d7cf593fc44b61d69e0966fe6aa262e0f036be99b36d6c57419298773",
    "degradation": "realistic",
    "scores": {
     "independent": {
-     "neuralPsnr": 33.47088166077932,
-     "neuralSsim": 0.9082279493411382,
-     "catmullPsnr": 33.39218930403391,
-     "catmullSsim": 0.9004229674736659,
-     "bilinearPsnr": 32.47951622804006,
-     "deltaPsnrDb": 0.07869235674540202,
-     "deltaSsim": 0.007804981867472331,
-     "wins": "41/60",
+     "neuralPsnr": 33.43266717592875,
+     "neuralSsim": 0.9078863064448038,
+     "catmullPsnr": 33.39218922456106,
+     "catmullSsim": 0.9004238754510879,
+     "bilinearPsnr": 32.47951638698578,
+     "deltaPsnrDb": 0.04047795136769613,
+     "deltaSsim": 0.007462430993715922,
+     "wins": "37/60",
      "images": 60
     }
    }
@@ -50,21 +50,21 @@
   {
    "model": "seed3.json",
    "seed": 3,
-   "weightsSha256": "d86bfd57d4036360a2e58ba24d244098eb12e24aa38be1f3f48f55ad2386bd30",
-   "valPsnrDbAtCheckpoint": 26.543,
-   "valSsimAtCheckpoint": 0.8016,
-   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "weightsSha256": "60b86a5a48a1134118d40498a78b73988e684bb6a17cb5f8cff2c98c3ff80c5b",
+   "valPsnrDbAtCheckpoint": 25.562,
+   "valSsimAtCheckpoint": 0.7988,
+   "splitDigest": "8fb88e7d7cf593fc44b61d69e0966fe6aa262e0f036be99b36d6c57419298773",
    "degradation": "realistic",
    "scores": {
     "independent": {
-     "neuralPsnr": 33.492685317993164,
-     "neuralSsim": 0.9085784653822581,
-     "catmullPsnr": 33.39218930403391,
-     "catmullSsim": 0.9004229674736659,
-     "bilinearPsnr": 32.47951622804006,
-     "deltaPsnrDb": 0.10049601395924886,
-     "deltaSsim": 0.008155497908592223,
-     "wins": "43/60",
+     "neuralPsnr": 33.43813554445902,
+     "neuralSsim": 0.9077812482913336,
+     "catmullPsnr": 33.39218922456106,
+     "catmullSsim": 0.9004238754510879,
+     "bilinearPsnr": 32.47951638698578,
+     "deltaPsnrDb": 0.045946319897969566,
+     "deltaSsim": 0.007357372840245565,
+     "wins": "36/60",
      "images": 60
     }
    }
@@ -72,20 +72,20 @@
   {
    "model": "seed4.json",
    "seed": 4,
-   "weightsSha256": "2b3e52627e7aefa942d65120c76e52a660b4b2d060e1d3855c5e7e0f1c5a8b6d",
-   "valPsnrDbAtCheckpoint": 26.572,
-   "valSsimAtCheckpoint": 0.80218,
-   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "weightsSha256": "721ed52ab586662e51c2a281a766b09c77c43cad84c98f8cce4d51a722920379",
+   "valPsnrDbAtCheckpoint": 25.576,
+   "valSsimAtCheckpoint": 0.79936,
+   "splitDigest": "8fb88e7d7cf593fc44b61d69e0966fe6aa262e0f036be99b36d6c57419298773",
    "degradation": "realistic",
    "scores": {
     "independent": {
-     "neuralPsnr": 33.487330198287964,
-     "neuralSsim": 0.9085684478282928,
-     "catmullPsnr": 33.39218930403391,
-     "catmullSsim": 0.9004229674736659,
-     "bilinearPsnr": 32.47951622804006,
-     "deltaPsnrDb": 0.09514089425404866,
-     "deltaSsim": 0.008145480354626974,
+     "neuralPsnr": 33.47296599547068,
+     "neuralSsim": 0.9092299362023671,
+     "catmullPsnr": 33.39218922456106,
+     "catmullSsim": 0.9004238754510879,
+     "bilinearPsnr": 32.47951638698578,
+     "deltaPsnrDb": 0.08077677090962727,
+     "deltaSsim": 0.008806060751279194,
      "wins": "41/60",
      "images": 60
     }
@@ -94,21 +94,21 @@
   {
    "model": "seed5.json",
    "seed": 5,
-   "weightsSha256": "35671ffbf844855f7ae4267455160af957551dac9c12c3fc730284870eb16650",
-   "valPsnrDbAtCheckpoint": 26.582,
-   "valSsimAtCheckpoint": 0.80238,
-   "splitDigest": "d60fed15661256d2d4a08317bf3f02fca745ab88083581e3af41eb9c20e08ba4",
+   "weightsSha256": "5d5b3fdb1e903b590385f94d802edcef98eaa1749e232a3378c2c4a77eb8fe66",
+   "valPsnrDbAtCheckpoint": 25.598,
+   "valSsimAtCheckpoint": 0.79991,
+   "splitDigest": "8fb88e7d7cf593fc44b61d69e0966fe6aa262e0f036be99b36d6c57419298773",
    "degradation": "realistic",
    "scores": {
     "independent": {
-     "neuralPsnr": 33.36856265862783,
-     "neuralSsim": 0.9058815320332845,
-     "catmullPsnr": 33.39218930403391,
-     "catmullSsim": 0.9004229674736659,
-     "bilinearPsnr": 32.47951622804006,
-     "deltaPsnrDb": -0.02362664540608724,
-     "deltaSsim": 0.005458564559618632,
-     "wins": "26/60",
+     "neuralPsnr": 33.43788150946299,
+     "neuralSsim": 0.9088334401448568,
+     "catmullPsnr": 33.39218922456106,
+     "catmullSsim": 0.9004238754510879,
+     "bilinearPsnr": 32.47951638698578,
+     "deltaPsnrDb": 0.04569228490193685,
+     "deltaSsim": 0.00840956469376882,
+     "wins": "37/60",
      "images": 60
     }
    }
@@ -117,38 +117,38 @@
  "aggregate": {
   "independent": {
    "neuralPsnr": {
-    "mean": 33.473160306612655,
-    "std": 0.06496804607689417,
-    "min": 33.36856265862783,
-    "max": 33.54634169737498,
+    "mean": 33.44738363424936,
+    "std": 0.016650910350421533,
+    "min": 33.43266717592875,
+    "max": 33.47296599547068,
     "n": 5
    },
    "neuralSsim": {
-    "mean": 0.9080158273379008,
-    "std": 0.0012117419906408217,
-    "min": 0.9058815320332845,
-    "max": 0.9088227421045303,
+    "mean": 0.908294761578242,
+    "std": 0.0006891724144569047,
+    "min": 0.9077428768078486,
+    "max": 0.9092299362023671,
     "n": 5
    },
    "catmullPsnr": {
-    "mean": 33.39218930403391,
+    "mean": 33.39218922456106,
     "std": 0.0,
-    "min": 33.39218930403391,
-    "max": 33.39218930403391,
+    "min": 33.39218922456106,
+    "max": 33.39218922456106,
     "n": 5
    },
    "deltaPsnrDb": {
-    "mean": 0.08097100257873535,
-    "std": 0.06496804607689581,
-    "min": -0.02362664540608724,
-    "max": 0.15415239334106445,
+    "mean": 0.05519440968831381,
+    "std": 0.01665091035042153,
+    "min": 0.04047795136769613,
+    "max": 0.08077677090962727,
     "n": 5
    },
    "deltaSsim": {
-    "mean": 0.0075928598642349245,
-    "std": 0.0012117419906408254,
-    "min": 0.005458564559618632,
-    "max": 0.008399774630864462,
+    "mean": 0.007870886127154033,
+    "std": 0.0006891724144569027,
+    "min": 0.00731900135676066,
+    "max": 0.008806060751279194,
     "n": 5
    }
   }

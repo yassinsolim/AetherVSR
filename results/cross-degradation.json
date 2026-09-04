@@ -31,89 +31,89 @@
  "matrix": {
   "box": {
    "box": {
-    "deltaPsnrDbMean": 0.41621921857198074,
-    "deltaPsnrDbStd": 0.08537709659468931,
-    "neuralPsnrMean": 33.815763298670454,
-    "catmullPsnrMean": 33.39954408009847,
+    "deltaPsnrDbMean": 0.3827146053314209,
+    "deltaPsnrDbStd": 0.041274764997863964,
+    "neuralPsnrMean": 33.78225860595703,
+    "catmullPsnrMean": 33.39954400062561,
     "seeds": 5
    },
    "bicubic": {
-    "deltaPsnrDbMean": 0.6167752424875895,
-    "deltaPsnrDbStd": 0.09113762131633976,
-    "neuralPsnrMean": 33.836959807078046,
-    "catmullPsnrMean": 33.220184564590454,
+    "deltaPsnrDbMean": 0.5661017894744873,
+    "deltaPsnrDbStd": 0.044874603936346215,
+    "neuralPsnrMean": 33.78628651301066,
+    "catmullPsnrMean": 33.22018472353617,
     "seeds": 5
    },
    "lanczos": {
-    "deltaPsnrDbMean": 0.34403247833251954,
-    "deltaPsnrDbStd": 0.09004625256093353,
-    "neuralPsnrMean": 33.80420735677083,
+    "deltaPsnrDbMean": 0.30112662315368655,
+    "deltaPsnrDbStd": 0.044539650775421026,
+    "neuralPsnrMean": 33.761301501592,
     "catmullPsnrMean": 33.460174878438316,
     "seeds": 5
    },
    "h264_high": {
-    "deltaPsnrDbMean": 0.2919476985931396,
-    "deltaPsnrDbStd": 0.06137112019203561,
-    "neuralPsnrMean": 32.171531693140665,
-    "catmullPsnrMean": 31.879583994547527,
+    "deltaPsnrDbMean": 0.252514918645223,
+    "deltaPsnrDbStd": 0.025806066272630834,
+    "neuralPsnrMean": 32.132568677266434,
+    "catmullPsnrMean": 31.880053758621216,
     "seeds": 5
    },
    "h264_typical": {
-    "deltaPsnrDbMean": 0.18025008837381998,
-    "deltaPsnrDbStd": 0.052095341617983355,
-    "neuralPsnrMean": 31.471570094426472,
-    "catmullPsnrMean": 31.291320006052654,
+    "deltaPsnrDbMean": 0.148639710744222,
+    "deltaPsnrDbStd": 0.021586713747248982,
+    "neuralPsnrMean": 31.43971215883891,
+    "catmullPsnrMean": 31.291072448094685,
     "seeds": 5
    },
    "h264_poor": {
-    "deltaPsnrDbMean": 0.04171212514241536,
-    "deltaPsnrDbStd": 0.035861974630838275,
-    "neuralPsnrMean": 29.956037918726604,
-    "catmullPsnrMean": 29.914325793584187,
+    "deltaPsnrDbMean": 0.021625789006551106,
+    "deltaPsnrDbStd": 0.014596522603782646,
+    "neuralPsnrMean": 29.935050121943156,
+    "catmullPsnrMean": 29.913424332936604,
     "seeds": 5
    }
   },
   "realistic": {
    "box": {
-    "deltaPsnrDbMean": 0.09098922411600749,
-    "deltaPsnrDbStd": 0.07514503443033518,
-    "neuralPsnrMean": 33.49053330421448,
-    "catmullPsnrMean": 33.39954408009847,
+    "deltaPsnrDbMean": 0.0538078784942627,
+    "deltaPsnrDbStd": 0.02165733004563413,
+    "neuralPsnrMean": 33.45335187911987,
+    "catmullPsnrMean": 33.39954400062561,
     "seeds": 5
    },
    "bicubic": {
-    "deltaPsnrDbMean": 0.5450114409128826,
-    "deltaPsnrDbStd": 0.07019171358855561,
-    "neuralPsnrMean": 33.765196005503334,
-    "catmullPsnrMean": 33.220184564590454,
+    "deltaPsnrDbMean": 0.4715290864308675,
+    "deltaPsnrDbStd": 0.036740943660295504,
+    "neuralPsnrMean": 33.69171380996704,
+    "catmullPsnrMean": 33.22018472353617,
     "seeds": 5
    },
    "lanczos": {
-    "deltaPsnrDbMean": 0.27192368507385256,
-    "deltaPsnrDbStd": 0.07816960350871399,
-    "neuralPsnrMean": 33.73209856351217,
+    "deltaPsnrDbMean": 0.20145854949951172,
+    "deltaPsnrDbStd": 0.02566455915583259,
+    "neuralPsnrMean": 33.66163342793783,
     "catmullPsnrMean": 33.460174878438316,
     "seeds": 5
    },
    "h264_high": {
-    "deltaPsnrDbMean": 0.5715927759806314,
-    "deltaPsnrDbStd": 0.05522943017357676,
-    "neuralPsnrMean": 32.45117677052816,
-    "catmullPsnrMean": 31.879583994547527,
+    "deltaPsnrDbMean": 0.5138521194458008,
+    "deltaPsnrDbStd": 0.048440594101216455,
+    "neuralPsnrMean": 32.39390587806702,
+    "catmullPsnrMean": 31.880053758621216,
     "seeds": 5
    },
    "h264_typical": {
-    "deltaPsnrDbMean": 0.3965887705485026,
-    "deltaPsnrDbStd": 0.03812925023084094,
-    "neuralPsnrMean": 31.687908776601155,
-    "catmullPsnrMean": 31.291320006052654,
+    "deltaPsnrDbMean": 0.34272507031758626,
+    "deltaPsnrDbStd": 0.04215199711238472,
+    "neuralPsnrMean": 31.633797518412273,
+    "catmullPsnrMean": 31.291072448094685,
     "seeds": 5
    },
    "h264_poor": {
-    "deltaPsnrDbMean": 0.14737898508707684,
-    "deltaPsnrDbStd": 0.023624709733554922,
-    "neuralPsnrMean": 30.061704778671263,
-    "catmullPsnrMean": 29.914325793584187,
+    "deltaPsnrDbMean": 0.11068905194600423,
+    "deltaPsnrDbStd": 0.03365919642717738,
+    "neuralPsnrMean": 30.02411338488261,
+    "catmullPsnrMean": 29.913424332936604,
     "seeds": 5
    }
   }
