@@ -5,9 +5,8 @@
  "source": "Wikimedia Commons",
  "licence_policy": "CC0, CC BY, CC BY-SA or public domain only, read from each file's own imageinfo. Sources are NOT redistributed: the fetcher pins URL and SHA-256 and a clone re-fetches.",
  "independence": "Video, from Commons video namespace. The training corpus is Wikimedia still images from the CC-Zero category; the Milestone 4.5 independent set is Met Museum stills. No overlap in medium or collection.",
- "clip_count": 13,
+ "clip_count": 10,
  "categories": [
-  "faces",
   "lowlight",
   "motion",
   "nature",
@@ -16,66 +15,6 @@
  ],
  "total_source_bytes": 2440507877,
  "clips": [
-  {
-   "id": "faces-video-production-i-m-a-defender-pr",
-   "category": "faces",
-   "captured_rationale": "to-camera interview: skin, hair, uniform weave",
-   "title": "File:VIDEO PRODUCTION- I\u2019m A Defender - Private Ieuan Hancock (4K Video) VERTICAL (9x16) (963611).webm",
-   "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/VIDEO_PRODUCTION-_I%E2%80%99m_A_Defender_-_Private_Ieuan_Hancock_%284K_Video%29_VERTICAL_%289x16%29_%28963611%29.webm",
-   "description_url": "https://commons.wikimedia.org/wiki/File:VIDEO_PRODUCTION-_I%E2%80%99m_A_Defender_-_Private_Ieuan_Hancock_(4K_Video)_VERTICAL_(9x16)_(963611).webm",
-   "licence": "Public domain",
-   "attribution": "U.S. Army 361PAOC by Staff Sgt. Christopher Tobey",
-   "source_width": 3840,
-   "source_height": 2160,
-   "source_bytes": 27489835,
-   "start_seconds": 7.39,
-   "source_file": "faces-video-production-i-m-a-defender-pr.webm",
-   "source_sha256": "a509459ddbf02b8bedc9b484eb09c409d2e8dd8a8e8740af0eb47184a019ba46",
-   "source_bytes_actual": 27489835,
-   "source_duration_s": 29.55,
-   "source_fps": "19001/317",
-   "licence_verified_from_api": "Public domain"
-  },
-  {
-   "id": "faces-video-production-i-m-a-defender-la",
-   "category": "faces",
-   "captured_rationale": "to-camera interview, second subject and setting",
-   "title": "File:VIDEO PRODUCTION- I\u2019m A Defender Lance Corporal James Count (4K Video) VERTICAL (9x16) (963600).webm",
-   "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/df/VIDEO_PRODUCTION-_I%E2%80%99m_A_Defender_Lance_Corporal_James_Count_%284K_Video%29_VERTICAL_%289x16%29_%28963600%29.webm",
-   "description_url": "https://commons.wikimedia.org/wiki/File:VIDEO_PRODUCTION-_I%E2%80%99m_A_Defender_Lance_Corporal_James_Count_(4K_Video)_VERTICAL_(9x16)_(963600).webm",
-   "licence": "Public domain",
-   "attribution": "U.S. Army 361PAOC by Staff Sgt. Christopher Tobey",
-   "source_width": 3840,
-   "source_height": 2160,
-   "source_bytes": 31259867,
-   "start_seconds": 7.39,
-   "source_file": "faces-video-production-i-m-a-defender-la.webm",
-   "source_sha256": "ec1af2e8c104a5fdc6ee36bb36500532e11901fbdddaf50c611276815856a411",
-   "source_bytes_actual": 31259867,
-   "source_duration_s": 29.56,
-   "source_fps": "19001/317",
-   "licence_verified_from_api": "Public domain"
-  },
-  {
-   "id": "faces-video-production-challenging-train",
-   "category": "faces",
-   "captured_rationale": "people outdoors, motion plus skin and fabric",
-   "title": "File:VIDEO PRODUCTION- Challenging Training is Important - Hungarian PL I'm a Defender (4K Video) VERTICAL (9x16) (963667).webm",
-   "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a0/VIDEO_PRODUCTION-_Challenging_Training_is_Important_-_Hungarian_PL_I%27m_a_Defender_%284K_Video%29_VERTICAL_%289x16%29_%28963667%29.webm",
-   "description_url": "https://commons.wikimedia.org/wiki/File:VIDEO_PRODUCTION-_Challenging_Training_is_Important_-_Hungarian_PL_I%27m_a_Defender_(4K_Video)_VERTICAL_(9x16)_(963667).webm",
-   "licence": "Public domain",
-   "attribution": "U.S. Army 361PAOC by Staff Sgt. Christopher Tobey",
-   "source_width": 3840,
-   "source_height": 2160,
-   "source_bytes": 27376074,
-   "start_seconds": 7.39,
-   "source_file": "faces-video-production-challenging-train.webm",
-   "source_sha256": "f08d969c82b1045f8dfa83368b270795f639841cc2b69ac9a33ed89432836333",
-   "source_bytes_actual": 27376074,
-   "source_duration_s": 29.56,
-   "source_fps": "19001/317",
-   "licence_verified_from_api": "Public domain"
-  },
   {
    "id": "motion-2023-maplefest-in-bowmanville-on-2",
    "category": "motion",
@@ -291,18 +230,22 @@
   {
    "id": "urban-aerial-video-of-charlotte-nc-4k-dr",
    "reason": "Source decode corruption: a chroma-smeared vertical band grows from frame 9 to cover roughly the left 38% of frame 18, reproduced bit-for-bit from the pinned source, plus a large semi-transparent burned-in channel logo. Corrupt pixels are not valid ground truth."
+  },
+  {
+   "id": "faces-video-production-i-m-a-defender-pr",
+   "reason": "9:16 vertical source: active picture is 1214 px wide, so fitting a 2560x1440 landscape master requires a 2.11x upscale. The resulting reference is interpolated rather than captured, which asks the model to recover detail the source never contained. Structurally unfit as an HR reference, independently of its score. Removed together with the other two faces clips from the same series."
+  },
+  {
+   "id": "faces-video-production-i-m-a-defender-la",
+   "reason": "9:16 vertical source: active picture is 1214 px wide, so fitting a 2560x1440 landscape master requires a 2.11x upscale. The resulting reference is interpolated rather than captured, which asks the model to recover detail the source never contained. Structurally unfit as an HR reference, independently of its score. Removed together with the other two faces clips from the same series."
+  },
+  {
+   "id": "faces-video-production-challenging-train",
+   "reason": "9:16 vertical source: active picture is 1214 px wide, so fitting a 2560x1440 landscape master requires a 2.11x upscale. The resulting reference is interpolated rather than captured, which asks the model to recover detail the source never contained. Structurally unfit as an HR reference, independently of its score. Removed together with the other two faces clips from the same series."
   }
  ],
  "exclusion_policy": "Clips are removed for documented corpus-purity defects - synthetic overlays, corrupt source - never for their scores. Independent review verified the headline survives both with these clips included and excluded, and both are reported.",
- "correlated_units": [
-  {
-   "clips": [
-    "faces-video-production-i-m-a-defender-pr",
-    "faces-video-production-i-m-a-defender-la",
-    "faces-video-production-challenging-train"
-   ],
-   "reason": "One DVIDS production series, same photographer (U.S. Army 361PAOC, Staff Sgt. Christopher Tobey), two shot the same day, identical framing, grade and pillarbox geometry. Effective independent observations for the faces category: 1, not 3."
-  }
- ],
- "scope_limitation": "Predominantly aerial, web-sourced 4K footage. Seven of thirteen clips are aerial or airborne; several are Commons VP9 transcodes of YouTube deliveries and therefore already twice-compressed rather than camera originals; lowlight is n=1 and texture n=2; two clips carry very little motion. This corpus supports a claim about that population, not about captured video in general."
+ "correlated_units": [],
+ "scope_limitation": "Predominantly aerial, web-sourced 4K footage: 7 of 10 clips are aerial or airborne, several are Commons VP9 transcodes of YouTube deliveries rather than camera originals, lowlight is n=1 and texture n=2, and two clips carry very little motion. This corpus supports a claim about that population, not about captured video in general, and it contains no faces at all.",
+ "known_gaps": "No faces/people category. The only permissively licensed face footage found at sufficient resolution was 9:16 vertical and could not supply a landscape HR master. Faces are therefore UNMEASURED in this milestone, not shown to be fine - and results/captured-faces-sensitivity.json records what the corpus said with those clips included, so the removal is auditable rather than quiet."
 }

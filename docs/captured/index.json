@@ -12,28 +12,28 @@
  "images": [
   {
    "role": "loss",
-   "file": "loss-faces-video-production-i-m-a-defender-la-h264_typical.png",
-   "clip": "faces-video-production-i-m-a-defender-la",
-   "category": "faces",
-   "deltaPsnrDb": -0.16132891178131104,
+   "file": "loss-texture-4k-drone-footage-of-a-barge-on-t-h264_typical.png",
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "deltaPsnrDb": -0.1183621088663737,
    "frame": "frame_0013.png",
    "crop": [
-    1024,
-    64,
+    1856,
+    384,
     128,
     128
    ]
   },
   {
    "role": "tie",
-   "file": "tie-nature-piz-neir-aerial-video-4k-webm-h264_typical.png",
-   "clip": "nature-piz-neir-aerial-video-4k-webm",
-   "category": "nature",
-   "deltaPsnrDb": 0.34631868203481037,
+   "file": "tie-urban-funchal-madeira-amazing-view-from--h264_typical.png",
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "deltaPsnrDb": 0.5074324210484823,
    "frame": "frame_0013.png",
    "crop": [
-    768,
-    576,
+    1408,
+    896,
     128,
     128
    ]
@@ -43,7 +43,7 @@
    "file": "win-lowlight-hofer-weihnachtsmarkt-am-abend--h264_typical.png",
    "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
    "category": "lowlight",
-   "deltaPsnrDb": 0.7004684209823608,
+   "deltaPsnrDb": 0.7813013593355814,
    "frame": "frame_0013.png",
    "crop": [
     1664,

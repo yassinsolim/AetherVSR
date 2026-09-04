@@ -8,45 +8,6 @@
   "shuffleControl": "misaligning the sequence must collapse the score"
  },
  "clips": {
-  "faces-video-production-i-m-a-defender-pr": {
-   "geometryOk": true,
-   "frames": 24,
-   "alignedPsnr": 44.04339128331398,
-   "offByOnePsnr": 30.742815536572664,
-   "alignmentMarginDb": 13.300575746741316,
-   "lumaSlope": 0.9999876483533297,
-   "lumaIntercept": -0.0018280788883933594,
-   "straightPsnr": 44.057446276456794,
-   "reversedPsnr": 13.416256538037741,
-   "shuffleCollapseDb": 30.64118973841905,
-   "problems": []
-  },
-  "faces-video-production-i-m-a-defender-la": {
-   "geometryOk": true,
-   "frames": 24,
-   "alignedPsnr": 44.797149261781804,
-   "offByOnePsnr": 32.19951810837188,
-   "alignmentMarginDb": 12.597631153409917,
-   "lumaSlope": 1.0006385806579068,
-   "lumaIntercept": -0.00218761860416698,
-   "straightPsnr": 44.75990762316604,
-   "reversedPsnr": 13.657220971779623,
-   "shuffleCollapseDb": 31.10268665138642,
-   "problems": []
-  },
-  "faces-video-production-challenging-train": {
-   "geometryOk": true,
-   "frames": 24,
-   "alignedPsnr": 46.25588494715408,
-   "offByOnePsnr": 41.611204625574494,
-   "alignmentMarginDb": 4.6446803215795835,
-   "lumaSlope": 0.9993226907860134,
-   "lumaIntercept": -0.0012965930650461032,
-   "straightPsnr": 46.22374637941207,
-   "reversedPsnr": 8.753241002399065,
-   "shuffleCollapseDb": 37.470505377013005,
-   "problems": []
-  },
   "motion-2023-maplefest-in-bowmanville-on-2": {
    "geometryOk": true,
    "frames": 24,

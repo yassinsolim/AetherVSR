@@ -1,0 +1,50 @@
+{
+ "schema": "aethervsr.captured-faces-sensitivity/1",
+ "why": "The three faces clips are 9:16 vertical footage whose active area is 1214 px wide. Fitting that to a 2560x1440 landscape master requires a 2.11x upscale, so their 'ground truth' is interpolated rather than captured and the benchmark asks the model to recover detail the source never contained. They are structurally unfit as HR references, independently of how they scored.",
+ "withFacesClips": {
+  "h264_high": {
+   "clips": 13,
+   "mean": 0.2685566666798714,
+   "median": 0.650632381439209,
+   "wins": 9,
+   "permutationP": 0.31494140625
+  },
+  "h264_typical": {
+   "clips": 13,
+   "mean": 0.12860855230918297,
+   "median": 0.2992794911066691,
+   "wins": 9,
+   "permutationP": 0.37109375
+  },
+  "h264_poor": {
+   "clips": 13,
+   "mean": -0.020883946846692987,
+   "median": 0.025853017965952556,
+   "wins": 7,
+   "permutationP": 0.697998046875
+  }
+ },
+ "withoutFacesClips": {
+  "h264_high": {
+   "clips": 10,
+   "mean": 0.7213907738526661,
+   "median": 0.7472525040308635,
+   "wins": 9,
+   "permutationP": 0.00390625
+  },
+  "h264_typical": {
+   "clips": 10,
+   "mean": 0.362689753373464,
+   "median": 0.42864272991816205,
+   "wins": 9,
+   "permutationP": 0.005859375
+  },
+  "h264_poor": {
+   "clips": 10,
+   "mean": 0.054534574349721275,
+   "median": 0.051361670096715294,
+   "wins": 7,
+   "permutationP": 0.21875
+  }
+ }
+}
