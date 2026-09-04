@@ -34,12 +34,27 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
+
+from PIL import Image
 from dataclasses import dataclass
 
 # Bumping this reshuffles every assignment, so it is recorded in the split
 # manifest and must never be tuned to move a metric.
-DEFAULT_SALT = "aethervsr/split/v1"
+DEFAULT_SALT = "aethervsr/split/v2-clustered"
+
+# Two photographs of the same scene are not independent samples even though
+# their bytes differ and their content hashes disagree. Splitting per image left
+# 36 near-duplicate pairs straddling splits on the 495-image corpus - several at
+# dHash distance 2-5, with adjacent filenames and *identical Commons titles*:
+# the same manuscript folio scanned twice, the same demonstration photographed
+# seconds apart. Inspected visually and confirmed as genuine duplicates.
+#
+# Images are therefore clustered first, by perceptual similarity and by shared
+# source title, and whole clusters are assigned - so a scene lands entirely on
+# one side of the split.
+DEFAULT_PHASH_THRESHOLD = 10
 
 SPLITS = ("train", "val", "test")
 
@@ -71,6 +86,96 @@ class SplitRatios:
 # sourced corpus in `data/eval-independent/` is the one that tests whether
 # results survive a change of source, and neither substitutes for the other.
 DEFAULT_RATIOS = SplitRatios(train=0.70, val=0.15, test=0.15)
+
+
+def dhash(image, size: int = 8) -> int:
+    """64-bit difference hash; survives rescaling and re-encoding."""
+    small = image.convert("L").resize((size + 1, size), Image.Resampling.LANCZOS)
+    px = list(small.getdata())
+    bits = 0
+    for row in range(size):
+        base = row * (size + 1)
+        for col in range(size):
+            bits = (bits << 1) | (1 if px[base + col] > px[base + col + 1] else 0)
+    return bits
+
+
+def hamming(a: int, b: int) -> int:
+    return bin(a ^ b).count("1")
+
+
+def _title_key(entry: dict) -> str:
+    """Normalised title, used as a second duplicate signal.
+
+    Two scans of one folio can exceed the perceptual threshold while carrying
+    the same Commons title, so title catches what dHash misses and vice versa.
+    Trailing plate/page/detail markers are stripped so "... (1)" and
+    "... detail" group with their parent.
+    """
+    title = (entry.get("title") or "").strip().lower()
+    title = re.sub(r"^file:", "", title)
+    title = re.sub(r"\.(jpe?g|png|tiff?)$", "", title)
+    title = re.sub(r"[\s_-]*(\(\d+\)|\bdetail\b|\bplate\b\s*\d*|\bfolio\b\s*\S*|\bp?g?\.?\s*\d+)\s*$", "", title)
+    return re.sub(r"[^a-z0-9]+", " ", title).strip()
+
+
+def cluster_sources(
+    entries: list[dict], corpus: str, threshold: int
+) -> tuple[dict[str, str], dict[str, int], int]:
+    """Union-find over perceptual similarity and shared title.
+
+    Returns identity -> cluster key, the perceptual hashes, and the cluster
+    count. The cluster key is the smallest content hash in the group, so it does
+    not depend on iteration order. Transitivity is deliberate: if A~B and B~C
+    then all three group, even when A and C are further apart than the
+    threshold. That errs toward over-grouping, which costs a little training
+    data and buys a split that cannot leak a scene.
+    """
+    hashes: dict[str, int] = {}
+    titles: dict[str, str] = {}
+    for entry in entries:
+        identity = source_identity(entry)
+        path = os.path.join(corpus, entry["file"])
+        titles[identity] = _title_key(entry)
+        if not os.path.exists(path):
+            continue
+        try:
+            with Image.open(path) as im:
+                hashes[identity] = dhash(im)
+        except Exception:  # noqa: BLE001
+            continue
+
+    ids = [source_identity(e) for e in entries]
+    parent = {i: i for i in ids}
+
+    def find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[max(ra, rb)] = min(ra, rb)
+
+    by_title: dict[str, list[str]] = {}
+    for i in ids:
+        key = titles.get(i, "")
+        if key:
+            by_title.setdefault(key, []).append(i)
+    for group in by_title.values():
+        for other in group[1:]:
+            union(group[0], other)
+
+    hashed = [i for i in ids if i in hashes]
+    for a in range(len(hashed)):
+        for b in range(a + 1, len(hashed)):
+            if hamming(hashes[hashed[a]], hashes[hashed[b]]) <= threshold:
+                union(hashed[a], hashed[b])
+
+    mapping = {i: find(i) for i in ids}
+    return mapping, hashes, len(set(mapping.values()))
 
 
 def unit_interval(identity: str, salt: str) -> float:
@@ -105,8 +210,15 @@ def source_identity(entry: dict) -> str:
     return sha
 
 
-def build_split(manifest: dict, salt: str = DEFAULT_SALT, ratios: SplitRatios = DEFAULT_RATIOS) -> dict:
+def build_split(
+    manifest: dict,
+    salt: str = DEFAULT_SALT,
+    ratios: SplitRatios = DEFAULT_RATIOS,
+    corpus: str = "data/corpus",
+    threshold: int = DEFAULT_PHASH_THRESHOLD,
+) -> dict:
     ratios.validate()
+    cluster_of, _hashes, n_clusters = cluster_sources(manifest["images"], corpus, threshold)
     buckets: dict[str, list[dict]] = {name: [] for name in SPLITS}
     seen: dict[str, str] = {}
 
@@ -120,7 +232,9 @@ def build_split(manifest: dict, salt: str = DEFAULT_SALT, ratios: SplitRatios = 
             print(f"  duplicate content: {entry['file']} == {seen[identity]}", file=sys.stderr)
             continue
         seen[identity] = entry["file"]
-        buckets[assign(identity, salt, ratios)].append(
+        # Assign the *cluster*, not the image, so near-duplicates cannot land
+        # on opposite sides of the split.
+        buckets[assign(cluster_of[identity], salt, ratios)].append(
             {
                 "file": entry["file"],
                 "sha256": identity,
@@ -135,7 +249,9 @@ def build_split(manifest: dict, salt: str = DEFAULT_SALT, ratios: SplitRatios = 
     return {
         "schema": "aethervsr.split/1",
         "salt": salt,
-        "unit": "source image, identified by SHA-256 of file content",
+        "unit": "perceptual cluster of source images (dHash <= threshold, or shared normalised title)",
+        "clusters": n_clusters,
+        "phashThreshold": threshold,
         "ratios": {"train": ratios.train, "val": ratios.val, "test": ratios.test},
         "counts": {name: len(buckets[name]) for name in SPLITS},
         "total": sum(len(buckets[name]) for name in SPLITS),
@@ -185,17 +301,21 @@ def check_disjoint(split: dict) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Build a source-level dataset split.")
     ap.add_argument("--manifest", default="data/corpus/manifest.json")
-    ap.add_argument("--out", default="data/splits/corpus-v1.json")
+    ap.add_argument("--out", default="data/splits/corpus-v2.json")
     ap.add_argument("--salt", default=DEFAULT_SALT)
     ap.add_argument("--train", type=float, default=DEFAULT_RATIOS.train)
     ap.add_argument("--val", type=float, default=DEFAULT_RATIOS.val)
     ap.add_argument("--test", type=float, default=DEFAULT_RATIOS.test)
+    ap.add_argument("--corpus", default="data/corpus")
+    ap.add_argument("--threshold", type=int, default=DEFAULT_PHASH_THRESHOLD)
     args = ap.parse_args()
 
     with open(args.manifest, encoding="utf-8") as fh:
         manifest = json.load(fh)
 
-    split = build_split(manifest, args.salt, SplitRatios(args.train, args.val, args.test))
+    split = build_split(
+        manifest, args.salt, SplitRatios(args.train, args.val, args.test), args.corpus, args.threshold
+    )
     problems = check_disjoint(split)
     if problems:
         for p in problems:
@@ -209,7 +329,8 @@ def main() -> int:
     c = split["counts"]
     print(f"wrote {args.out}")
     print(f"  train {c['train']}  val {c['val']}  test {c['test']}  (total {split['total']})")
-    print("  disjoint at content-hash and filename level: yes")
+    print(f"  {split['clusters']} perceptual clusters from {split['total']} images")
+    print("  disjoint at content-hash, filename and perceptual-cluster level: yes")
     return 0
 
 

@@ -59,7 +59,7 @@ for a target count is selecting a split.
 Rebuild with:
 
 ```bash
-python3 tools/dataset.py --manifest data/corpus/manifest.json --out data/splits/corpus-v1.json
+python3 tools/dataset.py --manifest data/corpus/manifest.json --out data/splits/corpus-v2.json
 ```
 
 `test/dataset-split.test.ts` enforces pairwise disjointness at content hash and

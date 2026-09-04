@@ -221,7 +221,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Score a frozen model on a named evaluation set.")
     ap.add_argument("--model", required=True)
     ap.add_argument("--set", required=True, choices=sorted(CATEGORY), help="which evidentiary category")
-    ap.add_argument("--split", default="data/splits/corpus-v1.json")
+    ap.add_argument("--split", default="data/splits/corpus-v2.json")
     ap.add_argument("--corpus", default="data/corpus")
     ap.add_argument("--independent", default="data/eval-independent")
     ap.add_argument("--profile", default="box", help="degradation profile applied to make LR")

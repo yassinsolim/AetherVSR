@@ -23,14 +23,17 @@ interface SplitEntry {
 
 interface SplitManifest {
   readonly schema: string;
+  readonly unit: string;
   readonly salt: string;
   readonly counts: Record<string, number>;
+  readonly clusters: number;
+  readonly phashThreshold: number;
   readonly total: number;
   readonly splits: Record<'train' | 'val' | 'test', SplitEntry[]>;
 }
 
 const split = JSON.parse(
-  readFileSync(new URL('../data/splits/corpus-v1.json', import.meta.url), 'utf8'),
+  readFileSync(new URL('../data/splits/corpus-v2.json', import.meta.url), 'utf8'),
 ) as SplitManifest;
 
 const NAMES = ['train', 'val', 'test'] as const;
@@ -53,6 +56,21 @@ describe('source-level dataset split', () => {
   it('is the expected schema and splits by source identity, not by patch', () => {
     expect(split.schema).toBe('aethervsr.split/1');
     expect(split.salt.length).toBeGreaterThan(0);
+  });
+
+  /**
+   * Hash disjointness is not enough. Splitting per image left 36 near-duplicate
+   * pairs straddling splits - the same manuscript folio scanned twice, the same
+   * demonstration photographed seconds apart, several at dHash distance 2-5
+   * with identical Commons titles. Assignment is by perceptual cluster now, and
+   * a corpus whose clusters equal its image count means clustering silently
+   * stopped working.
+   */
+  it('assigns perceptual clusters rather than individual images', () => {
+    expect(split.unit).toContain('cluster');
+    expect(split.clusters).toBeGreaterThan(0);
+    expect(split.clusters).toBeLessThan(split.total);
+    expect(split.phashThreshold).toBeGreaterThan(0);
   });
 
   it.each(PAIRS)('%s and %s share no source content hash', (a, b) => {
