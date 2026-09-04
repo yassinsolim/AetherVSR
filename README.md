@@ -20,6 +20,22 @@ kernel is deliberately naive — no shared-memory tiling — so that ≈15x gap 
 statement about one workload and one implementation, not about the hardware.
 Closing it is Milestone 3. Details and scoping in `BENCHMARKS.md`.
 
+
+## Evaluation methodology
+
+Quality claims are separated into three categories that are never averaged
+together: **regression** artefacts (the synthetic reference and the eight-image
+natural set, both overlapping the training corpus), **source-disjoint**
+validation and test splits, and a **held-out independent** corpus from a
+different institution. Only the last supports a generalisation claim.
+
+The dataset is split by source image, not by patch, and CI enforces that no
+photograph appears in two splits. Training never reads the test split. See
+`DECISIONS.md` ADR-0028 and ADR-0029, and the Milestone 4.5 section of
+`BENCHMARKS.md`, which also documents two defects in the Milestone 4 evaluation
+and what was rerun because of them.
+
+
 ## What works today
 
 - Local video decoded into an `HTMLVideoElement`, never displayed directly.

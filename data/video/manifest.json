@@ -1,0 +1,6005 @@
+{
+ "format_version": 1,
+ "seed": 424242,
+ "master": {
+  "width": 2560,
+  "height": 1440,
+  "format": "RGB PNG, full range"
+ },
+ "lr": {
+  "width": 1280,
+  "height": 720,
+  "format": "RGB PNG, full range"
+ },
+ "fps": 24,
+ "frame_count": 12,
+ "downsample_filter": "exact 2x2 block mean (the spatial operation in tools/aethersr.py's box_downsample2 / torch avg_pool2d(kernel_size=2,stride=2)), followed only by deterministic NumPy nearest-even rounding to RGB8 because PNG cannot store fractional channel values.",
+ "colour_contract": {
+  "source_and_decoded_png": "RGB24, full/PC range",
+  "encoded_video": "yuv420p, BT.709, limited/TV range",
+  "encode_filter": "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+  "decode_filter": "scale=in_range=tv:out_range=pc:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=rgb24,setparams=range=pc:colorspace=gbr:color_primaries=bt709:color_trc=bt709",
+  "vmaf_input_filter": "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv444p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+  "expected_stream_metadata": {
+   "pix_fmt": "yuv420p",
+   "color_range": "tv",
+   "color_space": "bt709",
+   "color_transfer": "bt709",
+   "color_primaries": "bt709"
+  }
+ },
+ "ffmpeg": {
+  "path": "/opt/homebrew/bin/ffmpeg",
+  "ffprobe_path": "/opt/homebrew/bin/ffprobe",
+  "version_output": [
+   "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+   "built with Apple clang version 21.0.0 (clang-2100.1.1.101)",
+   "configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/9.0.1_1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gpl --enable-libsvtav1 --enable-libopus --enable-libx264 --enable-libmp3lame --enable-libdav1d --enable-libvmaf --enable-libvpx --enable-libx265 --enable-openssl --enable-videotoolbox --enable-audiotoolbox --enable-neon",
+   "libavutil      61.  1.101 / 61.  1.101",
+   "libavcodec     63.  1.101 / 63.  1.101",
+   "libavformat    63.  1.101 / 63.  1.101",
+   "libavdevice    63.  1.101 / 63.  1.101",
+   "libavfilter    12.  1.101 / 12.  1.101",
+   "libswscale     10.  1.101 / 10.  1.101",
+   "libswresample   7.  1.101 /  7.  1.101",
+   "",
+   "Exiting with exit code 0"
+  ]
+ },
+ "tiers": [
+  {
+   "name": "h264-high",
+   "codec": "libx264",
+   "stream_codec": "h264",
+   "container": "mp4",
+   "args": [
+    "-c:v",
+    "libx264",
+    "-crf",
+    "18",
+    "-preset",
+    "medium",
+    "-pix_fmt",
+    "yuv420p"
+   ]
+  },
+  {
+   "name": "h264-medium",
+   "codec": "libx264",
+   "stream_codec": "h264",
+   "container": "mp4",
+   "args": [
+    "-c:v",
+    "libx264",
+    "-crf",
+    "23",
+    "-preset",
+    "medium",
+    "-pix_fmt",
+    "yuv420p"
+   ]
+  },
+  {
+   "name": "h264-low",
+   "codec": "libx264",
+   "stream_codec": "h264",
+   "container": "mp4",
+   "args": [
+    "-c:v",
+    "libx264",
+    "-crf",
+    "28",
+    "-preset",
+    "medium",
+    "-pix_fmt",
+    "yuv420p"
+   ]
+  },
+  {
+   "name": "vp9-medium",
+   "codec": "libvpx-vp9",
+   "stream_codec": "vp9",
+   "container": "mp4",
+   "args": [
+    "-c:v",
+    "libvpx-vp9",
+    "-crf",
+    "32",
+    "-b:v",
+    "0",
+    "-cpu-used",
+    "4",
+    "-row-mt",
+    "1",
+    "-pix_fmt",
+    "yuv420p"
+   ]
+  },
+  {
+   "name": "av1-medium",
+   "codec": "libsvtav1",
+   "stream_codec": "av1",
+   "container": "mp4",
+   "args": [
+    "-c:v",
+    "libsvtav1",
+    "-crf",
+    "32",
+    "-preset",
+    "8",
+    "-pix_fmt",
+    "yuv420p"
+   ]
+  }
+ ],
+ "colour_calibration": {
+  "h264-high": {
+   "description": "One 1280x720 RGB/full calibration frame: eight 320x360 flat tiles (black, white, mid-gray, near-black, near-white, red, green, blue); each result is the mean of a central 120x120 patch after this tier's real encode/decode. It catches a limited/full range mismatch independently of corpus content.",
+   "source_sha256": "40f77c360eb2e1a9c0254ed033b16cb0b5bebdeeb93349b1d48e1071884d67b8",
+   "encode_flags": [
+    "-vf",
+    "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+    "-c:v",
+    "libx264",
+    "-crf",
+    "18",
+    "-preset",
+    "medium",
+    "-pix_fmt",
+    "yuv420p",
+    "-color_range",
+    "tv",
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709"
+   ],
+   "stream_contract": {
+    "ok": true,
+    "expected": {
+     "codec_name": "h264",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "observed": {
+     "codec_name": "h264",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "mismatches": {}
+   },
+   "expected_rgb": {
+    "black": [
+     0,
+     0,
+     0
+    ],
+    "white": [
+     255,
+     255,
+     255
+    ],
+    "mid_gray": [
+     128,
+     128,
+     128
+    ],
+    "near_black": [
+     16,
+     16,
+     16
+    ],
+    "near_white": [
+     235,
+     235,
+     235
+    ],
+    "red": [
+     255,
+     0,
+     0
+    ],
+    "green": [
+     0,
+     255,
+     0
+    ],
+    "blue": [
+     0,
+     0,
+     255
+    ]
+   },
+   "decoded_patch_mean_rgb": {
+    "black": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "white": [
+     255.0,
+     255.0,
+     255.0
+    ],
+    "mid_gray": [
+     128.0,
+     128.0,
+     128.0
+    ],
+    "near_black": [
+     16.0,
+     16.0,
+     16.0
+    ],
+    "near_white": [
+     235.0,
+     235.0,
+     235.0
+    ],
+    "red": [
+     255.0,
+     0.0,
+     0.0
+    ],
+    "green": [
+     0.0,
+     255.0,
+     1.0
+    ],
+    "blue": [
+     1.0,
+     0.0,
+     255.0
+    ]
+   },
+   "max_abs_error_by_patch": {
+    "black": 0.0,
+    "white": 0.0,
+    "mid_gray": 0.0,
+    "near_black": 0.0,
+    "near_white": 0.0,
+    "red": 0.0,
+    "green": 1.0,
+    "blue": 1.0
+   },
+   "black_patch_max": 0.0,
+   "white_patch_min": 255.0,
+   "range_round_trip_ok": true,
+   "colour_error_ok": true,
+   "passed": true
+  },
+  "h264-medium": {
+   "description": "One 1280x720 RGB/full calibration frame: eight 320x360 flat tiles (black, white, mid-gray, near-black, near-white, red, green, blue); each result is the mean of a central 120x120 patch after this tier's real encode/decode. It catches a limited/full range mismatch independently of corpus content.",
+   "source_sha256": "40f77c360eb2e1a9c0254ed033b16cb0b5bebdeeb93349b1d48e1071884d67b8",
+   "encode_flags": [
+    "-vf",
+    "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+    "-c:v",
+    "libx264",
+    "-crf",
+    "23",
+    "-preset",
+    "medium",
+    "-pix_fmt",
+    "yuv420p",
+    "-color_range",
+    "tv",
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709"
+   ],
+   "stream_contract": {
+    "ok": true,
+    "expected": {
+     "codec_name": "h264",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "observed": {
+     "codec_name": "h264",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "mismatches": {}
+   },
+   "expected_rgb": {
+    "black": [
+     0,
+     0,
+     0
+    ],
+    "white": [
+     255,
+     255,
+     255
+    ],
+    "mid_gray": [
+     128,
+     128,
+     128
+    ],
+    "near_black": [
+     16,
+     16,
+     16
+    ],
+    "near_white": [
+     235,
+     235,
+     235
+    ],
+    "red": [
+     255,
+     0,
+     0
+    ],
+    "green": [
+     0,
+     255,
+     0
+    ],
+    "blue": [
+     0,
+     0,
+     255
+    ]
+   },
+   "decoded_patch_mean_rgb": {
+    "black": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "white": [
+     255.0,
+     255.0,
+     255.0
+    ],
+    "mid_gray": [
+     128.0,
+     128.0,
+     128.0
+    ],
+    "near_black": [
+     16.0,
+     16.0,
+     16.0
+    ],
+    "near_white": [
+     235.0,
+     235.0,
+     235.0
+    ],
+    "red": [
+     255.0,
+     0.0,
+     0.0
+    ],
+    "green": [
+     0.0,
+     255.0,
+     1.0
+    ],
+    "blue": [
+     1.0,
+     0.0,
+     255.0
+    ]
+   },
+   "max_abs_error_by_patch": {
+    "black": 0.0,
+    "white": 0.0,
+    "mid_gray": 0.0,
+    "near_black": 0.0,
+    "near_white": 0.0,
+    "red": 0.0,
+    "green": 1.0,
+    "blue": 1.0
+   },
+   "black_patch_max": 0.0,
+   "white_patch_min": 255.0,
+   "range_round_trip_ok": true,
+   "colour_error_ok": true,
+   "passed": true
+  },
+  "h264-low": {
+   "description": "One 1280x720 RGB/full calibration frame: eight 320x360 flat tiles (black, white, mid-gray, near-black, near-white, red, green, blue); each result is the mean of a central 120x120 patch after this tier's real encode/decode. It catches a limited/full range mismatch independently of corpus content.",
+   "source_sha256": "40f77c360eb2e1a9c0254ed033b16cb0b5bebdeeb93349b1d48e1071884d67b8",
+   "encode_flags": [
+    "-vf",
+    "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+    "-c:v",
+    "libx264",
+    "-crf",
+    "28",
+    "-preset",
+    "medium",
+    "-pix_fmt",
+    "yuv420p",
+    "-color_range",
+    "tv",
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709"
+   ],
+   "stream_contract": {
+    "ok": true,
+    "expected": {
+     "codec_name": "h264",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "observed": {
+     "codec_name": "h264",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "mismatches": {}
+   },
+   "expected_rgb": {
+    "black": [
+     0,
+     0,
+     0
+    ],
+    "white": [
+     255,
+     255,
+     255
+    ],
+    "mid_gray": [
+     128,
+     128,
+     128
+    ],
+    "near_black": [
+     16,
+     16,
+     16
+    ],
+    "near_white": [
+     235,
+     235,
+     235
+    ],
+    "red": [
+     255,
+     0,
+     0
+    ],
+    "green": [
+     0,
+     255,
+     0
+    ],
+    "blue": [
+     0,
+     0,
+     255
+    ]
+   },
+   "decoded_patch_mean_rgb": {
+    "black": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "white": [
+     255.0,
+     255.0,
+     255.0
+    ],
+    "mid_gray": [
+     128.0,
+     128.0,
+     128.0
+    ],
+    "near_black": [
+     16.0,
+     16.0,
+     16.0
+    ],
+    "near_white": [
+     235.0,
+     235.0,
+     235.0
+    ],
+    "red": [
+     255.0,
+     0.0,
+     0.0
+    ],
+    "green": [
+     0.0,
+     255.0,
+     1.0
+    ],
+    "blue": [
+     1.0,
+     0.0,
+     255.0
+    ]
+   },
+   "max_abs_error_by_patch": {
+    "black": 0.0,
+    "white": 0.0,
+    "mid_gray": 0.0,
+    "near_black": 0.0,
+    "near_white": 0.0,
+    "red": 0.0,
+    "green": 1.0,
+    "blue": 1.0
+   },
+   "black_patch_max": 0.0,
+   "white_patch_min": 255.0,
+   "range_round_trip_ok": true,
+   "colour_error_ok": true,
+   "passed": true
+  },
+  "vp9-medium": {
+   "description": "One 1280x720 RGB/full calibration frame: eight 320x360 flat tiles (black, white, mid-gray, near-black, near-white, red, green, blue); each result is the mean of a central 120x120 patch after this tier's real encode/decode. It catches a limited/full range mismatch independently of corpus content.",
+   "source_sha256": "40f77c360eb2e1a9c0254ed033b16cb0b5bebdeeb93349b1d48e1071884d67b8",
+   "encode_flags": [
+    "-vf",
+    "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+    "-c:v",
+    "libvpx-vp9",
+    "-crf",
+    "32",
+    "-b:v",
+    "0",
+    "-cpu-used",
+    "4",
+    "-row-mt",
+    "1",
+    "-pix_fmt",
+    "yuv420p",
+    "-color_range",
+    "tv",
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709"
+   ],
+   "stream_contract": {
+    "ok": true,
+    "expected": {
+     "codec_name": "vp9",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "observed": {
+     "codec_name": "vp9",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "mismatches": {}
+   },
+   "expected_rgb": {
+    "black": [
+     0,
+     0,
+     0
+    ],
+    "white": [
+     255,
+     255,
+     255
+    ],
+    "mid_gray": [
+     128,
+     128,
+     128
+    ],
+    "near_black": [
+     16,
+     16,
+     16
+    ],
+    "near_white": [
+     235,
+     235,
+     235
+    ],
+    "red": [
+     255,
+     0,
+     0
+    ],
+    "green": [
+     0,
+     255,
+     0
+    ],
+    "blue": [
+     0,
+     0,
+     255
+    ]
+   },
+   "decoded_patch_mean_rgb": {
+    "black": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "white": [
+     255.0,
+     255.0,
+     255.0
+    ],
+    "mid_gray": [
+     128.0,
+     128.0,
+     128.0
+    ],
+    "near_black": [
+     16.0,
+     16.0,
+     16.0
+    ],
+    "near_white": [
+     235.0,
+     235.0,
+     235.0
+    ],
+    "red": [
+     255.0,
+     0.0,
+     0.0
+    ],
+    "green": [
+     0.0,
+     255.0,
+     1.0
+    ],
+    "blue": [
+     1.0,
+     0.0,
+     255.0
+    ]
+   },
+   "max_abs_error_by_patch": {
+    "black": 0.0,
+    "white": 0.0,
+    "mid_gray": 0.0,
+    "near_black": 0.0,
+    "near_white": 0.0,
+    "red": 0.0,
+    "green": 1.0,
+    "blue": 1.0
+   },
+   "black_patch_max": 0.0,
+   "white_patch_min": 255.0,
+   "range_round_trip_ok": true,
+   "colour_error_ok": true,
+   "passed": true
+  },
+  "av1-medium": {
+   "description": "One 1280x720 RGB/full calibration frame: eight 320x360 flat tiles (black, white, mid-gray, near-black, near-white, red, green, blue); each result is the mean of a central 120x120 patch after this tier's real encode/decode. It catches a limited/full range mismatch independently of corpus content.",
+   "source_sha256": "40f77c360eb2e1a9c0254ed033b16cb0b5bebdeeb93349b1d48e1071884d67b8",
+   "encode_flags": [
+    "-vf",
+    "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+    "-c:v",
+    "libsvtav1",
+    "-crf",
+    "32",
+    "-preset",
+    "8",
+    "-pix_fmt",
+    "yuv420p",
+    "-color_range",
+    "tv",
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709"
+   ],
+   "stream_contract": {
+    "ok": true,
+    "expected": {
+     "codec_name": "av1",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "observed": {
+     "codec_name": "av1",
+     "width": 1280,
+     "height": 720,
+     "pix_fmt": "yuv420p",
+     "color_range": "tv",
+     "color_space": "bt709",
+     "color_transfer": "bt709",
+     "color_primaries": "bt709"
+    },
+    "mismatches": {}
+   },
+   "expected_rgb": {
+    "black": [
+     0,
+     0,
+     0
+    ],
+    "white": [
+     255,
+     255,
+     255
+    ],
+    "mid_gray": [
+     128,
+     128,
+     128
+    ],
+    "near_black": [
+     16,
+     16,
+     16
+    ],
+    "near_white": [
+     235,
+     235,
+     235
+    ],
+    "red": [
+     255,
+     0,
+     0
+    ],
+    "green": [
+     0,
+     255,
+     0
+    ],
+    "blue": [
+     0,
+     0,
+     255
+    ]
+   },
+   "decoded_patch_mean_rgb": {
+    "black": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "white": [
+     255.0,
+     255.0,
+     255.0
+    ],
+    "mid_gray": [
+     128.0,
+     128.0,
+     128.0
+    ],
+    "near_black": [
+     16.0,
+     16.0,
+     16.0
+    ],
+    "near_white": [
+     235.0,
+     235.0,
+     235.0
+    ],
+    "red": [
+     255.0,
+     0.0,
+     0.0
+    ],
+    "green": [
+     0.0,
+     255.0,
+     1.0
+    ],
+    "blue": [
+     1.0,
+     0.0,
+     255.0
+    ]
+   },
+   "max_abs_error_by_patch": {
+    "black": 0.0,
+    "white": 0.0,
+    "mid_gray": 0.0,
+    "near_black": 0.0,
+    "near_white": 0.0,
+    "red": 0.0,
+    "green": 1.0,
+    "blue": 1.0
+   },
+   "black_patch_max": 0.0,
+   "white_patch_min": 255.0,
+   "range_round_trip_ok": true,
+   "colour_error_ok": true,
+   "passed": true
+  }
+ },
+ "categories": {
+  "natural": {
+   "description": "Synthetic camera-like content: multi-octave fractal noise, a soft lighting vignette, independent per-pixel sensor grain, sampled through a gentle sub-pixel camera pan/zoom.",
+   "synthetic": true,
+   "master_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      2560,
+      1440
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "lr_source_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      1280,
+      720
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "frames": [
+    {
+     "index": 0,
+     "master_file": "natural/master/frame_0000.png",
+     "master_sha256": "7888441dc9691685c6ae92dbea52798f3b60f045ede2d856a264bd8f6bb33700",
+     "lr_source_file": "natural/lr_source/frame_0000.png",
+     "lr_source_sha256": "1d335d2ce0985cd18314c551ece2786b9b51ef8b27b4f2b5d2f512627c654864"
+    },
+    {
+     "index": 1,
+     "master_file": "natural/master/frame_0001.png",
+     "master_sha256": "67f7c5f88c71efea9e165220172662845b959ba1ec404bcb4d46841a48210f49",
+     "lr_source_file": "natural/lr_source/frame_0001.png",
+     "lr_source_sha256": "c5384639f9ec4cbf7951b17e95f76ba772465a271a49e7321146aa487cda3af7"
+    },
+    {
+     "index": 2,
+     "master_file": "natural/master/frame_0002.png",
+     "master_sha256": "54d83e5b59aff1036144a40c0e728a7677d8ddedc58390210cb127c7fc6db34d",
+     "lr_source_file": "natural/lr_source/frame_0002.png",
+     "lr_source_sha256": "b30e9f2e9ebd2dd0e1c9de062b6bf1501c14ea834b08b5e479d644332f72272c"
+    },
+    {
+     "index": 3,
+     "master_file": "natural/master/frame_0003.png",
+     "master_sha256": "1314cfe6deec99809e6c98043fffb348c9f85bfe86a7a5e69a606d482313d18a",
+     "lr_source_file": "natural/lr_source/frame_0003.png",
+     "lr_source_sha256": "8dcdfa76df27e3cadc5b0e84c714b94894e6bec0c0ce6c9dcffb1f20c3788df6"
+    },
+    {
+     "index": 4,
+     "master_file": "natural/master/frame_0004.png",
+     "master_sha256": "d514dbd3a582fdc68cf408c5fdcd98b94a4d6e29eebab39fe2a8421dc1349c63",
+     "lr_source_file": "natural/lr_source/frame_0004.png",
+     "lr_source_sha256": "cfd8b6a402ade386180210f0d582711e3c370e90a4f7f61c99f11f4e04f7f6e0"
+    },
+    {
+     "index": 5,
+     "master_file": "natural/master/frame_0005.png",
+     "master_sha256": "01aa1ec3a3432d8ec78859464bba3ddf938014f36925917b3e5a9933175304db",
+     "lr_source_file": "natural/lr_source/frame_0005.png",
+     "lr_source_sha256": "3d705f0455f6f672056d929920284233cf75f7c088640a962da44f795c2bcbec"
+    },
+    {
+     "index": 6,
+     "master_file": "natural/master/frame_0006.png",
+     "master_sha256": "e0f7d5286a1fa25d09d912afeae8b27ef24fd6c6f4c97ae7978c4b0ee27566eb",
+     "lr_source_file": "natural/lr_source/frame_0006.png",
+     "lr_source_sha256": "6f64bb741161df7082c7a1b2fb2a140fe2703e6a67954445c79eb7721a0c1d4e"
+    },
+    {
+     "index": 7,
+     "master_file": "natural/master/frame_0007.png",
+     "master_sha256": "aa759464f41bba3da3d454d7598adb321dfa622364b8f762a07c5aa390e83b6d",
+     "lr_source_file": "natural/lr_source/frame_0007.png",
+     "lr_source_sha256": "ef9f51fdf598d70417d43bbc2bc9b454189bfbc7ba8658de4cb13c01543c386f"
+    },
+    {
+     "index": 8,
+     "master_file": "natural/master/frame_0008.png",
+     "master_sha256": "428f0d0ccedd9dc4b5f90557557d426c019ee2233780c5f000bd6036b21900f2",
+     "lr_source_file": "natural/lr_source/frame_0008.png",
+     "lr_source_sha256": "76aa76ee6a364642006364536f7302f2c7a155be4d75dfabe9dadec2e1f83cb4"
+    },
+    {
+     "index": 9,
+     "master_file": "natural/master/frame_0009.png",
+     "master_sha256": "ef739eb278d79edd4c4faf4b753454caf8c07ecfc0f42333131c4b7e39b41289",
+     "lr_source_file": "natural/lr_source/frame_0009.png",
+     "lr_source_sha256": "f1cdbab3c0e84541e85986052297bde98acb9d02a692e03aa6260b51c86c8860"
+    },
+    {
+     "index": 10,
+     "master_file": "natural/master/frame_0010.png",
+     "master_sha256": "028ce6c3a8fdd15b8ba1f1098ffc1e533eef974586bc2b902c08969be71c611d",
+     "lr_source_file": "natural/lr_source/frame_0010.png",
+     "lr_source_sha256": "71810b69f314d6c40e429534858ea07b162408119b427b4267d1a5948d307899"
+    },
+    {
+     "index": 11,
+     "master_file": "natural/master/frame_0011.png",
+     "master_sha256": "044a5166e7ed42f4a84ee6d21ecba158f56a1fd5d584439cfe86abfe47ed28f2",
+     "lr_source_file": "natural/lr_source/frame_0011.png",
+     "lr_source_sha256": "378992fbdfbbbe28ca8e0b7f4a25910178945bc19754de2c2d43593747d60862"
+    }
+   ],
+   "encodes": {
+    "h264-high": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/natural/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "18",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/natural/encoded/h264-high.mp4"
+     ],
+     "video_file": "natural/encoded/h264-high.mp4",
+     "video_sha256": "716625c805414967e0b8ec52edc6b828a5bed31daefb994363e8ec2015a3c13e",
+     "video_size_bytes": 92730,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "natural/decoded/h264-high/frame_0000.png",
+       "sha256": "d75a47860395484cc18f2db6af6ec8468a165b5948f2c5553751757a93994458"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0001.png",
+       "sha256": "a7f4bc06ffee27bff7933335c3c84c1bd2d31547c2f8d22e5a62788848c51037"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0002.png",
+       "sha256": "21d2d69dd2d40edb1312154a645520326a20e7328d24c1461c1d7d6d4b22fe60"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0003.png",
+       "sha256": "0610dd76c9499a5c7bef51262916f95ad3d25e5e4f3674eb6dc0cb3f5f8ac3fc"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0004.png",
+       "sha256": "020b079dc2606d67e0e96ee738f20dffb6a833d01779bf331063195e272c33a3"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0005.png",
+       "sha256": "9afd907a77ba55c087c597a2ccfb143358a5998a90f9c486d28db05efa0be73f"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0006.png",
+       "sha256": "3e924445769aa8895c84d5ad66d786e9cc3343475a80b715efba79c3259e86b6"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0007.png",
+       "sha256": "73681de0dd29e6e84770a0ffefe1665b02336cdb3bca78f65361c1f40ba61897"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0008.png",
+       "sha256": "08b17b498a42eb87ec72448d6cc5c6eefafe508f73b1d8511ebfb3f9578c1a43"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0009.png",
+       "sha256": "ca06941eda3871dd166d1cb2798577ee733eda2a2879a9a7e820315ffff7a165"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0010.png",
+       "sha256": "fc97318fca72aef8c22ea8a318a90201a338337420524e731f04f07b5b3bdfa4"
+      },
+      {
+       "file": "natural/decoded/h264-high/frame_0011.png",
+       "sha256": "fd3f44cb78e833e86096bf2efa2792e76b12d79d8218635b017332fc4f5892da"
+      }
+     ]
+    },
+    "h264-medium": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/natural/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "23",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/natural/encoded/h264-medium.mp4"
+     ],
+     "video_file": "natural/encoded/h264-medium.mp4",
+     "video_sha256": "8a29121e163a3361f5696dee38794309819c654affd768016d92f233e4f36a3e",
+     "video_size_bytes": 36265,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "natural/decoded/h264-medium/frame_0000.png",
+       "sha256": "0e3be77fa56b73d2ef06c55646fb6d08c50fcd01918d704eb194f678e49e6b0b"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0001.png",
+       "sha256": "da1d56ceeb312f8e13b08fedba9c68de075484ab30d80533940c161c9f17dbdd"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0002.png",
+       "sha256": "5a5b8119f857462dbd74d349fe6fb9e82318ad12392dfacce5f93b05ec733c44"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0003.png",
+       "sha256": "8db1fb9559f64d65e888a2f89aac85cf598b9a207fafeeb648ef12436cea0270"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0004.png",
+       "sha256": "3b873a145192847aebe49a00d5c5427c46042c8eb431829f6357a2539eca77d2"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0005.png",
+       "sha256": "c48151159fb944d3d5c16fa04c3647b7662c99fd87c9fc72f6f1f14690754e6c"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0006.png",
+       "sha256": "544c2005e7e2dc1114d268a0b50ffc0134d2906044300d6faf6279e21f8c2096"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0007.png",
+       "sha256": "e2ecef32769c63dcb20f80b26f1675aee838693fc47dfdf5ca5d0df385e34d45"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0008.png",
+       "sha256": "410e944ae85a6c7a9cb2eac0c782d97d4e3049e18392d6837badd47519464f54"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0009.png",
+       "sha256": "8e8980aa163ac1214b7687c9a28ecde50416af525c8bc815dccd8f167d9bafe1"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0010.png",
+       "sha256": "a1e631a27208a30bf7305ac4db62a4523b111fa8343fc3dccb1d40382501cf68"
+      },
+      {
+       "file": "natural/decoded/h264-medium/frame_0011.png",
+       "sha256": "67de8b93806e388ce45fd630ad7b2303c719cadf1a739d469262dc4523c253dd"
+      }
+     ]
+    },
+    "h264-low": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/natural/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "28",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/natural/encoded/h264-low.mp4"
+     ],
+     "video_file": "natural/encoded/h264-low.mp4",
+     "video_sha256": "0796e0a0bc59a1b71a1b87e4347a02a6c6209c53295633fe1ca200dc03a52a11",
+     "video_size_bytes": 22405,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "natural/decoded/h264-low/frame_0000.png",
+       "sha256": "0d53800acd10f2efef2cea1079c682bff0fcd7b8737a3aa9a2539c6858b8c86f"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0001.png",
+       "sha256": "9f05479f8cad7598155eeb8a33e0f63dc7002a34b866b4a277524037b73170bd"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0002.png",
+       "sha256": "f0502efba0bba3049b87642ef699e02bce39195d6752f32209cdd8ea7d3aae7c"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0003.png",
+       "sha256": "922a4dc463258f1803fdbe5397e6134e33139bf87a84d69357d45e2c896ff7d2"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0004.png",
+       "sha256": "6e441daabec291fece948bc756cd97085ebabb488c86d686a29d4f78c542dfe5"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0005.png",
+       "sha256": "18c8f6a0a5fd2088e0b865091dcbc8e9905c91be7856acb68b9162e11e5f7d57"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0006.png",
+       "sha256": "28ae0370bae7aefb0fc22d2f85d8040200e9798106e1bfe798ae5b8f3dc8e6f6"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0007.png",
+       "sha256": "829bd4a5201223132c79e0ca7379de9b2fc30b731ddd4852ddb03c14ead88ac7"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0008.png",
+       "sha256": "4f834ca4de05dc8d688918fa494cbbac8bd4d446fad8e14a8dc0862c01d4fd44"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0009.png",
+       "sha256": "d67da8b2bb19515016bd8d3f6a7da643aba7c54f24e4d30e05bf64020d805eb4"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0010.png",
+       "sha256": "4d1e8d3214bdcd76412e8432518bfbb66fd05e071e0c1facea7985307e36b8b8"
+      },
+      {
+       "file": "natural/decoded/h264-low/frame_0011.png",
+       "sha256": "9fdd2271d16acce66427b794186b168d13a7519790dbbdeb1008d370bb643ffc"
+      }
+     ]
+    },
+    "vp9-medium": {
+     "codec": "libvpx-vp9",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/natural/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libvpx-vp9",
+      "-crf",
+      "32",
+      "-b:v",
+      "0",
+      "-cpu-used",
+      "4",
+      "-row-mt",
+      "1",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/natural/encoded/vp9-medium.mp4"
+     ],
+     "video_file": "natural/encoded/vp9-medium.mp4",
+     "video_sha256": "4745d0b0a63b3278e955a3f389be5a3cc0622098584ee4f5d1402ee3bba3023c",
+     "video_size_bytes": 24862,
+     "stream": {
+      "codec_name": "vp9",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "natural/decoded/vp9-medium/frame_0000.png",
+       "sha256": "dabff2426033568a534eb5a7cad91d4f980aa1e4467fa87c95d0e16c4ddd0f05"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0001.png",
+       "sha256": "ad7ab1bb8096d398e63984510cfed9ad46841ee64c15e65a49128da7e9527861"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0002.png",
+       "sha256": "66adfb1c5933152003a4d7d07ea935b6b1cee527d8d1dd4ca98540776f6fb266"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0003.png",
+       "sha256": "a224017c5b01168e5064bd844581df173405d763c589449cbdf072fd8f9bdec4"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0004.png",
+       "sha256": "f61142ed7137a222671c19f1c2727cc1cb7609d0e72072e43b4fda289deafd83"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0005.png",
+       "sha256": "a733778e4efc67a580519aa03247e5c743cffe3c76c219f2d5e02abce008154c"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0006.png",
+       "sha256": "1c0e9adfebb227d5136007e9c0f4b789f13af98eed1075317a00153b74f10bbd"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0007.png",
+       "sha256": "95619e398d2200d6abc7339d2d417547fa358b349aa8e758bde72a17415d9731"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0008.png",
+       "sha256": "f447fa39ac3a9aa845f220f152964e08e40ea0de384c5eead0782af0612af6e4"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0009.png",
+       "sha256": "a3ea052116367b374c75ae7d984126b42fb6f313a70f8c5c8748fa75e696ba93"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0010.png",
+       "sha256": "ec49e4069f6da3e880435cb25156ecd58a295dbeec5d8af790c5a6df48bff275"
+      },
+      {
+       "file": "natural/decoded/vp9-medium/frame_0011.png",
+       "sha256": "b4d53b9b76d55c050933f3a5640178c0be1a94d274b1408522da1f1951354455"
+      }
+     ]
+    },
+    "av1-medium": {
+     "codec": "libsvtav1",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/natural/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libsvtav1",
+      "-crf",
+      "32",
+      "-preset",
+      "8",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/natural/encoded/av1-medium.mp4"
+     ],
+     "video_file": "natural/encoded/av1-medium.mp4",
+     "video_sha256": "98d5ff409d5f90b3b4d5d3f0dba16091b295d3a1ccac0a46253bdef08bef78a1",
+     "video_size_bytes": 17956,
+     "stream": {
+      "codec_name": "av1",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "natural/decoded/av1-medium/frame_0000.png",
+       "sha256": "342351edbbd1c1c65e2c75db33551ca9b88388d2e4203c341c6d79b06f2c6d6a"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0001.png",
+       "sha256": "3134e8fa0e88ceb7518a4c07ff451e22a7c8a4733abdf54bd7f26d145116f099"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0002.png",
+       "sha256": "fd47d4890e98f59292cb3d5bcc5c034d8ee7fa20fc0adc17b1330dbddbeca665"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0003.png",
+       "sha256": "0e78cfe9b3303a4194612031103de0ffb7b5d6c9a2d4531b82df30be60b2d4fe"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0004.png",
+       "sha256": "c38203fb31b0300d52ba41bf78660341ea8d77dbce8a28304649f12b314efef3"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0005.png",
+       "sha256": "5074cc3d03181667cf5d04e1c85002cbdddfdeb3e720824dece77f217bb13626"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0006.png",
+       "sha256": "84a3c730d963c1d24628b1d25114d416b848a4643d760b12fc3f60875d6d1da7"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0007.png",
+       "sha256": "168146f7e232ee0f53bbb32eaeafe4c72d90a3b1fedffc4db3d5a58e8063f470"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0008.png",
+       "sha256": "76385d37492194a7fa22e7ad840e5e33c5fa8033f0bc41c0d5577224c90e4c82"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0009.png",
+       "sha256": "3ea5adce16f6a66974f0621781ef4320d1c03ac555e18e70f28da0740be1cfef"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0010.png",
+       "sha256": "04507ecd04b3d728ac5a09726a90ff46892c7bc895dd3c812ad91e01427d694a"
+      },
+      {
+       "file": "natural/decoded/av1-medium/frame_0011.png",
+       "sha256": "f37445f2530ec93ed6baf826da51e3ed2875b2839c18bff6c467ecc4e0857c8f"
+      }
+     ]
+    }
+   }
+  },
+  "texture": {
+   "description": "Synthetic high-frequency content: a zone-plate chirp crossed with a near-Nyquist sinusoidal grating in a central resolution-chart region, sampled through a small sub-pixel pan/zoom.",
+   "synthetic": true,
+   "master_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      2560,
+      1440
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "lr_source_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      1280,
+      720
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "frames": [
+    {
+     "index": 0,
+     "master_file": "texture/master/frame_0000.png",
+     "master_sha256": "0b5507ba3cc98efd32ec0b8d339374573770944c8a68a980d207718747ee21ee",
+     "lr_source_file": "texture/lr_source/frame_0000.png",
+     "lr_source_sha256": "51496a8b4e7735fad80b83a2bdb4ee705da418c5fbbae6b4fc6da4a4e99e8638"
+    },
+    {
+     "index": 1,
+     "master_file": "texture/master/frame_0001.png",
+     "master_sha256": "ca60c84744c24d83635276789fbbd50eced4f8c24d4ebc8e7975b29c612710db",
+     "lr_source_file": "texture/lr_source/frame_0001.png",
+     "lr_source_sha256": "a0998e4dc5c5748d1e8643ed417217a95a39ec5b3c21d37ca5f68ceef85c0f24"
+    },
+    {
+     "index": 2,
+     "master_file": "texture/master/frame_0002.png",
+     "master_sha256": "868bb9b469b9f640cbfe31584b74e0285c477d96455542a89449365dc12bdc06",
+     "lr_source_file": "texture/lr_source/frame_0002.png",
+     "lr_source_sha256": "a62923cabef0e80c150e7d989ba3ccdd7d62dff72a6c28b18e204b68f6191d16"
+    },
+    {
+     "index": 3,
+     "master_file": "texture/master/frame_0003.png",
+     "master_sha256": "b8f2e5064391e83eae7d4c4362d530a2995d58a58d9dc54beee6fb7e7955530f",
+     "lr_source_file": "texture/lr_source/frame_0003.png",
+     "lr_source_sha256": "8bc957528c03a6300d7ff670fcb248205acd94bf2966bcef9adf41713668c63e"
+    },
+    {
+     "index": 4,
+     "master_file": "texture/master/frame_0004.png",
+     "master_sha256": "cce1b7a07b7a46f43c89e7158a9b8e415f50d55f54e616623ab52ea92303c44c",
+     "lr_source_file": "texture/lr_source/frame_0004.png",
+     "lr_source_sha256": "e4528bd059bd73003118e67264d812b6ede344dc00a5319639d7c628964538e6"
+    },
+    {
+     "index": 5,
+     "master_file": "texture/master/frame_0005.png",
+     "master_sha256": "0cdd12d18fc9e1fe559d9bdb9161bb5addff1c09472fa22d8025992c77e84387",
+     "lr_source_file": "texture/lr_source/frame_0005.png",
+     "lr_source_sha256": "3f0b7b50f312499b9b80b4963c1652e594dc9de34a1cf7a352ca3ad9fc515f20"
+    },
+    {
+     "index": 6,
+     "master_file": "texture/master/frame_0006.png",
+     "master_sha256": "1dc7ca158ebdb807831e38a057ba2fa52130c17dc7e2e1e8c9fb55c5d3bb5565",
+     "lr_source_file": "texture/lr_source/frame_0006.png",
+     "lr_source_sha256": "df8c2bae319309630fbbf188ee0477d26d55507225201550f94f25ca88bc5e4b"
+    },
+    {
+     "index": 7,
+     "master_file": "texture/master/frame_0007.png",
+     "master_sha256": "05cfa5998eb3b41d3c7d78771ada94abd26ed9a926c4890f29229d998880bd4c",
+     "lr_source_file": "texture/lr_source/frame_0007.png",
+     "lr_source_sha256": "da5c9eb66d0082dbed3ef3333acbccb4a535d3374859ed124c00e02df50b1f58"
+    },
+    {
+     "index": 8,
+     "master_file": "texture/master/frame_0008.png",
+     "master_sha256": "0aa9b7604d3f0997b9f963ec013598a6e297938184575bc8bd8142481a63ff5f",
+     "lr_source_file": "texture/lr_source/frame_0008.png",
+     "lr_source_sha256": "351c8b236b8deed370e1aac7b9a56fa6dc6ae1fb5823dea1cd135588c5ad6391"
+    },
+    {
+     "index": 9,
+     "master_file": "texture/master/frame_0009.png",
+     "master_sha256": "3ae13803d2059aa6aa71b7d90b927aa24ba9239940f69813bdabaa8748e2c624",
+     "lr_source_file": "texture/lr_source/frame_0009.png",
+     "lr_source_sha256": "e324cfcdab15e2807d68bc397d9ce4910b86e2a379817ac9a976b2e6d48be713"
+    },
+    {
+     "index": 10,
+     "master_file": "texture/master/frame_0010.png",
+     "master_sha256": "868bb9b469b9f640cbfe31584b74e0285c477d96455542a89449365dc12bdc06",
+     "lr_source_file": "texture/lr_source/frame_0010.png",
+     "lr_source_sha256": "a62923cabef0e80c150e7d989ba3ccdd7d62dff72a6c28b18e204b68f6191d16"
+    },
+    {
+     "index": 11,
+     "master_file": "texture/master/frame_0011.png",
+     "master_sha256": "5fea9070b2edb6c2e6f4c3b66aded7601d1089d952b3346b4af69a037ce05085",
+     "lr_source_file": "texture/lr_source/frame_0011.png",
+     "lr_source_sha256": "53c3065bef980e12991ff557597a8b376fdc4fce92340712d9ad9cf5faeab715"
+    }
+   ],
+   "encodes": {
+    "h264-high": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/texture/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "18",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/texture/encoded/h264-high.mp4"
+     ],
+     "video_file": "texture/encoded/h264-high.mp4",
+     "video_sha256": "45a32617ab665af4afe032553500d11d3fff0b76060910d43fa19d0486c51884",
+     "video_size_bytes": 105003,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "texture/decoded/h264-high/frame_0000.png",
+       "sha256": "75012dc6b5be92f24c763a73bf292c138fc40ae10ffcc3ce4e041bc439a07fa6"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0001.png",
+       "sha256": "3e5997cd52392739dee4650bd7988e03dfb96ff009740fb048dbdc6b5ee8d085"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0002.png",
+       "sha256": "d5de5b926372ef33c1bb445e2bd421e9decc746651d02777515a840173b607be"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0003.png",
+       "sha256": "f3581e480835f941f72b10549c649c5e4e02c3987d1163a0e5126fad29880942"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0004.png",
+       "sha256": "c09f1a4721e4905847faafd6af41c79dc747fa0531da560ea04494696eb46ade"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0005.png",
+       "sha256": "93826f4cb7688eef962f45233f32c129fa0b6d3f1a6cc443ea9b94a0c6bb569e"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0006.png",
+       "sha256": "0d8f3623f9bcc085071fb95f222b04708c947f1c24bb9ea31100341dffa69ecd"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0007.png",
+       "sha256": "eac552cddcdc77e1e714117cb8c36e3073c39afc6f5d654ad1a2c5dfdfdcf5c4"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0008.png",
+       "sha256": "98fdd4a4b0ece0588b1325ae695c4835828f5402e11ef03ee752a12de2983449"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0009.png",
+       "sha256": "19347532229b35b825d74c4434bff3ad01b4e3d37399c1332b1952e18d23ed84"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0010.png",
+       "sha256": "09ab9ecf3e627cb6067f60a01c3f964c3e81d7c8a5e9e5a2a261ae3c66ce6ecd"
+      },
+      {
+       "file": "texture/decoded/h264-high/frame_0011.png",
+       "sha256": "cb671379a9928e55daeefcde2d3a6a67297585d9d62867214001baf04efbb6c7"
+      }
+     ]
+    },
+    "h264-medium": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/texture/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "23",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/texture/encoded/h264-medium.mp4"
+     ],
+     "video_file": "texture/encoded/h264-medium.mp4",
+     "video_sha256": "42efc3071ad02f0890c0c4c8220c4c08d0a067cb4a800d3c4ce48b485f4e94ed",
+     "video_size_bytes": 58462,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "texture/decoded/h264-medium/frame_0000.png",
+       "sha256": "9d8b3fe60d8612563255f94d10fc7391e7d6fb3b12a27b391489d5a268cb0b57"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0001.png",
+       "sha256": "9b084e1d07f67f093c531a1fe10eac3329ebe2d446259a08346d5cedbee525c7"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0002.png",
+       "sha256": "3a90fb6bc45a9f8d5ad94035d8628a595ca8e03d047184944f33246f8442dda2"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0003.png",
+       "sha256": "7ce9d08e1c48cfc5320ff51efc31bfb0e788c513f8d18e7293efff87e673b204"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0004.png",
+       "sha256": "a2d228508a6574a6b53f2bb83c04ec6716c9cca7a7db0cdac339dc1af230985c"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0005.png",
+       "sha256": "5064e0552b1ba19bfead44d68d9456faae59b79202d8c0cd692b9f2ae8c373b7"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0006.png",
+       "sha256": "5b657102f10202a7233e3145f265d4091540ce34bd00ce80b0ac4e50e8a65282"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0007.png",
+       "sha256": "ac3ad901595bfb316e624338f40369131e9d5d36826e5868d69033a58ffd6701"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0008.png",
+       "sha256": "b627314e3cc21b96ae9589f93bcb8ae716908a18c8610669d4fb53bf266bca9c"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0009.png",
+       "sha256": "ffe97c4e2bcba3bac2b1cda4c8eeb816c04209d0c635590d73efdcabac306b99"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0010.png",
+       "sha256": "7df5ee2ff3877190a6bef3cf4e3f913f7c530121d6c108b15d19e79675f9583a"
+      },
+      {
+       "file": "texture/decoded/h264-medium/frame_0011.png",
+       "sha256": "c80eb7e0436d33a3f668f5695f0b56dae6b36d5712b880886ea5d89018146b1f"
+      }
+     ]
+    },
+    "h264-low": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/texture/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "28",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/texture/encoded/h264-low.mp4"
+     ],
+     "video_file": "texture/encoded/h264-low.mp4",
+     "video_sha256": "cccf1c4f6ccfbcb6bc13492562290b48f2648b2c775c346b55e91b166b411c31",
+     "video_size_bytes": 35020,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "texture/decoded/h264-low/frame_0000.png",
+       "sha256": "43db6e1bf7bbe0044d7ad9999f995a9616c751c7071ea9f4cbb8b32f659bf29f"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0001.png",
+       "sha256": "82f02ff4d216f2b0143f6bab693d9e944eb3ed689276f56f3841698b9abe61f0"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0002.png",
+       "sha256": "45f12258bf96db9e1ae5554e1f179e785a0f06bc0f2e727a5816e57e9fcb80c4"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0003.png",
+       "sha256": "c91357c855f1be88e23bac12a0c412fe4d2d2ef380e0792a5562ac729d81b305"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0004.png",
+       "sha256": "1ac025cd2c9288a6c1cfa6dcabc416bff91f35505d86513b7386192710ec5a9d"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0005.png",
+       "sha256": "204efd6a56dde8e8e7fcb481223ee33e9fb61ddab08766be910c0d4839cb561a"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0006.png",
+       "sha256": "894f0bc9717909a9d9d563c2e5b9608b152e69479720927fe2e72040da0ca3fe"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0007.png",
+       "sha256": "8762652ae166ea8b12bfe0ba128449191d13377dec215a8001f0af7154bb206d"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0008.png",
+       "sha256": "9b69f66f884d5f8812d14c855c296cf488a93df00781dbb8f52ca9e3a1897bad"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0009.png",
+       "sha256": "e925c0204a184ef9b835a47bcbb2745b21b104550a460b0aaaece67249087be9"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0010.png",
+       "sha256": "af941cb9b51f7540fde44cd78ad91937b67257bca35d4925ac797bf86f055c65"
+      },
+      {
+       "file": "texture/decoded/h264-low/frame_0011.png",
+       "sha256": "d243f0b4d098da1150bbeee96ab0fb163ad1654849cd671416f8ab6bc957ad9d"
+      }
+     ]
+    },
+    "vp9-medium": {
+     "codec": "libvpx-vp9",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/texture/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libvpx-vp9",
+      "-crf",
+      "32",
+      "-b:v",
+      "0",
+      "-cpu-used",
+      "4",
+      "-row-mt",
+      "1",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/texture/encoded/vp9-medium.mp4"
+     ],
+     "video_file": "texture/encoded/vp9-medium.mp4",
+     "video_sha256": "28a700e1c5faf6744701bf0bea57f922da8befb4c8d4b095f1a8b67238c5aebc",
+     "video_size_bytes": 51462,
+     "stream": {
+      "codec_name": "vp9",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "texture/decoded/vp9-medium/frame_0000.png",
+       "sha256": "2a761f441afa0f72824e1ad3531b0ea391534e4e201dc8ecc0a6a813abbbc11b"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0001.png",
+       "sha256": "3ab0dd72f9d8916726d5020f8358bded32c7f14b6d61a39309e38de125d4086d"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0002.png",
+       "sha256": "cb80f2734e5a595c7e3e98bc245189714c6a4d02148f93db2de4cc75dac50997"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0003.png",
+       "sha256": "bc115a43ea93046ede0b03c33cd32ff5bd82df8f8fb7993de1e62d8794169944"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0004.png",
+       "sha256": "57ea2ee59a79a0f9584e48af5f2fc35b37fc2179a9e89e1d0037b235694705aa"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0005.png",
+       "sha256": "b29ac46409068c9875a13ecc72e717295a05985741a0edcea89f06e64819add2"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0006.png",
+       "sha256": "b9f2297b3e197bc00f32088ac4312051e9f9e264357a4c0f23f39522115a1e89"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0007.png",
+       "sha256": "cd8ad8878ead8c97cf13702cd95360f0ad63f6810ca3063c92d9ccab87eee4bb"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0008.png",
+       "sha256": "e4904db75a2917bf073342e58d3cac09b30be9de9642510c90bb285bab85c121"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0009.png",
+       "sha256": "5c832bcbeabe95c041967a604bef032bafce0dad721bfcdcc6660a5c12db2277"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0010.png",
+       "sha256": "149423dcbf3b1752418a0140ff9c1880d90c3d5d36a404c562a4145f89486b11"
+      },
+      {
+       "file": "texture/decoded/vp9-medium/frame_0011.png",
+       "sha256": "12dfb24c429f1064810e3e36abbe81c22af911d44a4e591682b0c456986de346"
+      }
+     ]
+    },
+    "av1-medium": {
+     "codec": "libsvtav1",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/texture/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libsvtav1",
+      "-crf",
+      "32",
+      "-preset",
+      "8",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/texture/encoded/av1-medium.mp4"
+     ],
+     "video_file": "texture/encoded/av1-medium.mp4",
+     "video_sha256": "76f02a5cce2a5d8d774e6535780306aeeaa2de00f0de831d3818a911468baf1c",
+     "video_size_bytes": 43675,
+     "stream": {
+      "codec_name": "av1",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "texture/decoded/av1-medium/frame_0000.png",
+       "sha256": "1a31d519241ffa689b8e30ac3d5f74a985cca6a8177d9d4cf6134e754c30cc7e"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0001.png",
+       "sha256": "1d3ed12339e60911776357891a4d295589ddc0214bf2599b868787186e6f57ab"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0002.png",
+       "sha256": "c34cb37194c7460ae839a214d5dd7a77261ff8c9622b44a463da4908d7afeae2"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0003.png",
+       "sha256": "246f373e25bb87dae8a61f9f0f7ca9cf907cceba316b148af63b8ff7cc1762dd"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0004.png",
+       "sha256": "405812391fce286693a178b7ccc0c8db2e938d2ef65ffd26680ea661d7ea71db"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0005.png",
+       "sha256": "15d1c0426809b87203350cb888fa95c79ac07b48f0b43d9df3b699da65d816a6"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0006.png",
+       "sha256": "5f7265a518dff7cb927c66251eff6bac10fad1d7252d455115627f2d0916206d"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0007.png",
+       "sha256": "942a7cec1833309de319bfdcd492fc89ebde2ef0c32c4b486a0e1a52237f7adf"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0008.png",
+       "sha256": "bb049111ddd1c67a7ac8d3b3561b95c90e9651d0e1340a9e714b920090d4aa39"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0009.png",
+       "sha256": "66bdc102d33002993e025a0a720f1f970b094a1d54214778abbf262c54c8254d"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0010.png",
+       "sha256": "19290bd950602186a2a18ccfc4f7116c3f47536394cf76a8b7412bdf31f7ca05"
+      },
+      {
+       "file": "texture/decoded/av1-medium/frame_0011.png",
+       "sha256": "6647d5f3fd03a9b0681f771b5635b0d9edf6034200902df8840cabb764740fae"
+      }
+     ]
+    }
+   }
+  },
+  "motion": {
+   "description": "Synthetic motion-stress content: cluttered fractal-noise background under a large sub-pixel pan/zoom, plus a discrete high-contrast disc flown across the frame independently of the camera motion.",
+   "synthetic": true,
+   "master_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      2560,
+      1440
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "lr_source_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      1280,
+      720
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "frames": [
+    {
+     "index": 0,
+     "master_file": "motion/master/frame_0000.png",
+     "master_sha256": "18a882dfb392b16bca1ae364f6b6a74877f6322a16c0a4a3164907747b55fe53",
+     "lr_source_file": "motion/lr_source/frame_0000.png",
+     "lr_source_sha256": "5617cf682f38c62d49720d0fba91f07ae46f66a24dd26f751e7b46ceb9db7e11"
+    },
+    {
+     "index": 1,
+     "master_file": "motion/master/frame_0001.png",
+     "master_sha256": "c10912fdc2ad5c0e05cba4985439394c6328722a11739dccba9bc5cc7b86380d",
+     "lr_source_file": "motion/lr_source/frame_0001.png",
+     "lr_source_sha256": "7a14b338c492a677b43d909fca2794cd9f9d8504cc840961aa39c8b2a89b36a4"
+    },
+    {
+     "index": 2,
+     "master_file": "motion/master/frame_0002.png",
+     "master_sha256": "d50b0caeade3641749e08a3ac6d36e74ae5b6392daced4c75fb2a52ef3b75d16",
+     "lr_source_file": "motion/lr_source/frame_0002.png",
+     "lr_source_sha256": "df4ea4d1b83311c714bc1ddd8d805f8ee569b7a124c1fbadb45c085b9938dcfb"
+    },
+    {
+     "index": 3,
+     "master_file": "motion/master/frame_0003.png",
+     "master_sha256": "1974f36cb1824839696395ea430c729d738e2f728caada69d2805d53cd9a011b",
+     "lr_source_file": "motion/lr_source/frame_0003.png",
+     "lr_source_sha256": "e68b02e7aa1cbca8e96e437ab7fb22b9eb524b63d2205a7448d2e3e2eca7ab76"
+    },
+    {
+     "index": 4,
+     "master_file": "motion/master/frame_0004.png",
+     "master_sha256": "7507aa0cf5085cc380b9aadbf2c2dcc8c4fa75de7f6df6e29a6bc07d396f9b9a",
+     "lr_source_file": "motion/lr_source/frame_0004.png",
+     "lr_source_sha256": "eea7d2c211ac700abc2a22bcc6f1fbed27bffecf7ff37b2a681ce97a7f91f9d9"
+    },
+    {
+     "index": 5,
+     "master_file": "motion/master/frame_0005.png",
+     "master_sha256": "63c2758a6188a7a148e1b4ef94d484141db2bd18408c12cb8f317f3936dd2d32",
+     "lr_source_file": "motion/lr_source/frame_0005.png",
+     "lr_source_sha256": "58e2ac120402cf128b8f5a1949bdcda024589ec425165c8fc35d76df6c85f439"
+    },
+    {
+     "index": 6,
+     "master_file": "motion/master/frame_0006.png",
+     "master_sha256": "75239c3fe88e09b215a7c600d282a4436c1ee61c5f642b1ba0d594d571a6d9a9",
+     "lr_source_file": "motion/lr_source/frame_0006.png",
+     "lr_source_sha256": "0de3ce6e518265bda620ff00bc129546fc2f3ca79d4e7504e2e41ab022549d3c"
+    },
+    {
+     "index": 7,
+     "master_file": "motion/master/frame_0007.png",
+     "master_sha256": "5564634d73119e5b267a3f488eac3989f93c7d197f6377f2546f18e66bc0f54c",
+     "lr_source_file": "motion/lr_source/frame_0007.png",
+     "lr_source_sha256": "8150d9961687b1972eb4a1518115ccafedf54f29e50af70dc09301842fec0299"
+    },
+    {
+     "index": 8,
+     "master_file": "motion/master/frame_0008.png",
+     "master_sha256": "15dfa7c5a8b927d7b2c70f3ad0014fa363e224173a57b8ab0c03e6a9f3ef0560",
+     "lr_source_file": "motion/lr_source/frame_0008.png",
+     "lr_source_sha256": "598c1635c16d3a2070a5b64a3ca8569dc0ced3079b8e0cc3a310454454d37d20"
+    },
+    {
+     "index": 9,
+     "master_file": "motion/master/frame_0009.png",
+     "master_sha256": "e9d418d6bc00e5c07a8512f71fe7f2dc19ec29df762edf163805b2b4f87cd8af",
+     "lr_source_file": "motion/lr_source/frame_0009.png",
+     "lr_source_sha256": "5b339007ab27549949eaca42b6e0c89158a361aa85761b83c5fca57cc1481509"
+    },
+    {
+     "index": 10,
+     "master_file": "motion/master/frame_0010.png",
+     "master_sha256": "ae56a82f360520b4bde1e7db2fd33dd093b0057e0c6400aa18e9aef6d75998fc",
+     "lr_source_file": "motion/lr_source/frame_0010.png",
+     "lr_source_sha256": "a26c19f7dfcf6a7175de235e6bdec9a2fb87c6998621d40846acd4f70525d717"
+    },
+    {
+     "index": 11,
+     "master_file": "motion/master/frame_0011.png",
+     "master_sha256": "5bad17a9fa3b434acb3fd8f0c2dd35b4a2b04fd476ad2cd8b6f5809f137796a1",
+     "lr_source_file": "motion/lr_source/frame_0011.png",
+     "lr_source_sha256": "d18589176d4991df41cbf2adddb5eeaae6ba1ab04f87eb8d892bb42ad3e20ec2"
+    }
+   ],
+   "encodes": {
+    "h264-high": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/motion/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "18",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/motion/encoded/h264-high.mp4"
+     ],
+     "video_file": "motion/encoded/h264-high.mp4",
+     "video_sha256": "3892560c0c36c5bbd0681c626402eec4f5b5d5dd19bcc7e00c51c040d43238e8",
+     "video_size_bytes": 200580,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "motion/decoded/h264-high/frame_0000.png",
+       "sha256": "7bb69e417457e045a0c7a4c70986b0bd0c795b48dae3ae6f984a8a88c895932e"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0001.png",
+       "sha256": "af9703d81238bde4c28b02dc70cfe29acb1bcb5ebfa50156c9f2300e660d1cc2"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0002.png",
+       "sha256": "f28e99c6b190f989130c8fb918ce660e8c380b9448575353c4db82f12413eea2"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0003.png",
+       "sha256": "82ca2abaad08b9613c21c0ad612f8e12daafae80d43b807070ad8c8e7906a9fe"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0004.png",
+       "sha256": "4714e5fbe655be8ff70304509749ef5c66c8e9f0a5b397a7979ac271b605309c"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0005.png",
+       "sha256": "f3cfb457dde237425e6f0a1ef16bd41ea253d2cc995c7870027f7603dc479749"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0006.png",
+       "sha256": "6ea780794a8d3a938320973579b2b97f68078d5e910ffd6ce148fd948ca91095"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0007.png",
+       "sha256": "34695bfbc62ce22f3e7b6b02f941c57c8e7fd525c2d12bdb5c8db4be74c6d35e"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0008.png",
+       "sha256": "3cee40a0caf4387f1d975ac56887a99a436d8bec9ed87f88c65c74b14b8ef6d0"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0009.png",
+       "sha256": "6d9b24f9affb3a684f6ac409fcbe36f37ce8be1a2fa2d60d3d95d184ae6fa3ad"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0010.png",
+       "sha256": "e5240531a267aa78c6cc139810b5df4536de167454267d3623455d98a02d8e9a"
+      },
+      {
+       "file": "motion/decoded/h264-high/frame_0011.png",
+       "sha256": "1111286c29093c36317b598dfece3c1838175196e802cb0647958198b8d6a26e"
+      }
+     ]
+    },
+    "h264-medium": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/motion/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "23",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/motion/encoded/h264-medium.mp4"
+     ],
+     "video_file": "motion/encoded/h264-medium.mp4",
+     "video_sha256": "3628b330cc0df5304268719b094616e358aa3f382168965de2c54025e7a7f258",
+     "video_size_bytes": 88866,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "motion/decoded/h264-medium/frame_0000.png",
+       "sha256": "89182e04c893f811aee45634a43266ea178c3a912e4f0244c883bf6368963e3e"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0001.png",
+       "sha256": "03a007b8b3e39d735b6a69b684902eed83a0461ba356ca48355e7eac7312f4a1"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0002.png",
+       "sha256": "d57fef2577900711e995b79461168e2f81b183f3cce1678446e14095f45091ca"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0003.png",
+       "sha256": "110f662e86a0e12a04258cb52b880d22bfb38e06c92dfad53d9801289df17b6a"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0004.png",
+       "sha256": "d1063ba3ccc2007c9c3fd4b0ff914edd010cce1994067673b03a9ae182ea7b4d"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0005.png",
+       "sha256": "136a908c19f3f5da1367c2c1f2aa5a8f78a63ae04d49f684b963375a9e724b73"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0006.png",
+       "sha256": "cbdf12d6c3f6f83375ec79531fb1c47a2d101a37f4aee9331c3c410826b08fcd"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0007.png",
+       "sha256": "359623e27446fb05715a61fb5c6b56d3b1c14773af7706fe639311072069ea73"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0008.png",
+       "sha256": "cf653b3f9d4904012ca69323942d86e60c5afc58b40f796c717db4d85d445cea"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0009.png",
+       "sha256": "b7e0eb1bc334af38efce63dab75da4387e8ecfef54be23627a875c5f60fb5047"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0010.png",
+       "sha256": "085124f738ac6c43fd3709e929fe2055068f9df71e3ab42510df6513a9a70b5e"
+      },
+      {
+       "file": "motion/decoded/h264-medium/frame_0011.png",
+       "sha256": "2ef29287c9e267f3e6113f0d58e1ff57258422e83e8ecd3253d91799bc418e34"
+      }
+     ]
+    },
+    "h264-low": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/motion/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "28",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/motion/encoded/h264-low.mp4"
+     ],
+     "video_file": "motion/encoded/h264-low.mp4",
+     "video_sha256": "de6734d950201c824e7be0762981b2c42d212ed9017d7fcfa6792e3374a58567",
+     "video_size_bytes": 51178,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "motion/decoded/h264-low/frame_0000.png",
+       "sha256": "6ed31c54785594d7933107d9ed099d386267615efd7679b8d878e13d4aa8daff"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0001.png",
+       "sha256": "14b385588a269dfd72d6a0bfdc4241928e5556ad7f5c310ed7ba2f370e565be7"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0002.png",
+       "sha256": "ae2fa620c5d63fab2fa11fd8507b79bdfc7bbd4d07832d01a52d044aa6d10af3"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0003.png",
+       "sha256": "b0d804000c63f439add92913beaba4087311b39803ef1522e08c2a3a0d7fb846"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0004.png",
+       "sha256": "8d185cf3fc59a21d6a7e52ce8ab7f6b1bb3f3492d66e21a5e04a24a46efdc99e"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0005.png",
+       "sha256": "c713ce2091507ce340731231a2ae15ebd9d161705493ee258a6941407b53aa60"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0006.png",
+       "sha256": "dcd2537c86b658c88f8c75e23700fa004c1bcd2b1487d76597200d8cdebe41a4"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0007.png",
+       "sha256": "7de778c7dc01a66f0e5d42f5f0c8863ef26ba6de1a28f27f9b9219cd7f66f0ca"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0008.png",
+       "sha256": "9452b42d233ad1c8fa6705d1f561bd4a2da9f7bb6cf82ed9c3cdc0cec8c08597"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0009.png",
+       "sha256": "5bf912aca64ce27a17acb46aa16c15a1edfd2eda886805439a6052bcca750eca"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0010.png",
+       "sha256": "414d8ea266b16509feede63d25bfec8a25936fc5d639927cf73adc9a36689640"
+      },
+      {
+       "file": "motion/decoded/h264-low/frame_0011.png",
+       "sha256": "5d14c0b18464e2d2f08b309844ec73fd5a2a80216d4928b1c85d68ab1523e48d"
+      }
+     ]
+    },
+    "vp9-medium": {
+     "codec": "libvpx-vp9",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/motion/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libvpx-vp9",
+      "-crf",
+      "32",
+      "-b:v",
+      "0",
+      "-cpu-used",
+      "4",
+      "-row-mt",
+      "1",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/motion/encoded/vp9-medium.mp4"
+     ],
+     "video_file": "motion/encoded/vp9-medium.mp4",
+     "video_sha256": "b212fb3426699d983ff6184b337513e360bf5b18ca6836f8377ca4b8b7fb69eb",
+     "video_size_bytes": 63404,
+     "stream": {
+      "codec_name": "vp9",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "motion/decoded/vp9-medium/frame_0000.png",
+       "sha256": "39ffb2ebae840dcc9f3eb8b6b232fa8a8f57e5f4b988f1fea4ad2c6351e5bcd0"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0001.png",
+       "sha256": "560654f1ff64236ac502afbf93fba9b6883fa1bcbf9275877a35efa16253e95b"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0002.png",
+       "sha256": "7c5b893b4c0e4815f26bf5ddcdbf320a1ff085085eccf73ae456225faf74eb25"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0003.png",
+       "sha256": "a108332c56cef8d5903adc85817f3c3789068f439fdb77a09b2e60cc167b550a"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0004.png",
+       "sha256": "a6b9095270676aac6b983e893c86e0c3ad12225f7bfc0cf57263a15173dc3e63"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0005.png",
+       "sha256": "ef6a135ae2508c9deed0d4a6512288c2295a3f0e6673540653c4bedc4d62a981"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0006.png",
+       "sha256": "7dfe77d88395aab59cb28c1fc05a08fb3fef2d23b628cdda00fef13ccad238b7"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0007.png",
+       "sha256": "fdc97bae0baf164bd0e42bb0b7e4f7d8ca28983333462ca4802f8e722873530a"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0008.png",
+       "sha256": "86d913529c3cc9d46f6bde32b2638771e66b5a7d131d02a0cba7c18aabc89298"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0009.png",
+       "sha256": "c81d6722dbbe494f39b26dac375fabbed638bf07d3b51d2a786147759a800d41"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0010.png",
+       "sha256": "d8078ac388e2f54c55fa966045307bd2dd93e55e5e920a948d443a45f8e0bdd3"
+      },
+      {
+       "file": "motion/decoded/vp9-medium/frame_0011.png",
+       "sha256": "95b5af193a4fa4e4b3f758e51dab7f628374c6ef706d0ead97229a99aa9c44eb"
+      }
+     ]
+    },
+    "av1-medium": {
+     "codec": "libsvtav1",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/motion/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libsvtav1",
+      "-crf",
+      "32",
+      "-preset",
+      "8",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/motion/encoded/av1-medium.mp4"
+     ],
+     "video_file": "motion/encoded/av1-medium.mp4",
+     "video_sha256": "a1c382e103975449ee47fc646362b14fb205a7e0515c410234fc94a02d7a8c55",
+     "video_size_bytes": 51774,
+     "stream": {
+      "codec_name": "av1",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "motion/decoded/av1-medium/frame_0000.png",
+       "sha256": "aab1646aae6189f00dbc6d760c7c6cd3b91ca0e69fa471892bdc19861903aa77"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0001.png",
+       "sha256": "77ce334ceef7e4fb94bcf153f4b75ee52d54fe46dc35ce18efcf41aa7f011ef8"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0002.png",
+       "sha256": "bd1c1f1e61c8d3e9543aa96c203fcb034d46fa646c8cc562058fa194c6fc5c9f"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0003.png",
+       "sha256": "feccadf864025a6a66a9721168adb622402fc205edfeec04ba84ebd48842c811"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0004.png",
+       "sha256": "c091a5eeb7f2ff89dfaffa6329856cfafa89a921bb46ffaa4ac22bce98129e6c"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0005.png",
+       "sha256": "e29cbfe9c1d08d6b2c00d8392dd134d3ab1856b5006ea6197bf4a989e92c577d"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0006.png",
+       "sha256": "c1e12d055bc849c8c1a321b078b65c8bdf873d079794458b9f1af738b1d5036f"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0007.png",
+       "sha256": "6ecd6302f6a52087f1e59e06903fc5ba43796ab0550f4beee0aeaace0e9d88e9"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0008.png",
+       "sha256": "ab6a070c82562ea5e5ad9e69547663989dcaecc80e8d4de98ee3a070b8922a3e"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0009.png",
+       "sha256": "1a44b0951978771dd1ac7ab4462984ee69be563193e8f9a3629a532fa1ee7457"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0010.png",
+       "sha256": "5b1c3d6cc32950a349a8d3bd687d7b1890a0d69eb0fa5f965a149689d243b66d"
+      },
+      {
+       "file": "motion/decoded/av1-medium/frame_0011.png",
+       "sha256": "4a916f6446d062ab7b0283f90ecfaad7c26aec6ec063ef9006bbbe8a3b2d0ef7"
+      }
+     ]
+    }
+   }
+  },
+  "text": {
+   "description": "Synthetic UI/screen content: title bar, sidebar, a scrolling data table with single-pixel gridlines, a live seven-segment clock and a hard-blinking cursor. Drawn with flat rectangles, not a system font, so it is bit-reproducible across machines.",
+   "synthetic": true,
+   "master_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      2560,
+      1440
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "lr_source_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      1280,
+      720
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "frames": [
+    {
+     "index": 0,
+     "master_file": "text/master/frame_0000.png",
+     "master_sha256": "00d3e086f9776fa37d13062b4d552584d978001d57e7762d5c3bba2f50afd92d",
+     "lr_source_file": "text/lr_source/frame_0000.png",
+     "lr_source_sha256": "d45d60043b1a1b9bcf50ccfb69eadcdc5790f2137406a793e36c0c20ed1e6bed"
+    },
+    {
+     "index": 1,
+     "master_file": "text/master/frame_0001.png",
+     "master_sha256": "e96ee995107d2f0e9b5c0fbca8092fa68428f5f1532882e1e9abaadad4c7ad95",
+     "lr_source_file": "text/lr_source/frame_0001.png",
+     "lr_source_sha256": "59b9667854b45b5a39f5f0ed5db933201c7a6de3d73027feb15d8cea9fa9b838"
+    },
+    {
+     "index": 2,
+     "master_file": "text/master/frame_0002.png",
+     "master_sha256": "59c168c315ea9dd76e8e8b2b98e5bc9d334ae66cb51609f8ca6420e223bbafac",
+     "lr_source_file": "text/lr_source/frame_0002.png",
+     "lr_source_sha256": "ec29e0da212463e775e356861e298f7a3b218d5686f434013e4772919979d123"
+    },
+    {
+     "index": 3,
+     "master_file": "text/master/frame_0003.png",
+     "master_sha256": "830a846473f54bde88837bc6fdf478af3e91d843d7f52ac57c29afe99afdc5a1",
+     "lr_source_file": "text/lr_source/frame_0003.png",
+     "lr_source_sha256": "c3592c85767f6ad167143786461ae7b74b47042e6beedf21bb91f13ac68e79bb"
+    },
+    {
+     "index": 4,
+     "master_file": "text/master/frame_0004.png",
+     "master_sha256": "27fdc315badf5311fbb8419cb107942829bf67d3bdc3caea6c75b5d4836d82f1",
+     "lr_source_file": "text/lr_source/frame_0004.png",
+     "lr_source_sha256": "7c506402c6dab8df5f860e5c9c6fbd6325291c77615e6a3abd0f9f7bd8bc7bf9"
+    },
+    {
+     "index": 5,
+     "master_file": "text/master/frame_0005.png",
+     "master_sha256": "08cd07aa6ddb66d569318bd6a7f156652c17854d65cf3a992a6e9ee516299270",
+     "lr_source_file": "text/lr_source/frame_0005.png",
+     "lr_source_sha256": "a310533ef894936437d8bfbd3db20dbd2405d91171f64723c21ee6dcaaf90d5f"
+    },
+    {
+     "index": 6,
+     "master_file": "text/master/frame_0006.png",
+     "master_sha256": "d22521874653f5240131dfb99d903153603f1334cd3ffea2e32ae8d2dbc8295b",
+     "lr_source_file": "text/lr_source/frame_0006.png",
+     "lr_source_sha256": "28da75a16600958d4343ea9877f35975a95bf96faeebfad5b31729dc6597c62e"
+    },
+    {
+     "index": 7,
+     "master_file": "text/master/frame_0007.png",
+     "master_sha256": "0e2f3dc95b805b10be280f16b90e5d4edf4763ec28eeb62d40c16e89e2f0bfc0",
+     "lr_source_file": "text/lr_source/frame_0007.png",
+     "lr_source_sha256": "e57a6e03d592c74bd36b0b6d13a9400c3830695dbbac3d03943f23bb8bde5b14"
+    },
+    {
+     "index": 8,
+     "master_file": "text/master/frame_0008.png",
+     "master_sha256": "ccd5e3f4163a2414f06bda872e5712cc6da4540ac4572c7e656cf915dd3d8487",
+     "lr_source_file": "text/lr_source/frame_0008.png",
+     "lr_source_sha256": "90a7436c310db6cd0b50cddc0b46e48e5d7fa86950ee1c83598fb7af993f2bb9"
+    },
+    {
+     "index": 9,
+     "master_file": "text/master/frame_0009.png",
+     "master_sha256": "3db3cff45b04b9e3de4f24c93b6053ed3258460d560f4bc2681d4c4e81b95e0b",
+     "lr_source_file": "text/lr_source/frame_0009.png",
+     "lr_source_sha256": "f1f183daec68ce8990683438bc4c42d9382141e438e28531d2377669677aaa30"
+    },
+    {
+     "index": 10,
+     "master_file": "text/master/frame_0010.png",
+     "master_sha256": "20eb8fad645b7ee3caa7de877436c2127ebab2dd93a0eccf0eb6b7eb9d5f5dc4",
+     "lr_source_file": "text/lr_source/frame_0010.png",
+     "lr_source_sha256": "a3a85a624e518c9960b36ad209a5c90b2119aa963f1f540ac1ac1b2080755aee"
+    },
+    {
+     "index": 11,
+     "master_file": "text/master/frame_0011.png",
+     "master_sha256": "6ec5683e2edf3e8407ca2119c56daa85f746fac891fc3f99e9c5513f5c2c6b5e",
+     "lr_source_file": "text/lr_source/frame_0011.png",
+     "lr_source_sha256": "c01c1e1a63567d96c71fe40c7cedc129ecb57d2085ceda9c43817d14cb0677fc"
+    }
+   ],
+   "encodes": {
+    "h264-high": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/text/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "18",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/text/encoded/h264-high.mp4"
+     ],
+     "video_file": "text/encoded/h264-high.mp4",
+     "video_sha256": "aff5ef320dea02d473d593b918178a02756fdd68988b5b9a95328dceaf1cfe21",
+     "video_size_bytes": 17353,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "text/decoded/h264-high/frame_0000.png",
+       "sha256": "b08f4b746c92531f4f9a695509b3aee5893620123119bcf5e1a26fb60e972aa3"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0001.png",
+       "sha256": "9a179f1cfde62b9416bac1d5bcdd0220df283a206dbd3d43f969ced599217c7a"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0002.png",
+       "sha256": "e696f4df6ca00276be5757d3f75982d0a0d3ae8240910a448377fa555eb78180"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0003.png",
+       "sha256": "7301ff97ed606fb7e59784d801aef09023a3c10d03f4330ee118ead53cd87edf"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0004.png",
+       "sha256": "c909fb18518220e8417d484e0a1eebb1b2c952214175da8ee9eee318799ca060"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0005.png",
+       "sha256": "ba7d7bea9416e3c20d3c35c8e69ffb8252379becfed0d9aa11d69016478f31bb"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0006.png",
+       "sha256": "29acd109cd6f77fed24fdc9cf13f9c84599385df00ae5f68f391c515c16aa978"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0007.png",
+       "sha256": "5c8d52173922dd20e5312302f5db45c0aa34a3c5109a780a01b97f6082047539"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0008.png",
+       "sha256": "c8d27bbe2c030e429a4b56449d27ea389148f5ab127ee71a01e198ca6d1b854f"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0009.png",
+       "sha256": "de3e23eca2891ff7f8acb7844a645ba11a401d4f25966b54653a5b42add62083"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0010.png",
+       "sha256": "d9b01ae6e4a1497d09a94a4d0a2f752faf3756a26e445b82aecb5ed0c72ee9e3"
+      },
+      {
+       "file": "text/decoded/h264-high/frame_0011.png",
+       "sha256": "81459d0efd880e66bb17552140181bd9fe792b203ad17084c1d87e4e91076dd0"
+      }
+     ]
+    },
+    "h264-medium": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/text/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "23",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/text/encoded/h264-medium.mp4"
+     ],
+     "video_file": "text/encoded/h264-medium.mp4",
+     "video_sha256": "35ca74bcd1c92276057726e6f963da3644770ed95a82af3e3c5db99c723db903",
+     "video_size_bytes": 13666,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "text/decoded/h264-medium/frame_0000.png",
+       "sha256": "5d60150d24427616c12d7675133f61ebcbbc08e90223ac25781dcb75c83748d4"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0001.png",
+       "sha256": "d0cf98b15e6cdad0994bda76ac9547dd7e20ccd48ac59d424c0fc1eca0763206"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0002.png",
+       "sha256": "1a1dbcb1b1659364e6c12834aea8984ccee99e9449281df1e0fcb49eba7eea9d"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0003.png",
+       "sha256": "b13a59b7cd230ac0060bc602dda3a0aaafb48c5ca78c482ee042bd149381d071"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0004.png",
+       "sha256": "f4a1a7081b2f7210d6dd7d851df2ac818b8d1acf97e9eda8c96809bb82929443"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0005.png",
+       "sha256": "539c818189245b2119cae270250b5cdb8aced9cdbc397af8b469d0da0f41b98f"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0006.png",
+       "sha256": "56077f41f66357fdb25abdd6038bbca5881c58aa9a7186b638dac4247f463a43"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0007.png",
+       "sha256": "a418a39720a4fca0bd196294a1b726a13a2cb670849cac8445da2d0b71e352db"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0008.png",
+       "sha256": "35811efdab5f3d46533bff245fe5b91f8d605add93461839eb3dbca6b525277b"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0009.png",
+       "sha256": "daa0f9ccf70a2fb7440c8a90285a0a509f03807de41cd62dea46e207bdadd141"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0010.png",
+       "sha256": "1ebf31ccf5759529a0ee5ad330a57bdb9d3d6eca55016ae5f74458399a4c9cb5"
+      },
+      {
+       "file": "text/decoded/h264-medium/frame_0011.png",
+       "sha256": "f308f5ad1a2cd29bd4ed8dbe842fe372afdac89bf446fb2d317062b0b218041e"
+      }
+     ]
+    },
+    "h264-low": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/text/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "28",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/text/encoded/h264-low.mp4"
+     ],
+     "video_file": "text/encoded/h264-low.mp4",
+     "video_sha256": "f5852a71de0a1fb980c701cc300afd4998d4b1937c85d037d2f5878768c42cf4",
+     "video_size_bytes": 10662,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "text/decoded/h264-low/frame_0000.png",
+       "sha256": "fa293fdaf3afc140a1529cd5c7233e0684a7d8d6dc532d9b5f03859344816993"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0001.png",
+       "sha256": "ee4fedfa722795dbe3e496cc783567f90ba2a3fa5e3a6f9eb2dbfcb28070b1be"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0002.png",
+       "sha256": "88f17dd621822342cfde07b2297bc363a258df8535257357fe5ac8d89ae35642"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0003.png",
+       "sha256": "1becdff040f06e8e7015d00f01c62092c42285708f32260117a6627b50ab2ba4"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0004.png",
+       "sha256": "26c133d4f789db8800fad7bb65cd6a00efca0d51701ba2295fa8854b182099fb"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0005.png",
+       "sha256": "574c0c92986103202b1c16321e6839ba3e04c391fdbe47eec6332dc371504e75"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0006.png",
+       "sha256": "9d730feb70fc32b76afec33222e072fa2536588c536ec79df0dbf1719931ccce"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0007.png",
+       "sha256": "335d13c1183f4146ae1637b075fb0bc8e2aed3a104335700f6ebb2145bd5426a"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0008.png",
+       "sha256": "51803616fed95e3fcf263a959cd5d0154bbe949887fb38e765c9770195b1dbab"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0009.png",
+       "sha256": "1e4914b3b5a6ac15366b6c398a2df1254bb30598c69e1d6f4e1652d39aacfc94"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0010.png",
+       "sha256": "6ca86876b10f2a6feeb755c87abe36da0f95d6590548e25650e8696e5963d746"
+      },
+      {
+       "file": "text/decoded/h264-low/frame_0011.png",
+       "sha256": "d496d0d1229a30f91d32c7f4cbbff8440a6bf34b6bbf96a4ac1626307d6fe157"
+      }
+     ]
+    },
+    "vp9-medium": {
+     "codec": "libvpx-vp9",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/text/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libvpx-vp9",
+      "-crf",
+      "32",
+      "-b:v",
+      "0",
+      "-cpu-used",
+      "4",
+      "-row-mt",
+      "1",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/text/encoded/vp9-medium.mp4"
+     ],
+     "video_file": "text/encoded/vp9-medium.mp4",
+     "video_sha256": "1040e3af77ec36c4536880f7294c7a6dff8a37fa6812d7b519e0836cec0c6ce8",
+     "video_size_bytes": 14532,
+     "stream": {
+      "codec_name": "vp9",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "text/decoded/vp9-medium/frame_0000.png",
+       "sha256": "932b79270c88d6b8fc59905cd4965a8650bfef544beb72b5c86cd3fd8944c480"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0001.png",
+       "sha256": "d0fcd20b9f4b4823e513d8831dff08baca31faeb9a8df4b36058d9e09dda4c70"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0002.png",
+       "sha256": "57d36db0f61f5ad576841a2c945a0236dcaf8c51095575841f9b10f22237c3dc"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0003.png",
+       "sha256": "9c696be11a35cbfa927906dbffdd794f034e4556eacaa8e95777853d591acb3c"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0004.png",
+       "sha256": "d4e6ec0665256923b0f82d767cc74146ef526ac803f8e212b062b917ed6d439b"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0005.png",
+       "sha256": "a35b73b3e23cc60bf688096243da36ff177025683540eb6c62b76e1da563e436"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0006.png",
+       "sha256": "7e5f06f74c3f85788117a747fe435fc2c2db65cba25db19947d1863c11365b92"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0007.png",
+       "sha256": "2439c6b72467d00becc3cdd7f5ece6596d4d08f30e21fe388cf0fa006f28f59a"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0008.png",
+       "sha256": "c218fe811110b08cb1dbb5085ee5c31455d39f3a169a70437ca08cedbfe848b7"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0009.png",
+       "sha256": "32a3252e08f1e837e44a3b4a87bab6ff94f8cbd7763b2495ddcdc9730644eeac"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0010.png",
+       "sha256": "127b9d0adf7bd915f273b5d0fa7ec45ad3a10c170f69a6db97112627aafc01c3"
+      },
+      {
+       "file": "text/decoded/vp9-medium/frame_0011.png",
+       "sha256": "fd897d6fd6487cea610847f7cecff476e9edcbf8f2613b2493274a31b0ecbe51"
+      }
+     ]
+    },
+    "av1-medium": {
+     "codec": "libsvtav1",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/text/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libsvtav1",
+      "-crf",
+      "32",
+      "-preset",
+      "8",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/text/encoded/av1-medium.mp4"
+     ],
+     "video_file": "text/encoded/av1-medium.mp4",
+     "video_sha256": "a7b847c4dd99b4f01f4e64a53f0fc46de0954ba6e5c21a29d9e6533bd5d9592a",
+     "video_size_bytes": 11156,
+     "stream": {
+      "codec_name": "av1",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "text/decoded/av1-medium/frame_0000.png",
+       "sha256": "fa7bd240b2c841c1a6441d223bb49fd94c820e96865568a5c7f9bb030bdec67d"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0001.png",
+       "sha256": "365283965e3c2285372b5522cbd5ee013534758a368124fa04d004996d323a4a"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0002.png",
+       "sha256": "7f93ba7fa5b1abdde73353c0fb019542b01dd40ac1f6a9f4e59511279b917022"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0003.png",
+       "sha256": "259fc1ff0e17b084b181862ee367a42b72b26c0e9d2d9696eb13edc664260cc6"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0004.png",
+       "sha256": "8aaf195d1b0ec332ded5cd37094e49bc30afa5ff372f49db5342d0f20a73ba79"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0005.png",
+       "sha256": "7c15b1470e1431f680ac841dfea834975a4b94e5644ad3ee7ecfc43f5e7c3f84"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0006.png",
+       "sha256": "7df0bad98bdf6c0d34db56384a7ca462dc579f1c3893ff8cf149c8e8c32d97b3"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0007.png",
+       "sha256": "2db032d537ca81ef2f8b9d96743480f952953018dcb927dee1045f1607243810"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0008.png",
+       "sha256": "230a4a4ca7ec17888b906bd19bd1dd8441b77f3c041ea4c969cb96b21176cb6b"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0009.png",
+       "sha256": "7328f0c60aa92f7e6b372f35196e51487a92bdaa1f43b545f0e57ac6f11a1df5"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0010.png",
+       "sha256": "f72b8cbbb1b5fe35cdccc6614f74740563c52445c4363224b37bc8af0cd0abb5"
+      },
+      {
+       "file": "text/decoded/av1-medium/frame_0011.png",
+       "sha256": "a17a2ee5efdbcb35a32a98709e277930ef3f00aa8f5d5d84f6a4ab2a4d4e6e23"
+      }
+     ]
+    }
+   }
+  },
+  "animation": {
+   "description": "Synthetic flat-colour/cel content: solid non-anti-aliased polygons with hard black outlines and diagonal cut edges, plus independently bouncing foreground shapes.",
+   "synthetic": true,
+   "master_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      2560,
+      1440
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "lr_source_sequence": {
+    "expected_frame_count": 12,
+    "actual_frame_count": 12,
+    "exact_filenames_and_order": true,
+    "dimensions": [
+     [
+      1280,
+      720
+     ]
+    ],
+    "modes": [
+     "RGB"
+    ]
+   },
+   "frames": [
+    {
+     "index": 0,
+     "master_file": "animation/master/frame_0000.png",
+     "master_sha256": "50733f5982ca3e67b0db841049d442387dc248e8bf21977715b9a23ff6d079a1",
+     "lr_source_file": "animation/lr_source/frame_0000.png",
+     "lr_source_sha256": "7016e554abda96d53e18f8c4107201867e978e13a4479dce2c2a82790dbf509c"
+    },
+    {
+     "index": 1,
+     "master_file": "animation/master/frame_0001.png",
+     "master_sha256": "ac6aba5b2ab31ca6acc3f7873ddbcf027d29c5168c6bc1b8ed2c3195cff07f96",
+     "lr_source_file": "animation/lr_source/frame_0001.png",
+     "lr_source_sha256": "a0cd9bfff6df046702da8fcfce11d03f76772526c00d02a779ad56866a1906db"
+    },
+    {
+     "index": 2,
+     "master_file": "animation/master/frame_0002.png",
+     "master_sha256": "5c6fd18824477f824d2765233bfb800c8b63f72b07b05c14496ced3299fe7bc0",
+     "lr_source_file": "animation/lr_source/frame_0002.png",
+     "lr_source_sha256": "940cd4acf54753b680add90ee2e91a4b0a216989d7d30299def6731a650ef09e"
+    },
+    {
+     "index": 3,
+     "master_file": "animation/master/frame_0003.png",
+     "master_sha256": "d11f450e0c268879e5f01776418480e1153efc2e639c33c6bb67163388c4988b",
+     "lr_source_file": "animation/lr_source/frame_0003.png",
+     "lr_source_sha256": "610ed958a67575ee38099d93b56e91f65c7953c334e412cabbef93ef0782e469"
+    },
+    {
+     "index": 4,
+     "master_file": "animation/master/frame_0004.png",
+     "master_sha256": "de7749f2d782e49b56a403dbd1c7e91bd33c56013fb14e7aa95006fae19e8042",
+     "lr_source_file": "animation/lr_source/frame_0004.png",
+     "lr_source_sha256": "25cee829efde9b1810492f480e5b9a7bb56032ac6d6f4a72c7326b2fa8954116"
+    },
+    {
+     "index": 5,
+     "master_file": "animation/master/frame_0005.png",
+     "master_sha256": "a537a7f3000d825dd2dd11d0b8fce60a4b3696b78e91923cc079b28a71c6134c",
+     "lr_source_file": "animation/lr_source/frame_0005.png",
+     "lr_source_sha256": "a208e058dda7ccd97a8ebfdf0b7f4cb241810537a93aebca961febef4101d20c"
+    },
+    {
+     "index": 6,
+     "master_file": "animation/master/frame_0006.png",
+     "master_sha256": "f0c3b125370a3f037b8759992f8d0d17acbc72488d75794258ddb6a555ce3179",
+     "lr_source_file": "animation/lr_source/frame_0006.png",
+     "lr_source_sha256": "911775156dda96f30a622f48e3cce4c62957dba0ab7c4704aa2520d475a898a9"
+    },
+    {
+     "index": 7,
+     "master_file": "animation/master/frame_0007.png",
+     "master_sha256": "ded471ce788aded96d475648666c92feff5188dad7e8af5a154d90e598e2af4f",
+     "lr_source_file": "animation/lr_source/frame_0007.png",
+     "lr_source_sha256": "fb516b0048036db2da9b84c661b207b980ddf8b1056c994febeaeab3ac4aa85c"
+    },
+    {
+     "index": 8,
+     "master_file": "animation/master/frame_0008.png",
+     "master_sha256": "b68b04addae97f0a593c2cd9c8f3f564de806be20a91c18765bf68b1007881ce",
+     "lr_source_file": "animation/lr_source/frame_0008.png",
+     "lr_source_sha256": "110afa303af4ca8cd117581d3cc9da8bc2e245ea4dbcc35304df38473b806de6"
+    },
+    {
+     "index": 9,
+     "master_file": "animation/master/frame_0009.png",
+     "master_sha256": "e6ed8684d2c5b8cb2c4e7d9cf7c849ae536c6065a976d08f99f50386e3ee9c28",
+     "lr_source_file": "animation/lr_source/frame_0009.png",
+     "lr_source_sha256": "e683b56f52203a09ef027c89c77759fec3c56f6474feb9371723b2074c1d7901"
+    },
+    {
+     "index": 10,
+     "master_file": "animation/master/frame_0010.png",
+     "master_sha256": "60cb0e1131b65fecf9adde99b326e9dabbbe00d2e452635f3ec21613c893be29",
+     "lr_source_file": "animation/lr_source/frame_0010.png",
+     "lr_source_sha256": "29a44cc0a3d5d165e41d0acf7aebc51d0d52d461dc00d07ca8e4e1224a7ed02b"
+    },
+    {
+     "index": 11,
+     "master_file": "animation/master/frame_0011.png",
+     "master_sha256": "f4a62aaf0bbf65ad6d15a30f9fb2d87b58001aff652d0bfb76f24a682fa049e2",
+     "lr_source_file": "animation/lr_source/frame_0011.png",
+     "lr_source_sha256": "3a2dfa9e7d158995126e45af664b4325c2f72b60371921dbc5313dae73457e33"
+    }
+   ],
+   "encodes": {
+    "h264-high": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/animation/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "18",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/animation/encoded/h264-high.mp4"
+     ],
+     "video_file": "animation/encoded/h264-high.mp4",
+     "video_sha256": "96473d0095f8591da82beda01faa42ed662ddb4dc518c5860461c1c9912ec580",
+     "video_size_bytes": 18984,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "animation/decoded/h264-high/frame_0000.png",
+       "sha256": "9499f7f348b0337310fa1480ce748d1fb9c3dcdba209d81b8fba455af2db703f"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0001.png",
+       "sha256": "7061050733f84cefd2ce53063a6ec4ccfaf85179b1818c8df58283d9d79da0d2"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0002.png",
+       "sha256": "8d97247efe8cc07631c6bf684667da8497a381af5b6e0df0c03b2725c8bb213d"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0003.png",
+       "sha256": "6b5d0d5b4be5912ae3fbac63a5c6808f9cdc43536be98b318c24484f442bacc5"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0004.png",
+       "sha256": "8789229376fc892474214f376a4ae0d4bf8284aedb7a472b3cd78c22ec0c7d50"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0005.png",
+       "sha256": "0adafd2797a9f351c0a2c7e4e797d86e202e4a17ab765805533057a1f235a4c6"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0006.png",
+       "sha256": "d107131a5e65b4918908760ef1d7666b2e2b83b104bf0cc21dc5d7d892d6250f"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0007.png",
+       "sha256": "7638e672b47576e4582508ebc58f89b82458381ddd085288c8a140a4d489a43d"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0008.png",
+       "sha256": "9aedf66aa95f0b316ce652583eb0a8e24cdb4fb38443e38690212b8ef46a2185"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0009.png",
+       "sha256": "a319cb20ee3252adb347e006e0a3adf408fadcd23435f53a74ac4c0b64579063"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0010.png",
+       "sha256": "f4d5f7f85adcd25489ad717481a3af21cbbac0ce1794972be3dc1e03d2820659"
+      },
+      {
+       "file": "animation/decoded/h264-high/frame_0011.png",
+       "sha256": "5a5a1338a02938b035df18a4c69cd0c49d865aead26860e7ca6fd6f216a60b7f"
+      }
+     ]
+    },
+    "h264-medium": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/animation/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "23",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/animation/encoded/h264-medium.mp4"
+     ],
+     "video_file": "animation/encoded/h264-medium.mp4",
+     "video_sha256": "3c5672d389496e5a49c5398a6e1fc8ed2638763a45478578f7e98afaefe4ab5a",
+     "video_size_bytes": 14883,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "animation/decoded/h264-medium/frame_0000.png",
+       "sha256": "a0e96da64503033401940bd9694cd3ed85de7190e1cdf7635ca18baa421dbd37"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0001.png",
+       "sha256": "fe2d7d961b6a856ea9c417b7d4e467b9f28d07245dac3928f3e8329316b17f28"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0002.png",
+       "sha256": "2a1534dce895915e6ffcb5aabf38665efb7503af7b128533ed8e5d0e53f84c68"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0003.png",
+       "sha256": "3b61b1801e3fc5f20b1be2883f0f8152b9f9616b5a4f98580fe4823e7b84af26"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0004.png",
+       "sha256": "c74e42ee36598dc06900c2e16e9c2596a8150255dc022124044ad738f68b72f2"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0005.png",
+       "sha256": "831ea10fe634a424f1c1d527ca6d246bc57f864afc2d5cf1491f4157aaab1970"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0006.png",
+       "sha256": "5c5886195eb932554f5661caee879a70e7f75a646091079c78af7c6f27dc916b"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0007.png",
+       "sha256": "f11006596425e4146fd5387725cdc43dc45438a95919a69e128d7a83220da563"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0008.png",
+       "sha256": "5d642ca2a933d14d9afa1fafceaaa5442c7ce564839da50e6012f323fa5c07bb"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0009.png",
+       "sha256": "9bbf467e469841dcda1bb497270b24ddf11f8191988dcdb918342f4af4bbc43d"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0010.png",
+       "sha256": "b514ded5c9ba53dd3e37423c06180fe29686d800af8e7df8962a6b6dbdf398f2"
+      },
+      {
+       "file": "animation/decoded/h264-medium/frame_0011.png",
+       "sha256": "81c4cd4f2647b7ef71147a80ecb9d587c52d223dd1a1b41230e97812e3a80085"
+      }
+     ]
+    },
+    "h264-low": {
+     "codec": "libx264",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/animation/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "28",
+      "-preset",
+      "medium",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/animation/encoded/h264-low.mp4"
+     ],
+     "video_file": "animation/encoded/h264-low.mp4",
+     "video_sha256": "14e2b9142852b024aacef796d0e74befbea0e8201bde89994f964084685c11b0",
+     "video_size_bytes": 11702,
+     "stream": {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "h264",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "animation/decoded/h264-low/frame_0000.png",
+       "sha256": "b230b17bb59a63ddb98ed054479855ea00ba97ab22286deb0d6034d533bdfedd"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0001.png",
+       "sha256": "de4593d8226682e9214dd4e7fe0703a54ec2fb8430c46d4b56f18aaaeab973ba"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0002.png",
+       "sha256": "5e515d53604238859ea6ef59a3758058558c8a394359fe2df1aa5caff6269340"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0003.png",
+       "sha256": "920b5cb36fd901d31bd6053958eefb9d9c5e2d2400ec33c34b401130cbb18ec0"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0004.png",
+       "sha256": "4923dd646d58daf0a99031ab046275dec07a01fa15940e20110cdd18c9446066"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0005.png",
+       "sha256": "09fb512cc9d118e1f4328468e4720ffaf00c42ec2e0f9fa5a6fc55592f89ef0a"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0006.png",
+       "sha256": "894073e41376f6a983facf32a7e2c71e1b1341b6f8e86295798213dcb8b49943"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0007.png",
+       "sha256": "3545f5b9c6eecc45daa18afa291cc5a9c28e67fe45f75427dc9702ed594a9c5d"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0008.png",
+       "sha256": "351c387b3a283dd6e988e843908fb8bc1201707dd6088f04f905ed2661445b3e"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0009.png",
+       "sha256": "9f71806aade35403438c866aa360a29440ad799f9c0fd4b206e530294c3d5244"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0010.png",
+       "sha256": "5005265117bd33739f1819fdbb46480672fa3bf899d42205433c60136b12caa3"
+      },
+      {
+       "file": "animation/decoded/h264-low/frame_0011.png",
+       "sha256": "54f74f5cb7c27aee4f95d5e52a999eff027725a9d0a69afbef0d47c9ec3aedf0"
+      }
+     ]
+    },
+    "vp9-medium": {
+     "codec": "libvpx-vp9",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/animation/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libvpx-vp9",
+      "-crf",
+      "32",
+      "-b:v",
+      "0",
+      "-cpu-used",
+      "4",
+      "-row-mt",
+      "1",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/animation/encoded/vp9-medium.mp4"
+     ],
+     "video_file": "animation/encoded/vp9-medium.mp4",
+     "video_sha256": "3c878bbfe751066c890bff296786bed22569595c4bcfead487b28b0e65bb0169",
+     "video_size_bytes": 15875,
+     "stream": {
+      "codec_name": "vp9",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "vp9",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "animation/decoded/vp9-medium/frame_0000.png",
+       "sha256": "48ec2fa60763bb3e5ba17807e6acf4680d52b8b8cfcd9d7f475afc1ff321a675"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0001.png",
+       "sha256": "a5ef02856e0381a8ab9d9e5ec138813829e52e8bbbd000e034034e297b19d48b"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0002.png",
+       "sha256": "39b6312062d360d544bdad5dfa0337589e8e01d3ed00a02e19088c4525d06e19"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0003.png",
+       "sha256": "2d623c718275c3488e42462551894f39df111a0fd2da9d87f84ef9f12ca74b6f"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0004.png",
+       "sha256": "fd21fb4400fbcb935f3f615d41e72b31dbb9226b8157aca2479efa05502442d1"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0005.png",
+       "sha256": "fef66534b4404f8d8c465011eadaab70226449049381507d63a12182e5154588"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0006.png",
+       "sha256": "4e5d931b774cc67aaace0d099eb58921f34cb9d31c2abb3d9719623ddf2c846a"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0007.png",
+       "sha256": "79b2554edf68e7e58468de53ff2a1251762ee136e8997911bfeb3ad5b2320ebe"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0008.png",
+       "sha256": "5c6ee07a086861405d565b052d54f9cf6f87d3901763c7454bf8acd8346dbc64"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0009.png",
+       "sha256": "22f0f8452d3ee67321eb6a6e4181569477aa7b4dfdc3ad072c83a7d12f5b9da5"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0010.png",
+       "sha256": "bd5a0a2185fb911bb9ffa6c192f60361c376b5491a4cd5448b972ee0b408169e"
+      },
+      {
+       "file": "animation/decoded/vp9-medium/frame_0011.png",
+       "sha256": "25dfeeb272054c0b80281d95360d97a0f011d09dd5ffcaae8faee116e5f104a8"
+      }
+     ]
+    },
+    "av1-medium": {
+     "codec": "libsvtav1",
+     "container": "mp4",
+     "ffmpeg_args": [
+      "-start_number",
+      "0",
+      "-framerate",
+      "24",
+      "-i",
+      "data/video/animation/lr_source/frame_%04d.png",
+      "-vf",
+      "scale=in_range=pc:out_range=tv:in_color_matrix=bt709:out_color_matrix=bt709:in_primaries=bt709:out_primaries=bt709:in_transfer=bt709:out_transfer=bt709,format=yuv420p,setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709",
+      "-c:v",
+      "libsvtav1",
+      "-crf",
+      "32",
+      "-preset",
+      "8",
+      "-pix_fmt",
+      "yuv420p",
+      "-color_range",
+      "tv",
+      "-colorspace",
+      "bt709",
+      "-color_primaries",
+      "bt709",
+      "-color_trc",
+      "bt709",
+      "data/video/animation/encoded/av1-medium.mp4"
+     ],
+     "video_file": "animation/encoded/av1-medium.mp4",
+     "video_sha256": "cf5e7815240c743e3950e1d2b2aa995aed2e00580d6a0d1aa893f525b9a79151",
+     "video_size_bytes": 16794,
+     "stream": {
+      "codec_name": "av1",
+      "width": 1280,
+      "height": 720,
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+     },
+     "stream_contract": {
+      "ok": true,
+      "expected": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "observed": {
+       "codec_name": "av1",
+       "width": 1280,
+       "height": 720,
+       "pix_fmt": "yuv420p",
+       "color_range": "tv",
+       "color_space": "bt709",
+       "color_transfer": "bt709",
+       "color_primaries": "bt709"
+      },
+      "mismatches": {}
+     },
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_frames": [
+      {
+       "file": "animation/decoded/av1-medium/frame_0000.png",
+       "sha256": "cbc26a8708fd9c589936d22833bc53698bc21ebd5045f2c61af8568ddacf9c03"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0001.png",
+       "sha256": "4ce2362a1ab976fda1d9b0ee7f0e5addcc1a71d97bd317657a97b00b5554cff7"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0002.png",
+       "sha256": "06ad723e7536c075d806d296fb1827491c8192415253b4dc4cd67cdea3b33704"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0003.png",
+       "sha256": "e829722aa2b73b604f724fca3011783ce4f26669521a6f2c69e65e02f113ffc6"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0004.png",
+       "sha256": "9ef6e41d9f10f609fb1e170fc2be4352bfd5c1a8692d3197be4132e5208af88b"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0005.png",
+       "sha256": "8beb252c88223047ca76bad951077fe3acea2ba6cb1b7acf738414e91f079ae6"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0006.png",
+       "sha256": "d7207dbb2e0f2365fd769141e1986b39412aab625cfec75ef96b8dbd28f787e9"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0007.png",
+       "sha256": "c23c38c128377edff9066f5c7d97a88b7c69f6e17bab21bed4319da04fa68cb7"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0008.png",
+       "sha256": "71e5cb60109c176055d5196995fe35aea991f4eab4c257e1b3f30f15ffac8b56"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0009.png",
+       "sha256": "eeaf908528a5b8ebdc0da9a7589b82df6abe971ac7e1835e71253397a645153a"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0010.png",
+       "sha256": "786a456d5fdd95956925731105c12ca8692788f73c82d94ea1c87638e2e3fbee"
+      },
+      {
+       "file": "animation/decoded/av1-medium/frame_0011.png",
+       "sha256": "947fcc639db1c13770e87e216b8934129029af61cbedb752e6e76d0f6e25052e"
+      }
+     ]
+    }
+   }
+  }
+ },
+ "alignment_proof": {
+  "natural": {
+   "sequence_geometry": {
+    "master": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "lr_source": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       1280,
+       720
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true
+   },
+   "self_comparison": {
+    "description": "The reference master sequence compared against itself. Every frame must be infinite PSNR; anything else is an order, geometry or pixel-conversion error.",
+    "all_infinite": true,
+    "psnr_db_sample": [
+     "inf",
+     "inf",
+     "inf"
+    ]
+   },
+   "known_filter_check": {
+    "description": "Pristine pre-codec 720p upscaled 2x with PIL bicubic and compared to its 1440p master. Exact frame naming and geometry are checked first; the finite positive score is a separate sanity check that the comparison is aligned.",
+    "filter": "PIL.Image.BICUBIC",
+    "reconstruction_sequence": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true,
+    "finite_positive_metrics": true,
+    "psnr_db": {
+     "mean": 42.135,
+     "p5": 40.811,
+     "median": 42.435,
+     "p95": 42.4545,
+     "min": 38.93,
+     "max": 42.46,
+     "worst_frames": [
+      {
+       "frame": 0,
+       "value": 38.93
+      },
+      {
+       "frame": 2,
+       "value": 42.35
+      },
+      {
+       "frame": 1,
+       "value": 42.38
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    },
+    "ssim": {
+     "mean": 0.9399301666666666,
+     "p5": 0.91728985,
+     "median": 0.9450415,
+     "p95": 0.9453277,
+     "min": 0.884649,
+     "max": 0.945364,
+     "worst_frames": [
+      {
+       "frame": 0,
+       "value": 0.884649
+      },
+      {
+       "frame": 2,
+       "value": 0.943996
+      },
+      {
+       "frame": 1,
+       "value": 0.944339
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    }
+   },
+   "master_pixel_range": {
+    "min": 37,
+    "max": 178
+   },
+   "per_tier": {
+    "h264-high": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 42,
+      "max": 168
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-high",
+     "colour_range_ok": true
+    },
+    "h264-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 45,
+      "max": 169
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-medium",
+     "colour_range_ok": true
+    },
+    "h264-low": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 45,
+      "max": 167
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-low",
+     "colour_range_ok": true
+    },
+    "vp9-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 45,
+      "max": 169
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "vp9-medium",
+     "colour_range_ok": true
+    },
+    "av1-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 46,
+      "max": 169
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "av1-medium",
+     "colour_range_ok": true
+    }
+   }
+  },
+  "texture": {
+   "sequence_geometry": {
+    "master": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "lr_source": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       1280,
+       720
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true
+   },
+   "self_comparison": {
+    "description": "The reference master sequence compared against itself. Every frame must be infinite PSNR; anything else is an order, geometry or pixel-conversion error.",
+    "all_infinite": true,
+    "psnr_db_sample": [
+     "inf",
+     "inf",
+     "inf"
+    ]
+   },
+   "known_filter_check": {
+    "description": "Pristine pre-codec 720p upscaled 2x with PIL bicubic and compared to its 1440p master. Exact frame naming and geometry are checked first; the finite positive score is a separate sanity check that the comparison is aligned.",
+    "filter": "PIL.Image.BICUBIC",
+    "reconstruction_sequence": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true,
+    "finite_positive_metrics": true,
+    "psnr_db": {
+     "mean": 44.193333333333335,
+     "p5": 43.0,
+     "median": 44.370000000000005,
+     "p95": 44.69,
+     "min": 43.0,
+     "max": 44.69,
+     "worst_frames": [
+      {
+       "frame": 0,
+       "value": 43.0
+      },
+      {
+       "frame": 6,
+       "value": 43.0
+      },
+      {
+       "frame": 5,
+       "value": 44.2
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    },
+    "ssim": {
+     "mean": 0.9975140833333334,
+     "p5": 0.99709,
+     "median": 0.997575,
+     "p95": 0.997692,
+     "min": 0.99709,
+     "max": 0.997692,
+     "worst_frames": [
+      {
+       "frame": 0,
+       "value": 0.99709
+      },
+      {
+       "frame": 6,
+       "value": 0.99709
+      },
+      {
+       "frame": 7,
+       "value": 0.997515
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    }
+   },
+   "master_pixel_range": {
+    "min": 20,
+    "max": 235
+   },
+   "per_tier": {
+    "h264-high": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 4,
+      "max": 253
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-high",
+     "colour_range_ok": true
+    },
+    "h264-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-medium",
+     "colour_range_ok": true
+    },
+    "h264-low": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-low",
+     "colour_range_ok": true
+    },
+    "vp9-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 3,
+      "max": 249
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "vp9-medium",
+     "colour_range_ok": true
+    },
+    "av1-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 4,
+      "max": 250
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "av1-medium",
+     "colour_range_ok": true
+    }
+   }
+  },
+  "motion": {
+   "sequence_geometry": {
+    "master": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "lr_source": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       1280,
+       720
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true
+   },
+   "self_comparison": {
+    "description": "The reference master sequence compared against itself. Every frame must be infinite PSNR; anything else is an order, geometry or pixel-conversion error.",
+    "all_infinite": true,
+    "psnr_db_sample": [
+     "inf",
+     "inf",
+     "inf"
+    ]
+   },
+   "known_filter_check": {
+    "description": "Pristine pre-codec 720p upscaled 2x with PIL bicubic and compared to its 1440p master. Exact frame naming and geometry are checked first; the finite positive score is a separate sanity check that the comparison is aligned.",
+    "filter": "PIL.Image.BICUBIC",
+    "reconstruction_sequence": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true,
+    "finite_positive_metrics": true,
+    "psnr_db": {
+     "mean": 39.965,
+     "p5": 38.774,
+     "median": 40.19,
+     "p95": 40.439,
+     "min": 38.18,
+     "max": 40.45,
+     "worst_frames": [
+      {
+       "frame": 7,
+       "value": 38.18
+      },
+      {
+       "frame": 0,
+       "value": 39.26
+      },
+      {
+       "frame": 1,
+       "value": 39.92
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    },
+    "ssim": {
+     "mean": 0.9192639166666665,
+     "p5": 0.89440995,
+     "median": 0.9239865,
+     "p95": 0.92769795,
+     "min": 0.880809,
+     "max": 0.927748,
+     "worst_frames": [
+      {
+       "frame": 7,
+       "value": 0.880809
+      },
+      {
+       "frame": 0,
+       "value": 0.905538
+      },
+      {
+       "frame": 1,
+       "value": 0.920574
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    }
+   },
+   "master_pixel_range": {
+    "min": 20,
+    "max": 255
+   },
+   "per_tier": {
+    "h264-high": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-high",
+     "colour_range_ok": true
+    },
+    "h264-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-medium",
+     "colour_range_ok": true
+    },
+    "h264-low": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-low",
+     "colour_range_ok": true
+    },
+    "vp9-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "vp9-medium",
+     "colour_range_ok": true
+    },
+    "av1-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "av1-medium",
+     "colour_range_ok": true
+    }
+   }
+  },
+  "text": {
+   "sequence_geometry": {
+    "master": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "lr_source": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       1280,
+       720
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true
+   },
+   "self_comparison": {
+    "description": "The reference master sequence compared against itself. Every frame must be infinite PSNR; anything else is an order, geometry or pixel-conversion error.",
+    "all_infinite": true,
+    "psnr_db_sample": [
+     "inf",
+     "inf",
+     "inf"
+    ]
+   },
+   "known_filter_check": {
+    "description": "Pristine pre-codec 720p upscaled 2x with PIL bicubic and compared to its 1440p master. Exact frame naming and geometry are checked first; the finite positive score is a separate sanity check that the comparison is aligned.",
+    "filter": "PIL.Image.BICUBIC",
+    "reconstruction_sequence": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true,
+    "finite_positive_metrics": true,
+    "psnr_db": {
+     "mean": 32.59833333333333,
+     "p5": 32.5755,
+     "median": 32.595,
+     "p95": 32.6335,
+     "min": 32.57,
+     "max": 32.65,
+     "worst_frames": [
+      {
+       "frame": 8,
+       "value": 32.57
+      },
+      {
+       "frame": 0,
+       "value": 32.58
+      },
+      {
+       "frame": 2,
+       "value": 32.58
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    },
+    "ssim": {
+     "mean": 0.9625005833333332,
+     "p5": 0.96244095,
+     "median": 0.9624915,
+     "p95": 0.9625692,
+     "min": 0.962436,
+     "max": 0.962589,
+     "worst_frames": [
+      {
+       "frame": 9,
+       "value": 0.962436
+      },
+      {
+       "frame": 5,
+       "value": 0.962445
+      },
+      {
+       "frame": 3,
+       "value": 0.962453
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    }
+   },
+   "master_pixel_range": {
+    "min": 30,
+    "max": 255
+   },
+   "per_tier": {
+    "h264-high": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-high",
+     "colour_range_ok": true
+    },
+    "h264-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-medium",
+     "colour_range_ok": true
+    },
+    "h264-low": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-low",
+     "colour_range_ok": true
+    },
+    "vp9-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "vp9-medium",
+     "colour_range_ok": true
+    },
+    "av1-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "av1-medium",
+     "colour_range_ok": true
+    }
+   }
+  },
+  "animation": {
+   "sequence_geometry": {
+    "master": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "lr_source": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       1280,
+       720
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true
+   },
+   "self_comparison": {
+    "description": "The reference master sequence compared against itself. Every frame must be infinite PSNR; anything else is an order, geometry or pixel-conversion error.",
+    "all_infinite": true,
+    "psnr_db_sample": [
+     "inf",
+     "inf",
+     "inf"
+    ]
+   },
+   "known_filter_check": {
+    "description": "Pristine pre-codec 720p upscaled 2x with PIL bicubic and compared to its 1440p master. Exact frame naming and geometry are checked first; the finite positive score is a separate sanity check that the comparison is aligned.",
+    "filter": "PIL.Image.BICUBIC",
+    "reconstruction_sequence": {
+     "expected_frame_count": 12,
+     "actual_frame_count": 12,
+     "exact_filenames_and_order": true,
+     "dimensions": [
+      [
+       2560,
+       1440
+      ]
+     ],
+     "modes": [
+      "RGB"
+     ]
+    },
+    "geometry_ok": true,
+    "finite_positive_metrics": true,
+    "psnr_db": {
+     "mean": 40.26583333333334,
+     "p5": 40.186,
+     "median": 40.27,
+     "p95": 40.338,
+     "min": 40.12,
+     "max": 40.36,
+     "worst_frames": [
+      {
+       "frame": 10,
+       "value": 40.12
+      },
+      {
+       "frame": 1,
+       "value": 40.24
+      },
+      {
+       "frame": 8,
+       "value": 40.24
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    },
+    "ssim": {
+     "mean": 0.9963720833333335,
+     "p5": 0.99608495,
+     "median": 0.996408,
+     "p95": 0.9965858000000001,
+     "min": 0.996047,
+     "max": 0.996588,
+     "worst_frames": [
+      {
+       "frame": 2,
+       "value": 0.996047
+      },
+      {
+       "frame": 8,
+       "value": 0.996116
+      },
+      {
+       "frame": 3,
+       "value": 0.996156
+      }
+     ],
+     "nonfinite_count": 0,
+     "count": 12
+    }
+   },
+   "master_pixel_range": {
+    "min": 6,
+    "max": 244
+   },
+   "per_tier": {
+    "h264-high": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-high",
+     "colour_range_ok": true
+    },
+    "h264-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-medium",
+     "colour_range_ok": true
+    },
+    "h264-low": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "h264-low",
+     "colour_range_ok": true
+    },
+    "vp9-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "vp9-medium",
+     "colour_range_ok": true
+    },
+    "av1-medium": {
+     "geometry_ok": true,
+     "frame_count_ok": true,
+     "decoded_sequence": {
+      "expected_frame_count": 12,
+      "actual_frame_count": 12,
+      "exact_filenames_and_order": true,
+      "dimensions": [
+       [
+        1280,
+        720
+       ]
+      ],
+      "modes": [
+       "RGB"
+      ]
+     },
+     "decoded_pixel_range": {
+      "min": 0,
+      "max": 255
+     },
+     "encoded_stream_contract_ok": true,
+     "colour_calibration_tier": "av1-medium",
+     "colour_range_ok": true
+    }
+   }
+  }
+ }
+}

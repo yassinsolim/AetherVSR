@@ -1151,6 +1151,211 @@ below 7, on a 30-sample median of **raw per-frame** whole-stage times with a
 3-evaluation dwell. Recovery is judged only from neural samples gathered during
 a probe; each failed probe doubles the backoff to a 30 s ceiling. See ADR-0024.
 
+## Milestone 4.5 — Generalization and real-world video validation
+
+Milestone 4 answered an engineering question: can a neural upscaler run in the
+real pipeline at practical speed. It can. Milestone 4.5 asks a different one —
+whether the *quality* result generalizes — and that turned out to need most of
+the measurement machinery rebuilt.
+
+**Read this section before any Milestone 4 quality number.** Two of those
+numbers are now known to have measured something other than what they claimed.
+
+### Three evidentiary categories, never mixed
+
+| Category | What it is | What it can support |
+| --- | --- | --- |
+| **REGRESSION** | the deterministic synthetic reference; the eight-image natural set | detecting change between builds |
+| **SOURCE-DISJOINT** | `val` and `test` splits of the training corpus | no source image shared with training; same corpus and curation |
+| **INDEPENDENT** | 60 CC0 images from the Met Open Access collection | a different institution, checked for exact, URL and perceptual overlap |
+
+The eight-image natural set overlaps the training corpus at source level, so it
+is a regression artefact and not generalisation evidence. It is retained because
+it is still the fastest way to notice that something changed.
+
+### What Milestone 4 got wrong
+
+**1. The validation split leaked source identity.** `load_patches` drew several
+patches from every photograph, pooled them, and shuffled the pool. Replaying
+that split on the 495-image corpus:
+
+| | |
+| --- | ---: |
+| images contributing to both train and val | 231 (46.7% of the corpus) |
+| val patches whose source also appears in train | 297/297 (100.00%) |
+| val patches from a genuinely unseen photograph | **0** |
+
+Not a partial leak. Every validation patch was a different crop of a photograph
+the model had trained on, so Milestone 4's validation PSNR measured memorisation
+of specific images. It is not evidence about unseen content and is not quoted as
+such anywhere below.
+
+**2. The baseline was the wrong filter.** Every delta in this project is neural
+minus Catmull-Rom, so the identity of that baseline decides every number. The
+Python evaluators used `F.interpolate(mode="bicubic")`, which is Keys cubic with
+**a = -0.75**. The shipped WGSL is `B = 0, C = 0.5`, i.e. Keys **a = -0.5**.
+Measured against the production scaler's own render pass on a fixed fixture:
+
+| Candidate | max abs diff | mean abs diff |
+| --- | ---: | ---: |
+| Python a = -0.5 (now used) | **0.557/255** | 0.2475/255 |
+| PyTorch bicubic a = -0.75 (was used) | 17.588/255 | 4.2205/255 |
+
+0.557/255 is below one quantisation step of an `rgba8unorm` target, so the
+corrected kernel is the shipped filter to within rounding. Every affected
+measurement was rerun and no pre-fix delta survives. The direction was not
+predicted in advance and went the other way from expectation: the true baseline
+is *softer*, so the neural advantage grew. Fixture and tolerance are in
+`results/catmull-rom-parity.json`.
+
+### Corrected dataset design
+
+Split unit is the source image, assigned by SHA-256 of file content and a
+recorded salt, so the assignment survives filesystem ordering, repeated runs,
+patch-extraction changes and corpus growth.
+
+| Split | Images |
+| --- | ---: |
+| train | 326 |
+| val | 88 |
+| test | 81 |
+| **total** | **495** |
+
+Nominal ratios are 70/15/15; realised are 65.9/17.8/16.4. Hash bucketing gives
+approximate counts and the salt was **not** tuned to land on prettier ones —
+searching salts for a target count is selecting a split. `test/dataset-split.test.ts`
+enforces pairwise disjointness at content hash and filename in CI.
+
+Training never loads the test split at all. Not to print a number, not to plot a
+curve: a test score available every epoch is an invitation to select on it.
+
+### Seed variance, five seeds, everything fixed but the seed
+
+| Set | neural PSNR | Catmull-Rom | Δ dB | Δ SSIM |
+| --- | ---: | ---: | ---: | ---: |
+| val (source-disjoint) | 29.513 ± 0.059 | 29.032 | **+0.480 ± 0.058** | +0.0204 |
+| test (source-disjoint) | 29.289 ± 0.051 | 28.858 | **+0.430 ± 0.048** | +0.0211 |
+| independent (Met) | 33.805 ± 0.069 | 33.385 | **+0.420 ± 0.064** | +0.0111 |
+
+Absolute PSNR is not comparable across sets — the Met corpus is museum
+photography with different content statistics — but the deltas are.
+
+**Seed standard deviation is 0.05–0.07 dB.** Milestone 4 saw a 1.1 dB swing
+after a 1% corpus change and I wrote that run-to-run variance was the likely
+cause. That was wrong by a factor of twenty: on the synthetic reference the seed
+spread is 0.055 dB, so 1.1 dB is 20σ. The shipped Milestone 4 model sits 0.2σ
+from the new seed mean; the withdrawn one sits 20.3σ away. The cause of that
+outlier was never isolated and is not attributed here.
+
+### Realistic degradation
+
+`tools/degrade.py`. Compression profiles perform a real libx264 encode and
+decode, not an approximation. CRF tiers were measured rather than chosen — real
+720p crops across CRF 18…38 give 18 → 39.28 dB/88 kB, 26 → 33.60 dB/34 kB,
+34 → 29.14 dB/12 kB.
+
+| Profile | Definition |
+| --- | --- |
+| `box` | exact `avg_pool2d` k2 s2, `torch.equal` to `box_downsample2` |
+| `bicubic`, `lanczos` | clean 2×, no compression |
+| `h264_high/typical/poor` | 2× resize + 4:2:0 + H.264 CRF 18/26/34 |
+| `realistic` | kernel uniform over the three, gaussian pre-blur p=0.5 σ∈(0.15,0.6), CRF uniform [18,36] |
+
+Chroma and range are explicit end to end (full-range RGB ↔ yuv420p BT.709
+limited), threads pinned for reproducibility, ffmpeg 9.0.1.
+
+### Cross-degradation matrix
+
+Same C16D2 architecture, same split, same seeds, same budget. **Only the
+training degradation differs.** Independent corpus, 30 images, five seeds per
+row; each cell is neural − Catmull-Rom on identical inputs.
+
+| train \ eval | box | bicubic | lanczos | h264_high | h264_typical | h264_poor |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **box** | +0.416±0.085 | +0.617±0.091 | +0.344±0.090 | +0.292±0.061 | +0.180±0.052 | +0.042±0.036 |
+| **realistic** | +0.091±0.075 | +0.545±0.070 | +0.272±0.078 | **+0.572±0.055** | **+0.397±0.038** | +0.147±0.024 |
+
+Realistic training roughly doubles the advantage on compressed input — +0.180 →
++0.397 dB at typical CRF, which is 8.9σ of the seed noise — and gives up most of
+the clean-condition advantage, +0.416 → +0.091.
+
+**This answers the question the milestone was built to isolate: it was the data,
+not the architecture.** The network was not too small to help on compressed
+video; it had been trained to invert a degradation that compressed video does
+not have.
+
+Both rows stay weak at `h264_poor` (+0.042 and +0.147). Heavy compression
+removes the information a 6,291-parameter network would need, and neither
+training distribution rescues it.
+
+### Ground-truth video
+
+`tools/videobench.py` builds a deterministic 2560×1440 master, downscales to
+720p, encodes at five codec/quality tiers, and decodes. The 1440p master frames
+are the reference. Alignment is proven per category: master self-comparison is
+infinite PSNR, pristine-LR bicubic checks are finite and sane, geometry and
+frame order are checked explicitly. VMAF is withheld automatically if colour
+calibration fails.
+
+**The footage is procedurally generated, not real camera capture.** That is a
+real limit on what these numbers can claim: the content is designed to be
+challenging, but it is not photography, and a synthetic texture category may be
+adversarial in ways real video is not.
+
+Δ dB against production Catmull-Rom, mean ± std over five seeds:
+
+| cond | tier | natural | texture | motion | text | animation |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| box | h264-high | −0.153 | −0.947 | −0.068 | +0.519 | −0.261 |
+| box | h264-medium | −0.081 | −0.581 | −0.076 | +0.522 | −0.204 |
+| box | vp9-medium | −0.091 | −1.193 | −0.024 | +0.536 | −0.251 |
+| box | av1-medium | −0.057 | −1.085 | −0.024 | +0.523 | −0.245 |
+| realistic | h264-high | −0.174 | **+0.574** | −0.132 | +0.406 | −0.002 |
+| realistic | h264-medium | −0.094 | +0.323 | −0.067 | +0.391 | +0.004 |
+| realistic | vp9-medium | −0.085 | +0.492 | −0.071 | +0.414 | +0.009 |
+| realistic | av1-medium | −0.063 | **+0.639** | −0.037 | +0.401 | +0.006 |
+
+Mean over all 25 category/tier cells: **box −0.141 dB, realistic +0.131 dB.**
+
+The clean-trained model loses on everything except text. The realistic model
+wins clearly on texture and text, is neutral on animation, and still loses
+slightly on natural and motion — and is in fact *more* negative there than the
+clean model. Reported per category because those are different outcomes.
+
+### Temporal, both conditions, five seeds each
+
+| Condition | static MAD | integer-pan MAD | sub-pixel variance ratio |
+| --- | ---: | ---: | ---: |
+| box-trained | 0 (all seeds) | ≤ 0.0101 | 3.067 ± 0.118× |
+| realistic-trained | 0 (all seeds) | ≤ 0.0137 | 2.938 ± 0.158× |
+
+Static control is exactly zero everywhere and the integer-pan shift gate passes
+everywhere. The elevated sub-pixel response Milestone 4 reported at 3.25× is
+therefore a **stable property of the architecture**, not a seed artefact —
+across ten models it never leaves 2.73–3.17×. Realistic training reduces it
+slightly while also scoring higher on the synthetic reference, so the
+quality/temporal trade moves the right way, but not by much.
+
+### Selected model and production runtime
+
+`public/models/aethersr-c16d2-realistic.json` — realistic seed 1, chosen on
+**validation only** (26.593 dB, best of five) before any test or video number
+was consulted.
+
+720p60 live pipeline, 31 s after warm-up, window foregrounded:
+
+| Metric | Value |
+| --- | ---: |
+| Whole stage | 5.83 ms avg · **p50 5.68** · p95 6.90 · max 7.72 (n=240) |
+| Share of 16.67 ms | 35.0% |
+| Presented FPS | 59.7 mean |
+| Parameters | 6,291 |
+| Persistent GPU memory | 77.43 MB (activations 2 × 29.49 MB, fp16) |
+
+Identical architecture and footprint to Milestone 4, as expected — the p50 moves
+from 5.34 to 5.68 ms, inside the ~16–19% cross-session spread this machine is
+already documented to have.
+
 ## Reproducing
 
 ```bash

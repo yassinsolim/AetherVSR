@@ -956,3 +956,83 @@ wrote the code, and it stopped a design that had already been implemented and
 benchmarked. It was worth the delay: the first architecture was withdrawn on the
 strength of it. Recording that here so the cost of the gate is not mistaken for
 wasted effort the next time one fires.
+
+## ADR-0028 — Split by source image; validation selects, test judges once
+
+**Status:** accepted (Milestone 4.5)
+
+Milestone 4 pooled patches from every photograph and split the pool, so 46.7% of
+the corpus contributed to both training and validation and **100% of validation
+patches came from a photograph the model had trained on**. That score measured
+memorisation, so it could not answer the only question worth asking of it.
+
+The split unit is now the source image, assigned deterministically from the
+SHA-256 of file content plus a recorded salt. Content hash rather than filename
+or URL, because the fetcher assigns filenames and one photograph can have
+several URLs. Hashing rather than seeding an RNG over a list, because the
+assignment must not depend on directory order and must not reshuffle when the
+corpus grows.
+
+Roles are fixed and asymmetric:
+
+- **train** — gradient updates only.
+- **val** — checkpoint selection and hyperparameter development.
+- **test** — evaluated once, on a frozen model, and never read during training.
+
+`train.py` does not load the test split at all. Not to log a number, not to draw
+a curve. A test metric that is available every epoch will eventually be looked
+at, and the cheapest way to guarantee it cannot influence a decision is for the
+data not to be in the process.
+
+`test/dataset-split.test.ts` enforces disjointness in CI against the committed
+manifest, with no Python and no GPU.
+
+## ADR-0029 — Evaluate against the filter the product ships
+
+**Status:** accepted (Milestone 4.5)
+
+Every quality claim in this project is *neural minus Catmull-Rom*, which makes
+the baseline's identity load-bearing. The Python evaluators used
+`F.interpolate(mode="bicubic")` — Keys cubic with a = -0.75 — while the shipped
+WGSL is B = 0, C = 0.5, i.e. Keys a = -0.5. Different filters, and the wrong one
+was sharper, so the neural stage was being scored against an opponent that
+exists nowhere in the product.
+
+Baselines must now be verified against the production implementation, not
+against a library function that resembles it. The check is a fixed fixture
+pushed through the real `BaselineScaler` render pass and read back:
+
+    python a = -0.5     max 0.557/255    below one 8-bit quantisation step
+    pytorch a = -0.75   max 17.588/255   thirty times that
+
+Recorded in `results/catmull-rom-parity.json` with its tolerance and scope. The
+lesson generalises past this one kernel: a reference implementation is only a
+reference if something checks it against the thing being shipped.
+
+## ADR-0030 — Ship the realistic-degradation model for compressed input
+
+**Status:** accepted (Milestone 4.5)
+
+Two models, identical architecture, differing only in training degradation. The
+realistic-trained model is selected as the default because the product's input
+is compressed web video.
+
+It is a targeted trade and not a uniform improvement:
+
+    better   compressed stills   +0.397 vs +0.180 dB at typical CRF
+             ground-truth video  +0.131 vs -0.141 dB overall
+             synthetic reference 21.065 vs 20.542
+             sub-pixel temporal  2.938x vs 3.067x Catmull-Rom
+    worse    clean box stills    +0.091 vs +0.416 dB
+             video natural       -0.174 vs -0.153
+             video motion        -0.132 vs -0.068
+
+Anyone upscaling pristine imagery should prefer the clean-trained weights, which
+remain reproducible from `tools/run-seeds.sh`. The seed was chosen on validation
+alone, before any test or video figure was consulted, and every seed's results
+are published rather than only the selected one.
+
+The finding behind this decision matters more than the decision: the network was
+never too small to help on compressed video. It had been trained to invert a
+degradation that compressed video does not have. Architecture was held fixed
+precisely so that could be established.
