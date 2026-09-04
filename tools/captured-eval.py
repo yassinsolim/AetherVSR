@@ -66,7 +66,10 @@ def frame_distribution(values: list[float]) -> dict:
     return {
         "mean": st.fmean(ordered),
         "median": st.median(ordered),
-        "p5": ordered[max(0, int(0.05 * len(ordered)) - 1)],
+        # Nearest-rank on the 0..n-1 index. The previous form collapsed to
+        # ordered[0] for any n < 40, so every published p5 equalled min and the
+        # tail was understated.
+        "p5": ordered[min(len(ordered) - 1, round(0.05 * (len(ordered) - 1)))],
         "p95": ordered[min(len(ordered) - 1, int(0.95 * len(ordered)))],
         "min": ordered[0],
         "max": ordered[-1],
@@ -215,7 +218,10 @@ def main() -> int:
                       for c in per_clip if condition in c["conditions"]]
         aggregate[condition] = {
             "psnr": paired_stats(diffs),
-            "ssimMeanDiff": st.fmean(ssim_diffs) if ssim_diffs else float("nan"),
+            # SSIM inverted the nearest/bilinear control on 4 of 15 clips, so it
+            # is reported but no conclusion rests on it. See
+            # results/captured-metric-sanity.json.
+            "ssimMeanDiff_DIAGNOSTIC_ONLY": st.fmean(ssim_diffs) if ssim_diffs else float("nan"),
         }
 
     report = {

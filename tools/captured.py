@@ -95,7 +95,8 @@ def probe(path: str) -> dict:
     return json.loads(out)
 
 
-def extract_master_frames(source: str, out_dir: str, start: float, frames: int, fps: int) -> list[str]:
+def extract_master_frames(source: str, out_dir: str, start: float, frames: int, fps: int,
+                          active: str | None = None) -> list[str]:
     """HR reference frames: deterministic crop-to-fit at exactly HR_W x HR_H.
 
     `increase` then centre-crop rather than `decrease` plus padding, so no black
@@ -104,18 +105,90 @@ def extract_master_frames(source: str, out_dir: str, start: float, frames: int, 
     which quietly compresses the differences the benchmark exists to measure.
     """
     os.makedirs(out_dir, exist_ok=True)
+    # `cropdetect`-derived active area first, when the source is pillarboxed.
+    # Three sources are 9:16 vertical footage padded into a 16:9 frame, so a
+    # centre crop of the padded frame keeps the bars: measured 68.3% of samples
+    # exactly zero, with the picture in 818 of 2560 columns. Scoring that
+    # inflates absolute PSNR with zero-error area and means the category is not
+    # measuring what its name says.
+    pre = f"crop={active}," if active else ""
+    # mpdecimate before scaling: several sources are transcodes that repeat
+    # frames (a 30 fps interview delivered at 59.94), and a duplicated
+    # reference silently disables the off-by-one alignment check at that index.
     vf = (
-        f"scale={HR_W}:{HR_H}:force_original_aspect_ratio=increase:flags=lanczos,"
+        f"{pre}scale={HR_W}:{HR_H}:force_original_aspect_ratio=increase:flags=lanczos,"
         f"crop={HR_W}:{HR_H},{DECODE_FILTER}"
     )
+    # No `-r`/`-fps_mode cfr`. Rate conversion duplicated the first frame on 4 of
+    # 15 clips - master_sha256[0] == master_sha256[1] - which blinded the
+    # off-by-one alignment check at that index, since it then compared a decoded
+    # frame against two identical references.
+    # Over-extract, then keep the first `frames` *distinct* images.
+    #
+    # Several sources are transcodes that repeat frames - a 30 fps interview
+    # delivered at 59.94 - and mpdecimate did not reliably remove them at this
+    # scale. A duplicated reference is not cosmetic: it silently disables the
+    # off-by-one alignment check at that index, because the decoded frame is
+    # then compared against two identical references and the margin is 0 dB by
+    # construction. Hashing is exact and deterministic, which the filter was not.
+    staging = out_dir + ".raw"
+    shutil.rmtree(staging, ignore_errors=True)
+    os.makedirs(staging, exist_ok=True)
     run([
         FFMPEG, "-hide_banner", "-loglevel", "error",
         "-ss", f"{start}", "-i", source,
-        "-frames:v", str(frames), "-r", str(fps),
-        "-vf", vf, "-fps_mode", "cfr",
-        os.path.join(out_dir, "frame_%04d.png"),
+        "-frames:v", str(frames * 4),
+        "-vf", vf, "-fps_mode", "passthrough",
+        os.path.join(staging, "raw_%04d.png"),
     ])
+
+    seen: set[str] = set()
+    kept = 0
+    for name in sorted(os.listdir(staging)):
+        src = os.path.join(staging, name)
+        digest = sha256_file(src)
+        if digest in seen:
+            continue
+        seen.add(digest)
+        kept += 1
+        shutil.move(src, os.path.join(out_dir, f"frame_{kept:04d}.png"))
+        if kept == frames:
+            break
+    shutil.rmtree(staging, ignore_errors=True)
     return sorted(os.listdir(out_dir))
+
+
+def detect_active_area(source: str, start: float) -> str | None:
+    """Returns a crop spec for pillarboxed/letterboxed sources, else None."""
+    r = subprocess.run(
+        [FFMPEG, "-hide_banner", "-ss", f"{start}", "-i", source, "-frames:v", "12",
+         "-vf", "cropdetect=limit=24:round=2:reset=0", "-f", "null", "-"],
+        capture_output=True, text=True, check=False,
+    )
+    spec = None
+    for line in r.stderr.splitlines():
+        if "crop=" in line:
+            spec = line.rsplit("crop=", 1)[1].strip()
+    if not spec:
+        return None
+    try:
+        w, h, _, _ = (int(v) for v in spec.split(":"))
+    except ValueError:
+        return None
+    # Only act when a real bar exists; ignore one- or two-pixel jitter.
+    probe = probe_dimensions(source)
+    if probe and (w < probe[0] * 0.95 or h < probe[1] * 0.95):
+        return spec
+    return None
+
+
+def probe_dimensions(path: str) -> tuple[int, int] | None:
+    try:
+        info = probe(path)
+        s = info["streams"][0]
+        return int(s["width"]), int(s["height"])
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def encode_lr(master_dir: str, out_path: str, condition: str, fps: int) -> list[str]:
@@ -181,7 +254,8 @@ def main() -> int:
         clip_root = os.path.join(args.root, "clips", clip["id"])
         master_dir = os.path.join(clip_root, "master")
         shutil.rmtree(clip_root, ignore_errors=True)
-        extract_master_frames(source, master_dir, clip["start_seconds"], args.frames, args.fps)
+        active = detect_active_area(source, clip["start_seconds"])
+        extract_master_frames(source, master_dir, clip["start_seconds"], args.frames, args.fps, active)
         n_master = len(os.listdir(master_dir))
 
         # Fail this clip loudly instead of aborting the run, and never emit a
@@ -205,6 +279,7 @@ def main() -> int:
             "start_seconds": clip["start_seconds"],
             "frames": n_master,
             "fps": args.fps,
+            "activeAreaCrop": active,
             "master_sha256": [sha256_file(os.path.join(master_dir, f)) for f in sorted(os.listdir(master_dir))],
             "conditions": {},
         }
@@ -233,6 +308,13 @@ def main() -> int:
                     f"  ALIGNMENT: {clip['id']}/{condition} decoded {n_decoded} against {n_master} master",
                     file=sys.stderr,
                 )
+
+        # A duplicated reference frame silently disables the off-by-one check at
+        # that index, so it is an error rather than a curiosity.
+        dupes = len(entry["master_sha256"]) - len(set(entry["master_sha256"]))
+        entry["duplicateMasterFrames"] = dupes
+        if dupes:
+            print(f"  WARNING {clip['id']}: {dupes} duplicate master frames", file=sys.stderr)
 
         prepared.append(entry)
         print(f"  prepared {clip['id']:<22} {n_master} frames x {len(conditions)} conditions", file=sys.stderr)
