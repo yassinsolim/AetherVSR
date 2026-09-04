@@ -1,0 +1,38 @@
+{
+ "schema": "aethervsr.temporal-synthetic/1",
+ "environment": "Chrome for Testing 152.0.7977.42, Apple M5, one session per condition",
+ "catmullRomReference": {"syntheticPsnrLuma": 19.448, "syntheticSsim": 0.9252, "naturalEightPsnrLuma": 29.143, "subPixelMcVariance": 17.236},
+ "box": {
+  "synthetic": [
+   {"seed": 1, "psnrLuma": 20.621, "ssimLuma": 0.9537, "naturalEight": 29.536},
+   {"seed": 2, "psnrLuma": 20.509, "ssimLuma": 0.9524, "naturalEight": 29.462},
+   {"seed": 3, "psnrLuma": 20.477, "ssimLuma": 0.9516, "naturalEight": 29.475},
+   {"seed": 4, "psnrLuma": 20.541, "ssimLuma": 0.9527, "naturalEight": 29.473},
+   {"seed": 5, "psnrLuma": 20.561, "ssimLuma": 0.9528, "naturalEight": 29.464}
+  ],
+  "temporal": [
+   {"seed": 1, "staticMAD": 0, "integerPanMcMAD": 0.0101, "subPixelMcVariance": 49.642, "ratioVsCatmullRom": 2.880},
+   {"seed": 2, "staticMAD": 0, "integerPanMcMAD": 0.0083, "subPixelMcVariance": 53.704, "ratioVsCatmullRom": 3.116},
+   {"seed": 3, "staticMAD": 0, "integerPanMcMAD": 0.0070, "subPixelMcVariance": 54.714, "ratioVsCatmullRom": 3.174},
+   {"seed": 4, "staticMAD": 0, "integerPanMcMAD": 0.0074, "subPixelMcVariance": 52.146, "ratioVsCatmullRom": 3.025},
+   {"seed": 5, "staticMAD": 0, "integerPanMcMAD": 0.0066, "subPixelMcVariance": 54.098, "ratioVsCatmullRom": 3.139}
+  ]
+ },
+ "realistic": {
+  "synthetic": [
+   {"seed": 1, "psnrLuma": 21.003, "ssimLuma": 0.9609, "naturalEight": 29.316},
+   {"seed": 2, "psnrLuma": 21.016, "ssimLuma": 0.9608, "naturalEight": 29.292},
+   {"seed": 3, "psnrLuma": 21.044, "ssimLuma": 0.9606, "naturalEight": 29.323},
+   {"seed": 4, "psnrLuma": 21.074, "ssimLuma": 0.9615, "naturalEight": 29.240},
+   {"seed": 5, "psnrLuma": 21.186, "ssimLuma": 0.9627, "naturalEight": 29.053}
+  ],
+  "temporal": [
+   {"seed": 1, "staticMAD": 0, "integerPanMcMAD": 0.0113, "subPixelMcVariance": 47.063, "ratioVsCatmullRom": 2.731},
+   {"seed": 2, "staticMAD": 0, "integerPanMcMAD": 0.0099, "subPixelMcVariance": 49.654, "ratioVsCatmullRom": 2.881},
+   {"seed": 3, "staticMAD": 0, "integerPanMcMAD": 0.0102, "subPixelMcVariance": 49.802, "ratioVsCatmullRom": 2.889},
+   {"seed": 4, "staticMAD": 0, "integerPanMcMAD": 0.0137, "subPixelMcVariance": 53.925, "ratioVsCatmullRom": 3.129},
+   {"seed": 5, "staticMAD": 0, "integerPanMcMAD": 0.0119, "subPixelMcVariance": 52.702, "ratioVsCatmullRom": 3.058}
+  ]
+ },
+ "note": "The synthetic reference and the eight-image natural set are REGRESSION artefacts: the natural set overlaps the training corpus at source level. They detect change; they are not generalisation evidence. Both conditions score exactly 0 on the static control and pass the integer-pan shift gate."
+}

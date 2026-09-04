@@ -1,0 +1,68 @@
+{
+ "model": "aethersr-c16d2-realistic.json",
+ "modelSeed": 1,
+ "cropRule": "highest gradient energy, 128 HR px, nearest-neighbour 3x zoom for inspection",
+ "panelOrder": [
+  "nearest",
+  "Catmull-Rom",
+  "neural",
+  "reference"
+ ],
+ "images": [
+  {
+   "file": "ind0000_bc34cf9f2e-h264_typical.png",
+   "source": "data/eval-independent/ind0000_bc34cf9f2e.jpg",
+   "crop": [
+    832,
+    704,
+    128,
+    128
+   ],
+   "profile": "h264_typical"
+  },
+  {
+   "file": "ind0001_5de0d11e32-h264_typical.png",
+   "source": "data/eval-independent/ind0001_5de0d11e32.jpg",
+   "crop": [
+    960,
+    448,
+    128,
+    128
+   ],
+   "profile": "h264_typical"
+  },
+  {
+   "file": "ind0002_5ebf0ffc0d-h264_typical.png",
+   "source": "data/eval-independent/ind0002_5ebf0ffc0d.jpg",
+   "crop": [
+    448,
+    256,
+    128,
+    128
+   ],
+   "profile": "h264_typical"
+  },
+  {
+   "file": "ind0003_dc30ebb4fd-h264_typical.png",
+   "source": "data/eval-independent/ind0003_dc30ebb4fd.jpg",
+   "crop": [
+    640,
+    320,
+    128,
+    128
+   ],
+   "profile": "h264_typical"
+  },
+  {
+   "file": "frame_0000-h264_typical.png",
+   "source": "data/video/text/master/frame_0000.png",
+   "crop": [
+    128,
+    192,
+    128,
+    128
+   ],
+   "profile": "h264_typical"
+  }
+ ]
+}

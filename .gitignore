@@ -20,4 +20,6 @@ __pycache__/
 
 # Seed sweep weights: regenerate with tools/run-seeds.sh. The aggregated
 # results in results/ are committed; 5+ model files per configuration are not.
-models/
+# Root-anchored: an unanchored `models/` also swallowed public/models, which
+# holds the shipped weights.
+/models/
