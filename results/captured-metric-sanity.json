@@ -1,0 +1,385 @@
+{
+ "schema": "aethervsr.captured-metric-sanity/1",
+ "condition": "h264_high",
+ "control": "nearest <= bilinear <= Catmull-Rom <= Lanczos on real footage",
+ "why": "Milestone 4.5 published VMAF for 25 cells then found it ranked nearest above Lanczos in 20. A metric that prefers nearest cannot choose an upscaler.",
+ "summary": {
+  "psnr": {
+   "clipsChecked": 15,
+   "clipsRespectingOrder": 15,
+   "verdict": "USABLE"
+  },
+  "ssim": {
+   "clipsChecked": 15,
+   "clipsRespectingOrder": 9,
+   "verdict": "DIAGNOSTIC ONLY - ordering inverted"
+  },
+  "vmaf": {
+   "clipsChecked": 15,
+   "clipsRespectingOrder": 0,
+   "verdict": "DIAGNOSTIC ONLY - ordering inverted"
+  }
+ },
+ "perClip": {
+  "faces-video-production-i-m-a-defender-pr": {
+   "nearest": {
+    "psnr": 37.278070052464805,
+    "ssim": 0.973947544892629
+   },
+   "bilinear": {
+    "psnr": 38.776172399520874,
+    "ssim": 0.9803785781065623
+   },
+   "catmull_rom": {
+    "psnr": 39.79482213656107,
+    "ssim": 0.9831390380859375
+   },
+   "lanczos": {
+    "psnr": 40.17696460088094,
+    "ssim": 0.9834383626778921
+   },
+   "vmaf": {
+    "nearest": 67.97232871428572,
+    "bilinear": 60.49892742857143,
+    "catmull_rom": 68.25959371428571,
+    "lanczos": 70.37722557142857
+   }
+  },
+  "faces-video-production-i-m-a-defender-la": {
+   "nearest": {
+    "psnr": 36.156540314356484,
+    "ssim": 0.9724850654602051
+   },
+   "bilinear": {
+    "psnr": 38.037128845850624,
+    "ssim": 0.9811493754386902
+   },
+   "catmull_rom": {
+    "psnr": 39.15426770846049,
+    "ssim": 0.9840303758780161
+   },
+   "lanczos": {
+    "psnr": 39.56529219945272,
+    "ssim": 0.9842979907989502
+   },
+   "vmaf": {
+    "nearest": 72.39307442857144,
+    "bilinear": 64.77840614285715,
+    "catmull_rom": 84.76396866666666,
+    "lanczos": 74.40736385714285
+   }
+  },
+  "faces-video-production-challenging-train": {
+   "nearest": {
+    "psnr": 33.04188887278239,
+    "ssim": 0.96295232574145
+   },
+   "bilinear": {
+    "psnr": 33.96858096122742,
+    "ssim": 0.9664656519889832
+   },
+   "catmull_rom": {
+    "psnr": 35.2206285794576,
+    "ssim": 0.9736760258674622
+   },
+   "lanczos": {
+    "psnr": 35.76730251312256,
+    "ssim": 0.9755256772041321
+   },
+   "vmaf": {
+    "nearest": 66.60827485714286,
+    "bilinear": 57.73504257142857,
+    "catmull_rom": 67.43563714285715,
+    "lanczos": 70.15522385714284
+   }
+  },
+  "motion-2023-maplefest-in-bowmanville-on-2": {
+   "nearest": {
+    "psnr": 25.8003834883372,
+    "ssim": 0.8526219228903452
+   },
+   "bilinear": {
+    "psnr": 26.37237310409546,
+    "ssim": 0.8508524696032206
+   },
+   "catmull_rom": {
+    "psnr": 27.469351291656494,
+    "ssim": 0.8843761185805002
+   },
+   "lanczos": {
+    "psnr": 27.85599112510681,
+    "ssim": 0.8933245142300924
+   },
+   "vmaf": {
+    "nearest": 69.59849200000001,
+    "bilinear": 57.934565,
+    "catmull_rom": 70.88938628571428,
+    "lanczos": 74.57111414285714
+   }
+  },
+  "motion-rogla-slovenia-ostru-ica-1-4k-pov-": {
+   "nearest": {
+    "psnr": 30.111008087793987,
+    "ssim": 0.927984356880188
+   },
+   "bilinear": {
+    "psnr": 30.888722737630207,
+    "ssim": 0.9348770081996918
+   },
+   "catmull_rom": {
+    "psnr": 32.31515725453695,
+    "ssim": 0.9494454463322958
+   },
+   "lanczos": {
+    "psnr": 32.9401179154714,
+    "ssim": 0.9534267485141754
+   },
+   "vmaf": {
+    "nearest": 66.53301314285714,
+    "bilinear": 55.89030928571429,
+    "catmull_rom": 68.326125,
+    "lanczos": 72.11220342857143
+   }
+  },
+  "motion-aerial-drone-chase-of-a-train-webm": {
+   "nearest": {
+    "psnr": 37.41959969202677,
+    "ssim": 0.9581867754459381
+   },
+   "bilinear": {
+    "psnr": 38.11843395233154,
+    "ssim": 0.9656662543614706
+   },
+   "catmull_rom": {
+    "psnr": 38.867832819620766,
+    "ssim": 0.9692220787207285
+   },
+   "lanczos": {
+    "psnr": 39.10591165224711,
+    "ssim": 0.969601591428121
+   },
+   "vmaf": {
+    "nearest": 69.16271657142856,
+    "bilinear": 59.968573857142864,
+    "catmull_rom": 69.89871385714285,
+    "lanczos": 73.124275
+   }
+  },
+  "urban-funchal-madeira-amazing-view-from-": {
+   "nearest": {
+    "psnr": 25.722966194152832,
+    "ssim": 0.8744639754295349
+   },
+   "bilinear": {
+    "psnr": 26.072208881378174,
+    "ssim": 0.8634367982546488
+   },
+   "catmull_rom": {
+    "psnr": 27.12286353111267,
+    "ssim": 0.8964509765307108
+   },
+   "lanczos": {
+    "psnr": 27.466379006703693,
+    "ssim": 0.9040879011154175
+   },
+   "vmaf": {
+    "nearest": 71.41037100000001,
+    "bilinear": 57.92109728571428,
+    "catmull_rom": 72.06200057142857,
+    "lanczos": 76.28143285714285
+   }
+  },
+  "urban-aerial-video-of-charlotte-nc-4k-dr": {
+   "nearest": {
+    "psnr": 27.453943093617756,
+    "ssim": 0.8969190716743469
+   },
+   "bilinear": {
+    "psnr": 27.824501991271973,
+    "ssim": 0.8944685757160187
+   },
+   "catmull_rom": {
+    "psnr": 28.84066979090373,
+    "ssim": 0.9158404469490051
+   },
+   "lanczos": {
+    "psnr": 29.159732659657795,
+    "ssim": 0.9202516575654348
+   },
+   "vmaf": {
+    "nearest": 68.30528042857142,
+    "bilinear": 55.85030114285714,
+    "catmull_rom": 68.67320271428572,
+    "lanczos": 72.33259457142857
+   }
+  },
+  "urban-drone-footage-in-new-orleans-2022-": {
+   "nearest": {
+    "psnr": 30.76907475789388,
+    "ssim": 0.9409721593062083
+   },
+   "bilinear": {
+    "psnr": 31.36298894882202,
+    "ssim": 0.9431902170181274
+   },
+   "catmull_rom": {
+    "psnr": 32.85766005516052,
+    "ssim": 0.95936119556427
+   },
+   "lanczos": {
+    "psnr": 33.59734455744425,
+    "ssim": 0.9648760954538981
+   },
+   "vmaf": {
+    "nearest": 72.14134028571429,
+    "bilinear": 61.75371685714286,
+    "catmull_rom": 73.7387462857143,
+    "lanczos": 77.88994314285715
+   }
+  },
+  "nature-4k-drone-flight-peninsula-state-pa": {
+   "nearest": {
+    "psnr": 33.48360300064087,
+    "ssim": 0.9642296632130941
+   },
+   "bilinear": {
+    "psnr": 34.506175915400185,
+    "ssim": 0.9783003330230713
+   },
+   "catmull_rom": {
+    "psnr": 35.55713971455892,
+    "ssim": 0.980715811252594
+   },
+   "lanczos": {
+    "psnr": 35.92779835065206,
+    "ssim": 0.9801668425401052
+   },
+   "vmaf": {
+    "nearest": 74.41998357142857,
+    "bilinear": 64.46971985714286,
+    "catmull_rom": 74.15360614285714,
+    "lanczos": 76.001856
+   }
+  },
+  "nature-the-beautiful-blue-river-dji-phant": {
+   "nearest": {
+    "psnr": 30.340892871220905,
+    "ssim": 0.9046149055163065
+   },
+   "bilinear": {
+    "psnr": 31.135234435399372,
+    "ssim": 0.9157379368940989
+   },
+   "catmull_rom": {
+    "psnr": 32.10859696070353,
+    "ssim": 0.9291988809903463
+   },
+   "lanczos": {
+    "psnr": 32.35361258188883,
+    "ssim": 0.9309545656045278
+   },
+   "vmaf": {
+    "nearest": 78.85849271428572,
+    "bilinear": 71.08680285714286,
+    "catmull_rom": 79.92660442857142,
+    "lanczos": 81.48525057142857
+   }
+  },
+  "nature-piz-neir-aerial-video-4k-webm": {
+   "nearest": {
+    "psnr": 29.345961809158325,
+    "ssim": 0.8718118667602539
+   },
+   "bilinear": {
+    "psnr": 29.56739107767741,
+    "ssim": 0.8626926441987356
+   },
+   "catmull_rom": {
+    "psnr": 30.54956515630086,
+    "ssim": 0.8917204837004343
+   },
+   "lanczos": {
+    "psnr": 30.893482367197674,
+    "ssim": 0.899925708770752
+   },
+   "vmaf": {
+    "nearest": 66.28389928571428,
+    "bilinear": 56.20806014285714,
+    "catmull_rom": 67.393111,
+    "lanczos": 70.786593
+   }
+  },
+  "lowlight-hofer-weihnachtsmarkt-am-abend-202": {
+   "nearest": {
+    "psnr": 29.482484261194866,
+    "ssim": 0.9533352255821228
+   },
+   "bilinear": {
+    "psnr": 30.12715260187785,
+    "ssim": 0.957690010468165
+   },
+   "catmull_rom": {
+    "psnr": 31.225794553756714,
+    "ssim": 0.965360422929128
+   },
+   "lanczos": {
+    "psnr": 31.649345954259235,
+    "ssim": 0.9670174717903137
+   },
+   "vmaf": {
+    "nearest": 69.14472771428572,
+    "bilinear": 57.70682171428571,
+    "catmull_rom": 69.63193714285714,
+    "lanczos": 72.74673385714286
+   }
+  },
+  "texture-snowex-field-campaign-4k-b-roll-fr": {
+   "nearest": {
+    "psnr": 31.45666241645813,
+    "ssim": 0.9371589620908102
+   },
+   "bilinear": {
+    "psnr": 32.254769802093506,
+    "ssim": 0.9430962602297465
+   },
+   "catmull_rom": {
+    "psnr": 33.77930363019308,
+    "ssim": 0.9582130213578542
+   },
+   "lanczos": {
+    "psnr": 34.50715263684591,
+    "ssim": 0.9629738132158915
+   },
+   "vmaf": {
+    "nearest": 70.98755657142857,
+    "bilinear": 61.25737028571429,
+    "catmull_rom": 72.81097700000001,
+    "lanczos": 76.33191599999999
+   }
+  },
+  "texture-4k-drone-footage-of-a-barge-on-the": {
+   "nearest": {
+    "psnr": 37.36354430516561,
+    "ssim": 0.9859761695067087
+   },
+   "bilinear": {
+    "psnr": 39.15779789288839,
+    "ssim": 0.9889984627564748
+   },
+   "catmull_rom": {
+    "psnr": 39.95462894439697,
+    "ssim": 0.9901209076245626
+   },
+   "lanczos": {
+    "psnr": 40.42304277420044,
+    "ssim": 0.9895179768403372
+   },
+   "vmaf": {
+    "nearest": 80.93334428571428,
+    "bilinear": 74.00754885714287,
+    "catmull_rom": 81.46442128571428,
+    "lanczos": 83.63745257142857
+   }
+  }
+ }
+}
