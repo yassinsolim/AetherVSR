@@ -97,6 +97,33 @@ def validate_manifest(corpus: str, minimum: int) -> dict:
     return manifest
 
 
+def load_video_pairs(
+    pairs_dir: str,
+) -> tuple[dict, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Load pre-degraded (LR, HR) patch pairs produced by tools/video-degrade.py.
+
+    Unlike the still-photograph path, the degradation is not applied here and
+    cannot be re-drawn per batch: it happened once, inside a real 720p H.264
+    encode of a temporally coherent sequence, which is the entire point. The
+    tensors are stored uint8 and converted on the way to the device.
+    """
+    with open(os.path.join(pairs_dir, "pairs.json"), encoding="utf-8") as fh:
+        meta = json.load(fh)
+    out: list[torch.Tensor] = []
+    for split in ("train", "val"):
+        path = os.path.join(pairs_dir, f"{split}.pt")
+        if not os.path.exists(path):
+            raise SystemExit(f"missing {path}; run tools/video-degrade.py first")
+        blob = torch.load(path)
+        lr, hr = blob["lr"], blob["hr"]
+        if lr.shape[0] != hr.shape[0]:
+            raise SystemExit(f"{split}: {lr.shape[0]} lr patches vs {hr.shape[0]} hr patches")
+        if hr.shape[-1] != lr.shape[-1] * 2 or hr.shape[-2] != lr.shape[-2] * 2:
+            raise SystemExit(f"{split}: hr {tuple(hr.shape)} is not 2x lr {tuple(lr.shape)}")
+        out += [lr.float().div_(255.0), hr.float().div_(255.0)]
+    return meta, out[0], out[1], out[2], out[3]
+
+
 def load_patches(
     corpus: str, files: list[str], patch: int, per_image: int, limit: int, seed: int
 ) -> torch.Tensor:
@@ -215,41 +242,70 @@ def main() -> int:
         help="HR->LR degradation: 'box' (clean 2x box downsample) or a realistic "
         "web-video profile name from tools/degrade.py",
     )
+    ap.add_argument(
+        "--pairs",
+        default=None,
+        help="directory of pre-degraded video pairs from tools/video-degrade.py. "
+        "Mutually exclusive with --corpus/--split/--degradation: the degradation "
+        "already happened, at full frame resolution, inside a real video encode.",
+    )
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
     random.seed(args.seed)
 
-    manifest = validate_manifest(args.corpus, args.min_images)
-
     device = "mps" if torch.backends.mps.is_available() else "cpu"
     print(f"device: {device}")
 
-    # The split is decided by source image before a single patch is read, so a
-    # photograph cannot contribute to more than one side. `test` is deliberately
-    # not loaded here: training must not be able to see it even by accident, and
-    # a test score computed every epoch is an invitation to select on it.
-    # `tools/evaluate.py` scores a frozen model on any split, once.
-    split = load_split(args.split)
-    problems = check_disjoint(split)
-    if problems:
-        for problem in problems:
-            print(f"ERROR split not disjoint: {problem}", file=sys.stderr)
-        raise SystemExit("refusing to train on a leaking split")
+    if args.pairs:
+        # Video pairs carry their own source-level split and their own recorded
+        # degradation, so none of the still-corpus machinery applies. What must
+        # still hold is the thing that machinery existed to guarantee: no source
+        # video on both sides.
+        pairs_meta, train_lr, train_hr, val_lr, val_hr = load_video_pairs(args.pairs)
+        split_digest = hashlib.sha256(
+            json.dumps(
+                {"train": pairs_meta["trainClips"], "val": pairs_meta["valClips"]},
+                sort_keys=True, separators=(",", ":"),
+            ).encode()
+        ).hexdigest()
+        leak = set(pairs_meta["trainClips"]) & set(pairs_meta["valClips"])
+        if leak:
+            raise SystemExit(f"refusing to train on a leaking split: {sorted(leak)}")
+        print(f"pairs {args.pairs}: structure={pairs_meta['structure']} "
+              f"crf={pairs_meta['crfDistribution']}")
+        print(f"split by source video: train {len(pairs_meta['trainClips'])} clips, "
+              f"val {len(pairs_meta['valClips'])} clips")
+        print(f"patches: train {tuple(train_hr.shape)}  val {tuple(val_hr.shape)}")
+    else:
+        manifest = validate_manifest(args.corpus, args.min_images)
+        pairs_meta, train_lr, val_lr = None, None, None
 
-    split_digest = hashlib.sha256(
-        json.dumps(split["splits"], sort_keys=True, separators=(",", ":")).encode()
-    ).hexdigest()
-    train_files = split_files(split, "train")
-    val_files = split_files(split, "val")
-    print(f"split {args.split}: train {len(train_files)} images, val {len(val_files)} images")
+        # The split is decided by source image before a single patch is read, so a
+        # photograph cannot contribute to more than one side. `test` is deliberately
+        # not loaded here: training must not be able to see it even by accident, and
+        # a test score computed every epoch is an invitation to select on it.
+        # `tools/evaluate.py` scores a frozen model on any split, once.
+        split = load_split(args.split)
+        problems = check_disjoint(split)
+        if problems:
+            for problem in problems:
+                print(f"ERROR split not disjoint: {problem}", file=sys.stderr)
+            raise SystemExit("refusing to train on a leaking split")
 
-    train_hr = load_patches(args.corpus, train_files, args.patch, args.per_image, args.limit, args.seed)
-    # A fixed seed offset, so validation patches are stable across training
-    # seeds: comparing five seeds against five different validation sets would
-    # confound seed variance with sampling variance.
-    val_hr = load_patches(args.corpus, val_files, args.patch, args.per_image, args.limit, 20260101)
-    print(f"patches: train {tuple(train_hr.shape)}  val {tuple(val_hr.shape)}")
+        split_digest = hashlib.sha256(
+            json.dumps(split["splits"], sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        train_files = split_files(split, "train")
+        val_files = split_files(split, "val")
+        print(f"split {args.split}: train {len(train_files)} images, val {len(val_files)} images")
+
+        train_hr = load_patches(args.corpus, train_files, args.patch, args.per_image, args.limit, args.seed)
+        # A fixed seed offset, so validation patches are stable across training
+        # seeds: comparing five seeds against five different validation sets would
+        # confound seed variance with sampling variance.
+        val_hr = load_patches(args.corpus, val_files, args.patch, args.per_image, args.limit, 20260101)
+        print(f"patches: train {tuple(train_hr.shape)}  val {tuple(val_hr.shape)}")
 
     model = AetherSR(channels=args.channels, depth=args.depth).to(device)
     print(f"parameters: {count_parameters(model)}")
@@ -257,10 +313,14 @@ def main() -> int:
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
 
     val_hr_d = val_hr.to(device)
-    # Validation degradation is fixed for the run: a validation set that is
-    # re-randomised every epoch makes checkpoint selection partly a draw on the
-    # degradation, not on the model.
-    val_lr_d = make_lr(val_hr_d, args.degradation, seed=20260101)
+    if args.pairs:
+        # Already degraded, by a real encoder, once. Nothing to re-draw.
+        val_lr_d = val_lr.to(device)
+    else:
+        # Validation degradation is fixed for the run: a validation set that is
+        # re-randomised every epoch makes checkpoint selection partly a draw on the
+        # degradation, not on the model.
+        val_lr_d = make_lr(val_hr_d, args.degradation, seed=20260101)
 
     # Bilinear on the same split, so "did it learn anything" has an answer that
     # does not depend on the browser harness.
@@ -279,20 +339,40 @@ def main() -> int:
         total = 0.0
         batches = 0
         for i in range(0, len(train_hr) - args.batch + 1, args.batch):
-            batch_hr = train_hr[idx[i : i + args.batch]].to(device)
+            sel = idx[i : i + args.batch]
+            batch_hr = train_hr[sel].to(device)
             # Flips and quarter turns only: they are exact and do not resample,
             # so they cannot contaminate the degradation the model is learning
             # to invert.
-            if random.random() < 0.5:
+            flip_w = random.random() < 0.5
+            flip_h = random.random() < 0.5
+            rot = random.random() < 0.5
+            if flip_w:
                 batch_hr = torch.flip(batch_hr, dims=[3])
-            if random.random() < 0.5:
+            if flip_h:
                 batch_hr = torch.flip(batch_hr, dims=[2])
-            if random.random() < 0.5:
+            if rot:
                 batch_hr = torch.rot90(batch_hr, 1, dims=[2, 3])
-            # Fresh degradation draw per batch for randomised profiles, so the
-            # model sees the distribution rather than one fixed sample of it.
-            # `box` ignores the seed and stays exact.
-            batch_lr = make_lr(batch_hr, args.degradation, seed=args.seed * 100_003 + epoch * 1_009 + batches)
+
+            if args.pairs:
+                # The LR is already fixed to this HR, so it must receive exactly
+                # the same geometric transform. Re-drawing per tensor would pair
+                # a flipped target with an unflipped input and teach the model a
+                # transform it will never see.
+                batch_lr = train_lr[sel].to(device)
+                if flip_w:
+                    batch_lr = torch.flip(batch_lr, dims=[3])
+                if flip_h:
+                    batch_lr = torch.flip(batch_lr, dims=[2])
+                if rot:
+                    batch_lr = torch.rot90(batch_lr, 1, dims=[2, 3])
+            else:
+                # Fresh degradation draw per batch for randomised profiles, so the
+                # model sees the distribution rather than one fixed sample of it.
+                # `box` ignores the seed and stays exact.
+                batch_lr = make_lr(
+                    batch_hr, args.degradation, seed=args.seed * 100_003 + epoch * 1_009 + batches
+                )
 
             out = model(batch_lr)
             loss = F.l1_loss(out, batch_hr)
@@ -332,10 +412,16 @@ def main() -> int:
 
     # Over verified file hashes: validate_manifest has already confirmed each
     # one against the bytes actually read, so this digest identifies the
-    # content trained on rather than the strings describing it.
-    corpus_digest = hashlib.sha256(
-        "".join(sorted(e["sha256"] for e in manifest["images"])).encode()
-    ).hexdigest()
+    # content trained on rather than the strings describing it. The video-pairs
+    # path has no still corpus; it is identified by its own split digest and
+    # recorded degradation instead.
+    corpus_digest = (
+        None
+        if args.pairs
+        else hashlib.sha256(
+            "".join(sorted(e["sha256"] for e in manifest["images"])).encode()
+        ).hexdigest()
+    )
 
     payload = {
         "architecture": ARCHITECTURE_ID,
@@ -386,24 +472,59 @@ def main() -> int:
             ]
         ),
         "normalisation": {"mean": [0, 0, 0], "scale": [1, 1, 1], "range": "[0,1] RGB"},
-        "degradation": degradation_description(args.degradation),
+        "degradation": (
+            f"video {pairs_meta['structure']} / CRF {pairs_meta['crfDistribution']}: "
+            f"{pairs_meta['structureSpec']['description']}; {pairs_meta['crfSpec']['description']}"
+            if args.pairs
+            else degradation_description(args.degradation)
+        ),
         "training": {
-            "corpus": manifest["source"],
-            "corpusImages": manifest["count"],
-            "corpusDigest": corpus_digest,
-            "corpusLicencePolicy": manifest["licence_policy"],
+            "corpus": pairs_meta["sourceManifest"] if args.pairs else manifest["source"],
+            "corpusImages": pairs_meta["trainPatches"] if args.pairs else manifest["count"],
+            "corpusDigest": None if args.pairs else corpus_digest,
+            "corpusLicencePolicy": (
+                "CC0/CC BY/CC BY-SA/public domain captured video; see manifest"
+                if args.pairs
+                else manifest["licence_policy"]
+            ),
             # Which source images were trainable at all. A model carrying this
             # can be checked against the split it claims to have used, and a
             # score quoted against the wrong split becomes detectable.
-            "split": os.path.basename(args.split),
+            "split": os.path.basename(args.pairs) if args.pairs else os.path.basename(args.split),
             "splitDigest": split_digest,
-            "splitSalt": split["salt"],
-            "splitCounts": split["counts"],
+            "splitSalt": None if args.pairs else split["salt"],
+            "splitCounts": (
+                {"train": len(pairs_meta["trainClips"]), "val": len(pairs_meta["valClips"])}
+                if args.pairs
+                else split["counts"]
+            ),
             "splitPolicy": (
                 "Source-level. Validation selects the checkpoint; test is never "
                 "read during training. See ADR-0028."
             ),
-            "degradationProfile": args.degradation,
+            "degradationProfile": (
+                f"video:{pairs_meta['structure']}:{pairs_meta['crfDistribution']}"
+                if args.pairs
+                else args.degradation
+            ),
+            # The exact compression the model was trained against, so two
+            # differently-degraded models can never be confused for each other.
+            "videoDegradation": (
+                {
+                    "structure": pairs_meta["structure"],
+                    "x264params": pairs_meta["structureSpec"]["x264params"],
+                    "crfDistribution": pairs_meta["crfDistribution"],
+                    "crfHistogram": pairs_meta["crfHistogram"],
+                    "preset": pairs_meta["preset"],
+                    "sequences": pairs_meta["sequences"],
+                    "sequenceFrames": pairs_meta["sequenceFrames"],
+                    "trainClips": pairs_meta["trainClips"],
+                    "valClips": pairs_meta["valClips"],
+                    "pairSeed": pairs_meta["seed"],
+                }
+                if args.pairs
+                else None
+            ),
             "epochs": args.epochs,
             "batch": args.batch,
             "lr": args.lr,

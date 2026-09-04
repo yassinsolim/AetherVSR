@@ -1,0 +1,135 @@
+{
+ "schema": "aethervsr.captured-alignment/1",
+ "condition": "h264_poor",
+ "checks": {
+  "geometry": "master 2560x1440, decoded 1280x720, equal counts",
+  "frameCorrespondence": "decoded[i] must match master[i] better than master[i+-1]",
+  "colourRange": "luma regression slope ~1.0, intercept ~0; catches tv/pc mismatch",
+  "shuffleControl": "misaligning the sequence must collapse the score"
+ },
+ "clips": {
+  "ceremony-2025-astronaut-candidates-cerem": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 38.03928382478426,
+   "offByOnePsnr": 33.031966316166525,
+   "alignmentMarginDb": 5.00731750861774,
+   "lumaSlope": 0.9943444733499158,
+   "lumaIntercept": 0.0018249545200988572,
+   "straightPsnr": 38.03380886598896,
+   "reversedPsnr": 24.084263184807455,
+   "shuffleCollapseDb": 13.949545681181505,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-ami-kille": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 38.566829852371704,
+   "offByOnePsnr": 35.19464455380863,
+   "alignmentMarginDb": 3.3721852985630707,
+   "lumaSlope": 0.996437705907495,
+   "lumaIntercept": 0.0012844428445596627,
+   "straightPsnr": 38.55447196117944,
+   "reversedPsnr": 25.98231375250802,
+   "shuffleCollapseDb": 12.572158208671418,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-duane-chi": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 35.31172147246422,
+   "offByOnePsnr": 33.46749853530025,
+   "alignmentMarginDb": 1.8442229371639653,
+   "lumaSlope": 0.9918243653060693,
+   "lumaIntercept": 0.003166322751044213,
+   "straightPsnr": 35.32131412868406,
+   "reversedPsnr": 26.148355227676415,
+   "shuffleCollapseDb": 9.172958901007643,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-emily-kol": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 39.232534865707684,
+   "offByOnePsnr": 34.49924096604148,
+   "alignmentMarginDb": 4.733293899666209,
+   "lumaSlope": 0.9948818180462171,
+   "lumaIntercept": 0.0011754969745796523,
+   "straightPsnr": 39.17861884458996,
+   "reversedPsnr": 24.488859726615136,
+   "shuffleCollapseDb": 14.689759117974827,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-jennifer": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 36.4446117001497,
+   "offByOnePsnr": 29.165926165977783,
+   "alignmentMarginDb": 7.278685534171917,
+   "lumaSlope": 0.9943410689237101,
+   "lumaIntercept": 0.0010369493229685739,
+   "straightPsnr": 36.44568041230972,
+   "reversedPsnr": 20.84386650445647,
+   "shuffleCollapseDb": 15.601813907853249,
+   "problems": []
+  },
+  "speech-artemis-ii-live-launch-coverage-c": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 36.56017518216771,
+   "offByOnePsnr": 35.9087707109429,
+   "alignmentMarginDb": 0.6514044712248089,
+   "lumaSlope": 0.9958066496150838,
+   "lumaIntercept": 0.0022594754570563935,
+   "straightPsnr": 36.54678113584061,
+   "reversedPsnr": 29.666103717346648,
+   "shuffleCollapseDb": 6.880677418493963,
+   "problems": [
+    "alignment margin only 0.65 dB"
+   ]
+  },
+  "reunion-artemis-ii-crew-welcomed-home": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 33.744140499118856,
+   "offByOnePsnr": 19.708778062544155,
+   "alignmentMarginDb": 14.035362436574696,
+   "lumaSlope": 0.9929086193024423,
+   "lumaIntercept": 0.003627656487707291,
+   "straightPsnr": 33.733854185277735,
+   "reversedPsnr": 12.568781754505329,
+   "shuffleCollapseDb": 21.165072430772405,
+   "problems": []
+  },
+  "announcement-another-step-toward-one-of": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 38.53613366237707,
+   "offByOnePsnr": 38.348467386388776,
+   "alignmentMarginDb": 0.18766627598829058,
+   "lumaSlope": 0.9912113564673011,
+   "lumaIntercept": 0.0017343678564798407,
+   "straightPsnr": 38.51179288531892,
+   "reversedPsnr": 31.333758861429853,
+   "shuffleCollapseDb": 7.178034023889065,
+   "problems": [
+    "alignment margin only 0.19 dB"
+   ]
+  }
+ },
+ "failures": [
+  {
+   "clip": "speech-artemis-ii-live-launch-coverage-c",
+   "problems": [
+    "alignment margin only 0.65 dB"
+   ]
+  },
+  {
+   "clip": "announcement-another-step-toward-one-of",
+   "problems": [
+    "alignment margin only 0.19 dB"
+   ]
+  }
+ ],
+ "allClipsAligned": false
+}

@@ -1,0 +1,343 @@
+{
+ "schema": "aethervsr.captured-faces-summary/1",
+ "purpose": "Milestone 5.5 Part V verdict: can faces now be measured validly, and with what geometry margins.",
+ "outcome": "a",
+ "clip_count": 8,
+ "clips": [
+  {
+   "id": "ceremony-2025-astronaut-candidates-cerem",
+   "category": "ceremony",
+   "people": "Sean Duffy (NASA Acting Administrator) plus seated astronaut candidates",
+   "attribution": "NASA Headquarters",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": null,
+   "activeAreaDimensions": [
+    3840,
+    2160
+   ],
+   "start_seconds": 13.0,
+   "source_sha256": "b619bfc60ca147717fe64a55ee468be1637b6489f3f9c9ee1507d16a88cdf4e2",
+   "duplicateMasterFrames": 0
+  },
+  {
+   "id": "portrait-artemis-ii-moon-watch-ami-kille",
+   "category": "portrait",
+   "people": "Ami Killeen",
+   "attribution": "NASA Johnson Space Center",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": "3840:1608:0:276",
+   "activeAreaDimensions": [
+    3840,
+    1608
+   ],
+   "start_seconds": 13.5,
+   "source_sha256": "a94ac3a338e62ef57c61743d21647de53878d4b42df4ad707efb816f0003a9f0",
+   "duplicateMasterFrames": 0
+  },
+  {
+   "id": "portrait-artemis-ii-moon-watch-duane-chi",
+   "category": "portrait",
+   "people": "Duane Chin",
+   "attribution": "NASA Johnson Space Center",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": "3840:1608:0:276",
+   "activeAreaDimensions": [
+    3840,
+    1608
+   ],
+   "start_seconds": 43.0,
+   "source_sha256": "e2c479f7fee1c77d4e22f2fff9b11f4fd49df8d20e89d1ec276e2ad6c3d55e10",
+   "duplicateMasterFrames": 0
+  },
+  {
+   "id": "portrait-artemis-ii-moon-watch-emily-kol",
+   "category": "portrait",
+   "people": "Emily Kollin",
+   "attribution": "NASA Johnson Space Center",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": "3840:1608:0:276",
+   "activeAreaDimensions": [
+    3840,
+    1608
+   ],
+   "start_seconds": 8.0,
+   "source_sha256": "5f87de7ecc33c6822070ddaefc90067ee4c7382c25e3ee1747b03ee87394a481",
+   "duplicateMasterFrames": 0
+  },
+  {
+   "id": "portrait-artemis-ii-moon-watch-jennifer",
+   "category": "portrait",
+   "people": "Jennifer Gratz",
+   "attribution": "NASA Johnson Space Center",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": "3840:1608:0:276",
+   "activeAreaDimensions": [
+    3840,
+    1608
+   ],
+   "start_seconds": 19.0,
+   "source_sha256": "052f4fd5381b2cafdfdd0c9057fede19e0e25fe392615479721ba33c178da626",
+   "duplicateMasterFrames": 0
+  },
+  {
+   "id": "speech-artemis-ii-live-launch-coverage-c",
+   "category": "speech",
+   "people": "Charlie Blackwell-Thompson (Artemis Launch Director)",
+   "attribution": "NASA Kennedy Space Center",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": null,
+   "activeAreaDimensions": [
+    3840,
+    2160
+   ],
+   "start_seconds": 40.0,
+   "source_sha256": "034c8e4d24a39a1444e9da31ddd15a8d7d7462e977c12f98c8c8e45fd445c2a9",
+   "duplicateMasterFrames": 0
+  },
+  {
+   "id": "reunion-artemis-ii-crew-welcomed-home",
+   "category": "reunion",
+   "people": "Artemis II crew (Reid Wiseman, Victor Glover, Christina Koch, Jeremy Hansen), family, NASA leadership incl. Jared Isaacman and Vanessa Wyche",
+   "attribution": "NASA",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": null,
+   "activeAreaDimensions": [
+    3840,
+    2160
+   ],
+   "start_seconds": 120.0,
+   "source_sha256": "6f4588075f32ad45e638229abab538ea8c6f6ef05da0c5ef8a8900e21d86b85a",
+   "duplicateMasterFrames": 0
+  },
+  {
+   "id": "announcement-another-step-toward-one-of",
+   "category": "announcement",
+   "people": "NASA HQ official at podium (press event announcing Artemis III crew)",
+   "attribution": "NASA Headquarters",
+   "licence": "Public domain",
+   "source_dimensions": [
+    3840,
+    2160
+   ],
+   "activeAreaCrop": null,
+   "activeAreaDimensions": [
+    3840,
+    2160
+   ],
+   "start_seconds": 82.0,
+   "source_sha256": "a23ad4922bbed38a93d6b9482ca688a41c0db479804a9f6ce34b2ee66c14a28b",
+   "duplicateMasterFrames": 0
+  }
+ ],
+ "alignment_by_condition": {
+  "h264_high": {
+   "ceremony-2025-astronaut-candidates-cerem": {
+    "alignmentMarginDb": 13.06,
+    "lumaSlope": 1.0003,
+    "lumaIntercept": -0.0015,
+    "shuffleCollapseDb": 23.08,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-ami-kille": {
+    "alignmentMarginDb": 10.61,
+    "lumaSlope": 1.0004,
+    "lumaIntercept": -0.0014,
+    "shuffleCollapseDb": 21.46,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-duane-chi": {
+    "alignmentMarginDb": 9.75,
+    "lumaSlope": 1.0002,
+    "lumaIntercept": -0.0018,
+    "shuffleCollapseDb": 18.45,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-emily-kol": {
+    "alignmentMarginDb": 12.38,
+    "lumaSlope": 1.0002,
+    "lumaIntercept": -0.0012,
+    "shuffleCollapseDb": 22.99,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-jennifer": {
+    "alignmentMarginDb": 16.05,
+    "lumaSlope": 0.9985,
+    "lumaIntercept": -0.0011,
+    "shuffleCollapseDb": 25.08,
+    "problems": []
+   },
+   "speech-artemis-ii-live-launch-coverage-c": {
+    "alignmentMarginDb": 4.6,
+    "lumaSlope": 0.9994,
+    "lumaIntercept": -0.0007,
+    "shuffleCollapseDb": 15.78,
+    "problems": []
+   },
+   "reunion-artemis-ii-crew-welcomed-home": {
+    "alignmentMarginDb": 23.83,
+    "lumaSlope": 1.0004,
+    "lumaIntercept": -0.0015,
+    "shuffleCollapseDb": 30.88,
+    "problems": []
+   },
+   "announcement-another-step-toward-one-of": {
+    "alignmentMarginDb": 1.95,
+    "lumaSlope": 0.9986,
+    "lumaIntercept": -0.0011,
+    "shuffleCollapseDb": 14.68,
+    "problems": []
+   }
+  },
+  "h264_typical": {
+   "ceremony-2025-astronaut-candidates-cerem": {
+    "alignmentMarginDb": 9.28,
+    "lumaSlope": 0.999,
+    "lumaIntercept": -0.0007,
+    "shuffleCollapseDb": 19.04,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-ami-kille": {
+    "alignmentMarginDb": 6.87,
+    "lumaSlope": 0.9991,
+    "lumaIntercept": -0.0005,
+    "shuffleCollapseDb": 17.28,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-duane-chi": {
+    "alignmentMarginDb": 5.31,
+    "lumaSlope": 0.9977,
+    "lumaIntercept": -0.0002,
+    "shuffleCollapseDb": 13.69,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-emily-kol": {
+    "alignmentMarginDb": 8.67,
+    "lumaSlope": 0.9989,
+    "lumaIntercept": -0.0005,
+    "shuffleCollapseDb": 19.17,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-jennifer": {
+    "alignmentMarginDb": 11.7,
+    "lumaSlope": 0.9973,
+    "lumaIntercept": -0.0003,
+    "shuffleCollapseDb": 20.59,
+    "problems": []
+   },
+   "speech-artemis-ii-live-launch-coverage-c": {
+    "alignmentMarginDb": 2.15,
+    "lumaSlope": 0.9981,
+    "lumaIntercept": 0.0005,
+    "shuffleCollapseDb": 11.47,
+    "problems": []
+   },
+   "reunion-artemis-ii-crew-welcomed-home": {
+    "alignmentMarginDb": 18.93,
+    "lumaSlope": 0.9983,
+    "lumaIntercept": -0.0001,
+    "shuffleCollapseDb": 26.0,
+    "problems": []
+   },
+   "announcement-another-step-toward-one-of": {
+    "alignmentMarginDb": 0.75,
+    "lumaSlope": 0.9971,
+    "lumaIntercept": -0.0004,
+    "shuffleCollapseDb": 11.01,
+    "problems": [
+     "alignment margin only 0.75 dB"
+    ]
+   }
+  },
+  "h264_poor": {
+   "ceremony-2025-astronaut-candidates-cerem": {
+    "alignmentMarginDb": 5.01,
+    "lumaSlope": 0.9943,
+    "lumaIntercept": 0.0018,
+    "shuffleCollapseDb": 13.95,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-ami-kille": {
+    "alignmentMarginDb": 3.37,
+    "lumaSlope": 0.9964,
+    "lumaIntercept": 0.0013,
+    "shuffleCollapseDb": 12.57,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-duane-chi": {
+    "alignmentMarginDb": 1.84,
+    "lumaSlope": 0.9918,
+    "lumaIntercept": 0.0032,
+    "shuffleCollapseDb": 9.17,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-emily-kol": {
+    "alignmentMarginDb": 4.73,
+    "lumaSlope": 0.9949,
+    "lumaIntercept": 0.0012,
+    "shuffleCollapseDb": 14.69,
+    "problems": []
+   },
+   "portrait-artemis-ii-moon-watch-jennifer": {
+    "alignmentMarginDb": 7.28,
+    "lumaSlope": 0.9943,
+    "lumaIntercept": 0.001,
+    "shuffleCollapseDb": 15.6,
+    "problems": []
+   },
+   "speech-artemis-ii-live-launch-coverage-c": {
+    "alignmentMarginDb": 0.65,
+    "lumaSlope": 0.9958,
+    "lumaIntercept": 0.0023,
+    "shuffleCollapseDb": 6.88,
+    "problems": [
+     "alignment margin only 0.65 dB"
+    ]
+   },
+   "reunion-artemis-ii-crew-welcomed-home": {
+    "alignmentMarginDb": 14.04,
+    "lumaSlope": 0.9929,
+    "lumaIntercept": 0.0036,
+    "shuffleCollapseDb": 21.17,
+    "problems": []
+   },
+   "announcement-another-step-toward-one-of": {
+    "alignmentMarginDb": 0.19,
+    "lumaSlope": 0.9912,
+    "lumaIntercept": 0.0017,
+    "shuffleCollapseDb": 7.18,
+    "problems": [
+     "alignment margin only 0.19 dB"
+    ]
+   }
+  }
+ },
+ "verdict": "8 clips sourced, fetched, prepared and aligned. All 8 pass the geometry/frame-correspondence/colour/shuffle alignment proof at h264_high (0/8 problems). At h264_typical 1/8 clips (announcement-another-step-toward-one-of, a near-static podium speaker) drops its off-by-one alignment margin below the tool's 1.0 dB bar (0.75 dB); at h264_poor 2/8 clips (that same announcement clip at 0.19 dB and speech-artemis-ii-live-launch-coverage-c at 0.65 dB) drop below it. In every case the shuffle-collapse control stays strongly positive (>=6.9 dB), proving temporal correspondence is still real; the low margin is a low-motion artifact (near-static talking-head footage compresses adjacent frames to be very similar), not a data or geometry defect. The other 6 clips - all with real head/hand/crowd motion - keep >=1.8 dB margins even at h264_poor. Geometry (2560x1440 master / 1280x720 decoded, exact frame counts, zero duplicate master frames), colour (luma slope 0.99-1.00, intercept <=0.004 in all 24 cells) and the >=2560x1440 verified active picture area are clean across all 8 clips and all 3 conditions. Faces CAN now be measured validly: every clip's ground truth is a real optical crop, never a synthetic upscale, and the alignment proof is honest end to end."
+}

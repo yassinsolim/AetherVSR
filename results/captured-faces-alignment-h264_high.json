@@ -1,0 +1,118 @@
+{
+ "schema": "aethervsr.captured-alignment/1",
+ "condition": "h264_high",
+ "checks": {
+  "geometry": "master 2560x1440, decoded 1280x720, equal counts",
+  "frameCorrespondence": "decoded[i] must match master[i] better than master[i+-1]",
+  "colourRange": "luma regression slope ~1.0, intercept ~0; catches tv/pc mismatch",
+  "shuffleControl": "misaligning the sequence must collapse the score"
+ },
+ "clips": {
+  "ceremony-2025-astronaut-candidates-cerem": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 47.109772748621644,
+   "offByOnePsnr": 34.04632268969916,
+   "alignmentMarginDb": 13.063450058922484,
+   "lumaSlope": 1.0003039110236018,
+   "lumaIntercept": -0.0014605560882370759,
+   "straightPsnr": 47.12384389416031,
+   "reversedPsnr": 24.043327145274134,
+   "shuffleCollapseDb": 23.080516748886176,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-ami-kille": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 47.59981733561899,
+   "offByOnePsnr": 36.98986705167634,
+   "alignmentMarginDb": 10.609950283942647,
+   "lumaSlope": 1.000354288368764,
+   "lumaIntercept": -0.0014444950065021637,
+   "straightPsnr": 47.592489728978414,
+   "reversedPsnr": 26.12942976573252,
+   "shuffleCollapseDb": 21.463059963245893,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-duane-chi": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 44.224738054335276,
+   "offByOnePsnr": 34.47308080744603,
+   "alignmentMarginDb": 9.751657246889247,
+   "lumaSlope": 1.0002413588840564,
+   "lumaIntercept": -0.0017601823780286675,
+   "straightPsnr": 44.267038637104974,
+   "reversedPsnr": 25.816077199961423,
+   "shuffleCollapseDb": 18.45096143714355,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-emily-kol": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 47.578901354695496,
+   "offByOnePsnr": 35.20369313001906,
+   "alignmentMarginDb": 12.37520822467644,
+   "lumaSlope": 1.0001929599623012,
+   "lumaIntercept": -0.001234251455409192,
+   "straightPsnr": 47.540305529070594,
+   "reversedPsnr": 24.547234252328234,
+   "shuffleCollapseDb": 22.99307127674236,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-jennifer": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 45.9328819533362,
+   "offByOnePsnr": 29.87941042830889,
+   "alignmentMarginDb": 16.05347152502731,
+   "lumaSlope": 0.9985124796471083,
+   "lumaIntercept": -0.001100351649692461,
+   "straightPsnr": 45.94072390146479,
+   "reversedPsnr": 20.858552941011876,
+   "shuffleCollapseDb": 25.082170960452917,
+   "problems": []
+  },
+  "speech-artemis-ii-live-launch-coverage-c": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 46.033772272679286,
+   "offByOnePsnr": 41.43695754233797,
+   "alignmentMarginDb": 4.5968147303413165,
+   "lumaSlope": 0.9994423134212794,
+   "lumaIntercept": -0.0006923300166290667,
+   "straightPsnr": 46.046486986727814,
+   "reversedPsnr": 30.268202363017057,
+   "shuffleCollapseDb": 15.778284623710757,
+   "problems": []
+  },
+  "reunion-artemis-ii-crew-welcomed-home": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 43.41429399784226,
+   "offByOnePsnr": 19.580968434585422,
+   "alignmentMarginDb": 23.83332556325684,
+   "lumaSlope": 1.0003657053865902,
+   "lumaIntercept": -0.001541581910270101,
+   "straightPsnr": 43.41572522455247,
+   "reversedPsnr": 12.531083759750738,
+   "shuffleCollapseDb": 30.88464146480173,
+   "problems": []
+  },
+  "announcement-another-step-toward-one-of": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 46.84219916168584,
+   "offByOnePsnr": 44.89455637405843,
+   "alignmentMarginDb": 1.9476427876274123,
+   "lumaSlope": 0.9986412716086809,
+   "lumaIntercept": -0.0010780619279041872,
+   "straightPsnr": 46.806919515183644,
+   "reversedPsnr": 32.12770759895503,
+   "shuffleCollapseDb": 14.679211916228617,
+   "problems": []
+  }
+ },
+ "failures": [],
+ "allClipsAligned": true
+}

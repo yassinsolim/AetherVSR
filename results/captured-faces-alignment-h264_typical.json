@@ -1,0 +1,127 @@
+{
+ "schema": "aethervsr.captured-alignment/1",
+ "condition": "h264_typical",
+ "checks": {
+  "geometry": "master 2560x1440, decoded 1280x720, equal counts",
+  "frameCorrespondence": "decoded[i] must match master[i] better than master[i+-1]",
+  "colourRange": "luma regression slope ~1.0, intercept ~0; catches tv/pc mismatch",
+  "shuffleControl": "misaligning the sequence must collapse the score"
+ },
+ "clips": {
+  "ceremony-2025-astronaut-candidates-cerem": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 43.0795397596731,
+   "offByOnePsnr": 33.804377003088526,
+   "alignmentMarginDb": 9.27516275658457,
+   "lumaSlope": 0.9990039226034864,
+   "lumaIntercept": -0.0006726080095936868,
+   "straightPsnr": 43.09436214680509,
+   "reversedPsnr": 24.0564676231543,
+   "shuffleCollapseDb": 19.037894523650788,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-ami-kille": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 43.391950014604966,
+   "offByOnePsnr": 36.52517725799746,
+   "alignmentMarginDb": 6.866772756607503,
+   "lumaSlope": 0.9990956688595056,
+   "lumaIntercept": -0.0005476613374716227,
+   "straightPsnr": 43.377603866733516,
+   "reversedPsnr": 26.098475308254134,
+   "shuffleCollapseDb": 17.279128558479382,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-duane-chi": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 39.58051793571961,
+   "offByOnePsnr": 34.26622002356118,
+   "alignmentMarginDb": 5.314297912158428,
+   "lumaSlope": 0.9977051230026494,
+   "lumaIntercept": -0.00021564072621611718,
+   "straightPsnr": 39.59912388907082,
+   "reversedPsnr": 25.911399900736324,
+   "shuffleCollapseDb": 13.687723988334493,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-emily-kol": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 43.762464653052746,
+   "offByOnePsnr": 35.09342622803176,
+   "alignmentMarginDb": 8.669038425020988,
+   "lumaSlope": 0.9988595607032367,
+   "lumaIntercept": -0.0005291763940299372,
+   "straightPsnr": 43.70701677975787,
+   "reversedPsnr": 24.540190186495874,
+   "shuffleCollapseDb": 19.166826593261998,
+   "problems": []
+  },
+  "portrait-artemis-ii-moon-watch-jennifer": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 41.44466537117303,
+   "offByOnePsnr": 29.740123376603332,
+   "alignmentMarginDb": 11.704541994569697,
+   "lumaSlope": 0.9972898136804588,
+   "lumaIntercept": -0.0002711045268628053,
+   "straightPsnr": 41.45035375230997,
+   "reversedPsnr": 20.859119626310694,
+   "shuffleCollapseDb": 20.59123412599928,
+   "problems": []
+  },
+  "speech-artemis-ii-live-launch-coverage-c": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 41.61408452572147,
+   "offByOnePsnr": 39.46420718884312,
+   "alignmentMarginDb": 2.1498773368783493,
+   "lumaSlope": 0.9981390696785382,
+   "lumaIntercept": 0.0005476306433640099,
+   "straightPsnr": 41.608520353544726,
+   "reversedPsnr": 30.140394791111945,
+   "shuffleCollapseDb": 11.468125562432782,
+   "problems": []
+  },
+  "reunion-artemis-ii-crew-welcomed-home": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 38.553275626056184,
+   "offByOnePsnr": 19.621878680430736,
+   "alignmentMarginDb": 18.93139694562545,
+   "lumaSlope": 0.9983476819066838,
+   "lumaIntercept": -0.00012914109898137002,
+   "straightPsnr": 38.54432302050147,
+   "reversedPsnr": 12.542279242370325,
+   "shuffleCollapseDb": 26.002043778131146,
+   "problems": []
+  },
+  "announcement-another-step-toward-one-of": {
+   "geometryOk": true,
+   "frames": 24,
+   "alignedPsnr": 42.90178637346052,
+   "offByOnePsnr": 42.1491943738477,
+   "alignmentMarginDb": 0.752591999612821,
+   "lumaSlope": 0.9970940309509757,
+   "lumaIntercept": -0.00038087794922315386,
+   "straightPsnr": 42.872667540025446,
+   "reversedPsnr": 31.862641926501386,
+   "shuffleCollapseDb": 11.01002561352406,
+   "problems": [
+    "alignment margin only 0.75 dB"
+   ]
+  }
+ },
+ "failures": [
+  {
+   "clip": "announcement-another-step-toward-one-of",
+   "problems": [
+    "alignment margin only 0.75 dB"
+   ]
+  }
+ ],
+ "allClipsAligned": false
+}

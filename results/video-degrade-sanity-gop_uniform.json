@@ -1,0 +1,95 @@
+{
+ "schema": "aethervsr.video-degrade-sanity/1",
+ "pairs": "/tmp/pairs/gop_uniform",
+ "structure": "gop",
+ "crfDistribution": "uniform",
+ "splitsInspected": 2,
+ "checks": {
+  "gopStructure": {
+   "requested": "gop",
+   "sequencesWithPorB": 96,
+   "intraOnlySequences": 0,
+   "total": 96
+  },
+  "patchCount": {
+   "ok": true
+  },
+  "geometry": {
+   "ok": true,
+   "expected": "hr patch == 2x lr patch in both axes"
+  },
+  "alignment": {
+   "splits": [
+    {
+     "split": "train",
+     "patches": 8640,
+     "inspected": 320,
+     "matchedPsnr": 32.887982460261135,
+     "shufflePsnr": 9.487157849118649,
+     "shuffleCollapseDb": 23.400824611142486,
+     "meanLevelError": 3.5822391510009766e-05,
+     "channelMeanError": 0.0014411509037017822,
+     "lrPatch": [
+      64,
+      64
+     ],
+     "hrPatch": [
+      128,
+      128
+     ]
+    },
+    {
+     "split": "val",
+     "patches": 2880,
+     "inspected": 320,
+     "matchedPsnr": 31.88764075913968,
+     "shufflePsnr": 11.772366157312865,
+     "shuffleCollapseDb": 20.115274601826812,
+     "meanLevelError": 0.00020435452461242676,
+     "channelMeanError": 0.0011599063873291016,
+     "lrPatch": [
+      64,
+      64
+     ],
+     "hrPatch": [
+      128,
+      128
+     ]
+    }
+   ],
+   "minShuffleCollapseDb": 20.115274601826812
+  },
+  "range": {
+   "maxMeanLevelError": 0.00020435452461242676,
+   "threshold": 0.02
+  },
+  "crfEffective": {
+   "ok": true,
+   "bytesPerFrameByCrf": {
+    "18": 31151.8,
+    "19": 22314.7,
+    "20": 24418.3,
+    "21": 18062.1,
+    "22": 14422.4,
+    "23": 18640.6,
+    "24": 12603.9,
+    "25": 12057.1,
+    "26": 7634.6,
+    "27": 10598.1,
+    "28": 9462.4,
+    "29": 5678.0,
+    "30": 5985.6,
+    "31": 4071.2,
+    "32": 3615.2,
+    "33": 3676.0,
+    "34": 2994.3,
+    "35": 3458.2,
+    "36": 3102.2
+   },
+   "lowestCrfBytes": 31151.8,
+   "highestCrfBytes": 3102.2
+  }
+ },
+ "failures": [],
+ "pass": true
+}
