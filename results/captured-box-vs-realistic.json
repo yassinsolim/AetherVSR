@@ -1,0 +1,34 @@
+{
+ "schema": "aethervsr.captured-box-vs-realistic/1",
+ "caveat": "One seed per arm. Still-image seed variance was 0.018-0.034 dB, comparable to the smaller differences here, so this cannot separate a training-distribution effect from seed noise. It is a direction, not an established effect.",
+ "pairing": "same clips, same decoded frames, same reference; paired per clip",
+ "conditions": {
+  "h264_high": {
+   "boxVsCatmull": 0.5150704781214396,
+   "realisticVsCatmull": 0.6439191699028015,
+   "realisticMinusBox": 0.12884869178136188,
+   "clips": 15,
+   "realisticWins": 11,
+   "permutationP": 0.08056640625,
+   "smallestAttainableP": 6.103515625e-05
+  },
+  "h264_typical": {
+   "boxVsCatmull": 0.22138227356804743,
+   "realisticVsCatmull": 0.29777691099378795,
+   "realisticMinusBox": 0.07639463742574056,
+   "clips": 15,
+   "realisticWins": 11,
+   "permutationP": 0.0989990234375,
+   "smallestAttainableP": 6.103515625e-05
+  },
+  "h264_poor": {
+   "boxVsCatmull": 0.022890494929419625,
+   "realisticVsCatmull": 0.046371393733554415,
+   "realisticMinusBox": 0.023480898804134794,
+   "clips": 15,
+   "realisticWins": 11,
+   "permutationP": 0.3031005859375,
+   "smallestAttainableP": 6.103515625e-05
+  }
+ }
+}
