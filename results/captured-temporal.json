@@ -1,0 +1,337 @@
+{
+ "schema": "aethervsr.captured-temporal/1",
+ "model": "aethersr-c16d2-realistic.json",
+ "condition": "h264_typical",
+ "method": "Dense Farneback flow estimated on the HR reference only; each method's own output is warped by that flow and the residual measured. Flow error inflates every method equally, so only ratios between methods are interpreted.",
+ "control": "catmullOverReferenceResidual shows how much of the residual is flow error rather than upscaler behaviour; a ratio near 1 would mean the metric cannot resolve anything.",
+ "perClip": {
+  "faces-video-production-i-m-a-defender-pr": {
+   "reference": {
+    "mcResidual": 6.394423209263054,
+    "staticRegionVariance": 0.899570147745015
+   },
+   "neural": {
+    "mcResidual": 6.220272112383761,
+    "staticRegionVariance": 0.8554233099249277
+   },
+   "catmull_rom": {
+    "mcResidual": 6.100766590542414,
+    "staticRegionVariance": 0.8322207821025089
+   },
+   "bilinear": {
+    "mcResidual": 5.965111708141524,
+    "staticRegionVariance": 0.8161105962300842
+   },
+   "neuralOverCatmullResidual": 1.0195886074426463,
+   "neuralOverReferenceResidual": 0.9727651593927948,
+   "catmullOverReferenceResidual": 0.9540761364847975
+  },
+  "faces-video-production-i-m-a-defender-la": {
+   "reference": {
+    "mcResidual": 10.091611342642203,
+    "staticRegionVariance": 7.238752042414324
+   },
+   "neural": {
+    "mcResidual": 9.94860024665567,
+    "staticRegionVariance": 7.200348956341093
+   },
+   "catmull_rom": {
+    "mcResidual": 9.803007490509613,
+    "staticRegionVariance": 7.115319054573774
+   },
+   "bilinear": {
+    "mcResidual": 9.640847781842405,
+    "staticRegionVariance": 7.091581431979483
+   },
+   "neuralOverCatmullResidual": 1.014851845853123,
+   "neuralOverReferenceResidual": 0.9858287154418802,
+   "catmullOverReferenceResidual": 0.9714016084910948
+  },
+  "faces-video-production-challenging-train": {
+   "reference": {
+    "mcResidual": 8.084094513842667,
+    "staticRegionVariance": 73.17698363815857
+   },
+   "neural": {
+    "mcResidual": 7.9328432223674925,
+    "staticRegionVariance": 73.9118598015471
+   },
+   "catmull_rom": {
+    "mcResidual": 7.737476852383804,
+    "staticRegionVariance": 73.21467250737955
+   },
+   "bilinear": {
+    "mcResidual": 7.549048036336899,
+    "staticRegionVariance": 73.17412796311758
+   },
+   "neuralOverCatmullResidual": 1.0252493640641394,
+   "neuralOverReferenceResidual": 0.981290261857258,
+   "catmullOverReferenceResidual": 0.9571235020984307
+  },
+  "motion-2023-maplefest-in-bowmanville-on-2": {
+   "reference": {
+    "mcResidual": 10.93216661973433,
+    "staticRegionVariance": 11.580990357832475
+   },
+   "neural": {
+    "mcResidual": 9.284302711486816,
+    "staticRegionVariance": 5.795771620490334
+   },
+   "catmull_rom": {
+    "mcResidual": 7.7968689745122735,
+    "staticRegionVariance": 3.534774346785112
+   },
+   "bilinear": {
+    "mcResidual": 6.703493898565119,
+    "staticRegionVariance": 2.410059679638256
+   },
+   "neuralOverCatmullResidual": 1.1907732118927377,
+   "neuralOverReferenceResidual": 0.8492646548880025,
+   "catmullOverReferenceResidual": 0.7132043670499554
+  },
+  "motion-rogla-slovenia-ostru-ica-1-4k-pov-": {
+   "reference": {
+    "mcResidual": 13.736803418237038,
+    "staticRegionVariance": 15.642904581332749
+   },
+   "neural": {
+    "mcResidual": 13.287566593763502,
+    "staticRegionVariance": 15.242533107372848
+   },
+   "catmull_rom": {
+    "mcResidual": 12.750719245523214,
+    "staticRegionVariance": 14.915099001743577
+   },
+   "bilinear": {
+    "mcResidual": 12.243421402844517,
+    "staticRegionVariance": 14.75815280357545
+   },
+   "neuralOverCatmullResidual": 1.042103299265159,
+   "neuralOverReferenceResidual": 0.9672968440476387,
+   "catmullOverReferenceResidual": 0.9282158925412958
+  },
+  "motion-aerial-drone-chase-of-a-train-webm": {
+   "reference": {
+    "mcResidual": 3.742229613390836,
+    "staticRegionVariance": 1.0633921189741655
+   },
+   "neural": {
+    "mcResidual": 3.2565513090653853,
+    "staticRegionVariance": 0.7370217496698553
+   },
+   "catmull_rom": {
+    "mcResidual": 3.058091792193326,
+    "staticRegionVariance": 0.6455403214151209
+   },
+   "bilinear": {
+    "mcResidual": 2.8955670270052822,
+    "staticRegionVariance": 0.5914308239113201
+   },
+   "neuralOverCatmullResidual": 1.064896520561837,
+   "neuralOverReferenceResidual": 0.8702168614700857,
+   "catmullOverReferenceResidual": 0.817184434982435
+  },
+  "urban-funchal-madeira-amazing-view-from-": {
+   "reference": {
+    "mcResidual": 0.9021904360164296,
+    "staticRegionVariance": 2.6810203032060103
+   },
+   "neural": {
+    "mcResidual": 0.519210390069268,
+    "staticRegionVariance": 0.898604542016983
+   },
+   "catmull_rom": {
+    "mcResidual": 0.40142580054023047,
+    "staticRegionVariance": 0.5541626133702018
+   },
+   "bilinear": {
+    "mcResidual": 0.3347570313648744,
+    "staticRegionVariance": 0.3824681240049275
+   },
+   "neuralOverCatmullResidual": 1.293415593543129,
+   "neuralOverReferenceResidual": 0.5754997718240196,
+   "catmullOverReferenceResidual": 0.44494575038137535
+  },
+  "urban-aerial-video-of-charlotte-nc-4k-dr": {
+   "reference": {
+    "mcResidual": 8.528442946347324,
+    "staticRegionVariance": 60.84969585592096
+   },
+   "neural": {
+    "mcResidual": 7.52678230675784,
+    "staticRegionVariance": 60.68499462712895
+   },
+   "catmull_rom": {
+    "mcResidual": 6.576479099013588,
+    "staticRegionVariance": 59.55896272442558
+   },
+   "bilinear": {
+    "mcResidual": 5.925918611613187,
+    "staticRegionVariance": 59.266388616778634
+   },
+   "neuralOverCatmullResidual": 1.1445003007592298,
+   "neuralOverReferenceResidual": 0.8825505844512346,
+   "catmullOverReferenceResidual": 0.7711230690509867
+  },
+  "urban-drone-footage-in-new-orleans-2022-": {
+   "reference": {
+    "mcResidual": 5.832121307140121,
+    "staticRegionVariance": 0.45965599742802704
+   },
+   "neural": {
+    "mcResidual": 5.284425634552132,
+    "staticRegionVariance": 0.3790371472185308
+   },
+   "catmull_rom": {
+    "mcResidual": 4.482435139065439,
+    "staticRegionVariance": 0.25633407587354834
+   },
+   "bilinear": {
+    "mcResidual": 3.8660950233990494,
+    "staticRegionVariance": 0.19072671708735553
+   },
+   "neuralOverCatmullResidual": 1.178918483057828,
+   "neuralOverReferenceResidual": 0.9060898009927436,
+   "catmullOverReferenceResidual": 0.7685771442335578
+  },
+  "nature-4k-drone-flight-peninsula-state-pa": {
+   "reference": {
+    "mcResidual": 4.627460479736328,
+    "staticRegionVariance": 1.9439433975653215
+   },
+   "neural": {
+    "mcResidual": 4.4077559384432705,
+    "staticRegionVariance": 1.5316740762103687
+   },
+   "catmull_rom": {
+    "mcResidual": 4.253587354313243,
+    "staticRegionVariance": 1.391775288365104
+   },
+   "bilinear": {
+    "mcResidual": 4.072039690884677,
+    "staticRegionVariance": 1.2897246859290383
+   },
+   "neuralOverCatmullResidual": 1.0362443677038151,
+   "neuralOverReferenceResidual": 0.9525215737108627,
+   "catmullOverReferenceResidual": 0.9192055497696248
+  },
+  "nature-the-beautiful-blue-river-dji-phant": {
+   "reference": {
+    "mcResidual": 38.081328310210004,
+    "staticRegionVariance": 12.849814675071023
+   },
+   "neural": {
+    "mcResidual": 37.89724048938263,
+    "staticRegionVariance": 12.328152997927232
+   },
+   "catmull_rom": {
+    "mcResidual": 37.383385790342636,
+    "staticRegionVariance": 12.001479851928623
+   },
+   "bilinear": {
+    "mcResidual": 36.985529668967835,
+    "staticRegionVariance": 11.804066320711916
+   },
+   "neuralOverCatmullResidual": 1.01374553663817,
+   "neuralOverReferenceResidual": 0.9951659296301906,
+   "catmullOverReferenceResidual": 0.9816723168324923
+  },
+  "nature-piz-neir-aerial-video-4k-webm": {
+   "reference": {
+    "mcResidual": 16.437976143576883,
+    "staticRegionVariance": 7.822255633094094
+   },
+   "neural": {
+    "mcResidual": 15.29655716635964,
+    "staticRegionVariance": 7.158616716211492
+   },
+   "catmull_rom": {
+    "mcResidual": 14.15430701862682,
+    "staticRegionVariance": 6.876593589782715
+   },
+   "bilinear": {
+    "mcResidual": 13.170913349498402,
+    "staticRegionVariance": 6.671732794154774
+   },
+   "neuralOverCatmullResidual": 1.080699828414746,
+   "neuralOverReferenceResidual": 0.9305620736246627,
+   "catmullOverReferenceResidual": 0.8610735832073584
+  },
+  "lowlight-hofer-weihnachtsmarkt-am-abend-202": {
+   "reference": {
+    "mcResidual": 3.2807375734502617,
+    "staticRegionVariance": 1.469548593867909
+   },
+   "neural": {
+    "mcResidual": 2.853227225216952,
+    "staticRegionVariance": 0.78268747438084
+   },
+   "catmull_rom": {
+    "mcResidual": 2.4951158545233985,
+    "staticRegionVariance": 0.5911486636508595
+   },
+   "bilinear": {
+    "mcResidual": 2.222004706209356,
+    "staticRegionVariance": 0.4760989248752594
+   },
+   "neuralOverCatmullResidual": 1.1435249469656221,
+   "neuralOverReferenceResidual": 0.8696907818251038,
+   "catmullOverReferenceResidual": 0.7605350317304879
+  },
+  "texture-snowex-field-campaign-4k-b-roll-fr": {
+   "reference": {
+    "mcResidual": 7.548501144755971,
+    "staticRegionVariance": 1.0518242174928838
+   },
+   "neural": {
+    "mcResidual": 6.709080045873469,
+    "staticRegionVariance": 0.6291430782188069
+   },
+   "catmull_rom": {
+    "mcResidual": 6.018204212188721,
+    "staticRegionVariance": 0.499701126055284
+   },
+   "bilinear": {
+    "mcResidual": 5.366691936146129,
+    "staticRegionVariance": 0.43064206025817175
+   },
+   "neuralOverCatmullResidual": 1.1147976720838937,
+   "neuralOverReferenceResidual": 0.8887963209138999,
+   "catmullOverReferenceResidual": 0.7972714180973047
+  },
+  "texture-4k-drone-footage-of-a-barge-on-the": {
+   "reference": {
+    "mcResidual": 0.24567096886331088,
+    "staticRegionVariance": 0.11758711527694356
+   },
+   "neural": {
+    "mcResidual": 0.21126627109267496,
+    "staticRegionVariance": 0.10515001009811055
+   },
+   "catmull_rom": {
+    "mcResidual": 0.17881602387536655,
+    "staticRegionVariance": 0.07818172618069431
+   },
+   "bilinear": {
+    "mcResidual": 0.16063607145439496,
+    "staticRegionVariance": 0.06462308374995535
+   },
+   "neuralOverCatmullResidual": 1.1814728149862341,
+   "neuralOverReferenceResidual": 0.8599561929119172,
+   "catmullOverReferenceResidual": 0.7278679475345667
+  }
+ },
+ "aggregate": {
+  "neuralOverCatmullResidual": {
+   "mean": 1.102985492882154,
+   "median": 1.080699828414746,
+   "min": 1.01374553663817,
+   "max": 1.293415593543129,
+   "clipsWorseThanCatmull": 15,
+   "clips": 15
+  },
+  "catmullOverReferenceResidual": {
+   "mean": 0.8248985168323842
+  }
+ }
+}
