@@ -36,15 +36,31 @@ The split unit is the **source image**, never the extracted patch.
 
 ```
 all source images
-        ↓  deterministic, content-addressed
+        ↓  group into perceptual clusters (dHash / DCT pHash / title)
+   277 clusters from 495 images
+        ↓  deterministic, content-addressed, per cluster
  ┌───────────┬────────────┬───────────┐
- │ train 326 │ val 88     │ test 81   │
+ │ train 329 │ val 94     │ test 72   │
  └───────────┴────────────┴───────────┘
         ↓  patches extracted independently within each split
 ```
 
-Assignment is `sha256(salt + ':' + sha256(file_bytes))` mapped to `[0,1)` and
-bucketed. Consequences that matter:
+The split unit is the **perceptual cluster**, not the individual image. Two
+photographs of one scene are not independent samples even when their bytes
+differ, and splitting per image left 36 near-duplicate pairs straddling splits
+under dHash and 7 more under DCT pHash — the same manuscript folio scanned
+twice, the same demonstration photographed seconds apart.
+
+Images are grouped by union-find over three signals, any one of which is enough:
+
+| Signal | Catches |
+| --- | --- |
+| dHash ≤ 10 | rescaled, re-encoded, lightly recoloured copies |
+| DCT pHash ≤ 10 | same subject rephotographed with a different crop or mount |
+| normalised source title | two scans of one artwork under different photo ids |
+
+Each cluster is then assigned by `sha256(salt + ':' + cluster_key)` mapped to
+`[0,1)` and bucketed. Consequences that matter:
 
 - independent of filesystem or manifest ordering
 - stable across machines and repeated runs
@@ -52,9 +68,15 @@ bucketed. Consequences that matter:
 - stable under corpus growth — an image's bucket depends only on its own bytes
 - a duplicate photograph under two filenames lands in one bucket, not two
 
-Nominal 70/15/15, realised 65.9/17.8/16.4. Hash bucketing gives approximate
-counts and **the salt is not tuned** to produce rounder ones; searching salts
-for a target count is selecting a split.
+Nominal 70/15/15, realised 66.5/19.0/14.5. Bucketing whole clusters gives
+approximate counts — a large cluster moves several images at once — and **the
+salt is not tuned** to produce rounder ones; searching salts for a target count
+is selecting a split.
+
+`tools/dataset.py` refuses to emit a split it could not verify: if any manifest
+image is unreadable it exits non-zero rather than silently clustering fewer
+images, which previously let a clone without the corpus produce a different,
+duplicate-straddling split while every committed check reported healthy.
 
 Rebuild with:
 
@@ -62,8 +84,10 @@ Rebuild with:
 python3 tools/dataset.py --manifest data/corpus/manifest.json --out data/splits/corpus-v3.json
 ```
 
-`test/dataset-split.test.ts` enforces pairwise disjointness at content hash and
-filename, in CI, with no Python and no GPU.
+Each entry records its cluster key, so `test/dataset-split.test.ts` enforces
+pairwise disjointness at content hash, filename **and perceptual cluster** from
+the committed artifact — in CI, with no Python and no GPU. The cluster
+assertion is the load-bearing one: hash equality cannot express "same scene".
 
 ## Split roles
 

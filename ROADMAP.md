@@ -177,11 +177,12 @@ construction. Excluding it both conditions are neutral; excluding synthetic text
 as well, both are negative. The corpus contains no captured footage, so it
 cannot settle the question either way.
 
-Nine methodology defects were found and fixed, three by me and six by
-independent review, including a patch-level split that leaked 100% of validation
-sources, a baseline that was the wrong filter, perceptual duplicates straddling
-splits under two different hashes, and an MPS backend that returned different
-answers for identical model-free computations. Every affected result was
+Ten methodology defects were found and fixed: two carried in from Milestone 4's
+external review, two I found myself during 4.5, and six from this milestone's
+independent review. They include a patch-level split that leaked 100% of
+validation sources, a baseline that was the wrong filter, perceptual duplicates
+straddling splits under two different hashes, and an MPS backend that returned
+different answers for identical model-free computations. Every affected result was
 regenerated; nothing measured before the fixes is carried forward.
 
 Delivered: cluster-level split with CI-enforced disjointness; independent CC0

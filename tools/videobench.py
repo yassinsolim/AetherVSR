@@ -1374,6 +1374,39 @@ def score_baselines(args: argparse.Namespace) -> dict:
             cat_result[tier_name] = tier_result
         result["categories"][category] = cat_result
 
+    # Evaluate the VMAF sanity rule and record the verdict *in the artifact*.
+    # Hand-annotating this file was itself a defect: the next regeneration would
+    # have silently dropped the warning, which is exactly the failure mode this
+    # milestone fixed elsewhere.
+    vmaf_failures: dict[str, str] = {}
+    for category, tiers in result["categories"].items():
+        for tier_name, scalers in tiers.items():
+            got: dict[str, float] = {}
+            for scaler_name, entry in scalers.items():
+                value = entry.get("vmaf")
+                if isinstance(value, dict):
+                    value = value.get("mean")
+                if isinstance(value, (int, float)):
+                    got[scaler_name] = float(value)
+            problems = vmaf_sanity_failures(got)
+            if problems:
+                vmaf_failures[f"{category}/{tier_name}"] = "; ".join(problems)
+
+    result["vmaf_validity"] = {
+        "status": "DIAGNOSTIC ONLY - NOT A QUALITY CLAIM" if vmaf_failures else "sanity rule passed",
+        "sanityRule": "nearest-neighbour must not outrank bicubic or lanczos",
+        "note": VMAF_VALIDITY_NOTE,
+        "failingCells": len(vmaf_failures),
+        "totalCells": sum(len(t) for t in result["categories"].values()),
+        "sanityFailures": vmaf_failures,
+    }
+    if vmaf_failures:
+        print(
+            f"WARNING: VMAF fails the sanity rule in {len(vmaf_failures)} cells; "
+            "recorded as DIAGNOSTIC ONLY.",
+            file=sys.stderr,
+        )
+
     out_path = os.path.join(out_root, "baseline_scores.json")
     write_json(out_path, result)
 

@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 interface SplitEntry {
   readonly file: string;
   readonly sha256: string;
+  readonly cluster: string;
   readonly source_url: string | null;
   readonly licence: string | null;
 }
@@ -47,6 +48,8 @@ const hashes = (name: (typeof NAMES)[number]): Set<string> =>
   new Set(split.splits[name].map((e) => e.sha256));
 const files = (name: (typeof NAMES)[number]): Set<string> =>
   new Set(split.splits[name].map((e) => e.file));
+const clusters = (name: (typeof NAMES)[number]): Set<string> =>
+  new Set(split.splits[name].map((e) => e.cluster));
 
 function intersect(a: Set<string>, b: Set<string>): string[] {
   return [...a].filter((v) => b.has(v));
@@ -83,6 +86,15 @@ describe('source-level dataset split', () => {
     expect(intersect(files(a), files(b))).toEqual([]);
   });
 
+  /**
+   * The load-bearing property, and the one hash equality cannot express. Two
+   * photographs of one scene share a cluster key even though every byte
+   * differs, so this is the assertion that actually enforces the fix.
+   */
+  it.each(PAIRS)('%s and %s share no perceptual cluster', (a, b) => {
+    expect(intersect(clusters(a), clusters(b))).toEqual([]);
+  });
+
   it('contains no duplicate source within a single split', () => {
     for (const name of NAMES) {
       expect(hashes(name).size).toBe(split.splits[name].length);
@@ -114,6 +126,7 @@ describe('source-level dataset split', () => {
     for (const name of NAMES) {
       for (const entry of split.splits[name]) {
         expect(entry.sha256).toMatch(/^[0-9a-f]{64}$/);
+        expect(entry.cluster).toMatch(/^[0-9a-f]{64}$/);
         expect(entry.file.length).toBeGreaterThan(0);
       }
     }

@@ -304,6 +304,10 @@ def build_split(
             {
                 "file": entry["file"],
                 "sha256": identity,
+                # Recorded per entry so cluster disjointness is checkable from
+                # the committed artifact, rather than merely true by
+                # construction inside the generator.
+                "cluster": cluster_of[identity],
                 "source_url": entry.get("source_url"),
                 "licence": entry.get("licence"),
             }
@@ -315,7 +319,10 @@ def build_split(
     return {
         "schema": "aethervsr.split/1",
         "salt": salt,
-        "unit": "perceptual cluster of source images (dHash <= threshold, or shared normalised title)",
+        "unit": (
+            "perceptual cluster of source images: union-find over dHash <= threshold, "
+            "DCT pHash <= threshold, or shared normalised source title"
+        ),
         "clusters": n_clusters,
         "phashThreshold": threshold,
         "ratios": {"train": ratios.train, "val": ratios.val, "test": ratios.test},
@@ -345,13 +352,24 @@ def split_hashes(split: dict, name: str) -> set[str]:
     return {e["sha256"] for e in split["splits"][name]}
 
 
+def split_clusters(split: dict, name: str) -> set[str]:
+    return {e["cluster"] for e in split["splits"][name] if "cluster" in e}
+
+
 def check_disjoint(split: dict) -> list[str]:
     """Returns a list of problems; empty means the splits are disjoint."""
     problems: list[str] = []
     hashes = {name: split_hashes(split, name) for name in SPLITS}
     files = {name: set(split_files(split, name)) for name in SPLITS}
+    clusters = {name: split_clusters(split, name) for name in SPLITS}
     pairs = (("train", "val"), ("train", "test"), ("val", "test"))
     for a, b in pairs:
+        # The load-bearing property. Two photographs of one scene share a
+        # cluster key, so a shared key across splits is a leak even when every
+        # content hash differs.
+        shared_c = clusters[a] & clusters[b]
+        if shared_c:
+            problems.append(f"{a} and {b} share {len(shared_c)} clusters: {sorted(shared_c)[:3]}")
         shared_h = hashes[a] & hashes[b]
         if shared_h:
             problems.append(f"{a} and {b} share {len(shared_h)} content hashes: {sorted(shared_h)[:3]}")
