@@ -40,7 +40,9 @@
    "activeAreaCrop": null,
    "activeAreaWidth": 3840,
    "activeAreaHeight": 2160,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA Headquarters",
+   "shootId": "nasa headquarters::astronaut candidates ceremony highlights"
   },
   {
    "id": "portrait-artemis-ii-moon-watch-ami-kille",
@@ -65,7 +67,9 @@
    "activeAreaCrop": "3840:1608:0:276",
    "activeAreaWidth": 3840,
    "activeAreaHeight": 1608,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA Johnson Space Center",
+   "shootId": "nasa johnson space center::artemis ii moon watch"
   },
   {
    "id": "portrait-artemis-ii-moon-watch-duane-chi",
@@ -90,7 +94,9 @@
    "activeAreaCrop": "3840:1608:0:276",
    "activeAreaWidth": 3840,
    "activeAreaHeight": 1608,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA Johnson Space Center",
+   "shootId": "nasa johnson space center::artemis ii moon watch"
   },
   {
    "id": "portrait-artemis-ii-moon-watch-emily-kol",
@@ -115,7 +121,9 @@
    "activeAreaCrop": "3840:1608:0:276",
    "activeAreaWidth": 3840,
    "activeAreaHeight": 1608,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA Johnson Space Center",
+   "shootId": "nasa johnson space center::artemis ii moon watch"
   },
   {
    "id": "portrait-artemis-ii-moon-watch-jennifer",
@@ -140,7 +148,9 @@
    "activeAreaCrop": "3840:1608:0:276",
    "activeAreaWidth": 3840,
    "activeAreaHeight": 1608,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA Johnson Space Center",
+   "shootId": "nasa johnson space center::artemis ii moon watch"
   },
   {
    "id": "speech-artemis-ii-live-launch-coverage-c",
@@ -165,7 +175,9 @@
    "activeAreaCrop": null,
    "activeAreaWidth": 3840,
    "activeAreaHeight": 2160,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA Kennedy Space Center",
+   "shootId": "nasa kennedy space center::artemis ii live launch"
   },
   {
    "id": "reunion-artemis-ii-crew-welcomed-home",
@@ -190,7 +202,9 @@
    "activeAreaCrop": null,
    "activeAreaWidth": 3840,
    "activeAreaHeight": 2160,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA",
+   "shootId": "nasa::artemis ii crew welcomed"
   },
   {
    "id": "announcement-another-step-toward-one-of",
@@ -215,7 +229,9 @@
    "activeAreaCrop": null,
    "activeAreaWidth": 3840,
    "activeAreaHeight": 2160,
-   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)"
+   "activeAreaVerification": "ffmpeg cropdetect=limit=24:round=2:reset=0 over 24 frames at start_seconds, plus visual inspection of extracted frame(s)",
+   "creator": "NASA Headquarters",
+   "shootId": "nasa headquarters::another step toward one"
   }
  ],
  "fetch_summary": {
@@ -238,5 +254,6 @@
    "reason": "That specific segment is an animated Moon-phase graphic explicitly captioned 'Animation' in the source file. Excluded by choosing start_seconds=82.0, a different, verified-optical segment of the same file (a real press-conference speaker), instead of discarding the whole source."
   }
  ],
- "scope_limitation": "All 8 clips are NASA/Artemis-program video from 2025-2026, so subjects skew toward NASA personnel and astronauts in professional/ceremonial dress rather than a demographically or occupationally general population; this supports a claim about that population, not a general-purpose faces benchmark."
+ "scope_limitation": "All 8 clips are NASA/Artemis-program video from 2025-2026, so subjects skew toward NASA personnel and astronauts in professional/ceremonial dress rather than a demographically or occupationally general population; this supports a claim about that population, not a general-purpose faces benchmark.",
+ "role": "faces-benchmark"
 }

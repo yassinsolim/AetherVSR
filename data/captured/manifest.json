@@ -33,7 +33,9 @@
    "source_bytes_actual": 103423652,
    "source_duration_s": 52.0,
    "source_fps": "30000/1001",
-   "licence_verified_from_api": "CC BY 3.0"
+   "licence_verified_from_api": "CC BY 3.0",
+   "creator": "Drozwik Drones",
+   "shootId": "drozwik drones::maplefest in bowmanville on"
   },
   {
    "id": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
@@ -53,7 +55,9 @@
    "source_bytes_actual": 285789341,
    "source_duration_s": 105.73,
    "source_fps": "30000/1001",
-   "licence_verified_from_api": "CC BY 4.0"
+   "licence_verified_from_api": "CC BY 4.0",
+   "creator": "Ride With R",
+   "shootId": "ride with r::rogla slovenia ostru\u0161\u010dica 1"
   },
   {
    "id": "motion-aerial-drone-chase-of-a-train-webm",
@@ -73,7 +77,9 @@
    "source_bytes_actual": 303546580,
    "source_duration_s": 114.16,
    "source_fps": "50/1",
-   "licence_verified_from_api": "CC BY 3.0"
+   "licence_verified_from_api": "CC BY 3.0",
+   "creator": "Flykit production",
+   "shootId": "flykit production::aerial drone chase of"
   },
   {
    "id": "urban-funchal-madeira-amazing-view-from-",
@@ -93,7 +99,9 @@
    "source_bytes_actual": 201463359,
    "source_duration_s": 102.4,
    "source_fps": "25/1",
-   "licence_verified_from_api": "CC BY 3.0"
+   "licence_verified_from_api": "CC BY 3.0",
+   "creator": "NoCopyrightNature",
+   "shootId": "nocopyrightnature::funchal madeira amazing view"
   },
   {
    "id": "urban-drone-footage-in-new-orleans-2022-",
@@ -113,7 +121,9 @@
    "source_bytes_actual": 262577277,
    "source_duration_s": 171.87,
    "source_fps": "30/1",
-   "licence_verified_from_api": "CC BY 3.0"
+   "licence_verified_from_api": "CC BY 3.0",
+   "creator": "Angel C Planells",
+   "shootId": "angel c planells::drone footage in new"
   },
   {
    "id": "nature-the-beautiful-blue-river-dji-phant",
@@ -133,7 +143,9 @@
    "source_bytes_actual": 137777251,
    "source_duration_s": 61.32,
    "source_fps": "25/1",
-   "licence_verified_from_api": "CC BY 3.0"
+   "licence_verified_from_api": "CC BY 3.0",
+   "creator": "Bryan Aspenson",
+   "shootId": "bryan aspenson::the beautiful blue river"
   },
   {
    "id": "nature-piz-neir-aerial-video-4k-webm",
@@ -153,7 +165,9 @@
    "source_bytes_actual": 137170565,
    "source_duration_s": 136.6,
    "source_fps": "30000/1001",
-   "licence_verified_from_api": "CC BY-SA 4.0"
+   "licence_verified_from_api": "CC BY-SA 4.0",
+   "creator": "Capricorn4049",
+   "shootId": "capricorn4049::piz neir aerial video"
   },
   {
    "id": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
@@ -173,7 +187,9 @@
    "source_bytes_actual": 32298162,
    "source_duration_s": 5.71,
    "source_fps": "19001/317",
-   "licence_verified_from_api": "CC BY-SA 4.0"
+   "licence_verified_from_api": "CC BY-SA 4.0",
+   "creator": "PantheraLeo1359531",
+   "shootId": "pantheraleo1359531::hofer weihnachtsmarkt am abend"
   },
   {
    "id": "texture-snowex-field-campaign-4k-b-roll-fr",
@@ -193,7 +209,9 @@
    "source_bytes_actual": 161222612,
    "source_duration_s": 68.34,
    "source_fps": "30000/1001",
-   "licence_verified_from_api": "Public domain"
+   "licence_verified_from_api": "Public domain",
+   "creator": "NASA's Goddard Space Flight Center",
+   "shootId": "nasa s goddard space flight center::snowex field campaign 4k"
   },
   {
    "id": "texture-4k-drone-footage-of-a-barge-on-the",
@@ -213,7 +231,9 @@
    "source_bytes_actual": 129846453,
    "source_duration_s": 278.32,
    "source_fps": "24000/1001",
-   "licence_verified_from_api": "CC BY 3.0"
+   "licence_verified_from_api": "CC BY 3.0",
+   "creator": "MrAyrit",
+   "shootId": "mrayrit::4k drone footage of"
   }
  ],
  "fetch_summary": {
@@ -247,5 +267,6 @@
  "exclusion_policy": "Clips are removed for documented corpus-purity defects - synthetic overlays, corrupt source - never for their scores. Independent review verified the headline survives both with these clips included and excluded, and both are reported.",
  "correlated_units": [],
  "scope_limitation": "Predominantly aerial, web-sourced 4K footage: 7 of 10 clips are aerial or airborne, several are Commons VP9 transcodes of YouTube deliveries rather than camera originals, lowlight is n=1 and texture n=2, and two clips carry very little motion. This corpus supports a claim about that population, not about captured video in general, and it contains no faces at all.",
- "known_gaps": "No faces/people category. The only permissively licensed face footage found at sufficient resolution was 9:16 vertical and could not supply a landscape HR master. Faces are therefore UNMEASURED in this milestone, not shown to be fine - and results/captured-faces-sensitivity.json records what the corpus said with those clips included, so the removal is auditable rather than quiet."
+ "known_gaps": "No faces/people category. The only permissively licensed face footage found at sufficient resolution was 9:16 vertical and could not supply a landscape HR master. Faces are therefore UNMEASURED in this milestone, not shown to be fine - and results/captured-faces-sensitivity.json records what the corpus said with those clips included, so the removal is auditable rather than quiet.",
+ "role": "regression-benchmark"
 }
