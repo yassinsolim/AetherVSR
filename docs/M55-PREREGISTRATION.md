@@ -88,3 +88,66 @@ budget fallback.
 A negative result is a successful experiment. If no candidate meets the target
 the milestone reports that the current default is retained and says why. The
 project does not weaken the criterion after seeing results.
+
+---
+
+# Amendment 1 — tie-break between two qualifying candidates
+
+**Timing, stated plainly.** This amendment was written at 23:20, after
+`results/captured-gopvideo-poor.json` was produced at 22:50, and before its
+contents were inspected. It therefore does **not** carry pre-registration
+weight and must not be read as one. It is recorded here, in the same document,
+because a rule invented after a result is still worth writing down explicitly
+rather than applying silently.
+
+## Why an amendment was needed
+
+The original document fixed an acceptance target but specified no tie-break.
+Independent review (`M55Stats`) established that the 2×2 has a large
+interaction the original analysis averaged over: at CRF 34 the interaction is
+−0.0613 (t = −23), roughly nine times either main effect. Within the GOP arm,
+the heavy-CRF distribution is worth **+0.0344 dB** at CRF 34 on validation,
+making `gop_poor` the best CRF-34 cell in the experiment and `gop_uniform` —
+the candidate selected first — the worst of that arm.
+
+So two candidates can satisfy the general-replacement criteria at once, and
+the original document does not say which ships.
+
+## The rule
+
+> Where more than one candidate satisfies the general-replacement criteria, the
+> default is the candidate selected first on validation. It is displaced only by
+> a candidate that beats it on the primary endpoint — frozen CRF 34 — by at
+> least the pre-registered materiality margin of **0.20 dB**, measured as a
+> paired clip-level difference between the two models on the same ten clips.
+> An advantage below that margin does not displace a default that is
+> simultaneously behind at CRF 18 and CRF 26.
+
+## Why this rule is not outcome-shopping
+
+The rule is decided entirely by numbers that were available **before any test
+read**, and it inherits its threshold rather than inventing one:
+
+* The 0.20 dB margin is not new. The original target already declared that a
+  CRF 34 movement should be "approximately +0.20 dB or better, so the result is
+  not statistical-only" — that is a materiality floor for this endpoint, fixed
+  in advance.
+* The validation tradeoff was fully characterised before the freeze was read:
+  `gop_poor` costs 0.1589 dB at CRF 18 and 0.0213 at CRF 26 to buy 0.0344 at
+  CRF 34. That 0.0344 dB is a factor of six below the materiality floor at the
+  endpoint the floor applies to.
+
+The outcome is therefore determined by the validation gap, not by the frozen
+test. If the test reproduces the validation pattern it adds nothing already
+unknown; if it contradicts it at the 0.03 dB scale, the honest reading is that
+one read is noisy at that scale, not that the ranking reversed.
+
+## Consequences for reporting
+
+* CRF 34 is the primary endpoint for the second read. CRF 18 and CRF 26 are
+  descriptive. Two candidates across three conditions is six cells, and the
+  freeze only protects a decision that hangs on one named cell.
+* Any candidate-versus-candidate comparison is computed as a **paired per-clip
+  difference between the two models**, never by comparing two intervals against
+  a shared baseline. The Catmull-Rom baseline is bit-identical across runs, so
+  it cancels exactly and the paired interval is far tighter.
