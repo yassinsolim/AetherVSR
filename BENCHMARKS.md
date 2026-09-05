@@ -1777,6 +1777,41 @@ measures that nothing regressed rather than which is faster. One 20-second run
 per arm, unreplicated: the 10-versus-0 decoder-drop difference is session noise
 and is not attributed to the model.
 
+### Capacity probe (Part E) — is the information there?
+
+The milestone asked for an offline diagnostic oracle: is there recoverable
+information at CRF 34 that a 6,291-parameter model fails to exploit, or is it
+destroyed? Two attempts, one useful.
+
+**Real-ESRGAN x2plus (16.7M parameters, BSD-3) is the wrong instrument.** It
+loses 1.05 dB to Catmull-Rom on 10/10 clips at CRF 34. That is not a defect in
+the model: it is adversarially trained for perceptual quality and trades PSNR
+for hallucinated texture, so it cannot answer a fidelity-headroom question. A
+distortion-oriented oracle was needed instead.
+
+**C64D8 — the same architecture family, 302,019 parameters, 48x the shipped
+model — trained on the same data with the same L1 loss.** This is a capacity
+probe, not a production candidate; runtime was never considered and it is far
+too slow for the frame budget. Diagnostic only, and it selected nothing.
+
+| condition | oracle vs Catmull-Rom | shipped vs Catmull-Rom | headroom |
+|---|---|---|---|
+| CRF 26 typical | +0.8781 (10/10) | +0.5961 | **+0.2819** |
+| CRF 34 poor | +0.4113 (10/10) | +0.2306 | **+0.1806** |
+
+**Verdict: MODEST HEADROOM.** The information at CRF 34 is not destroyed —
+48x the parameters recovers a further +0.18 dB, comparable to the whole gain
+the shipped model achieves there. But the trade is poor: that model cannot run
+in a 16.67 ms budget, and the same +0.18 dB at CRF 34 was obtained this
+milestone by changing the training corpus at **zero** runtime cost. On its own
+validation set the 48x model is only +0.32 dB better, so capacity is giving
+sharply diminishing returns at this corpus size.
+
+A first attempt at this probe diverged at the default learning rate and
+produced ~10 dB output. It is mentioned because an undertrained oracle bounds
+nothing, and reporting one as evidence would have been worse than reporting
+none.
+
 ### Quality signal (diagnostic, Part U)
 
 | signal | pooled r | within-clip r | clip-centred r |
