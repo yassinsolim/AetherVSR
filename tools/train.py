@@ -223,6 +223,14 @@ def main() -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--channels", type=int, default=16)
     ap.add_argument(
+        "--max-steps",
+        type=int,
+        default=0,
+        help="cap total optimizer updates and stop when reached. Equalises training "
+        "compute across corpus sizes, so a dataset-scale comparison measures more "
+        "unique data rather than more gradient steps. 0 disables the cap.",
+    )
+    ap.add_argument(
         "--pairs-hr-only",
         action="store_true",
         help="take only the HR patches from --pairs and degrade them with --degradation "
@@ -343,6 +351,16 @@ def main() -> int:
         base_psnr = psnr(bilinear.clamp(0, 1), val_hr_d)
     print(f"bilinear baseline on val: {base_psnr:.2f} dB")
 
+    # Steps, not just epochs. A larger corpus at a fixed epoch count silently
+    # receives proportionally more optimizer updates, so "more data helped" and
+    # "more updates helped" become indistinguishable - exactly the confound a
+    # scaling curve has to avoid. With --max-steps every scale gets the same
+    # number of updates and differs only in how much unique data those updates
+    # saw.
+    steps_per_epoch = max(1, (len(train_hr) - args.batch + 1 + args.batch - 1) // args.batch)
+    step_budget = args.max_steps if args.max_steps > 0 else args.epochs * steps_per_epoch
+    total_steps = 0
+
     best = -1.0
     best_ssim = float("nan")
     best_state = None
@@ -395,6 +413,9 @@ def main() -> int:
             opt.step()
             total += loss.item()
             batches += 1
+            total_steps += 1
+            if args.max_steps > 0 and total_steps >= args.max_steps:
+                break
         sched.step()
 
         model.eval()
@@ -414,6 +435,11 @@ def main() -> int:
                 f"  epoch {epoch:3d}  loss {total / max(1, batches):.5f}  val {v:.2f} dB"
                 f"  best {best:.2f}"
             )
+        # Checked here, after validation and checkpointing, so a step-capped run
+        # still selects a checkpoint on the epoch it stops in.
+        if args.max_steps > 0 and total_steps >= args.max_steps:
+            print(f"  step budget {args.max_steps} reached during epoch {epoch}", file=sys.stderr)
+            break
 
     print(
         f"trained in {time.time() - start:.0f}s; best val PSNR {best:.2f} dB "
@@ -540,6 +566,14 @@ def main() -> int:
                 else None
             ),
             "epochs": args.epochs,
+            # Recorded so a scaling comparison can be checked for the compute
+            # confound rather than trusted about it.
+            "stepBudget": step_budget,
+            "optimizerSteps": total_steps,
+            "stepsPerEpoch": steps_per_epoch,
+            "epochsCompleted": epoch + 1,
+            "trainPatches": int(len(train_hr)),
+            "patchesSeen": int(total_steps * args.batch),
             "batch": args.batch,
             "lr": args.lr,
             "patch": args.patch,
