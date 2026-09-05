@@ -1,0 +1,1476 @@
+{
+ "schema": "aethervsr.m55-validation/1",
+ "note": "Common fixed-CRF GOP validation set built from the three held-out validation videos every condition shares. This is validation; the frozen captured test set is not read here.",
+ "commonSet": {
+  "clips": [
+   "glencoe-on-train-station-360-drone-4k-",
+   "hofer-verkehrswendetag-20230824-c0259-",
+   "treinstel-681-w08-als-de-exprestrein-s"
+  ],
+  "crfs": [
+   18,
+   26,
+   34
+  ],
+  "frames": 12,
+  "gopParams": "keyint=48:min-keyint=24:scenecut=40:bframes=3:ref=3"
+ },
+ "models": {
+  "catmull_rom": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 31.882944107055664,
+     "ssim": 0.9234632551670074,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.144025087356567,
+     "ssim": 0.8720503101746241,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.396421432495117,
+     "ssim": 0.760532925526301,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 31.665894389152527,
+     "ssim": 0.9087254057327906,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 29.80447192986806,
+     "ssim": 0.8596137712399164,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.068299452463787,
+     "ssim": 0.7632589936256409,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 30.774699846903484,
+     "ssim": 0.9081648836533228,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.240413705507915,
+     "ssim": 0.8701268633206686,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.658779780069988,
+     "ssim": 0.7901670783758163,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 31.44117944770389,
+    "26": 29.729636907577515,
+    "34": 27.041166888342968
+   },
+   "mean": 29.403994414541458
+  },
+  "production-c16d2-realistic": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 32.76247978210449,
+     "ssim": 0.931568001707395,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.51746169726054,
+     "ssim": 0.8745891203482946,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.449291547139484,
+     "ssim": 0.7590163399775823,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.65301585197449,
+     "ssim": 0.9206700424353281,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.21275321642558,
+     "ssim": 0.8648614635070165,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.13288187980652,
+     "ssim": 0.7619552810986837,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.71739121278127,
+     "ssim": 0.921999196211497,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.669823050498962,
+     "ssim": 0.8792533228794733,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.69842044512431,
+     "ssim": 0.7924859672784805,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.377628948953415,
+    "26": 30.133345988061695,
+    "34": 27.093531290690105
+   },
+   "mean": 29.868168742568407
+  },
+  "all_i_poor-seed1": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 32.30044702688853,
+     "ssim": 0.9218923995892206,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.48026700814565,
+     "ssim": 0.8736552794774374,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.58030692736308,
+     "ssim": 0.7647677262624105,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 31.946165561676025,
+     "ssim": 0.9074721386035284,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.07940113544464,
+     "ssim": 0.8627627640962601,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.251542409261067,
+     "ssim": 0.7697973350683848,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.326650579770405,
+     "ssim": 0.9135324756304423,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.678432941436768,
+     "ssim": 0.8779009133577347,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.9043771425883,
+     "ssim": 0.7988982448975245,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 31.857754389444988,
+    "26": 30.07936702834235,
+    "34": 27.245408826404148
+   },
+   "mean": 29.727510081397163
+  },
+  "all_i_poor-seed2": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 32.31098214785258,
+     "ssim": 0.9214237431685129,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.491151412328083,
+     "ssim": 0.8732736458381017,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.589275638262432,
+     "ssim": 0.7648409207661947,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.050660053888954,
+     "ssim": 0.907760019103686,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.140780409177143,
+     "ssim": 0.8632927487293879,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.268985708554585,
+     "ssim": 0.7703815350929896,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.36378268400828,
+     "ssim": 0.913804312547048,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.709730744361877,
+     "ssim": 0.8782612234354019,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.91148817539215,
+     "ssim": 0.7990028113126755,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 31.908474961916607,
+    "26": 30.1138875219557,
+    "34": 27.25658317406972
+   },
+   "mean": 29.759648552647345
+  },
+  "all_i_poor-seed3": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 32.348609368006386,
+     "ssim": 0.9222716788450877,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.505860050519306,
+     "ssim": 0.8736523886521658,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.589738567670185,
+     "ssim": 0.7647966941197714,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.01297998428345,
+     "ssim": 0.9081859191258749,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.11128048102061,
+     "ssim": 0.863120511174202,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.25725293159485,
+     "ssim": 0.7699361344178518,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.283289591471355,
+     "ssim": 0.9133425503969193,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.65170423189799,
+     "ssim": 0.877334401011467,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.887244780858357,
+     "ssim": 0.7981085777282715,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 31.881626314587063,
+    "26": 30.08961492114597,
+    "34": 27.244745426707794
+   },
+   "mean": 29.738662220813612
+  },
+  "all_i_uniform-seed1": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 32.746802965799965,
+     "ssim": 0.9274072994788488,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.69883445898692,
+     "ssim": 0.8771895418564478,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.623222668965656,
+     "ssim": 0.7653083105882009,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.44111657142639,
+     "ssim": 0.9136741558710734,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.315938194592793,
+     "ssim": 0.8667027602593104,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.292196949323017,
+     "ssim": 0.7703351030747095,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.65756086508433,
+     "ssim": 0.9180566519498825,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.840905865033466,
+     "ssim": 0.8806142409642538,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.912575364112854,
+     "ssim": 0.7987487961848577,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.281826800770226,
+    "26": 30.28522617287106,
+    "34": 27.275998327467175
+   },
+   "mean": 29.947683767036153
+  },
+  "all_i_uniform-seed2": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 32.77016222476959,
+     "ssim": 0.9265657265981039,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.70848007996877,
+     "ssim": 0.876805325349172,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.61903981367747,
+     "ssim": 0.7653392056624094,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.49964733918508,
+     "ssim": 0.9133000125487646,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.346107681592304,
+     "ssim": 0.8666652242342631,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.29816476504008,
+     "ssim": 0.7704626570145289,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.72002653280894,
+     "ssim": 0.9191035528977712,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.859748482704163,
+     "ssim": 0.8814090291659037,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.90591812133789,
+     "ssim": 0.7990682274103165,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.32994536558787,
+    "26": 30.30477874808841,
+    "34": 27.274374233351818
+   },
+   "mean": 29.969699449009365
+  },
+  "all_i_uniform-seed3": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 32.74241546789805,
+     "ssim": 0.9266780416170756,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.696598688761394,
+     "ssim": 0.8769369771083196,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.620877822240193,
+     "ssim": 0.7654869010051092,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.423187692960106,
+     "ssim": 0.9129340350627899,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.3138530254364,
+     "ssim": 0.8665713568528494,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.297509709994,
+     "ssim": 0.7706946680943171,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.669474442799885,
+     "ssim": 0.9190769096215566,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.840765794118244,
+     "ssim": 0.8814786970615387,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.912822326024372,
+     "ssim": 0.7994055151939392,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.278359201219345,
+    "26": 30.28373916943868,
+    "34": 27.277069952752854
+   },
+   "mean": 29.94638944113696
+  },
+  "gop_poor-seed1": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.05047869682312,
+     "ssim": 0.9306211372216543,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.830182830492657,
+     "ssim": 0.8786685913801193,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.63128678003947,
+     "ssim": 0.7651333759228388,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.8415455420812,
+     "ssim": 0.9192596673965454,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.49050509929657,
+     "ssim": 0.870059738556544,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.304526567459106,
+     "ssim": 0.7709978918234507,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.994603872299194,
+     "ssim": 0.9250034689903259,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 30.00802417596181,
+     "ssim": 0.8859691669543585,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.910749475161236,
+     "ssim": 0.8004961063464483,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.62887603706784,
+    "26": 30.442904035250347,
+    "34": 27.282187607553272
+   },
+   "mean": 30.11798922662382
+  },
+  "gop_poor-seed2": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.07553688685099,
+     "ssim": 0.9301991810401281,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.847107768058777,
+     "ssim": 0.87837020556132,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.637613614400227,
+     "ssim": 0.7651929159959158,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.85042564074198,
+     "ssim": 0.9188014268875122,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.50419847170512,
+     "ssim": 0.869868223865827,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.312100330988567,
+     "ssim": 0.7709070593118668,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 32.050966024398804,
+     "ssim": 0.9255068997542063,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 30.04261513551076,
+     "ssim": 0.8864203095436096,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.92278226216634,
+     "ssim": 0.8007503648598989,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.65897618399726,
+    "26": 30.464640458424885,
+    "34": 27.290832069185043
+   },
+   "mean": 30.13814957053573
+  },
+  "gop_poor-seed3": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.055600921312966,
+     "ssim": 0.9315684189399084,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.83930293718974,
+     "ssim": 0.8794488807519277,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.63802468776703,
+     "ssim": 0.7655041416486105,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.80572692553202,
+     "ssim": 0.9194806615511576,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.48136830329895,
+     "ssim": 0.8704234113295873,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.302565375963848,
+     "ssim": 0.7709437062342962,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 31.990275581677754,
+     "ssim": 0.9256588419278463,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 30.013393958409626,
+     "ssim": 0.8865932474533716,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.91749592622121,
+     "ssim": 0.8010714997847875,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.61720114284091,
+    "26": 30.44468839963277,
+    "34": 27.286028663317364
+   },
+   "mean": 30.115972735263686
+  },
+  "gop_uniform-seed1": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.222338358561196,
+     "ssim": 0.9336005498965582,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.86228867371877,
+     "ssim": 0.8795211911201477,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.605679829915363,
+     "ssim": 0.7643469870090485,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 33.027025858561196,
+     "ssim": 0.9230842192967733,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.531803170839947,
+     "ssim": 0.8713821321725845,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.28193720181783,
+     "ssim": 0.7699057012796402,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 32.12472160657247,
+     "ssim": 0.9270534366369247,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 30.015244285265606,
+     "ssim": 0.8863275150458018,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.867966453234356,
+     "ssim": 0.7992134044567744,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.79136194123162,
+    "26": 30.46977870994144,
+    "34": 27.25186116165585
+   },
+   "mean": 30.171000604276305
+  },
+  "gop_uniform-seed2": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.22202742099762,
+     "ssim": 0.9341732362906138,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.85693895816803,
+     "ssim": 0.8798004140456518,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.600637674331665,
+     "ssim": 0.7643357217311859,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 33.00899008909861,
+     "ssim": 0.9235589802265167,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.511336127916973,
+     "ssim": 0.8713144063949585,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.269300421079,
+     "ssim": 0.7692779997984568,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 32.16156621774038,
+     "ssim": 0.9278862675031027,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 30.03370702266693,
+     "ssim": 0.8870172848304113,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.872247457504272,
+     "ssim": 0.7996823241313299,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.79752790927887,
+    "26": 30.46732736958398,
+    "34": 27.247395184304978
+   },
+   "mean": 30.170750154389275
+  },
+  "gop_uniform-seed3": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.23513130346934,
+     "ssim": 0.9345956196387609,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.875651836395264,
+     "ssim": 0.8802235275506973,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.61334518591563,
+     "ssim": 0.764531597495079,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 33.000211914380394,
+     "ssim": 0.9234344959259033,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.523543159166973,
+     "ssim": 0.8716855694850286,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.278130451838177,
+     "ssim": 0.7697045753399531,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 32.14284876982371,
+     "ssim": 0.9280301878849665,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 30.037587881088257,
+     "ssim": 0.8873016287883123,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.87787175178528,
+     "ssim": 0.7999191532532374,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.79273066255781,
+    "26": 30.478927625550167,
+    "34": 27.256449129846363
+   },
+   "mean": 30.17603580598478
+  },
+  "oracle-c64d8": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 12.055483063062033,
+     "ssim": 0.8945020437240601,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 12.041549483935038,
+     "ssim": 0.8460272351900736,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 12.005769709746042,
+     "ssim": 0.7445592681566874,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 12.193242808183035,
+     "ssim": 0.8789861698945364,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 12.177025576432547,
+     "ssim": 0.8321528931458791,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 12.137040992577871,
+     "ssim": 0.7434105277061462,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 10.445696115493774,
+     "ssim": 0.879939133922259,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 10.4343710343043,
+     "ssim": 0.8421029647191366,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 10.405316452185312,
+     "ssim": 0.7664478570222855,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 11.564807328912948,
+    "26": 11.550982031557295,
+    "34": 11.516042384836409
+   },
+   "mean": 11.543943915102217
+  },
+  "videohr-realistic-seed1": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.110562562942505,
+     "ssim": 0.9351252367099127,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.754700899124146,
+     "ssim": 0.8790946702162424,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.557764649391174,
+     "ssim": 0.762720967332522,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.917926708857216,
+     "ssim": 0.9245026061932246,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.403486887613933,
+     "ssim": 0.8699430475632349,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.220564087231953,
+     "ssim": 0.7668225169181824,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 32.06091423829397,
+     "ssim": 0.9259342402219772,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.907716512680054,
+     "ssim": 0.8838858157396317,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.813136140505474,
+     "ssim": 0.7969233493010203,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.6964678366979,
+    "26": 30.355301433139378,
+    "34": 27.197154959042866
+   },
+   "mean": 30.082974742960047
+  },
+  "videohr-realistic-seed2": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.07753105958303,
+     "ssim": 0.93497467537721,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.73905885219574,
+     "ssim": 0.8790974269310633,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.55147099494934,
+     "ssim": 0.7626850306987762,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.89246002833048,
+     "ssim": 0.9243899484475454,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.39029796918233,
+     "ssim": 0.8699025064706802,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.21615235010783,
+     "ssim": 0.7667176028092703,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 32.00537165006002,
+     "ssim": 0.925517757733663,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.87753431002299,
+     "ssim": 0.8835005064805349,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.802613337834675,
+     "ssim": 0.7965685327847799,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.65845424599118,
+    "26": 30.335630377133686,
+    "34": 27.190078894297283
+   },
+   "mean": 30.061387839140714
+  },
+  "videohr-realistic-seed3": {
+   "perCell": [
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 18,
+     "psnr": 33.07684997717539,
+     "ssim": 0.9350132991870245,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 26,
+     "psnr": 30.722775260607403,
+     "ssim": 0.8785400638977686,
+     "frames": 12
+    },
+    {
+     "clip": "glencoe-on-train-station-360-drone-4k-",
+     "crf": 34,
+     "psnr": 27.538292209307354,
+     "ssim": 0.7620742122332255,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 18,
+     "psnr": 32.881388465563454,
+     "ssim": 0.9244720389445623,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 26,
+     "psnr": 30.374095638593037,
+     "ssim": 0.8695005228122076,
+     "frames": 12
+    },
+    {
+     "clip": "hofer-verkehrswendetag-20230824-c0259-",
+     "crf": 34,
+     "psnr": 27.202672561009724,
+     "ssim": 0.7660135179758072,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 18,
+     "psnr": 32.03106105327606,
+     "ssim": 0.925791804989179,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 26,
+     "psnr": 29.873814582824707,
+     "ssim": 0.8834026505549749,
+     "frames": 12
+    },
+    {
+     "clip": "treinstel-681-w08-als-de-exprestrein-s",
+     "crf": 34,
+     "psnr": 26.788346767425537,
+     "ssim": 0.7961421310901642,
+     "frames": 12
+    }
+   ],
+   "byCrf": {
+    "18": 32.66309983200497,
+    "26": 30.323561827341717,
+    "34": 27.17643717924754
+   },
+   "mean": 30.054366279531408
+  }
+ },
+ "conditions": {
+  "all_i_poor": {
+   "seeds": [
+    "all_i_poor-seed1",
+    "all_i_poor-seed2",
+    "all_i_poor-seed3"
+   ],
+   "n": 3,
+   "byCrf": {
+    "18": {
+     "mean": 31.882618555316217,
+     "sd": 0.025374840378032483,
+     "deltaVsCatmull": 0.4414391076123252
+    },
+    "26": {
+     "mean": 30.094289823814673,
+     "sd": 0.017728709937520067,
+     "deltaVsCatmull": 0.36465291623715856
+    },
+    "34": {
+     "mean": 27.248912475727224,
+     "sd": 0.006651295707266757,
+     "deltaVsCatmull": 0.20774558738425597
+    }
+   },
+   "mean": 29.741940284952705,
+   "sd": 0.016318076233113484,
+   "deltaVsCatmull": 0.3379458704112466
+  },
+  "all_i_uniform": {
+   "seeds": [
+    "all_i_uniform-seed1",
+    "all_i_uniform-seed2",
+    "all_i_uniform-seed3"
+   ],
+   "n": 3,
+   "byCrf": {
+    "18": {
+     "mean": 32.29671045585915,
+     "sd": 0.028834449538156993,
+     "deltaVsCatmull": 0.855531008155257
+    },
+    "26": {
+     "mean": 30.291248030132717,
+     "sd": 0.011741509319477476,
+     "deltaVsCatmull": 0.5616111225552025
+    },
+    "34": {
+     "mean": 27.275814171190614,
+     "sd": 0.0013572622896578556,
+     "deltaVsCatmull": 0.23464728284764647
+    }
+   },
+   "mean": 29.954590885727495,
+   "sd": 0.013100394391585045,
+   "deltaVsCatmull": 0.5505964711860365
+  },
+  "gop_poor": {
+   "seeds": [
+    "gop_poor-seed1",
+    "gop_poor-seed2",
+    "gop_poor-seed3"
+   ],
+   "n": 3,
+   "byCrf": {
+    "18": {
+     "mean": 32.63501778796867,
+     "sd": 0.021554102718497767,
+     "deltaVsCatmull": 1.1938383402647794
+    },
+    "26": {
+     "mean": 30.450744297769333,
+     "sd": 0.012067454155122026,
+     "deltaVsCatmull": 0.7211073901918184
+    },
+    "34": {
+     "mean": 27.286349446685225,
+     "sd": 0.0043311494666675695,
+     "deltaVsCatmull": 0.24518255834225755
+    }
+   },
+   "mean": 30.12403717747441,
+   "sd": 0.012263208706910408,
+   "deltaVsCatmull": 0.7200427629329518
+  },
+  "gop_uniform": {
+   "seeds": [
+    "gop_uniform-seed1",
+    "gop_uniform-seed2",
+    "gop_uniform-seed3"
+   ],
+   "n": 3,
+   "byCrf": {
+    "18": {
+     "mean": 32.7938735043561,
+     "sd": 0.0032379555311746423,
+     "deltaVsCatmull": 1.3526940566522079
+    },
+    "26": {
+     "mean": 30.472011235025196,
+     "sd": 0.006113886718566122,
+     "deltaVsCatmull": 0.7423743274476813
+    },
+    "34": {
+     "mean": 27.251901825269062,
+     "sd": 0.0045271097417306765,
+     "deltaVsCatmull": 0.21073493692609446
+    }
+   },
+   "mean": 30.17259552155012,
+   "sd": 0.0029820041968461716,
+   "deltaVsCatmull": 0.7686011070086636
+  },
+  "videohr-realistic": {
+   "seeds": [
+    "videohr-realistic-seed1",
+    "videohr-realistic-seed2",
+    "videohr-realistic-seed3"
+   ],
+   "n": 3,
+   "byCrf": {
+    "18": {
+     "mean": 32.672673971564684,
+     "sd": 0.020736595208378658,
+     "deltaVsCatmull": 1.2314945238607926
+    },
+    "26": {
+     "mean": 30.338164545871592,
+     "sd": 0.016020834948337344,
+     "deltaVsCatmull": 0.6085276382940776
+    },
+    "34": {
+     "mean": 27.187890344195896,
+     "sd": 0.010530855310544318,
+     "deltaVsCatmull": 0.14672345585292845
+    }
+   },
+   "mean": 30.06624295387739,
+   "sd": 0.014909398018252336,
+   "deltaVsCatmull": 0.6622485393359305
+  }
+ }
+}

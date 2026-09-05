@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import statistics as st
+import sys
 
 import torch
 import torch.nn.functional as F
@@ -64,6 +65,15 @@ def main() -> int:
     model, _ = load_model(args.model)
     with open(args.results, encoding="utf-8") as fh:
         res = json.load(fh)
+    # The first version of this sheet was rendered with the candidate's pixels
+    # and the production model's scores, which inverted the roles: the clip
+    # labelled a loss was in fact the candidate's best. Refuse the mismatch.
+    named = os.path.basename(res.get("model", ""))
+    if named and named != os.path.basename(args.model):
+        raise SystemExit(
+            f"--results describes {named!r} but --model is "
+            f"{os.path.basename(args.model)!r}; the roles would describe the wrong model"
+        )
     os.makedirs(args.out, exist_ok=True)
 
     scored = [
@@ -71,11 +81,19 @@ def main() -> int:
         for c in res["perClip"] if args.condition in c["conditions"]
     ]
     scored.sort()
+    # Rank-based names, not outcome names. Calling the worst clip a "loss" when
+    # it is in fact a small win invents a failure case the evidence does not
+    # contain - and reading a "LOSS" banner over a winning panel is worse than
+    # no banner at all. The labels describe rank; whether the worst clip is
+    # actually a loss is stated, not assumed.
     picks = {
-        "loss": scored[0],
-        "tie": scored[len(scored) // 2],
-        "win": scored[-1],
+        "worst": scored[0],
+        "median": scored[len(scored) // 2],
+        "best": scored[-1],
     }
+    if scored[0][0] > 0:
+        print(f"  note: no losing clip at {args.condition}; worst is {scored[0][0]:+.4f} dB",
+              file=sys.stderr)
 
     index = []
     for role, (delta, cid, category) in picks.items():
@@ -114,6 +132,9 @@ def main() -> int:
             "condition": args.condition,
             "cropRule": "highest gradient energy in the reference, 128 px, 3x nearest zoom",
             "clipRule": "measured delta ranked; worst, median and best clip selected before viewing",
+        "resultsFile": args.results,
+        "hasLosingClip": bool(scored[0][0] <= 0),
+        "worstClipDeltaDb": scored[0][0],
             "panelOrder": ["720p input (nearest)", "Catmull-Rom", "AetherVSR", "reference"],
             "images": index,
         }, fh, indent=1)

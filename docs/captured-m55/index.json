@@ -1,0 +1,59 @@
+{
+ "model": "aethersr-c16d2-gopvideo.json",
+ "condition": "h264_poor",
+ "cropRule": "highest gradient energy in the reference, 128 px, 3x nearest zoom",
+ "clipRule": "measured delta ranked; worst, median and best clip selected before viewing",
+ "resultsFile": "results/captured-gopvideo.json",
+ "hasLosingClip": false,
+ "worstClipDeltaDb": 0.018512109915415447,
+ "panelOrder": [
+  "720p input (nearest)",
+  "Catmull-Rom",
+  "AetherVSR",
+  "reference"
+ ],
+ "images": [
+  {
+   "role": "worst",
+   "file": "worst-nature-the-beautiful-blue-river-dji-phan-h264_poor.png",
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "deltaPsnrDb": 0.018512109915415447,
+   "frame": "frame_0013.png",
+   "crop": [
+    1216,
+    256,
+    128,
+    128
+   ]
+  },
+  {
+   "role": "median",
+   "file": "median-urban-funchal-madeira-amazing-view-from--h264_poor.png",
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "deltaPsnrDb": 0.25763700405756634,
+   "frame": "frame_0013.png",
+   "crop": [
+    1408,
+    896,
+    128,
+    128
+   ]
+  },
+  {
+   "role": "best",
+   "file": "best-texture-4k-drone-footage-of-a-barge-on-t-h264_poor.png",
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "deltaPsnrDb": 0.5250718196233114,
+   "frame": "frame_0013.png",
+   "crop": [
+    1856,
+    384,
+    128,
+    128
+   ]
+  }
+ ]
+}
