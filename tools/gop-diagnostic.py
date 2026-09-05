@@ -117,6 +117,9 @@ def main() -> int:
     ap.add_argument("--work", default="data/captured/gopdiag")
     ap.add_argument("--crfs", default="26,34")
     ap.add_argument("--fps", type=int, default=24)
+    ap.add_argument("--structures", default="all_i,gop",
+                    help="which compression contexts to run; 'gop' alone gives the dense "
+                         "CRF curve a real browser would see")
     ap.add_argument("--out", default="results/gop-diagnostic.json")
     args = ap.parse_args()
 
@@ -124,6 +127,11 @@ def main() -> int:
     model.eval()
     with open(os.path.join(args.root, "prepared.json"), encoding="utf-8") as fh:
         prepared = json.load(fh)
+
+    structures = [s for s in args.structures.split(",") if s.strip()]
+    for s in structures:
+        if s not in STRUCTURES:
+            raise SystemExit(f"unknown structure {s!r}; choices: {sorted(STRUCTURES)}")
 
     crfs = [int(c) for c in args.crfs.split(",") if c.strip()]
     rows: list[dict] = []
@@ -136,7 +144,7 @@ def main() -> int:
         refs = [load_png(os.path.join(master_dir, n)) for n in names]
 
         for crf in crfs:
-            for structure in STRUCTURES:
+            for structure in structures:
                 work = os.path.join(args.work, cid, f"{structure}_crf{crf}")
                 os.makedirs(work, exist_ok=True)
                 clip_path = os.path.join(work, "clip.mp4")
@@ -183,7 +191,7 @@ def main() -> int:
 
     summary = {}
     for crf in crfs:
-        for structure in STRUCTURES:
+        for structure in structures:
             sel = [r for r in rows if r["crf"] == crf and r["structure"] == structure]
             summary[f"crf{crf}_{structure}"] = {
                 "clips": len(sel),

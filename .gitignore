@@ -55,3 +55,4 @@ data/captured-train/clips/
 # Captured-faces corpus (Milestone 5.5): fetched from pinned URLs, never redistributed.
 data/captured-faces/sources/
 data/captured-faces/clips/
+data/captured-train/commonval/

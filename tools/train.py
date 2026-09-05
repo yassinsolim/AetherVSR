@@ -249,12 +249,19 @@ def main() -> int:
         "Mutually exclusive with --corpus/--split/--degradation: the degradation "
         "already happened, at full frame resolution, inside a real video encode.",
     )
+    ap.add_argument("--device", default=None, choices=["cpu", "mps"],
+                    help="override device selection; cpu is slower but reproducible "
+                         "and does not deadlock when runs are queued")
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
     random.seed(args.seed)
 
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    # MPS is the default because it is faster, but it deadlocks when more than
+    # one process holds a Metal context, and this milestone trains twelve models
+    # in a row alongside evaluation work. `--device cpu` is the escape hatch,
+    # and it is also bit-reproducible, which MPS is not.
+    device = args.device or ("mps" if torch.backends.mps.is_available() else "cpu")
     print(f"device: {device}")
 
     if args.pairs:
