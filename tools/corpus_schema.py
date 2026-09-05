@@ -40,7 +40,7 @@ LICENCE_DENY = ("nc", "noncommercial", "non-commercial", "nd", "noderiv", "no de
 REQUIRED_CLIP_FIELDS = (
     "id", "title", "category", "creator", "shootId",
     "source_url", "description_url", "licence",
-    "source_sha256", "source_width", "source_height",
+    "source_width", "source_height",
 )
 
 MIN_WIDTH, MIN_HEIGHT = 2560, 1440
@@ -111,6 +111,14 @@ def validate_clip(clip: dict) -> list[str]:
         problems.append(f"{clip.get('id')}: unknown category {cat!r}")
     if not licence_ok(clip.get("licence")):
         problems.append(f"{clip.get('id')}: licence {clip.get('licence')!r} is not permissive")
+    # Identity may be pinned either by a full-file SHA-256 (the download path,
+    # used for the small benchmark corpora) or by the Commons digest plus our
+    # own prefix hash (the streaming path, which never transfers whole files).
+    # Both fix the bytes; requiring the first would have forced 52 GB of
+    # downloads to use three seconds of each clip.
+    has_pin = clip.get("source_sha256") or (clip.get("commonsSha1") and clip.get("prefixSha256"))
+    if not has_pin:
+        problems.append(f"{clip.get('id')}: no content pin (source_sha256, or commonsSha1+prefixSha256)")
     w, h = clip.get("source_width") or 0, clip.get("source_height") or 0
     if w < MIN_WIDTH or h < MIN_HEIGHT:
         problems.append(f"{clip.get('id')}: {w}x{h} is below the {MIN_WIDTH}x{MIN_HEIGHT} floor")

@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import collections
 import glob
+import hashlib
 import json
 import os
 import re
@@ -92,11 +93,48 @@ def dedupe(cands: list[dict]) -> tuple[list[dict], list[dict]]:
     return kept, dropped
 
 
+EXISTING_EVALUATION = (
+    "data/captured/manifest.json",
+    "data/captured-faces/manifest.json",
+)
+
+
+def existing_evaluation_keys() -> set[str]:
+    """Identifiers already spoken for by a benchmark this project cannot retrain on.
+
+    Discovery searches the same public archive the benchmarks were drawn from,
+    so it will rediscover them - it found the Mississippi barge and the Rogla
+    snowmobile clips, both already in the frozen ten-clip set. Training on those
+    would quietly invalidate the regression benchmark, and no hash check inside
+    the new corpus would notice, because the collision is with a different
+    corpus entirely.
+    """
+    keys: set[str] = set()
+    for path in EXISTING_EVALUATION:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                clips = json.load(fh).get("clips", [])
+        except FileNotFoundError:
+            continue
+        for c in clips:
+            for field in ("source_url", "description_url", "title", "commonsSha1", "source_sha256"):
+                if c.get(field):
+                    keys.add(str(c[field]).strip().casefold())
+            if c.get("pageid"):
+                keys.add(f"pageid:{c['pageid']}")
+    return keys
+
+
 def gate(cands: list[dict]) -> tuple[list[dict], list[dict]]:
+    taken = existing_evaluation_keys()
     kept, rejected = [], []
     for c in cands:
         why = None
-        if not licence_ok(c.get("licence")):
+        ids = {str(c.get(f, "")).strip().casefold() for f in ("source_url", "description_url", "title")}
+        ids.add(f"pageid:{c.get('pageid')}")
+        if ids & taken:
+            why = "already in an evaluation corpus"
+        elif not licence_ok(c.get("licence")):
             why = f"licence {c.get('licence')!r}"
         elif (c.get("width") or 0) < 2560 or (c.get("height") or 0) < 1440:
             why = f"{c.get('width')}x{c.get('height')} below floor"
@@ -179,8 +217,19 @@ def assign(cands: list[dict], seed: int) -> dict[str, list[dict]]:
 
 def build(role: str, clips: list[dict], notes: dict) -> dict:
     out = []
+    used: set[str] = set()
     for c in sorted(clips, key=lambda x: (x["category"], x.get("title", ""))):
-        cid = f"{c['category']}-{slugify(c.get('title',''))}"[:56]
+        base = f"{c['category']}-{slugify(c.get('title',''))}"[:56]
+        cid = base
+        if cid in used:
+            # Truncation to 56 characters collapsed distinct titles - three
+            # Tbilisi clips and two rainforest clips shared an id, so their
+            # prepared patches overwrote each other and the clips looked like
+            # extraction failures. A short digest of the full title restores
+            # uniqueness without making the id unreadable, and is stable.
+            suffix = hashlib.sha256((c.get("title") or "").encode()).hexdigest()[:6]
+            cid = f"{base[:49]}-{suffix}"
+        used.add(cid)
         entry = {
             "id": cid,
             "title": c.get("title"),

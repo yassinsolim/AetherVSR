@@ -56,3 +56,8 @@ data/captured-train/clips/
 data/captured-faces/sources/
 data/captured-faces/clips/
 data/captured-train/commonval/
+
+# Milestone 6 streamed corpora: prepared patches are regenerable from manifests.
+data/captured-train-v2/sources/
+data/captured-val/sources/
+data/captured-confirm/sources/
