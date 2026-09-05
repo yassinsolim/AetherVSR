@@ -1,7 +1,7 @@
 {
  "schema": "aethervsr.gop-diagnostic/1",
  "question": "Does the model lose more advantage on GOP-compressed frames than on equivalently quantised all-I frames? If so the single-frame training degradation is teaching the wrong problem.",
- "controlledVariable": "GOP structure only; source, kernel, colour, preset, CRF and decoder identical",
+ "controlledVariable": "Source, downscale kernel, colour, range, preset, CRF and decoder are identical; only -x264-params differs. That string changes more than GOP structure: the all-I arm also loses mb-tree, rc_lookahead, weighted P and multiple references. Since mb-tree is rate control, equal CRF is not equal quality target, which is why the conclusion rests on the matched-input-quality re-analysis rather than on equal CRF.",
  "model": "aethersr-c16d2-realistic.json",
  "structures": {
   "all_i": {
@@ -1998,5 +1998,9 @@
    "meanInputPsnr": 26.584185361862183,
    "meanBytes": 48743.4
   }
+ },
+ "x264OptionsObserved": {
+  "all_i": "ref=1 mixed_ref=0 bframes=0 weightp=0 keyint=1 rc=crf mbtree=0 crf=34.0",
+  "gop": "ref=3 mixed_ref=1 bframes=3 weightp=2 keyint=48 rc_lookahead=40 rc=crf mbtree=1 crf=34.0"
  }
 }

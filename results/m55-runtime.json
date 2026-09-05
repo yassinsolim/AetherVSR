@@ -1,0 +1,61 @@
+{
+ "schema": "aethervsr.m55-runtime/1",
+ "environment": {
+  "machine": "Apple M5 base, macOS 26.6.2",
+  "browser": "Chrome for Testing 152.0.7977.42",
+  "adapter": "apple / metal-3",
+  "device": "bgra8unorm, maxTextureDimension2D 8192, timestamp-query",
+  "clip": "/media/aethervsr-testclip-720p60-h264.mp4 (1280x720 -> 2560x1440)",
+  "windowSeconds": 20,
+  "note": "Paired A/B in one browser session on one clip. Both models are the same 6,291-parameter graph, so this measures whether anything regressed, not which is faster.",
+  "limitation": "One 20-second run per arm, fixed order, unreplicated, single clip, single machine, numbers transcribed from the diagnostic overlay. Adequate to show that swapping weights changes nothing measurable; not adequate to attribute any difference between the arms."
+ },
+ "measurements": [
+  {
+   "model": "aethersr-c16d2-realistic (production)",
+   "gpuMsAvg": 6.48,
+   "gpuMsP50": 6.43,
+   "gpuMsP95": 7.44,
+   "gpuMsMax": 8.05,
+   "presentedFps": 59.7,
+   "renderedFps": 59.2,
+   "framesRendered": 1182,
+   "decoderDropped": 10,
+   "decoderDecoded": 1199,
+   "skippedFrames": 11,
+   "budget60hzPercent": 38.9,
+   "fallbackToConventional": false
+  },
+  {
+   "model": "aethersr-c16d2-gopvideo (candidate)",
+   "gpuMsAvg": 6.48,
+   "gpuMsP50": 6.34,
+   "gpuMsP95": 7.4,
+   "gpuMsMax": 7.82,
+   "presentedFps": 59.7,
+   "renderedFps": 59.7,
+   "framesRendered": 1192,
+   "decoderDropped": 0,
+   "decoderDecoded": 1199,
+   "skippedFrames": 1,
+   "budget60hzPercent": 38.9,
+   "fallbackToConventional": false
+  }
+ ],
+ "preRegisteredTargets": {
+  "p50WholeStageMsMax": 8,
+  "p50Observed": 6.34,
+  "p50Pass": true,
+  "p95MsMax": 10,
+  "p95Observed": 7.4,
+  "p95Pass": true,
+  "presented720p60Maintained": true,
+  "presentedObserved": 59.7,
+  "noPersistentDecoderDrops": true,
+  "dropsObserved": 0,
+  "noRepeatedBudgetFallback": true,
+  "dropsObservedProduction": 10,
+  "dropNote": "The candidate arm logged 0 decoder drops and the production arm 10 in the same session. The inference graph is byte-identical, so this is warm-up or session noise and is NOT attributed to the model. Establishing a real difference would need alternating A/B/A/B repetitions with run order recorded."
+ },
+ "verdict": "Swapping the candidate weights into the production pipeline changes nothing measurable at runtime, which is what an identical inference graph predicts: whole-stage p50 6.34 ms against 6.43, p95 7.40 against 7.44, 38.9% of a 60 Hz budget in both arms, 59.7 presented fps, no budget fallback in either. The pre-registered runtime targets are met. The 10-vs-0 decoder-drop difference is within session noise and is not a property of the weights."
+}

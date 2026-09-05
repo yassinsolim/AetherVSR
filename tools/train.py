@@ -222,6 +222,13 @@ def main() -> int:
     ap.add_argument("--corpus", default="data/corpus")
     ap.add_argument("--out", required=True)
     ap.add_argument("--channels", type=int, default=16)
+    ap.add_argument(
+        "--pairs-hr-only",
+        action="store_true",
+        help="take only the HR patches from --pairs and degrade them with --degradation "
+        "on the fly, exactly as the still-photograph path does. Isolates the corpus: "
+        "video frames vs photographs with the degradation pipeline held identical.",
+    )
     ap.add_argument("--depth", type=int, default=2)
     ap.add_argument("--patch", type=int, default=128)
     ap.add_argument("--per-image", type=int, default=8)
@@ -320,7 +327,7 @@ def main() -> int:
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
 
     val_hr_d = val_hr.to(device)
-    if args.pairs:
+    if args.pairs and not args.pairs_hr_only:
         # Already degraded, by a real encoder, once. Nothing to re-draw.
         val_lr_d = val_lr.to(device)
     else:
@@ -361,7 +368,7 @@ def main() -> int:
             if rot:
                 batch_hr = torch.rot90(batch_hr, 1, dims=[2, 3])
 
-            if args.pairs:
+            if args.pairs and not args.pairs_hr_only:
                 # The LR is already fixed to this HR, so it must receive exactly
                 # the same geometric transform. Re-drawing per tensor would pair
                 # a flipped target with an unflipped input and teach the model a

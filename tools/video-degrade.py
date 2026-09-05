@@ -23,7 +23,9 @@ CRF is sampled per sequence, not per frame, because a real encoder holds a
 rate-control setting across a GOP. Two distributions are supported:
 
     uniform  CRF ~ U[18, 36]           what the shipped model was trained on
-    poor     CRF ~ U[18, 36] biased    two-thirds of draws in [28, 36]
+    poor     CRF ~ U[18, 36] biased    heavy branch taken 2/3 of the time; because the
+                                       light branch still spans [18,36], the realised
+                                       share landing in [28,36] is 0.825, not 0.667
 
 Everything is seeded and recorded, so a given (condition, seed) reproduces the
 same clips, the same crops, the same CRFs and the same bytes.
@@ -36,6 +38,7 @@ import hashlib
 import json
 import os
 import shutil
+import re
 import subprocess
 import sys
 
@@ -236,16 +239,45 @@ def main() -> int:
         manifest = json.load(fh)
     clips = sorted(manifest["clips"], key=lambda c: c["id"])
 
-    # The split is by SOURCE VIDEO, decided before a single frame is written, so
-    # no validation frame can come from a video that also appears in training.
-    # Two sequences from one clip share a scene, a camera and a compression
-    # history; splitting by sequence would leak all three.
-    order = rng_for("split", args.seed).permutation(len(clips))
-    val_ids = {clips[i]["id"] for i in order[: args.val_clips]}
+    # The split is by SHOOT, decided before a single frame is written. Splitting
+    # by sequence would leak a scene, a camera and a compression history between
+    # train and val - but so does splitting by file, because two clips from one
+    # event share all three just as thoroughly. The first version of this split
+    # put hofer-verkehrswendetag-...-c0259 in validation and ...-c0284 in
+    # training: same operator, same event, same camera, 36 minutes apart.
+    #
+    # The group is the CREATOR, not the file and not the title. A title-based
+    # key looked appealing but missed real siblings whose titles differ by a
+    # leading ordinal ("4. Lewis and Clark Bridge" against "7. ..."), and on a
+    # corpus this small the conservative choice is strictly better: one operator
+    # means one camera, one encoder and one set of habits, whatever they filmed.
+    def shoot_key(c: dict) -> str:
+        # Unicode-aware on purpose. Stripping to ASCII erased two Japanese
+        # uploader names entirely, which silently un-grouped their clips and
+        # reintroduced exactly the leak this key exists to close.
+        who = (c.get("attribution") or "").casefold()
+        who = re.sub(r"\(.*?\)", " ", who)          # "(talk)" and similar suffixes
+        who = re.sub(r"[^\w\s]", " ", who, flags=re.UNICODE)
+        who = " ".join(who.split())
+        return who or f"unattributed::{c['id']}"
+
+    shoots: dict[str, list[dict]] = {}
+    for c in clips:
+        shoots.setdefault(shoot_key(c), []).append(c)
+    keys = sorted(shoots)
+    order = rng_for("split", args.seed).permutation(len(keys))
+    val_ids: set[str] = set()
+    for i in order:
+        if len(val_ids) >= args.val_clips:
+            break
+        val_ids |= {c["id"] for c in shoots[keys[i]]}
+    print(f"  {len(keys)} shoots across {len(clips)} clips; "
+          f"{len(val_ids)} clips held out", file=sys.stderr)
 
     os.makedirs(args.out, exist_ok=True)
     index: list[dict] = []
     evidence: list[dict] = []
+    source_hashes: list[str] = []
     patches: dict[str, list[torch.Tensor]] = {
         "train_lr": [], "train_hr": [], "val_lr": [], "val_hr": []
     }
@@ -254,8 +286,18 @@ def main() -> int:
         cid = clip["id"]
         src = os.path.join(args.sources, clip["source_file"])
         if not os.path.exists(src):
-            print(f"  MISSING {cid}", file=sys.stderr)
-            continue
+            # Skipping silently would train a different model with identical
+            # metadata, which is the exact failure ADR-0026 added hashing to
+            # prevent. Fail loudly instead.
+            raise SystemExit(f"missing source for {cid}: {src}; run tools/fetch-captured.py")
+        want = clip.get("source_sha256")
+        if want:
+            got = hashlib.sha256(open(src, "rb").read()).hexdigest()
+            if got != want:
+                raise SystemExit(
+                    f"source hash mismatch for {cid}: manifest {want[:16]}... file {got[:16]}..."
+                )
+            source_hashes.append(got)
         info = probe(src)
         split = "val" if cid in val_ids else "train"
         gen = rng_for("seq", args.seed, cid)
@@ -318,6 +360,10 @@ def main() -> int:
         "sequenceFrames": SEQ_FRAMES,
         "hrSize": [HR_W, HR_H], "lrSize": [LR_W, LR_H],
         "sourceManifest": args.manifest,
+        # Ties the emitted pairs to the exact bytes they came from, so a model
+        # card can claim a corpus rather than hope for one.
+        "sourceDigest": hashlib.sha256("".join(sorted(source_hashes)).encode()).hexdigest(),
+        "sourcesVerified": len(source_hashes),
         "splitUnit": "source video",
         "trainClips": train_clips, "valClips": val_clips,
         "sequences": len(index),

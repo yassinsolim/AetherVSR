@@ -10,17 +10,27 @@ cheap and run before training, not after.
 Each check fails loudly and independently:
 
   1. GOP structure    the requested frame types actually occur in the bitstream
-  2. Frame count      decoded LR count equals HR master count, per sequence
-  3. Frame alignment  LR frame i corresponds to HR frame i, not i+-1
+  2. Patch count      every LR patch has exactly one HR partner
+  3. Alignment        a +-2 px shift search peaks at zero offset
   4. Range/colour     no full/limited range mismatch, no channel swap
-  5. CRF monotonicity worse CRF really does produce worse decoded quality
-  6. Geometry         LR is exactly half of HR in both axes
+  5. CRF effective    higher CRF really does spend fewer bits per frame
+  6. Geometry         HR patch is exactly twice the LR patch in both axes
 
-Check 3 is the one that matters most and the one that is easiest to get wrong.
-It is done by a shuffle control: if LR frame i genuinely matches HR frame i,
-then scoring it against a *different* HR frame must be substantially worse. A
-pipeline that passes on absolute PSNR but collapses under the shuffle control
-is measuring content similarity rather than correspondence.
+Check 3 is the one that matters and the one an earlier version got wrong. It
+used to score each LR patch against a *different* patch and require the true
+pair to win by 1 dB. That always passed - a quarter-patch misregistration still
+cleared it by nearly an order of magnitude - because unrelated content sits
+near 9.5 dB no matter how the pair is aligned. It measured content
+dissimilarity, not correspondence.
+
+The replacement asks whether zero is the *best* offset among its neighbours,
+which is the question a misalignment would actually answer differently, and
+reports the +1/-1 asymmetry because a half-pixel phase error from the downscale
+shows up there rather than in the peak.
+
+Frame-level count and off-by-one checks live in tools/video-degrade.py, which
+drops any sequence whose decoded LR count differs from its HR count before a
+patch is ever cut.
 """
 
 from __future__ import annotations
@@ -39,7 +49,7 @@ from PIL import Image
 
 FFMPEG = os.environ.get("AETHER_FFMPEG", "/opt/homebrew/bin/ffmpeg")
 
-MIN_SHUFFLE_COLLAPSE_DB = 1.0
+MIN_SHIFT_MARGIN_DB = 0.05
 MAX_RANGE_ERROR = 0.02
 MIN_CRF_MONOTONIC_DB = 0.10
 
@@ -115,22 +125,46 @@ def main() -> int:
         step = max(1, n // max(1, args.sequences * 40))
         sel = list(range(0, n, step))[: args.sequences * 40]
 
-        matched, shuffled = [], []
-        for k, i in enumerate(sel):
+        # Shift search, not a shuffle. The original check scored each LR patch
+        # against a *different* patch and asserted the matched pair won by 1 dB.
+        # It always passed: review showed a quarter-patch misregistration still
+        # cleared that gate by nearly an order of magnitude, because the
+        # mismatched partner is unrelated content pinned near 9.5 dB. It was
+        # measuring content dissimilarity, not correspondence.
+        #
+        # This asks the question that actually matters: of all small offsets,
+        # is zero the best one? A pipeline shifted by a pixel, or carrying a
+        # half-pixel phase error from the downscale, peaks somewhere else.
+        offsets = [-2, -1, 0, 1, 2]
+        scores: dict[tuple[int, int], list[float]] = {(dx, dy): [] for dx in offsets for dy in offsets}
+        for i in sel[: max(8, len(sel) // 8)]:
             lr = lr_all[i : i + 1].float() / 255.0
             up = F.interpolate(lr, scale_factor=2, mode="bilinear", align_corners=False).clamp(0, 1)
-            matched.append(psnr(up, hr_all[i : i + 1].float() / 255.0))
-            # Pair against a different patch entirely. If the crop offsets were
-            # wrong, matched and mismatched would score alike.
-            j = sel[(k + len(sel) // 2) % len(sel)]
-            shuffled.append(psnr(up, hr_all[j : j + 1].float() / 255.0))
-        collapse = st.fmean(matched) - st.fmean(shuffled)
-        if collapse < MIN_SHUFFLE_COLLAPSE_DB:
+            hr = hr_all[i : i + 1].float() / 255.0
+            for (dx, dy), acc in scores.items():
+                # Compare on the overlap only, so a shifted candidate is not
+                # penalised for edge pixels it cannot see.
+                a = up[:, :, 2 + dy : -2 + dy or None, 2 + dx : -2 + dx or None]
+                b = hr[:, :, 2 : -2, 2 : -2]
+                acc.append(psnr(a, b))
+        mean_by_offset = {k: st.fmean(v) for k, v in scores.items()}
+        best = max(mean_by_offset, key=lambda k: mean_by_offset[k])
+        zero = mean_by_offset[(0, 0)]
+        runner = max(v for k, v in mean_by_offset.items() if k != (0, 0))
+        margin = zero - runner
+        if best != (0, 0):
             failures.append(
-                f"{split}: shuffle control collapses only {collapse:.2f} dB "
-                f"(<{MIN_SHUFFLE_COLLAPSE_DB}); LR/HR patches may be misaligned"
+                f"{split}: alignment peaks at offset {best}, not (0,0); "
+                f"{mean_by_offset[best]:.3f} dB against {zero:.3f} dB"
             )
-
+        elif margin < MIN_SHIFT_MARGIN_DB:
+            failures.append(
+                f"{split}: zero offset beats its nearest neighbour by only {margin:.3f} dB "
+                f"(<{MIN_SHIFT_MARGIN_DB}); alignment is not sharply peaked"
+            )
+        # A half-pixel phase error shows up as asymmetry between +1 and -1.
+        asym_x = abs(mean_by_offset[(1, 0)] - mean_by_offset[(-1, 0)])
+        asym_y = abs(mean_by_offset[(0, 1)] - mean_by_offset[(0, -1)])
         lr_f = lr_all[sel].float() / 255.0
         hr_f = hr_all[sel].float() / 255.0
         rng_err = abs(float(lr_f.mean()) - float(hr_f.mean()))
@@ -143,20 +177,25 @@ def main() -> int:
 
         align_rows.append({
             "split": split, "patches": n, "inspected": len(sel),
-            "matchedPsnr": st.fmean(matched), "shufflePsnr": st.fmean(shuffled),
-            "shuffleCollapseDb": collapse,
+            "zeroOffsetPsnr": zero, "bestOffset": list(best),
+            "marginOverNearestOffsetDb": margin,
+            "horizontalAsymmetryDb": asym_x, "verticalAsymmetryDb": asym_y,
+            "psnrByOffset": {f"{dx},{dy}": v for (dx, dy), v in sorted(mean_by_offset.items())},
             "meanLevelError": rng_err, "channelMeanError": ch_err,
             "lrPatch": list(lr_all.shape[-2:]), "hrPatch": list(hr_all.shape[-2:]),
         })
-        print(f"  {split:<6} {n:>6} patches  matched {st.fmean(matched):6.2f} dB  "
-              f"shuffle -{collapse:5.2f} dB  range {rng_err:.4f}  chan {ch_err:.4f}",
-              file=sys.stderr)
+        print(f"  {split:<6} {n:>6} patches  peak {best} {zero:6.3f} dB  "
+              f"margin +{margin:.3f}  asym x {asym_x:.3f} y {asym_y:.3f}  "
+              f"range {rng_err:.4f}", file=sys.stderr)
 
     checks["patchCount"] = {"ok": count_ok}
     checks["geometry"] = {"ok": geom_ok, "expected": "hr patch == 2x lr patch in both axes"}
     checks["alignment"] = {
         "splits": align_rows,
-        "minShuffleCollapseDb": min((r["shuffleCollapseDb"] for r in align_rows), default=float("nan")),
+        "allPeakAtZeroOffset": all(r["bestOffset"] == [0, 0] for r in align_rows),
+        "minMarginOverNearestOffsetDb": min(
+            (r["marginOverNearestOffsetDb"] for r in align_rows), default=float("nan")
+        ),
     }
     checks["range"] = {
         "maxMeanLevelError": max(range_errors, default=float("nan")),

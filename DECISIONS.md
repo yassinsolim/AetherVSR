@@ -1086,3 +1086,45 @@ at all, and an unstated sharpness confound — blurring the reference, which
 cannot change the footage's real stability, buys a 14.9% residual reduction.
 Without that control the 24.3% neural excess would have been reported as pure
 temporal instability.
+
+## ADR-0033 — Captured *video* corpora may use CC BY and CC BY-SA, unlike the still corpus
+
+**Status:** accepted (Milestone 5.5). Widens ADR-0026 for video only; the
+still-image corpus rule is unchanged.
+
+ADR-0026 restricted the training corpus to CC0 and deleted five files rather
+than accept a bare public-domain tag, on the reasoning that such a tag is a
+claim about some jurisdiction and is not equivalent to CC0 worldwide. That rule
+was written for the still-photograph corpus whose weights ship inside the
+repository.
+
+Milestone 5.5 needed captured *video* with real motion and real GOP structure.
+Applying CC0-only to video would have left essentially nothing: the permissive
+video on Wikimedia Commons is overwhelmingly CC BY and CC BY-SA. Holding the
+rule would not have produced a cleaner corpus, it would have produced no
+milestone and no answer about heavy compression.
+
+So the video corpora accept CC0, CC BY, CC BY-SA and public domain, and
+explicitly still reject NonCommercial and NoDerivatives — our degraded frames
+are derivative works, so ND is disqualifying regardless of intent.
+
+What this costs, stated plainly rather than discovered later:
+
+* **Attribution is now a real obligation.** CC BY and CC BY-SA require it, and
+  the manifests carry a per-clip `attribution` field read live from the Commons
+  `Artist` metadata. It was missing when the corpus was first assembled; that
+  was a defect, not a decision.
+* **Share-alike is quarantined.** One clip is CC BY-SA 4.0. No media, no frames
+  and no derived weights from these corpora are redistributed: the manifests
+  pin URLs and SHA-256s and the fetcher downloads at use time, which is why the
+  interaction between share-alike and the Apache-2.0 shipped weights does not
+  arise. **If that ever changes — if a frame, a crop or a corpus archive is
+  published — this ADR must be revisited before it happens.**
+* **The still corpus is untouched.** `data/corpus` remains CC0-only under
+  ADR-0026. Two rules exist because two things carry different risk: the still
+  corpus trains weights we publish, the video corpora train weights we publish
+  from media we never republish.
+
+The honest summary is that ADR-0026's reasoning still holds for anything we
+redistribute, and video is only acceptable here because we redistribute none of
+it.

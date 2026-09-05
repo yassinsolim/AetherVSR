@@ -44,7 +44,19 @@ COLOUR = [
 ]
 DECODE_FILTER = "scale=in_range=tv:out_range=pc,format=rgb24"
 
-# The single controlled variable.
+# The controlled variable, with a caveat that matters. At the ffmpeg level only
+# -x264-params differs. At the encoder level it does more than restructure the
+# GOP: libx264 reports mbtree=0, no rc_lookahead, weightp=0, mixed_ref=0, ref=1
+# for the all-I arm against mbtree=1, rc_lookahead=40, weightp=2, mixed_ref=1,
+# ref=3 for the GOP arm. mb-tree is a rate-control algorithm, not a GOP
+# property, so "the same CRF" does not mean "the same quality target" - which is
+# the mechanism behind the 1.8 dB input-quality gap this diagnostic then has to
+# correct for by matching on delivered PSNR.
+#
+# This is therefore "production's all-intra approximation against a normal GOP
+# encode", which is the comparison the milestone actually needs, and not a
+# one-variable experiment. Reference count in particular is an independent knob
+# that keyint=1 does not force.
 STRUCTURES = {
     "all_i": {
         "x264params": "keyint=1:min-keyint=1:scenecut=0:bframes=0:ref=1",
@@ -209,7 +221,17 @@ def main() -> int:
         "question": ("Does the model lose more advantage on GOP-compressed frames than on "
                      "equivalently quantised all-I frames? If so the single-frame training "
                      "degradation is teaching the wrong problem."),
-        "controlledVariable": "GOP structure only; source, kernel, colour, preset, CRF and decoder identical",
+        "controlledVariable": (
+            "Source, downscale kernel, colour, range, preset, CRF and decoder are identical; "
+            "only -x264-params differs. That string changes more than GOP structure: the all-I "
+            "arm also loses mb-tree, rc_lookahead, weighted P and multiple references. Since "
+            "mb-tree is rate control, equal CRF is not equal quality target, which is why the "
+            "conclusion rests on the matched-input-quality re-analysis rather than on equal CRF."
+        ),
+        "x264OptionsObserved": {
+            "all_i": "ref=1 mixed_ref=0 bframes=0 weightp=0 keyint=1 rc=crf mbtree=0 crf=34.0",
+            "gop": "ref=3 mixed_ref=1 bframes=3 weightp=2 keyint=48 rc_lookahead=40 rc=crf mbtree=1 crf=34.0",
+        },
         "model": os.path.basename(args.model),
         "structures": STRUCTURES,
         "encodeEvidence": structure_evidence,

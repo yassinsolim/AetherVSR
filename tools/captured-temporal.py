@@ -115,6 +115,7 @@ def main() -> int:
         controls = ("reference_blur0p5", "reference_blur1p0")
         residual: dict[str, list[float]] = {m: [] for m in (*methods, *controls)}
         static_var = {m: [] for m in methods}
+        sharpness = {m: [] for m in methods}
 
         prev = None
         for name in names:
@@ -128,6 +129,17 @@ def main() -> int:
                     "bilinear": F.interpolate(lr, scale_factor=2, mode="bilinear", align_corners=False).clamp(0, 1),
                 }
             cur = {m: to_luma(v) for m, v in frames.items()}
+            # Output sharpness of each method, in the same units, every frame.
+            # The residual ratio responds strongly to spatial frequency, so two
+            # models cannot be compared on it without knowing how sharp each one
+            # is: a softer model scores a lower residual for no temporal reason.
+            # The existing blur control establishes that sensitivity but is only
+            # ever applied to the reference, so it never caught this between two
+            # models.
+            for m in methods:
+                gy = np.abs(np.diff(cur[m], axis=0)).mean()
+                gx = np.abs(np.diff(cur[m], axis=1)).mean()
+                sharpness[m].append(float((gx + gy) / 2))
             if prev is not None:
                 # Flow from the reference only, so no method compensates itself.
                 flow = cv2.calcOpticalFlowFarneback(
@@ -169,6 +181,21 @@ def main() -> int:
         for m in methods:
             if static_var[m]:
                 entry[m]["staticRegionVariance"] = st.fmean(static_var[m])
+            if sharpness[m]:
+                entry[m]["sharpness"] = st.fmean(sharpness[m])
+        # Express both quantities as excess over Catmull-Rom, since the residual
+        # ratio already is one. If a method's excess residual is simply
+        # proportional to its excess sharpness, there is nothing left to call a
+        # temporal difference: the metric is reading spatial frequency.
+        cat_sharp = entry["catmull_rom"].get("sharpness")
+        if cat_sharp:
+            excess_sharp = (entry["neural"]["sharpness"] - cat_sharp) / cat_sharp
+            excess_resid = entry["neural"]["mcResidual"] / entry["catmull_rom"]["mcResidual"] - 1.0
+            entry["neuralExcessSharpnessOverCatmull"] = excess_sharp
+            entry["neuralExcessResidualOverCatmull"] = excess_resid
+            entry["excessResidualPerExcessSharpness"] = (
+                excess_resid / excess_sharp if abs(excess_sharp) > 1e-9 else float("nan")
+            )
         entry["neuralOverCatmullResidual"] = entry["neural"]["mcResidual"] / entry["catmull_rom"]["mcResidual"]
         entry["neuralOverReferenceResidual"] = entry["neural"]["mcResidual"] / entry["reference"]["mcResidual"]
         entry["catmullOverReferenceResidual"] = entry["catmull_rom"]["mcResidual"] / entry["reference"]["mcResidual"]
@@ -215,6 +242,20 @@ def main() -> int:
             "catmullOverReferenceResidual": {"mean": st.fmean(cat_ratio)},
             "blurControl0p5OverReference": {"mean": st.fmean(blur05), "min": min(blur05), "max": max(blur05)},
             "blurControl1p0OverReference": {"mean": st.fmean(blur10), "min": min(blur10), "max": max(blur10)},
+            "neuralSharpness": {"mean": st.fmean(v["neural"]["sharpness"] for v in per_clip.values())},
+            "catmullSharpness": {"mean": st.fmean(v["catmull_rom"]["sharpness"] for v in per_clip.values())},
+            "excessResidualPerExcessSharpness": {
+                "mean": st.fmean(
+                    v["excessResidualPerExcessSharpness"] for v in per_clip.values()
+                    if v.get("excessResidualPerExcessSharpness") == v.get("excessResidualPerExcessSharpness")
+                ),
+                "note": (
+                    "Excess motion-compensated residual divided by excess output sharpness, both "
+                    "relative to Catmull-Rom. Two models landing on the same value means their "
+                    "residual difference is explained by sharpness alone, and neither is more "
+                    "temporally stable than the other."
+                ),
+            },
         },
     }
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
