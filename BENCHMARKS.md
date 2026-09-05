@@ -1777,6 +1777,34 @@ measures that nothing regressed rather than which is faster. One 20-second run
 per arm, unreplicated: the 10-versus-0 decoder-drop difference is session noise
 and is not attributed to the model.
 
+### Faces — a separate set, reported separately
+
+Milestone 5 could not measure faces: the candidate clips were 9:16 vertical
+sources whose active picture was 1214 px wide, so reaching a 2560x1440 master
+required a 2.11x synthetic upscale and the "ground truth" was interpolated.
+This milestone sourced eight landscape clips whose active picture is genuinely
+larger than the master, verified by `cropdetect` and by inspecting extracted
+frames. The four letterboxed sources crop to 3840x1608 and are then
+*downscaled* 0.90x to 1440 height — a real downscale on both axes, never an
+upscale. Alignment passes on all eight.
+
+**This set never enters the ten-clip headline** and selected nothing.
+
+| condition | production | gop-video |
+|---|---|---|
+| CRF 18 | +0.5615, 8/8, p=0.0078 | **+1.4341**, 8/8, p=0.0078 |
+| CRF 26 | +0.3177, 8/8, p=0.0078 | **+0.9457**, 8/8, p=0.0078 |
+| CRF 34 | +0.1001, 5/8, p=0.1172 | **+0.4462**, 8/8, p=0.0078 |
+
+The gains are larger here than on the aerial corpus, and CRF 34 moves from not
+significant to 8/8. **How narrow this claim must be:** eight clips, one
+institution, largely one event series, press and studio lighting, mostly static
+talking heads — the alignment check itself flags several as near-static. The
+honest reading is *on eight NASA Artemis-II press and portrait clips, faces are
+now measurable against a genuine optical-downscale reference and the model
+improves them at every compression level.* It is not a general claim about
+faces, and the corpus cannot support one.
+
 ### Capacity probe (Part E) — is the information there?
 
 The milestone asked for an offline diagnostic oracle: is there recoverable
