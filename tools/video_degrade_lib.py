@@ -10,10 +10,59 @@ from __future__ import annotations
 
 import hashlib
 import os
+import subprocess
+import time
 
 import numpy as np
 import torch
 from PIL import Image
+
+FFMPEG = os.environ.get("AETHER_FFMPEG", "/opt/homebrew/bin/ffmpeg")
+UA = "AetherVSR/0.1 (https://github.com/yassinsolim/AetherVSR) corpus"
+HR_W, HR_H = 2560, 1440
+
+
+def _run(cmd: list[str], timeout: int = 900) -> bool:
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout).returncode == 0
+    except subprocess.TimeoutExpired:
+        return False
+
+
+def extract_hr(url: str, start: float, out_dir: str, frames: int, pause: float = 1.5) -> int:
+    """Decode one sequence straight from a URL into 2560x1440 masters.
+
+    Shared by preparation and evaluation so both see identical geometry. Two
+    behaviours matter and both were learned the hard way:
+
+    Ogg/Theora will not seek on input over HTTP - ffmpeg exits 0 and writes
+    nothing, so the failure is silent. The container picks the strategy, which
+    also avoids spending a request to discover what the extension already says.
+
+    Wikimedia rate-limits hard, and a 429 is indistinguishable from a broken
+    file unless you retry. Three attempts with backoff separates them.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    vf = (f"scale={HR_W}:{HR_H}:force_original_aspect_ratio=increase:flags=lanczos,"
+          f"crop={HR_W}:{HR_H},format=rgb24")
+    pattern = os.path.join(out_dir, "hr_%04d.png")
+    base = [FFMPEG, "-hide_banner", "-loglevel", "error", "-y", "-user_agent", UA]
+    tail = ["-frames:v", str(frames), "-fps_mode", "passthrough", "-vf", vf, pattern]
+
+    ogg = url.lower().endswith((".ogv", ".ogg", ".oga"))
+    orders = [["-i", url, "-ss", f"{start:.3f}"]] if ogg else [
+        ["-ss", f"{start:.3f}", "-i", url], ["-i", url, "-ss", f"{start:.3f}"]
+    ]
+    for pre in orders:
+        for retry in range(3):
+            for f in os.listdir(out_dir):
+                os.remove(os.path.join(out_dir, f))
+            _run(base + pre + tail)
+            n = len([x for x in os.listdir(out_dir) if x.startswith("hr_")])
+            if n >= frames:
+                return n
+            time.sleep(pause * (2 ** retry))
+    return len([x for x in os.listdir(out_dir) if x.startswith("hr_")])
 
 
 def rng_for(*parts: object) -> np.random.Generator:

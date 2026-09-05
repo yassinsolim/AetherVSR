@@ -34,6 +34,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from evaluate import catmull_rom_2x, load_model, psnr, ssim  # noqa: E402
+from video_degrade_lib import extract_hr  # noqa: E402
 
 FFMPEG = os.environ.get("AETHER_FFMPEG", "/opt/homebrew/bin/ffmpeg")
 UA = "AetherVSR/0.1 (https://github.com/yassinsolim/AetherVSR) corpus-eval"
@@ -65,16 +66,13 @@ def build_cache(manifest: dict, cache: str, crfs: list[int], frames: int, fps: i
         hr_dir = os.path.join(cache, cid, "hr")
         have = len(os.listdir(hr_dir)) if os.path.isdir(hr_dir) else 0
         if have < frames:
-            os.makedirs(hr_dir, exist_ok=True)
-            ok = run([
-                FFMPEG, "-hide_banner", "-loglevel", "error", "-y", "-user_agent", UA,
-                "-ss", f"{start:.2f}", "-i", clip["source_url"],
-                "-frames:v", str(frames), "-fps_mode", "passthrough",
-                "-vf", (f"scale={HR_W}:{HR_H}:force_original_aspect_ratio=increase:flags=lanczos,"
-                        f"crop={HR_W}:{HR_H},format=rgb24"),
-                os.path.join(hr_dir, "hr_%04d.png"),
-            ])
-            if not ok or len(os.listdir(hr_dir)) < frames:
+            # Seek late enough to miss the training sequences' windows, but back
+            # off toward the start for clips too short to allow it rather than
+            # dropping them: several validation clips are under 15 seconds and
+            # a fixed 12 s offset silently lost thirteen of sixteen.
+            dur = float(clip.get("duration") or 0)
+            at = start if dur <= 0 or dur > start + frames / fps + 1 else max(0.5, dur * 0.3)
+            if extract_hr(clip["source_url"], at, hr_dir, frames) < frames:
                 print(f"  SKIP {cid}: extraction failed", file=sys.stderr)
                 continue
         for crf in crfs:
