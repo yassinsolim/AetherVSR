@@ -230,6 +230,34 @@ paired statistics with bootstrap CIs and exact permutation tests; temporal
 analysis with a sharpness confound control; deterministic visual comparisons;
 production runtime validation; repository size guard.
 
+## Milestone 5.5 — Heavy compression and GOP-aware degradation [DONE]
+
+Milestone 5 left the model with no measurable advantage at heavily compressed
+input: +0.055 dB at CRF 34, 7/10 clips, not significant. The rule for this
+milestone was to test whether the *training* compression process was teaching
+the wrong problem before making the network larger.
+
+The hypothesis was that single-frame all-I training degradation mismatched real
+GOP-structured video. **Refuted** — the model does better on GOP input at every
+CRF, so the all-intra approximation was the harder condition. A 2x2 with the
+architecture fixed at 6,291 parameters then showed GOP-aware degradation is a
+large win at high and typical quality (+0.62 / +0.27 dB) and worth nothing at
+CRF 34, while what actually moved CRF 34 was the training corpus: video frames
+instead of still photographs.
+
+The shipped model changed weights and not the graph. On the frozen ten-clip
+captured test, read once after selection closed: **+0.91 dB at CRF 18, +0.60 at
+CRF 26, +0.23 at CRF 34, 10/10 clips at every level.** Runtime unchanged at
+6.3 ms p50, 39% of a 60 Hz budget.
+
+Corrections made after independent review, recorded because they matter more
+than the headline: the temporal "improvement" was the metric responding to a
+7.5% softer image and is retracted; the corpus attribution was five-way
+confounded and is now isolated at half its original size; the quality-signal
+null result was Simpson's paradox and inverts on a within-clip analysis; the
+matched-quality comparison had clamped two extrapolated points; and the visual
+comparison sheets had been rendered against the wrong model's scores.
+
 ## Milestone 6 — Dynamic quality selection
 
 Measure the per-frame budget continuously and choose the most expensive model

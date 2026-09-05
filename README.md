@@ -8,33 +8,44 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine �
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 5 complete — captured-footage validation.** A 6,291-parameter
-neural upscaler runs in the production pipeline at **5.5 ms p50, ~33% of a 60 Hz
-frame budget**, 2560x1440 output from a 1280x720 source, with automatic fallback
-to a conventional scaler when it cannot hold the budget.
+**Status: Milestone 5.5 complete — heavy-compression and GOP-aware training.**
+A 6,291-parameter neural upscaler runs in the production pipeline at **6.3 ms
+p50, 39% of a 60 Hz frame budget**, 2560x1440 output from a 1280x720 source,
+with automatic fallback to a conventional scaler when it cannot hold the budget.
 
 ## What the evidence supports
 
 Measured on 10 independently sourced captured clips under controlled 720p H.264,
-against the production Catmull-Rom baseline this project actually ships:
+against the production Catmull-Rom baseline this project actually ships. The
+test set was frozen by content hash before the current model was trained, and
+read once after model selection closed.
 
 | Input quality | Gain over Catmull-Rom | Clips won | p |
 | --- | ---: | ---: | ---: |
-| high (CRF 18) | **+0.72 dB** | 9/10 | 0.004 |
-| typical (CRF 26) | **+0.36 dB** | 9/10 | 0.006 |
-| poor (CRF 34) | +0.05 dB | 7/10 | 0.22, not significant |
+| high (CRF 18) | **+0.91 dB** | 10/10 | 0.002 |
+| typical (CRF 26) | **+0.60 dB** | 10/10 | 0.002 |
+| poor (CRF 34) | **+0.23 dB** | 10/10 | 0.002 |
 
-**What it does not support.** The corpus is predominantly aerial, web-sourced
-4K footage and **contains no faces**; low-light is a single clip. At heavily
-compressed input the model adds nothing measurable. It is also consistently less
-temporally stable than Catmull-Rom — 1.24x the motion-compensated residual on
-10/10 clips — though a substantial part of that is the metric responding to a
-sharper image rather than to invented shimmer.
+Milestone 5 shipped a model that added nothing measurable at CRF 34 (+0.05 dB,
+7/10, not significant). Retraining on captured *video* rather than still
+photographs, with a real GOP-structured H.264 degradation, improved every
+compression level at identical runtime — the inference graph is unchanged and
+only the weights differ. The gain now decays gradually with compression instead
+of collapsing: it is still +0.18 dB at CRF 36.
 
-So: a real, reproducible improvement on lightly-to-typically compressed video of
-the kind this corpus contains, not a general "better web video" claim. The
-distinction is deliberate; `BENCHMARKS.md` gives the full evidence, including
-every clip that was excluded and why.
+**What it does not support.** The corpus is predominantly aerial, web-sourced 4K
+footage; low-light is a single clip. Faces are measured only on a separate
+eight-clip NASA/Artemis set — one institution, largely one event, mostly static
+talking heads — which cannot support a general claim about faces. The model
+remains **less temporally stable than Catmull-Rom**, and the apparent
+improvement in that metric this milestone is explained by the new model being
+7.5% softer, not by better temporal behaviour. The two corpora are disjoint by
+content hash, id and upload but share one creator; removing that clip leaves
++0.20 dB at CRF 34, 9/9.
+
+So: a real, reproducible improvement across the compression range this corpus
+covers, not a general "better web video" claim. `BENCHMARKS.md` gives the full
+evidence, including every retracted or corrected number.
 
 ## Evaluation methodology
 

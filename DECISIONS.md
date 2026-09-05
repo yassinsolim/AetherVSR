@@ -1128,3 +1128,73 @@ What this costs, stated plainly rather than discovered later:
 The honest summary is that ADR-0026's reasoning still holds for anything we
 redistribute, and video is only acceptable here because we redistribute none of
 it.
+
+## ADR-0034 — The heavy-compression failure was the training corpus, not the compression context
+
+**Status:** accepted (Milestone 5.5).
+
+Milestone 5 showed the neural upscaler beating Catmull-Rom by +0.72 dB at CRF 18
+and +0.36 at CRF 26 on captured video, but only +0.055 dB at CRF 34, not
+significant. The leading hypothesis was that training degrades single frames as
+H.264 I-frames while real video arrives with GOP structure and temporal
+prediction, so the model had learned the wrong compression.
+
+**That hypothesis is refuted.** Holding everything else fixed and varying only
+the GOP parameters, the model does *better* on GOP input at every CRF from 18 to
+38, and still better at every matched-input-quality point inside the measured
+overlap. The all-intra approximation is the harder condition, so training on it
+was conservative rather than harmful.
+
+A 2×2 with the architecture fixed at 6,291 parameters then crossed compression
+context against CRF distribution, three seeds per cell:
+
+* **GOP-aware degradation is a large win — at high and typical quality.**
+  +0.62 dB at CRF 18, +0.27 at CRF 26, and +0.007 at CRF 34. The compression
+  context the model trains against matters; it does not matter where the model
+  was failing.
+* **Heavy-CRF weighting is conditional, not rejected.** The first analysis
+  reported main effects only and called it rejected outright. Review showed the
+  interaction at CRF 34 is about nine times either main effect. Inside the GOP
+  arm the heavy distribution is worth +0.034 dB at CRF 34; inside the all-I arm
+  it costs 0.027. It helps only in a realistic compression context, and even
+  there by six times less than the pre-registered materiality floor while
+  costing 0.16 dB at CRF 18.
+* **What moved CRF 34 was the training corpus.** Isolated by running video HR
+  patches through the completely unchanged still-image degradation, the corpus
+  alone is worth +0.094 dB at CRF 34 and +0.295 at CRF 18. An earlier draft
+  credited it with +0.182 at CRF 34 from a contrast that changed seven things at
+  once; the label was wrong, not the arithmetic.
+
+The lesson generalises past this milestone. The model had been trained to
+upscale *photographs* and asked to upscale *video frames*, which differ in
+sensor noise, motion blur, exposure behaviour and their own prior compression
+history — and that gap, not the codec's GOP structure, is what heavy
+compression exposed. The milestone's own framing named the wrong culprit, and
+the experiment that settled it was only possible because the architecture was
+held fixed while the data changed.
+
+## ADR-0035 — The shipped default changes weights, never the graph
+
+**Status:** accepted (Milestone 5.5).
+
+`aethersr-c16d2-gopvideo.json` replaces `aethersr-c16d2-realistic.json` as the
+production model. The inference graph is byte-for-byte identical: same 5×5 stem,
+same two 3×3 body convolutions, same resize-convolution head, same 6,291
+parameters, same WGSL. Only the weights differ, so runtime is unchanged
+(p50 6.34 ms against 6.43, 38.9% of a 60 Hz budget in both arms) and the WebGPU
+pipeline needed no change at all.
+
+Two candidates satisfied the acceptance criteria. `gop_poor` is better at CRF 34
+by +0.015 dB on the frozen test and worse by 0.12 dB at CRF 18; it does not
+displace the default, which was chosen first on validation, because the margin
+required is 0.20 dB — the materiality floor fixed in advance for that endpoint.
+It is recorded as a finding about the interaction rather than shipped as a
+variant: routing between two models needs a runtime signal to route on, and the
+quality-signal diagnostic shows the candidate signals carry no cross-stream
+calibration.
+
+The general principle this milestone re-established: **prefer the change that
+leaves the graph alone.** A weights-only change is measurable, reversible, and
+cannot regress the runtime. The milestone's central rule — do not enlarge the
+network until the training process has been tested — produced a model that is
+better at every measured compression level while costing nothing at run time.

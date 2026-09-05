@@ -1584,6 +1584,217 @@ The claim is bounded by what the corpus is: predominantly aerial, web-sourced
 temporal cost of roughly 1.24× Catmull-Rom's motion-compensated residual.
 
 
+## Milestone 5.5 — Heavy compression and GOP-aware degradation
+
+Milestone 5 left the model with no measurable advantage at CRF 34: +0.055 dB,
+7/10 clips, not significant. The milestone's rule was to test whether the
+training compression process was teaching the wrong problem before making the
+network larger. It was, but not in the way expected, and the fix was not the
+one proposed.
+
+Environment: Apple M5 base, macOS 26.6.2, Chrome for Testing 152.0.7977.42,
+adapter `apple / metal-3`. Training on MPS, evaluation on CPU (MPS is not
+bit-reproducible; see ADR-0029).
+
+### The diagnosis: all-I against GOP
+
+`tools/gop-diagnostic.py`. Same source, kernel, colour, range, preset, CRF and
+decoder; only `-x264-params` differs. Frame types confirm the structures really
+differ (24 I against 1 I / 6 P / 17 B at CRF 26).
+
+| CRF | all-I delta | GOP delta | all-I input dB | GOP input dB |
+|---|---|---|---|---|
+| 18 | +0.3582 | +0.7214 | 30.33 | 30.71 |
+| 22 | +0.1348 | +0.5608 | 29.57 | 30.29 |
+| 26 | -0.0143 | +0.3627 | 28.48 | 29.67 |
+| 30 | -0.0644 | +0.1781 | 27.23 | 28.81 |
+| 34 | -0.0648 | +0.0545 | 25.96 | 27.75 |
+| 38 | -0.0443 | -0.0019 | 24.79 | 26.58 |
+
+The model does **better** on GOP input at every CRF, so the I-frame
+approximation is not what breaks it — it is the harder of the two conditions.
+At equal CRF the arms do not deliver equal input quality (up to 1.8 dB apart),
+so the comparison is repeated at matched delivered input PSNR
+(`results/gop-matched-quality.json`):
+
+| input dB | all-I | GOP | GOP − all-I |
+|---|---|---|---|
+| 27.23 | -0.0644 | +0.0293 | +0.0937 |
+| 28.48 | -0.0143 | +0.1402 | +0.1545 |
+| 29.57 | +0.1348 | +0.3414 | +0.2066 |
+| 30.33 | +0.3582 | +0.5759 | +0.2178 |
+
+GOP is easier at 4/4 points inside the measured overlap.
+2 all-I points fall below the GOP curve's measured floor and are
+excluded rather than extrapolated — an earlier version clamped them, and
+extrapolating linearly instead flips the sign at the lowest point.
+
+**Caveat.** `-x264-params` changes more than GOP structure. libx264 reports
+`mbtree=0`, no `rc_lookahead`, `weightp=0`, `ref=1` for the all-I arm against
+`mbtree=1`, `rc_lookahead=40`, `weightp=2`, `ref=3` for GOP. mb-tree is rate
+control, so equal CRF is not an equal quality target — which is why the
+conclusion rests on the matched-quality analysis and not on equal CRF.
+
+### The 2×2, architecture fixed at 6,291 parameters
+
+Four degradation conditions, three seeds each, scored on one common fixed-CRF
+GOP validation set built from the three held-out videos every condition shares.
+Deltas are against production Catmull-Rom.
+
+| condition | CRF 18 | CRF 26 | CRF 34 |
+|---|---|---|---|
+| `all_i_uniform` | +0.8555 | +0.5616 | +0.2346 |
+| `all_i_poor` | +0.4414 | +0.3647 | +0.2077 |
+| `gop_uniform` | +1.3527 | +0.7424 | +0.2107 |
+| `gop_poor` | +1.1938 | +0.7211 | +0.2452 |
+
+Main effects, and — after review — the interaction, which the first analysis
+averaged over and should not have:
+
+| term | CRF 18 | CRF 26 | CRF 34 |
+|---|---|---|---|
+| GOP-aware | +0.6248 | +0.2686 | +0.0068 |
+| heavy-CRF | -0.2865 | -0.1091 | +0.0038 |
+| interaction | -0.2552 | -0.1757 | -0.0613 |
+
+**GOP-aware degradation is a large win — at high and typical quality.** +0.62 dB
+at CRF 18 and +0.27 at CRF 26, consistent across all three validation videos.
+At CRF 34 it is +0.007, negligible in magnitude and unresolvable across three
+videos (the per-video values are +0.017, +0.014, −0.011).
+
+**Heavy-CRF weighting is not rejected outright — that verdict was wrong.** The
+interaction at CRF 34 is −0.061, about nine times either main effect, so
+averaging over it hides the answer. Inside the GOP arm the heavy distribution
+is worth +0.034 dB at CRF 34, making `gop_poor` the best CRF-34 cell in the
+experiment. Inside the all-I arm it costs 0.027. The correct verdict is that
+the heavy distribution helps **only in a realistic compression context**, and
+even there by an amount six times below the pre-registered 0.20 dB materiality
+floor while costing 0.16 dB at CRF 18.
+
+**Neither factor is what moved CRF 34.** Isolating the corpus by running video
+HR patches through the completely unchanged M5 `realistic` degradation
+(`--pairs-hr-only`, three seeds) separates it from the pipeline:
+
+| effect on | CRF 18 | CRF 26 | CRF 34 |
+|---|---|---|---|
+| corpus alone (video vs stills, pipeline held identical) | +0.2950 | +0.2048 | +0.0944 |
+| previously attributed to corpus (five-way confounded) | -0.0809 | +0.1579 | +0.1823 |
+
+The corpus is real but worth about half what was first attributed to it at
+CRF 34; the remainder belongs to the other pipeline differences (kernel mixture,
+blur augmentation, mosaic-versus-full-frame encoding, per-batch redraw, learning
+rate). One confound survives: the common validation set is drawn from the same
+4K pool as the video corpus, so video-trained models match its target statistics
+and still-trained ones do not. The frozen test does not share that property.
+
+### Frozen captured test — the headline
+
+Ten independently sourced captured clips, frozen with hashes before any 5.5
+model trained (`data/captured/FROZEN.json`, CI-enforced). Read once per frozen
+candidate, after selection closed on validation. Paired at clip level against
+the production Catmull-Rom the project ships.
+
+| condition | production | gop-video candidate |
+|---|---|---|
+| CRF 18 high | +0.7214, 9/10, p=0.0039 | **+0.9089**, 10/10, p=0.0020 |
+| CRF 26 typical | +0.3627, 9/10, p=0.0059 | **+0.5961**, 10/10, p=0.0020 |
+| CRF 34 poor | +0.0545, 7/10, p=0.2188 | **+0.2306**, 10/10, p=0.0020 |
+
+At CRF 34 the candidate scores **+0.2306 dB, CI [+0.1307, +0.3397], 10/10 clips**,
+permutation p = 0.0020 (the attainable floor at n=10). Every criterion
+pre-registered before any candidate existed is met. The CI lower bound is +0.13,
+so the data are also consistent with a true effect below the 0.20 dB target; the
+criterion was keyed to the point estimate, and *at least +0.20 dB* is not a claim
+this evidence supports.
+
+The statistical unit is the clip: 24 frames are averaged within a clip, then all
+inference is across the ten clips. The Catmull-Rom baseline is bit-identical
+between runs, so the comparison is on the same decoded frames.
+
+**Creator independence.** The corpora are disjoint by content hash, clip id and
+upload, but not by creator: one photographer contributes two training clips and
+one test clip (different event, season, time of day). Dropping that test clip:
+
+| condition | all ten | shared-creator clip removed |
+|---|---|---|
+| CRF 18 | +0.9089 (10/10) | +0.8827 (9/9, p=0.0039) |
+| CRF 26 | +0.5961 (10/10) | +0.5584 (9/9, p=0.0039) |
+| CRF 34 | +0.2306 (10/10) | +0.1997 (9/9, p=0.0039) |
+
+The headline is not carried by that clip.
+
+### Second candidate, and why the default did not change
+
+Review showed `gop_poor` is the validation-best cell at CRF 34, so it was frozen
+and read as a second declared candidate. Compared **paired against the first**,
+so Catmull-Rom cancels exactly:
+
+| condition | gop_poor − gop_uniform | wins | p |
+|---|---|---|---|
+| CRF 18 | -0.1229 [-0.1536, -0.0826] | 1/10 | 0.0039 |
+| CRF 26 | -0.0408 [-0.0632, -0.0176] | 1/10 | 0.0156 |
+| CRF 34 | +0.0148 [+0.0070, +0.0226] | 9/10 | 0.0078 |
+
+At the primary endpoint `gop_poor` is +0.0148 dB — thirteen times below the
+0.20 dB displacement margin — while losing 0.12 dB at CRF 18. **The default is
+not displaced.** The test reproduced what validation already showed, which is the
+point: the decision was determined before the read.
+
+### Dense CRF curve
+
+| CRF | production | candidate | input dB |
+|---|---|---|---|
+| 18 | +0.7214 | +0.9089 | 30.71 |
+| 22 | +0.5608 | +0.7835 | 30.29 |
+| 26 | +0.3627 | +0.5961 | 29.67 |
+| 30 | +0.1781 | +0.3966 | 28.81 |
+| 32 | — | +0.3004 | 28.30 |
+| 34 | +0.0545 | +0.2306 | 27.75 |
+| 36 | — | +0.1751 | 27.18 |
+
+Production fell to zero by CRF 34. The candidate decays gradually and is still
++0.175 dB at CRF 36.
+
+### Temporal — no improvement established
+
+| model | residual ratio | output sharpness | excess-residual / excess-sharpness |
+|---|---|---|---|
+| production | 1.2427 | 0.01480 | 0.9346 |
+| candidate | 1.1624 | 0.01369 | 1.0440 |
+
+The ratio moved 6.5%, but the candidate is also 7.5% softer, and the tool's own
+blur control shows 14.9% is purchasable at sigma 0.5 by softness alone.
+**The neural stage remains less temporally stable than Catmull-Rom under both
+models and no temporal improvement is established.** An earlier draft reported
+this as an improvement; that was the metric responding to spatial frequency.
+
+### Runtime
+
+Whole neural stage p50 6.34 ms against production's 6.43, p95 7.40 against
+7.44, 38.9% of a 60 Hz budget in both arms, 59.7 presented fps, no budget
+fallback in either. The graph is byte-identical and only weights differ, so this
+measures that nothing regressed rather than which is faster. One 20-second run
+per arm, unreplicated: the 10-versus-0 decoder-drop difference is session noise
+and is not attributed to the model.
+
+### Quality signal (diagnostic, Part U)
+
+| signal | pooled r | within-clip r | clip-centred r |
+|---|---|---|---|
+| `gradientEnergy` | +0.052 | +0.940 (+0.87..+0.99) | +0.799 |
+| `highFreqEnergy` | +0.106 | +0.950 (+0.89..+1.00) | +0.810 |
+| `blockiness` | +0.050 | -0.880 (-0.98..-0.77) | -0.451 |
+| `lumaVariance` | -0.104 | +0.929 (+0.87..+0.99) | +0.830 |
+
+An earlier draft read the pooled column and concluded no signal predicts the
+gain. That was Simpson's paradox: the gain falls steadily with compression inside
+a clip, but the spread between clips at one CRF dwarfs that trend. Within a
+stream these signals track the gain almost perfectly; across streams they carry no
+calibration. A fixed global threshold cannot work — a per-stream adaptive one
+might. `lumaVariance`, a pure content control, correlates as strongly as the
+sharpness signals, which warns that within a clip they largely measure the same
+thing.
+
 ## Reproducing
 
 ```bash

@@ -33,6 +33,10 @@ const frozen = JSON.parse(
 const TRAINING_MANIFESTS = [
   '../data/corpus/manifest.json',
   '../data/captured-train/manifest.json',
+  // Faces are a separate *evaluation* set, never merged into the ten-clip
+  // headline. It is listed here because the guard that matters is the same one:
+  // nothing evaluated may share content with anything trained on.
+  '../data/captured-faces/manifest.json',
 ];
 
 function loadIfPresent(rel: string): TrainingManifest | null {
@@ -77,5 +81,33 @@ describe('Milestone 5 captured test set stays frozen', () => {
     for (const clip of live.clips) {
       expect(clip.source_sha256).toBe(frozen.sourceSha256[clip.id]);
     }
+  });
+});
+
+describe('shipped default model', () => {
+  /**
+   * The harness loads `/models/aethersr-c16d2.json`, but every benchmark in
+   * BENCHMARKS.md is quoted against a named model file. Milestone 5 shipped a
+   * default that was a *different* file from the one the documentation called
+   * the production model, which meant the harness and the evidence could drift
+   * apart without anything failing. This ties them together.
+   */
+  it('is byte-identical to the model the benchmarks name', () => {
+    const def = readFileSync(new URL('../public/models/aethersr-c16d2.json', import.meta.url));
+    const named = readFileSync(
+      new URL('../public/models/aethersr-c16d2-gopvideo.json', import.meta.url),
+    );
+    expect(def.equals(named)).toBe(true);
+  });
+
+  it('keeps the inference graph the WGSL runtime implements', () => {
+    const model = JSON.parse(
+      readFileSync(new URL('../public/models/aethersr-c16d2.json', import.meta.url), 'utf8'),
+    ) as { architecture: string; parameters: number; scale: number };
+    // A weights-only change must never quietly become an architecture change:
+    // the runtime shader is written for exactly this graph.
+    expect(model.architecture).toBe('aethersr-resizeconv');
+    expect(model.parameters).toBe(6291);
+    expect(model.scale).toBe(2);
   });
 });
