@@ -1,0 +1,778 @@
+{
+ "schema": "aethervsr.quality-signal/1",
+ "diagnosticOnly": "Reports whether a cheap no-reference signal tracks the neural gain. No selector is built and nothing here chooses a model.",
+ "interpretation": "The pooled correlation is near zero while the within-clip correlation is strong. That gap is the result, not a contradiction: these signals track the neural gain closely as compression varies inside one stream, but carry no calibration across streams, because the between-clip spread at a fixed CRF dwarfs the compression trend. A fixed global threshold would therefore not work; a selector that adapts to the current stream might. Note that lumaVariance - included as a pure content control - correlates about as strongly within clips as the sharpness signals do, which is the warning that all of them are largely tracking the same thing.",
+ "model": "aethersr-c16d2-gopvideo.json",
+ "benefitThresholdDb": 0.15,
+ "cells": 70,
+ "perCell": [
+  {
+   "clip": "motion-2023-maplefest-in-bowmanville-on-2",
+   "category": "motion",
+   "crf": 18,
+   "delta": 1.0579856236775715,
+   "gradientEnergy": 0.04936905764043331,
+   "highFreqEnergy": 0.033658407628536224,
+   "blockiness": 0.9922595123449961,
+   "lumaVariance": 0.055796499674518905
+  },
+  {
+   "clip": "motion-2023-maplefest-in-bowmanville-on-2",
+   "category": "motion",
+   "crf": 22,
+   "delta": 0.9809104601542155,
+   "gradientEnergy": 0.04882965423166752,
+   "highFreqEnergy": 0.03295148847003778,
+   "blockiness": 0.991336981455485,
+   "lumaVariance": 0.05564981636901697
+  },
+  {
+   "clip": "motion-2023-maplefest-in-bowmanville-on-2",
+   "category": "motion",
+   "crf": 26,
+   "delta": 0.8076937993367513,
+   "gradientEnergy": 0.04792201705276966,
+   "highFreqEnergy": 0.03187436951945225,
+   "blockiness": 0.9978477160135905,
+   "lumaVariance": 0.055429659162958465
+  },
+  {
+   "clip": "motion-2023-maplefest-in-bowmanville-on-2",
+   "category": "motion",
+   "crf": 30,
+   "delta": 0.5519656340281168,
+   "gradientEnergy": 0.04602425421277682,
+   "highFreqEnergy": 0.02995139608780543,
+   "blockiness": 1.0102790395418804,
+   "lumaVariance": 0.05507580749690533
+  },
+  {
+   "clip": "motion-2023-maplefest-in-bowmanville-on-2",
+   "category": "motion",
+   "crf": 32,
+   "delta": 0.4185783863067627,
+   "gradientEnergy": 0.04436349682509899,
+   "highFreqEnergy": 0.02839649251351754,
+   "blockiness": 1.021159052848816,
+   "lumaVariance": 0.054800109937787056
+  },
+  {
+   "clip": "motion-2023-maplefest-in-bowmanville-on-2",
+   "category": "motion",
+   "crf": 34,
+   "delta": 0.29553572336832684,
+   "gradientEnergy": 0.04233029236396154,
+   "highFreqEnergy": 0.026520367711782455,
+   "blockiness": 1.0347301761309307,
+   "lumaVariance": 0.05434606783092022
+  },
+  {
+   "clip": "motion-2023-maplefest-in-bowmanville-on-2",
+   "category": "motion",
+   "crf": 36,
+   "delta": 0.18610556920369467,
+   "gradientEnergy": 0.03986523114144802,
+   "highFreqEnergy": 0.02429717779159546,
+   "blockiness": 1.0481950441996257,
+   "lumaVariance": 0.0537961603452762
+  },
+  {
+   "clip": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+   "category": "motion",
+   "crf": 18,
+   "delta": 1.1178139845530193,
+   "gradientEnergy": 0.024053937134643395,
+   "highFreqEnergy": 0.015787305931250255,
+   "blockiness": 1.0430588722229004,
+   "lumaVariance": 0.06390430778265
+  },
+  {
+   "clip": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+   "category": "motion",
+   "crf": 22,
+   "delta": 0.8920677502950033,
+   "gradientEnergy": 0.02341673771540324,
+   "highFreqEnergy": 0.015159645428260168,
+   "blockiness": 1.0416738589604695,
+   "lumaVariance": 0.06380964070558548
+  },
+  {
+   "clip": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+   "category": "motion",
+   "crf": 26,
+   "delta": 0.5823727448781332,
+   "gradientEnergy": 0.022514271239439648,
+   "highFreqEnergy": 0.014307364510993162,
+   "blockiness": 1.0462036728858948,
+   "lumaVariance": 0.06368472054600716
+  },
+  {
+   "clip": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+   "category": "motion",
+   "crf": 30,
+   "delta": 0.2673073609670003,
+   "gradientEnergy": 0.020910289448996384,
+   "highFreqEnergy": 0.012953555521865686,
+   "blockiness": 1.070955713589986,
+   "lumaVariance": 0.06343441208203633
+  },
+  {
+   "clip": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+   "category": "motion",
+   "crf": 32,
+   "delta": 0.1541010538736979,
+   "gradientEnergy": 0.019605503727992375,
+   "highFreqEnergy": 0.011916683676342169,
+   "blockiness": 1.0877900123596191,
+   "lumaVariance": 0.06320101333161195
+  },
+  {
+   "clip": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+   "category": "motion",
+   "crf": 34,
+   "delta": 0.07140398025512695,
+   "gradientEnergy": 0.018049898867805798,
+   "highFreqEnergy": 0.010728253206859032,
+   "blockiness": 1.1015347639719646,
+   "lumaVariance": 0.0629780472566684
+  },
+  {
+   "clip": "motion-rogla-slovenia-ostru-ica-1-4k-pov-",
+   "category": "motion",
+   "crf": 36,
+   "delta": 0.022619167963663738,
+   "gradientEnergy": 0.016223500793178875,
+   "highFreqEnergy": 0.009365802320341269,
+   "blockiness": 1.1238949696222942,
+   "lumaVariance": 0.06260289686421554
+  },
+  {
+   "clip": "motion-aerial-drone-chase-of-a-train-webm",
+   "category": "motion",
+   "crf": 18,
+   "delta": 0.9339725971221924,
+   "gradientEnergy": 0.007749748959516485,
+   "highFreqEnergy": 0.005017280966664354,
+   "blockiness": 1.0422920385996501,
+   "lumaVariance": 0.07690995931625366
+  },
+  {
+   "clip": "motion-aerial-drone-chase-of-a-train-webm",
+   "category": "motion",
+   "crf": 22,
+   "delta": 0.7519185543060303,
+   "gradientEnergy": 0.007242310093715787,
+   "highFreqEnergy": 0.004643133298183481,
+   "blockiness": 1.0287999014059703,
+   "lumaVariance": 0.07687784483035405
+  },
+  {
+   "clip": "motion-aerial-drone-chase-of-a-train-webm",
+   "category": "motion",
+   "crf": 26,
+   "delta": 0.5481704076131185,
+   "gradientEnergy": 0.006499407269681494,
+   "highFreqEnergy": 0.004078006061414878,
+   "blockiness": 1.0307793418566387,
+   "lumaVariance": 0.07676128049691518
+  },
+  {
+   "clip": "motion-aerial-drone-chase-of-a-train-webm",
+   "category": "motion",
+   "crf": 30,
+   "delta": 0.3711589177449544,
+   "gradientEnergy": 0.005462402089809378,
+   "highFreqEnergy": 0.0033121520342926183,
+   "blockiness": 1.0620634456475575,
+   "lumaVariance": 0.0765850804746151
+  },
+  {
+   "clip": "motion-aerial-drone-chase-of-a-train-webm",
+   "category": "motion",
+   "crf": 32,
+   "delta": 0.31428853670756024,
+   "gradientEnergy": 0.0049511763111998635,
+   "highFreqEnergy": 0.002956425577091674,
+   "blockiness": 1.123953253030777,
+   "lumaVariance": 0.07650550082325935
+  },
+  {
+   "clip": "motion-aerial-drone-chase-of-a-train-webm",
+   "category": "motion",
+   "crf": 34,
+   "delta": 0.2520334720611572,
+   "gradientEnergy": 0.004474384943023324,
+   "highFreqEnergy": 0.0026299060167123875,
+   "blockiness": 1.1647298733393352,
+   "lumaVariance": 0.0764811784029007
+  },
+  {
+   "clip": "motion-aerial-drone-chase-of-a-train-webm",
+   "category": "motion",
+   "crf": 36,
+   "delta": 0.21178603172302246,
+   "gradientEnergy": 0.0040172225174804526,
+   "highFreqEnergy": 0.002343672909773886,
+   "blockiness": 1.2175809144973755,
+   "lumaVariance": 0.07641570021708806
+  },
+  {
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "crf": 18,
+   "delta": 0.8177586396535238,
+   "gradientEnergy": 0.04544867388904095,
+   "highFreqEnergy": 0.03303046400348345,
+   "blockiness": 1.0494004885355632,
+   "lumaVariance": 0.08647745102643967
+  },
+  {
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "crf": 22,
+   "delta": 0.7628341515858968,
+   "gradientEnergy": 0.0451499056071043,
+   "highFreqEnergy": 0.032750638822714485,
+   "blockiness": 1.0545643369356792,
+   "lumaVariance": 0.08645326644182205
+  },
+  {
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "crf": 26,
+   "delta": 0.6566786766052246,
+   "gradientEnergy": 0.044685790315270424,
+   "highFreqEnergy": 0.03229681526621183,
+   "blockiness": 1.0678249994913738,
+   "lumaVariance": 0.08634909863273303
+  },
+  {
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "crf": 30,
+   "delta": 0.48271457354227704,
+   "gradientEnergy": 0.04371654180188974,
+   "highFreqEnergy": 0.03138395336767038,
+   "blockiness": 1.0896196564038594,
+   "lumaVariance": 0.08617589622735977
+  },
+  {
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "crf": 32,
+   "delta": 0.3857235113779704,
+   "gradientEnergy": 0.04288175950447718,
+   "highFreqEnergy": 0.030637286913891632,
+   "blockiness": 1.1155226230621338,
+   "lumaVariance": 0.08597771699229877
+  },
+  {
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "crf": 34,
+   "delta": 0.2687505880991618,
+   "gradientEnergy": 0.04150421855350336,
+   "highFreqEnergy": 0.029449387453496456,
+   "blockiness": 1.1595526734987895,
+   "lumaVariance": 0.08580972378452618
+  },
+  {
+   "clip": "urban-funchal-madeira-amazing-view-from-",
+   "category": "urban",
+   "crf": 36,
+   "delta": 0.1696622371673584,
+   "gradientEnergy": 0.03903516692419847,
+   "highFreqEnergy": 0.027413666248321533,
+   "blockiness": 1.2135262489318848,
+   "lumaVariance": 0.08541688943902652
+  },
+  {
+   "clip": "urban-drone-footage-in-new-orleans-2022-",
+   "category": "urban",
+   "crf": 18,
+   "delta": 1.0845601558685303,
+   "gradientEnergy": 0.02089735089490811,
+   "highFreqEnergy": 0.015491640971352657,
+   "blockiness": 1.055272897084554,
+   "lumaVariance": 0.04053470926980177
+  },
+  {
+   "clip": "urban-drone-footage-in-new-orleans-2022-",
+   "category": "urban",
+   "crf": 22,
+   "delta": 0.8830225467681885,
+   "gradientEnergy": 0.020592217954496544,
+   "highFreqEnergy": 0.015143394780655703,
+   "blockiness": 1.0652530590693157,
+   "lumaVariance": 0.04045970179140568
+  },
+  {
+   "clip": "urban-drone-footage-in-new-orleans-2022-",
+   "category": "urban",
+   "crf": 26,
+   "delta": 0.5465308825174967,
+   "gradientEnergy": 0.01992391391346852,
+   "highFreqEnergy": 0.014506536225477854,
+   "blockiness": 1.0882987976074219,
+   "lumaVariance": 0.04033042428394159
+  },
+  {
+   "clip": "urban-drone-footage-in-new-orleans-2022-",
+   "category": "urban",
+   "crf": 30,
+   "delta": 0.20633538564046225,
+   "gradientEnergy": 0.0184028126920263,
+   "highFreqEnergy": 0.013224464220305284,
+   "blockiness": 1.1518407464027405,
+   "lumaVariance": 0.04008732736110687
+  },
+  {
+   "clip": "urban-drone-footage-in-new-orleans-2022-",
+   "category": "urban",
+   "crf": 32,
+   "delta": 0.11902133623758952,
+   "gradientEnergy": 0.01710562811543544,
+   "highFreqEnergy": 0.012201191547016302,
+   "blockiness": 1.1663047075271606,
+   "lumaVariance": 0.03994331881403923
+  },
+  {
+   "clip": "urban-drone-footage-in-new-orleans-2022-",
+   "category": "urban",
+   "crf": 34,
+   "delta": 0.06937305132548015,
+   "gradientEnergy": 0.015531130135059357,
+   "highFreqEnergy": 0.011002278265853723,
+   "blockiness": 1.1808396379152934,
+   "lumaVariance": 0.039731282740831375
+  },
+  {
+   "clip": "urban-drone-footage-in-new-orleans-2022-",
+   "category": "urban",
+   "crf": 36,
+   "delta": 0.051305691401163735,
+   "gradientEnergy": 0.013735876884311438,
+   "highFreqEnergy": 0.009603754772494236,
+   "blockiness": 1.1806258360544841,
+   "lumaVariance": 0.039435764153798424
+  },
+  {
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "crf": 18,
+   "delta": 0.39840539296468097,
+   "gradientEnergy": 0.028411186610658962,
+   "highFreqEnergy": 0.018147907219827175,
+   "blockiness": 1.0172737042109172,
+   "lumaVariance": 0.06507287671168645
+  },
+  {
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "crf": 22,
+   "delta": 0.3115355968475342,
+   "gradientEnergy": 0.027884721135099728,
+   "highFreqEnergy": 0.017593805988629658,
+   "blockiness": 1.008577952782313,
+   "lumaVariance": 0.06498611842592557
+  },
+  {
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "crf": 26,
+   "delta": 0.17935951550801596,
+   "gradientEnergy": 0.027018931073447067,
+   "highFreqEnergy": 0.01670540946846207,
+   "blockiness": 1.0090861320495605,
+   "lumaVariance": 0.06485278780261676
+  },
+  {
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "crf": 30,
+   "delta": 0.06263772646586101,
+   "gradientEnergy": 0.025197246111929417,
+   "highFreqEnergy": 0.014997516758739948,
+   "blockiness": 1.0254217386245728,
+   "lumaVariance": 0.06454623490571976
+  },
+  {
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "crf": 32,
+   "delta": 0.02665082613627116,
+   "gradientEnergy": 0.023752483539283276,
+   "highFreqEnergy": 0.013663439701000849,
+   "blockiness": 1.0373928546905518,
+   "lumaVariance": 0.06429873655239741
+  },
+  {
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "crf": 34,
+   "delta": -0.0009083747863769531,
+   "gradientEnergy": 0.021943288544813793,
+   "highFreqEnergy": 0.01205859457453092,
+   "blockiness": 1.0534184575080872,
+   "lumaVariance": 0.06393255417545636
+  },
+  {
+   "clip": "nature-the-beautiful-blue-river-dji-phant",
+   "category": "nature",
+   "crf": 36,
+   "delta": -0.0177303949991862,
+   "gradientEnergy": 0.019913155895968277,
+   "highFreqEnergy": 0.010286649068196615,
+   "blockiness": 1.0712195038795471,
+   "lumaVariance": 0.06358291705449422
+  },
+  {
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "crf": 18,
+   "delta": 0.621574322382609,
+   "gradientEnergy": 0.03045193509509166,
+   "highFreqEnergy": 0.020541931812961895,
+   "blockiness": 1.0054320096969604,
+   "lumaVariance": 0.02938735360900561
+  },
+  {
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "crf": 22,
+   "delta": 0.5443120002746582,
+   "gradientEnergy": 0.029818236206968624,
+   "highFreqEnergy": 0.01992650516331196,
+   "blockiness": 1.0084901452064514,
+   "lumaVariance": 0.029320919265349705
+  },
+  {
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "crf": 26,
+   "delta": 0.3972800572713216,
+   "gradientEnergy": 0.02899114415049553,
+   "highFreqEnergy": 0.019162536909182865,
+   "blockiness": 1.01001970966657,
+   "lumaVariance": 0.029228993691504
+  },
+  {
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "crf": 30,
+   "delta": 0.2008966604868571,
+   "gradientEnergy": 0.026814428468545277,
+   "highFreqEnergy": 0.01741056392590205,
+   "blockiness": 1.0191281139850616,
+   "lumaVariance": 0.029027367010712624
+  },
+  {
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "crf": 32,
+   "delta": 0.12083252271016438,
+   "gradientEnergy": 0.02464614249765873,
+   "highFreqEnergy": 0.01573647481078903,
+   "blockiness": 1.0333088239034016,
+   "lumaVariance": 0.02883346751332283
+  },
+  {
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "crf": 34,
+   "delta": 0.05608836809794108,
+   "gradientEnergy": 0.021775364875793457,
+   "highFreqEnergy": 0.013535686302930117,
+   "blockiness": 1.0412405828634899,
+   "lumaVariance": 0.02854343969374895
+  },
+  {
+   "clip": "nature-piz-neir-aerial-video-4k-webm",
+   "category": "nature",
+   "crf": 36,
+   "delta": 0.020145177841186523,
+   "gradientEnergy": 0.018523266538977623,
+   "highFreqEnergy": 0.011044998653233051,
+   "blockiness": 1.0596336722373962,
+   "lumaVariance": 0.028167075477540493
+  },
+  {
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "crf": 18,
+   "delta": 1.1784056822458904,
+   "gradientEnergy": 0.016144650367399056,
+   "highFreqEnergy": 0.011018955614417791,
+   "blockiness": 1.067565659681956,
+   "lumaVariance": 0.031032773666083813
+  },
+  {
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "crf": 22,
+   "delta": 1.1191511154174805,
+   "gradientEnergy": 0.015900081023573875,
+   "highFreqEnergy": 0.01072327916820844,
+   "blockiness": 1.0677341024080913,
+   "lumaVariance": 0.03096974982569615
+  },
+  {
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "crf": 26,
+   "delta": 0.9685758749643961,
+   "gradientEnergy": 0.015607237194975218,
+   "highFreqEnergy": 0.010362605874737104,
+   "blockiness": 1.0648159583409627,
+   "lumaVariance": 0.03085943777114153
+  },
+  {
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "crf": 30,
+   "delta": 0.759283701578776,
+   "gradientEnergy": 0.015245293577512106,
+   "highFreqEnergy": 0.009898416077097258,
+   "blockiness": 1.0698107679684956,
+   "lumaVariance": 0.03068594727665186
+  },
+  {
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "crf": 32,
+   "delta": 0.6268592675526937,
+   "gradientEnergy": 0.015036928777893385,
+   "highFreqEnergy": 0.00965890179698666,
+   "blockiness": 1.0787049134572346,
+   "lumaVariance": 0.030576403563221295
+  },
+  {
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "crf": 34,
+   "delta": 0.4990692933400472,
+   "gradientEnergy": 0.01460193283855915,
+   "highFreqEnergy": 0.009250380254040161,
+   "blockiness": 1.0925111373265584,
+   "lumaVariance": 0.030349963034192722
+  },
+  {
+   "clip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+   "category": "lowlight",
+   "crf": 36,
+   "delta": 0.36374449729919434,
+   "gradientEnergy": 0.014080230767528215,
+   "highFreqEnergy": 0.008767780692627033,
+   "blockiness": 1.1302502950032551,
+   "lumaVariance": 0.03016952859858672
+  },
+  {
+   "clip": "texture-snowex-field-campaign-4k-b-roll-fr",
+   "category": "texture",
+   "crf": 18,
+   "delta": 1.1958475907643635,
+   "gradientEnergy": 0.022601656305293243,
+   "highFreqEnergy": 0.014610724058002234,
+   "blockiness": 1.0252471764882405,
+   "lumaVariance": 0.038010247672597565
+  },
+  {
+   "clip": "texture-snowex-field-campaign-4k-b-roll-fr",
+   "category": "texture",
+   "crf": 22,
+   "delta": 1.0168004035949707,
+   "gradientEnergy": 0.022205856007834274,
+   "highFreqEnergy": 0.0142222431798776,
+   "blockiness": 1.0239928563435872,
+   "lumaVariance": 0.03797191878159841
+  },
+  {
+   "clip": "texture-snowex-field-campaign-4k-b-roll-fr",
+   "category": "texture",
+   "crf": 26,
+   "delta": 0.7117001215616862,
+   "gradientEnergy": 0.021673434724410374,
+   "highFreqEnergy": 0.013713530730456114,
+   "blockiness": 1.024443358182907,
+   "lumaVariance": 0.03788642771542072
+  },
+  {
+   "clip": "texture-snowex-field-campaign-4k-b-roll-fr",
+   "category": "texture",
+   "crf": 30,
+   "delta": 0.37152330080668133,
+   "gradientEnergy": 0.020691813280185063,
+   "highFreqEnergy": 0.012807607650756836,
+   "blockiness": 1.0327193041642506,
+   "lumaVariance": 0.03772203562160333
+  },
+  {
+   "clip": "texture-snowex-field-campaign-4k-b-roll-fr",
+   "category": "texture",
+   "crf": 32,
+   "delta": 0.2223356564839681,
+   "gradientEnergy": 0.019834768027067184,
+   "highFreqEnergy": 0.012048200083275637,
+   "blockiness": 1.0394278168678284,
+   "lumaVariance": 0.037576777239640556
+  },
+  {
+   "clip": "texture-snowex-field-campaign-4k-b-roll-fr",
+   "category": "texture",
+   "crf": 34,
+   "delta": 0.10517120361328125,
+   "gradientEnergy": 0.01879362886150678,
+   "highFreqEnergy": 0.011131009086966515,
+   "blockiness": 1.0483888685703278,
+   "lumaVariance": 0.03743234400947889
+  },
+  {
+   "clip": "texture-snowex-field-campaign-4k-b-roll-fr",
+   "category": "texture",
+   "crf": 36,
+   "delta": 0.026618242263793945,
+   "gradientEnergy": 0.017392600265642006,
+   "highFreqEnergy": 0.009995230939239264,
+   "blockiness": 1.0611010789871216,
+   "lumaVariance": 0.03718655494352182
+  },
+  {
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "crf": 18,
+   "delta": 0.8546169598897299,
+   "gradientEnergy": 0.002867178486970564,
+   "highFreqEnergy": 0.0021321039724474153,
+   "blockiness": 1.5756965279579163,
+   "lumaVariance": 0.037323525796333946
+  },
+  {
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "crf": 22,
+   "delta": 0.8089367548624674,
+   "gradientEnergy": 0.002716824683981637,
+   "highFreqEnergy": 0.0020270737586542964,
+   "blockiness": 1.6661446889241536,
+   "lumaVariance": 0.037317950278520584
+  },
+  {
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "crf": 26,
+   "delta": 0.7352761427561442,
+   "gradientEnergy": 0.0025408608683695397,
+   "highFreqEnergy": 0.0018966448842547834,
+   "blockiness": 1.76573779185613,
+   "lumaVariance": 0.03731419083972772
+  },
+  {
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "crf": 30,
+   "delta": 0.650944709777832,
+   "gradientEnergy": 0.0023716414968172708,
+   "highFreqEnergy": 0.001749800828595956,
+   "blockiness": 1.7375766038894653,
+   "lumaVariance": 0.0373083520680666
+  },
+  {
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "crf": 32,
+   "delta": 0.4998226960500081,
+   "gradientEnergy": 0.002296063001267612,
+   "highFreqEnergy": 0.0016713695561823745,
+   "blockiness": 1.9506576855977376,
+   "lumaVariance": 0.03725843131542206
+  },
+  {
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "crf": 34,
+   "delta": 0.5230160554250082,
+   "gradientEnergy": 0.002214286825619638,
+   "highFreqEnergy": 0.0015949790831655264,
+   "blockiness": 1.993188480536143,
+   "lumaVariance": 0.03720365775128206
+  },
+  {
+   "clip": "texture-4k-drone-footage-of-a-barge-on-the",
+   "category": "texture",
+   "crf": 36,
+   "delta": 0.5191008249918619,
+   "gradientEnergy": 0.002152138273231685,
+   "highFreqEnergy": 0.0015708445959414046,
+   "blockiness": 2.2670615116755166,
+   "lumaVariance": 0.03721836085120837
+  }
+ ],
+ "correlations": {
+  "gradientEnergy": {
+   "pooledPearson": 0.05153155088843849,
+   "pooledSpearman": 0.041763625229638696,
+   "withinClipPearsonMean": 0.939891379037415,
+   "withinClipPearsonMin": 0.8736037504216005,
+   "withinClipPearsonMax": 0.987373980755784,
+   "clipCentredPearson": 0.7988375044644965,
+   "clips": 10
+  },
+  "highFreqEnergy": {
+   "pooledPearson": 0.1062009401844509,
+   "pooledSpearman": 0.11083894672382118,
+   "withinClipPearsonMean": 0.9503432098961108,
+   "withinClipPearsonMin": 0.8915285248025107,
+   "withinClipPearsonMax": 0.9950007593645053,
+   "clipCentredPearson": 0.8098175819973136,
+   "clips": 10
+  },
+  "blockiness": {
+   "pooledPearson": 0.050074402308535146,
+   "pooledSpearman": -0.17344064386317906,
+   "withinClipPearsonMean": -0.8803373693920375,
+   "withinClipPearsonMin": -0.9774986065099931,
+   "withinClipPearsonMax": -0.7749112018148538,
+   "clipCentredPearson": -0.45063496195382013,
+   "clips": 10
+  },
+  "lumaVariance": {
+   "pooledPearson": -0.10353437204244093,
+   "pooledSpearman": -0.023847432420610618,
+   "withinClipPearsonMean": 0.9287328685473657,
+   "withinClipPearsonMin": 0.8721465745030682,
+   "withinClipPearsonMax": 0.9880435743653139,
+   "clipCentredPearson": 0.8303052861612367,
+   "clips": 10
+  }
+ },
+ "separation": {
+  "gradientEnergy": {
+   "beneficialMean": 0.022893092968539953,
+   "marginalMean": 0.019470229423383164,
+   "standardisedDifference": 0.3759052875148867,
+   "beneficialN": 56,
+   "marginalN": 14
+  },
+  "highFreqEnergy": {
+   "beneficialMean": 0.015308878254949204,
+   "marginalMean": 0.011810777143442206,
+   "standardisedDifference": 0.5766906694274615,
+   "beneficialN": 56,
+   "marginalN": 14
+  },
+  "blockiness": {
+   "beneficialMean": 1.1592439170039837,
+   "marginalMean": 1.0845946783111209,
+   "standardisedDifference": 0.45100240938774205,
+   "beneficialN": 56,
+   "marginalN": 14
+  },
+  "lumaVariance": {
+   "beneficialMean": 0.05321730466537355,
+   "marginalMean": 0.04722961672537384,
+   "standardisedDifference": 0.3471163212747735,
+   "beneficialN": 56,
+   "marginalN": 14
+  }
+ }
+}

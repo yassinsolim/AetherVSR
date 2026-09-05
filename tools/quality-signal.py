@@ -153,11 +153,46 @@ def main() -> int:
 
     signals = ["gradientEnergy", "highFreqEnergy", "blockiness", "lumaVariance"]
     deltas = [r["delta"] for r in rows]
-    correlations = {
-        s: {"pearson": pearson([r[s] for r in rows], deltas),
-            "spearman": spearman([r[s] for r in rows], deltas)}
-        for s in signals
-    }
+
+    # Pooling every (clip, CRF) cell together answers the wrong question. The
+    # gain falls steadily with compression *within* a clip, but the spread
+    # between clips at one CRF is far larger than that trend, so a pooled
+    # correlation is dominated by which clip a cell came from and reports
+    # roughly zero however well the signal tracks compression. That is Simpson's
+    # paradox, and the first version of this analysis fell straight into it and
+    # concluded "no signal predicts the gain".
+    #
+    # Three statistics are reported instead, because they answer three different
+    # deployment questions:
+    #   pooled       could a fixed global threshold work?
+    #   withinClip   does the signal track the gain inside one stream?
+    #   clipCentred  does it still, pooled, once clip identity is removed?
+    by_clip: dict[str, list[dict]] = {}
+    for r in rows:
+        by_clip.setdefault(r["clip"], []).append(r)
+
+    correlations: dict[str, dict] = {}
+    for s in signals:
+        within = [
+            pearson([r[s] for r in cells], [r["delta"] for r in cells])
+            for cells in by_clip.values() if len(cells) >= 3
+        ]
+        within = [w for w in within if w == w]
+        cx, cy = [], []
+        for cells in by_clip.values():
+            ms = st.fmean(r[s] for r in cells)
+            md = st.fmean(r["delta"] for r in cells)
+            cx += [r[s] - ms for r in cells]
+            cy += [r["delta"] - md for r in cells]
+        correlations[s] = {
+            "pooledPearson": pearson([r[s] for r in rows], deltas),
+            "pooledSpearman": spearman([r[s] for r in rows], deltas),
+            "withinClipPearsonMean": st.fmean(within) if within else float("nan"),
+            "withinClipPearsonMin": min(within) if within else float("nan"),
+            "withinClipPearsonMax": max(within) if within else float("nan"),
+            "clipCentredPearson": pearson(cx, cy),
+            "clips": len(within),
+        }
 
     # A signal is only useful if it separates the two regimes it would switch
     # between. Split at the point the gain stops mattering and ask whether the
@@ -182,6 +217,16 @@ def main() -> int:
         "schema": "aethervsr.quality-signal/1",
         "diagnosticOnly": ("Reports whether a cheap no-reference signal tracks the neural "
                            "gain. No selector is built and nothing here chooses a model."),
+        "interpretation": (
+            "The pooled correlation is near zero while the within-clip correlation is strong. "
+            "That gap is the result, not a contradiction: these signals track the neural gain "
+            "closely as compression varies inside one stream, but carry no calibration across "
+            "streams, because the between-clip spread at a fixed CRF dwarfs the compression "
+            "trend. A fixed global threshold would therefore not work; a selector that adapts "
+            "to the current stream might. Note that lumaVariance - included as a pure content "
+            "control - correlates about as strongly within clips as the sharpness signals do, "
+            "which is the warning that all of them are largely tracking the same thing."
+        ),
         "model": os.path.basename(args.model),
         "benefitThresholdDb": BENEFIT_DB,
         "cells": len(rows),
@@ -193,11 +238,13 @@ def main() -> int:
     with open(args.out, "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=1)
 
-    print(f"\n  {'signal':<18}{'pearson':>10}{'spearman':>11}{'std diff':>11}", file=sys.stderr)
+    print(f"\n  {'signal':<18}{'pooled':>9}{'within-clip':>13}{'(min..max)':>18}{'clip-centred':>14}",
+          file=sys.stderr)
     for s in signals:
         c = correlations[s]
-        sep = separation.get(s, {}).get("standardisedDifference", float("nan"))
-        print(f"  {s:<18}{c['pearson']:>+10.3f}{c['spearman']:>+11.3f}{sep:>+11.3f}", file=sys.stderr)
+        rng = f"({c['withinClipPearsonMin']:+.2f}..{c['withinClipPearsonMax']:+.2f})"
+        print(f"  {s:<18}{c['pooledPearson']:>+9.3f}{c['withinClipPearsonMean']:>+13.3f}"
+              f"{rng:>18}{c['clipCentredPearson']:>+14.3f}", file=sys.stderr)
     print(f"\nwrote {args.out}", file=sys.stderr)
     return 0
 

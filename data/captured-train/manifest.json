@@ -1,9 +1,9 @@
 {
  "schema": "aethervsr.captured-train/1",
  "purpose": "TRAINING video corpus for GOP-aware degradation. Real camera footage with motion, used only to generate temporally coherent sequences for the encoder. The model remains single-frame.",
- "disjointness": "Fully disjoint from the frozen Milestone 5 captured test set: no shared clip, no shared upload, no shared source hash. Locations and series appearing in the test set are excluded by name as well, so the two corpora do not share a scene even by coincidence.",
+ "disjointness": "Disjoint from the frozen Milestone 5 captured test set by content SHA-256, clip id and Commons upload. It is NOT disjoint by creator: PantheraLeo1359531 contributes two training clips (hofer-verkehrswendetag-20230824-c0259/c0284) and one frozen test clip (lowlight-hofer-weihnachtsmarkt-am-abend-202). Different event, season and time of day, but the camera and operator are shared, so the corpora are independent by content and not by provenance. Impact is bounded in results/m55-creator-sensitivity.json: dropping that test clip leaves +0.1997 dB at CRF 34 on the remaining nine, 9/9 wins, p=0.0039.",
  "frozenTestsetDigest": "eadceb4dcf76e5c35057766ab82c639012c8ede7997c592e313988cdf6c56dca",
- "licence_policy": "CC0, CC BY, CC BY-SA or public domain only, read from each file's imageinfo.",
+ "licence_policy": "CC0, CC BY, CC BY-SA or public domain, read from each file's Commons imageinfo. Broader than ADR-0026's CC0-only rule for the still corpus; see ADR-0033 for why that was widened for evaluation video and what it does not permit.",
  "clip_count": 12,
  "total_source_bytes": 1335712658,
  "clips": [
@@ -18,7 +18,8 @@
    "source_bytes": 18275868,
    "source_file": "7-lewis-and-clark-bridge-cars-trucks-a.webm",
    "source_sha256": "c8c45e7aa478d7de0f01a6c583b488f6936bfcb447502697837025cbb594f978",
-   "source_bytes_actual": 18275868
+   "source_bytes_actual": 18275868,
+   "attribution": "No Drones Zone Louisville"
   },
   {
    "id": "glencoe-on-train-station-360-drone-4k-",
@@ -31,7 +32,8 @@
    "source_bytes": 71845851,
    "source_file": "glencoe-on-train-station-360-drone-4k-.webm",
    "source_sha256": "54328b0dc4cb9c6306c8502428b36b0483dd8cecf0f0d29b2fa16b0d54b7753b",
-   "source_bytes_actual": 71845851
+   "source_bytes_actual": 71845851,
+   "attribution": "SoftwareSimian"
   },
   {
    "id": "treinstel-681-w08-als-de-exprestrein-s",
@@ -44,7 +46,8 @@
    "source_bytes": 71846969,
    "source_file": "treinstel-681-w08-als-de-exprestrein-s.webm",
    "source_sha256": "6f02eff6bb0da9e291051737544aaaec2481db55174d24c61d8bdc1cd549cc19",
-   "source_bytes_actual": 71846969
+   "source_bytes_actual": 71846969,
+   "attribution": "\u4ea4\u901a\u5927\u81e3 \u9244\u9053\u30c1\u30e3\u30f3\u30cd\u30eb"
   },
   {
    "id": "4-lewis-and-clark-bridge-cars-trucks-a",
@@ -57,7 +60,8 @@
    "source_bytes": 77756556,
    "source_file": "4-lewis-and-clark-bridge-cars-trucks-a.webm",
    "source_sha256": "e9e7bd2dc31803460b7c365377363f5f89557afe5b20c321905d78b1b972b4dc",
-   "source_bytes_actual": 77756556
+   "source_bytes_actual": 77756556,
+   "attribution": "No Drones Zone Louisville"
   },
   {
    "id": "nishi-kyushu-shinkansen-n700s-8000-set",
@@ -70,7 +74,8 @@
    "source_bytes": 77850613,
    "source_file": "nishi-kyushu-shinkansen-n700s-8000-set.webm",
    "source_sha256": "72432af126a45a6338a0920ba0635c59363a3fac2b53a267b596c2b364f0761e",
-   "source_bytes_actual": 77850613
+   "source_bytes_actual": 77850613,
+   "attribution": "\u9244\u64ae\u30b2\u30ea\u30e9\u6620\u56e3 \u9244\u9053\u30c1\u30e3\u30f3\u30cd\u30eb"
   },
   {
    "id": "artemis-ii-orion-lift-pre-saw-installa",
@@ -83,7 +88,8 @@
    "source_bytes": 84467195,
    "source_file": "artemis-ii-orion-lift-pre-saw-installa.webm",
    "source_sha256": "fd8ae5ce7c7b3cbd4e195a2468c955eb863341ce4077fc1da1ebcfcaa3bed833",
-   "source_bytes_actual": 84467195
+   "source_bytes_actual": 84467195,
+   "attribution": "NASA Kennedy Space Center"
   },
   {
    "id": "hofer-verkehrswendetag-20230824-c0284-",
@@ -96,7 +102,8 @@
    "source_bytes": 121279096,
    "source_file": "hofer-verkehrswendetag-20230824-c0284-.webm",
    "source_sha256": "609beb77b754886d3dc6f91bd5563d9570eed83564594fa1b98c653eb08a41b3",
-   "source_bytes_actual": 121279096
+   "source_bytes_actual": 121279096,
+   "attribution": "PantheraLeo1359531"
   },
   {
    "id": "aerial-views-over-brisbane-queensland-",
@@ -109,7 +116,8 @@
    "source_bytes": 147946131,
    "source_file": "aerial-views-over-brisbane-queensland-.webm",
    "source_sha256": "22c86faf87360744e65165c499e520dc22dbd71689987154455fda8de4e84130",
-   "source_bytes_actual": 147946131
+   "source_bytes_actual": 147946131,
+   "attribution": "Oof Media"
   },
   {
    "id": "treinstellen-211-k107-k103-en-311-b4-a",
@@ -122,7 +130,8 @@
    "source_bytes": 150359295,
    "source_file": "treinstellen-211-k107-k103-en-311-b4-a.webm",
    "source_sha256": "b870b624a576b5093c75a3033bfa210cd5ef4abc488c5f610258b140893f10f4",
-   "source_bytes_actual": 150359295
+   "source_bytes_actual": 150359295,
+   "attribution": "\u4ea4\u901a\u5927\u81e3 \u9244\u9053\u30c1\u30e3\u30f3\u30cd\u30eb"
   },
   {
    "id": "hofer-verkehrswendetag-20230824-c0259-",
@@ -135,7 +144,8 @@
    "source_bytes": 160487016,
    "source_file": "hofer-verkehrswendetag-20230824-c0259-.webm",
    "source_sha256": "a0d382858c983d2b9affbb4f15256b7e4517de0fa6763761cc335a912d104a7c",
-   "source_bytes_actual": 160487016
+   "source_bytes_actual": 160487016,
+   "attribution": "PantheraLeo1359531"
   },
   {
    "id": "2160p30-das-autonome-shuttle-in-hof-al",
@@ -148,7 +158,8 @@
    "source_bytes": 160915106,
    "source_file": "2160p30-das-autonome-shuttle-in-hof-al.webm",
    "source_sha256": "e8baa6b4f5eed1fee7d4bd84251d08b1ddb9773b26d7e66c8a9669060fa2e832",
-   "source_bytes_actual": 160915106
+   "source_bytes_actual": 160915106,
+   "attribution": "PantheraLeo1359531 \ud83d\ude3a (talk)"
   },
   {
    "id": "chs8-075-with-train-ic-749-webm",
@@ -161,7 +172,8 @@
    "source_bytes": 192682962,
    "source_file": "chs8-075-with-train-ic-749-webm.webm",
    "source_sha256": "ead2945c98387c5b791b106adbf111d0ec71cccd4fadc2ca9be5522fd76b635e",
-   "source_bytes_actual": 192682962
+   "source_bytes_actual": 192682962,
+   "attribution": "wl/trains"
   }
  ],
  "fetch_summary": {
@@ -173,5 +185,6 @@
   "licenceDrift": [],
   "missing": [],
   "note": "Sources are gitignored and never redistributed; hashes pin what was used."
- }
+ },
+ "attribution_note": "CC BY and CC BY-SA require attribution. Each clip carries an `attribution` field taken live from the Commons Artist metadata."
 }

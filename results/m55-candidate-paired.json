@@ -1,0 +1,39 @@
+{
+ "schema": "aethervsr.m55-candidate-paired/1",
+ "note": "Paired per-clip difference between the two frozen candidates on the same ten clips. Catmull-Rom cancels exactly, so this is tighter than comparing each candidate's interval against the shared baseline.",
+ "primaryEndpoint": "h264_poor",
+ "displacementMarginDb": 0.2,
+ "displaced": false,
+ "conditions": {
+  "h264_high": {
+   "mean": -0.12285562356313058,
+   "ci": [
+    -0.15363526344299458,
+    -0.08263519406318628
+   ],
+   "wins": 1,
+   "p": 0.00390625,
+   "n": 10
+  },
+  "h264_typical": {
+   "mean": -0.04082826773325543,
+   "ci": [
+    -0.06321107347806318,
+    -0.017578969399133726
+   ],
+   "wins": 1,
+   "p": 0.015625,
+   "n": 10
+  },
+  "h264_poor": {
+   "mean": 0.014832148949305336,
+   "ci": [
+    0.006969869136810658,
+    0.022639115651447737
+   ],
+   "wins": 9,
+   "p": 0.0078125,
+   "n": 10
+  }
+ }
+}

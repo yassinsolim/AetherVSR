@@ -1,20 +1,24 @@
 {
- "schema": "aethervsr.gop-matched-quality/1",
+ "schema": "aethervsr.gop-matched-quality/2",
  "question": "At equal delivered input quality, is GOP-compressed input harder for the model than all-I?",
- "answer": "No. GOP input is easier at every matched-quality point tested.",
+ "method": "Linear interpolation of the GOP delta-vs-input-PSNR curve, evaluated only at all-I points inside the overlapping measured range. Points outside are reported as excluded rather than extrapolated.",
+ "measuredRange": {
+  "allI": [
+   24.78750527401765,
+   30.326921572287876
+  ],
+  "gop": [
+   26.584185361862183,
+   30.70696221788724
+  ],
+  "overlap": [
+   26.584185361862183,
+   30.326921572287876
+  ]
+ },
+ "answer": "No, over the measured overlap: GOP input is easier at 4/4 matched points between 26.58 and 30.33 dB input PSNR.",
+ "limitation": "2 all-I point(s) fall below the GOP curve's measured floor (26.58 dB) and are excluded. The comparison therefore says nothing about the very lowest input qualities, which is where a CRF 38-and-beyond regime would sit.",
  "matched": [
-  {
-   "inputPsnr": 24.78750527401765,
-   "allIDelta": -0.0442810704310735,
-   "gopDelta": -0.0019393364588419584,
-   "gopMinusAllI": 0.042341733972231545
-  },
-  {
-   "inputPsnr": 25.960503458976746,
-   "allIDelta": -0.0647980272769928,
-   "gopDelta": -0.0019393364588419584,
-   "gopMinusAllI": 0.06285869081815083
-  },
   {
    "inputPsnr": 27.231544663508732,
    "allIDelta": -0.06442256768544516,
@@ -38,6 +42,18 @@
    "allIDelta": 0.3581523497899374,
    "gopDelta": 0.5759360785471852,
    "gopMinusAllI": 0.21778372875724783
+  }
+ ],
+ "excluded": [
+  {
+   "inputPsnr": 24.78750527401765,
+   "allIDelta": -0.0442810704310735,
+   "reason": "outside the range where both curves were measured"
+  },
+  {
+   "inputPsnr": 25.960503458976746,
+   "allIDelta": -0.0647980272769928,
+   "reason": "outside the range where both curves were measured"
   }
  ]
 }

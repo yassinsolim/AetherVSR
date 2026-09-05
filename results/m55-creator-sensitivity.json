@@ -1,0 +1,75 @@
+{
+ "schema": "aethervsr.m55-creator-sensitivity/1",
+ "question": "Does the one clip sharing a creator with the training corpus carry the headline?",
+ "sharedCreator": "PantheraLeo1359531",
+ "excludedClip": "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+ "answer": "No. Removing it costs about 0.03 dB at every condition and the result stays significant.",
+ "conditions": {
+  "h264_high": {
+   "all10": {
+    "mean": 0.9089377025763185,
+    "ci95": [
+     0.7637214064598077,
+     1.039426833391189
+    ],
+    "wins": 10,
+    "n": 10,
+    "permP": 0.001953125
+   },
+   "dropSharedCreator": {
+    "mean": 0.8826709676671898,
+    "ci95": [
+     0.7313029523249013,
+     1.0206278827455284
+    ],
+    "wins": 9,
+    "n": 9,
+    "permP": 0.00390625
+   }
+  },
+  "h264_typical": {
+   "all10": {
+    "mean": 0.5961438020070393,
+    "ci95": [
+     0.4726459383964546,
+     0.7176442046960194
+    ],
+    "wins": 10,
+    "n": 10,
+    "permP": 0.001953125
+   },
+   "dropSharedCreator": {
+    "mean": 0.5584453211890322,
+    "ci95": [
+     0.4395946198039573,
+     0.6644026328016209
+    ],
+    "wins": 9,
+    "n": 9,
+    "permP": 0.00390625
+   }
+  },
+  "h264_poor": {
+   "all10": {
+    "mean": 0.23061693708101955,
+    "ci95": [
+     0.13050614794095275,
+     0.3413882652918495
+    ],
+    "wins": 10,
+    "n": 10,
+    "permP": 0.001953125
+   },
+   "dropSharedCreator": {
+    "mean": 0.1997068745118607,
+    "ci95": [
+     0.10941451346432708,
+     0.3058323926395864
+    ],
+    "wins": 9,
+    "n": 9,
+    "permP": 0.00390625
+   }
+  }
+ }
+}
