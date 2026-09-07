@@ -1,0 +1,59 @@
+{
+ "schema": "aethervsr.m6-selection/1",
+ "decidedAt": "2026-09-07",
+ "rulesCommittedIn": "e821425 docs: pre-register the Milestone 6 decision rule",
+ "architecture": {
+  "id": "aethersr-resizeconv",
+  "parameters": 6291,
+  "scale": 2,
+  "unchangedFrom": "aethersr-c16d2 (Milestone 5.5)"
+ },
+ "corpus": {
+  "version": "captured-train-v2",
+  "clips": 151,
+  "creators": 109,
+  "contentDigest": "9bf33e3ea9f88573be56c682e53e4628eecb13f59251c92339192c4b9df98776",
+  "subset": "N151 (all clips)"
+ },
+ "degradation": "video:gop:uniform [18,36] per sequence",
+ "training": {
+  "epochs": 60,
+  "optimizerSteps": 81180,
+  "trainPatches": 43296,
+  "batch": 32,
+  "lr": 0.002,
+  "loss": "L1"
+ },
+ "seedProtocol": {
+  "seeds": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "selected": 2,
+  "rule": "highest validation mean; ties within 0.01 dB go to the lowest seed number",
+  "argmaxWas": 4,
+  "tiedWithin0p01": [
+   2,
+   3,
+   4
+  ],
+  "why": "seeds 2, 3 and 4 are within 0.01 dB, below the 0.0059 dB seed sd, so the argmax is noise"
+ },
+ "validation": {
+  "meanDelta": 0.6168,
+  "production": 0.4411,
+  "gain": 0.1757,
+  "threshold": 0.05,
+  "passes": true,
+  "worstCategoryChangeVsProduction": 0.0642,
+  "categoriesRegressed": 0
+ },
+ "modelFile": "public/models/aethersr-c16d2-v2corpus.json",
+ "sha256": "29fce3fb1147a02d51c995b946d23047f823bbc29998fef86388da7e39632a7e",
+ "primaryMetric": "paired clip-level neural-minus-Catmull-Rom PSNR on the validation corpus",
+ "acceptanceCriteria": "see docs/M6-PREREGISTRATION.md, committed before this model was trained",
+ "confirmationSetStatus": "UNOPENED at the time of this record"
+}
