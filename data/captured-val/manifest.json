@@ -18,8 +18,8 @@
    "duration": 211.74,
    "fps": 23.976,
    "codec": "vp9",
-   "hasBurnedInGraphics": false,
-   "contentNote": "Aerial daylight footage over Lala Lake, Romania, calm lake and forested shoreline.",
+   "hasBurnedInGraphics": true,
+   "contentNote": "Aerial daylight footage over Lala Lake, Romania, calm lake and forested shoreline. Carries rendered AEROTEAM and M3D watermarks.",
    "source_file": "daylight-lala-lake-romania-4k-aerial.webm",
    "commonsSha1": "d1e5b2df86f1785c88ad253cee4907bef49aefe9",
    "prefixSha256": "f745307584a303a8158acd7842f704c738791c2572bfed485ad5e15f71772702",
@@ -408,6 +408,6 @@
  "creatorDisjointFromTraining": true,
  "assemblySeed": 20260906,
  "contentDigestPending": true,
- "contentDigest": "fa6f568049c30b16cbd8b6801017ca93b5d4299edb712951f3ce87bde7ed50ed",
+ "contentDigest": "7750d47279311d8394d8b41e815be522bbab09c3d52caefdb989bbc36aeeebe6",
  "corpusVersion": "v1"
 }

@@ -303,9 +303,9 @@
    "pinnedAt": "2026-09-05T13:00:04Z"
   },
   {
-   "id": "texture-deska-fifteen-inches-of-pure-white-snow",
+   "id": "nature-deska-fifteen-inches-of-pure-white-snow",
    "title": "File:Deska- Fifteen Inches of Pure White Snow.webm",
-   "category": "texture",
+   "category": "nature",
    "creator": "Sasa Vignjevic",
    "shootId": "sasa vignjevic::deska fifteen inches of",
    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Deska-_Fifteen_Inches_of_Pure_White_Snow.webm",
@@ -318,14 +318,15 @@
    "duration": 788.03,
    "fps": 24,
    "codec": "vp9",
-   "hasBurnedInGraphics": false,
-   "contentNote": "Fresh deep snowfall on a ski slope/forest, fine snow-surface and powder texture, verified via Commons video thumbnail.",
+   "hasBurnedInGraphics": true,
+   "contentNote": "Aerial forest ridge with a full-screen rendered 'DESKA' title card burned into the frame. Originally labelled texture on the strength of a Commons thumbnail that was itself the title card; relabelled after inspecting the scored frames.",
    "source_file": "texture-deska-fifteen-inches-of-pure-white-snow.webm",
    "commonsSha1": "cb12d0283b647657fd25d17345c4145432ce215e",
    "prefixSha256": "302efe48fa1d85dabeeade6b7f77b29f7fa02b5cee08177ca6e6385609e0eafa",
    "prefixBytes": 2097152,
    "byteLength": 1205618215,
-   "pinnedAt": "2026-09-05T13:00:22Z"
+   "pinnedAt": "2026-09-05T13:00:22Z",
+   "labelCorrection": "M6 review: category texture -> nature; hasBurnedInGraphics false -> true"
   },
   {
    "id": "texture-pteroplatytrygon-violacea-aquarium-of-the-pacifi",

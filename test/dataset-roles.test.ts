@@ -51,17 +51,20 @@ function clipsOf(paths: string[]): { path: string; clip: Clip }[] {
   return out;
 }
 
-/** Unicode-aware; stripping to ASCII erased non-Latin creator names and
- *  silently un-grouped their clips. Mirrors tools/corpus_schema.py. */
+/** Mirrors tools/corpus_schema.py:normalise_creator exactly. Commons credits are
+ *  free text; reduce to the first credited party, since that is the operator
+ *  whose camera and encoder the corpus inherits. Kept in sync deliberately —
+ *  the two implementations drifted once and the divergence hid a real overlap. */
 function normaliseCreator(name: string | undefined): string {
-  const s = (name ?? '')
-    .normalize('NFKC')
-    .toLowerCase()
-    .replace(/\(.*?\)/g, ' ')
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-    .split(/\s+/)
-    .filter(Boolean)
-    .join(' ');
+  let s = (name ?? '').normalize('NFKC').toLowerCase();
+  // `split` is typed as possibly-undefined under noUncheckedIndexedAccess;
+  // both splits always yield at least one element.
+  s = s.split('\n')[0] ?? '';
+  s = s.split(/(?:audio|music|sound|editing|edit|schild|text)\s*[:-]/)[0] ?? '';
+  s = s.replace(/^\s*(?:video|foto|photo|footage|film|by|author|creator|image)\s*[:-]\s*/, ' ');
+  s = s.replace(/\(.*?\)/g, ' ');
+  s = s.replace(/[^\p{L}\p{N}\s]/gu, ' ');
+  s = s.split(/\s+/).filter(Boolean).join(' ');
   return s || 'unattributed';
 }
 
@@ -112,6 +115,37 @@ describe('dataset roles', () => {
       .filter(({ clip }) => clip.shootId && evalShoots.has(clip.shootId))
       .map(({ path, clip }) => `${path}:${clip.id} (${clip.shootId})`);
     expect(collisions).toEqual([]);
+  });
+
+  it('reports creator overlap between training and every evaluation corpus', () => {
+    // Not an assertion that overlap is zero - it is not, and pretending
+    // otherwise would be worse than recording it. Milestone 6 shipped with
+    // training sharing creators with the regression and faces benchmarks
+    // (MrAyrit shot both a training clip and a benchmark clip on the same
+    // river with the same drone a month apart). The confirmation set, which
+    // carries the headline, is disjoint and asserted separately below.
+    //
+    // This test exists so the overlap cannot grow silently: it pins the known
+    // set, and any new collision fails until it is examined and recorded.
+    const KNOWN = {
+      '../data/captured/manifest.json': ['mrayrit', 'capricorn4049', 'pantheraleo1359531'],
+      '../data/captured-faces/manifest.json': ['nasa johnson space center', 'nasa kennedy space center'],
+    } as Record<string, string[]>;
+    const trainCreators = new Set(
+      clipsOf(TRAINING).map(({ clip }) => normaliseCreator(clip.creator)),
+    );
+    for (const [path, known] of Object.entries(KNOWN)) {
+      const m = load(path);
+      if (m === null) continue;
+      const shared = [
+        ...new Set(
+          (m.clips ?? [])
+            .map((c) => normaliseCreator(c.creator))
+            .filter((c) => c !== 'unattributed' && trainCreators.has(c)),
+        ),
+      ].sort();
+      expect(shared).toEqual([...known].sort());
+    }
   });
 
   it('the confirmation set shares no creator with training', () => {

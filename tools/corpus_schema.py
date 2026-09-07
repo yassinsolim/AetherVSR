@@ -54,7 +54,18 @@ def normalise_creator(name: str | None) -> str:
     reintroduced the leak the key exists to close.
     """
     s = unicodedata.normalize("NFKC", (name or "")).casefold()
-    s = re.sub(r"\(.*?\)", " ", s)          # "(talk)" and similar decorations
+    # Commons credits are free text and arrive in several shapes. Reduce to the
+    # first credited party, because that is the operator whose camera, encoder
+    # and habits the corpus actually inherits:
+    #   "Foto: PantheraLeo1359531\nSchild: Landmetzgerei Krafft"  -> multi-line
+    #   "Video: Capricorn4049Audio: Kevin MacLeod"                -> no space
+    #   "PantheraLeo1359531 (talk)"                               -> decoration
+    # Both earlier versions missed one of these, and each miss hid a real
+    # creator overlap with an evaluation benchmark.
+    s = s.split("\n")[0]
+    s = re.split(r"(?:audio|music|sound|editing|edit|schild|text)\s*[:\-]", s)[0]
+    s = re.sub(r"^\s*(?:video|foto|photo|footage|film|by|author|creator|image)\s*[:\-]\s*", " ", s)
+    s = re.sub(r"\(.*?\)", " ", s)
     s = re.sub(r"[^\w\s]", " ", s, flags=re.UNICODE)
     return " ".join(s.split()) or "unattributed"
 

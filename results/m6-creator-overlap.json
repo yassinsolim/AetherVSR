@@ -1,0 +1,149 @@
+{
+ "schema": "aethervsr.m6-creator-overlap/1",
+ "question": "The training corpus is creator-disjoint from the confirmation set by construction, but not from the two older benchmarks. How much of the benchmark result rests on clips whose operator also appears in training?",
+ "benchmarks": {
+  "regression": {
+   "sharedCreatorClips": [
+    "lowlight-hofer-weihnachtsmarkt-am-abend-202",
+    "nature-piz-neir-aerial-video-4k-webm",
+    "texture-4k-drone-footage-of-a-barge-on-the"
+   ],
+   "total": 10,
+   "conditions": {
+    "h264_high": {
+     "allClips": {
+      "mean": 1.1465005079905182,
+      "ci95": [
+       0.9355887373288472,
+       1.35446262359619
+      ],
+      "wins": 10,
+      "clips": 10
+     },
+     "creatorDisjointOnly": {
+      "mean": 1.1518031216803044,
+      "ci95": [
+       0.9195579375539492,
+       1.3371916895820972
+      ],
+      "wins": 7,
+      "clips": 7
+     }
+    },
+    "h264_typical": {
+     "allClips": {
+      "mean": 0.7484883964061737,
+      "ci95": [
+       0.5845313469568879,
+       0.9312536716461185
+      ],
+      "wins": 10,
+      "clips": 10
+     },
+     "creatorDisjointOnly": {
+      "mean": 0.6900118504251748,
+      "ci95": [
+       0.5288353988102494,
+       0.8375360568364455
+      ],
+      "wins": 7,
+      "clips": 7
+     }
+    },
+    "h264_poor": {
+     "allClips": {
+      "mean": 0.2758879065513614,
+      "ci95": [
+       0.16097086668014526,
+       0.4064851303895317
+      ],
+      "wins": 10,
+      "clips": 10
+     },
+     "creatorDisjointOnly": {
+      "mean": 0.20354323443912342,
+      "ci95": [
+       0.11205585229964399,
+       0.2966433195840748
+      ],
+      "wins": 7,
+      "clips": 7
+     }
+    }
+   }
+  },
+  "faces": {
+   "sharedCreatorClips": [
+    "portrait-artemis-ii-moon-watch-ami-kille",
+    "portrait-artemis-ii-moon-watch-duane-chi",
+    "portrait-artemis-ii-moon-watch-emily-kol",
+    "portrait-artemis-ii-moon-watch-jennifer",
+    "speech-artemis-ii-live-launch-coverage-c"
+   ],
+   "total": 8,
+   "conditions": {
+    "h264_high": {
+     "allClips": {
+      "mean": 2.096364994843799,
+      "ci95": [
+       1.5445888787507993,
+       2.6880431299408247
+      ],
+      "wins": 8,
+      "clips": 8
+     },
+     "creatorDisjointOnly": {
+      "mean": 1.9167276554637478,
+      "ci95": [
+       1.1786247293154375,
+       3.1150346994400024
+      ],
+      "wins": 3,
+      "clips": 3
+     }
+    },
+    "h264_typical": {
+     "allClips": {
+      "mean": 1.3381100197633113,
+      "ci95": [
+       0.8970339099566145,
+       1.7987896129488972
+      ],
+      "wins": 8,
+      "clips": 8
+     },
+     "creatorDisjointOnly": {
+      "mean": 1.1654371685451963,
+      "ci95": [
+       0.4389335711797102,
+       2.2662399212519375
+      ],
+      "wins": 3,
+      "clips": 3
+     }
+    },
+    "h264_poor": {
+     "allClips": {
+      "mean": 0.5930301671226799,
+      "ci95": [
+       0.34573098023732385,
+       0.8529426405827181
+      ],
+      "wins": 8,
+      "clips": 8
+     },
+     "creatorDisjointOnly": {
+      "mean": 0.5394298500484851,
+      "ci95": [
+       0.09772400061289233,
+       1.1682890852292331
+      ],
+      "wins": 3,
+      "clips": 3
+     }
+    }
+   }
+  }
+ },
+ "verdict": "The benchmark conclusions survive. On the regression set the CRF 34 gain moves +0.276 -> +0.204 dB and stays positive on all seven creator-disjoint clips; on faces it moves +0.593 -> +0.539 on three clips. Magnitudes are inflated by the shared-creator clips, so the creator-disjoint column is the one to quote. The confirmation corpus, which carries the headline, has no creator in common with training at all."
+}

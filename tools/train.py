@@ -18,6 +18,7 @@ this model file has to be able to demonstrate.
 
 from __future__ import annotations
 
+import math
 import argparse
 import hashlib
 import json
@@ -332,7 +333,6 @@ def main() -> int:
     model = AetherSR(channels=args.channels, depth=args.depth).to(device)
     print(f"parameters: {count_parameters(model)}")
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
-    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
 
     val_hr_d = val_hr.to(device)
     if args.pairs and not args.pairs_hr_only:
@@ -360,6 +360,22 @@ def main() -> int:
     steps_per_epoch = max(1, (len(train_hr) - args.batch + 1 + args.batch - 1) // args.batch)
     step_budget = args.max_steps if args.max_steps > 0 else args.epochs * steps_per_epoch
     total_steps = 0
+
+    # The cosine runs on optimizer updates, not epochs, and validation happens on
+    # a fixed update cadence rather than at epoch boundaries.
+    #
+    # Both used to key off epochs, which quietly broke every cross-corpus
+    # comparison: at a fixed 16,200-update budget a 12-clip corpus completes 159
+    # short epochs while a 151-clip corpus completes 12 long ones, so the two ran
+    # different fractions of their schedules (mean multiplier 0.5037 against
+    # 0.5428, an 7.8% cumulative learning-rate advantage to the larger corpus)
+    # and got 159 against 12 chances to draw a lucky best checkpoint. A scaling
+    # curve measured that way varies schedule and selection cadence alongside
+    # the thing it claims to isolate.
+    VAL_EVERY = max(1, step_budget // 60)
+
+    def lr_at(step: int) -> float:
+        return args.lr * 0.5 * (1.0 + math.cos(math.pi * min(1.0, step / step_budget)))
 
     best = -1.0
     best_ssim = float("nan")
@@ -406,6 +422,8 @@ def main() -> int:
                     batch_hr, args.degradation, seed=args.seed * 100_003 + epoch * 1_009 + batches
                 )
 
+            for group in opt.param_groups:
+                group["lr"] = lr_at(total_steps)
             out = model(batch_lr)
             loss = F.l1_loss(out, batch_hr)
             opt.zero_grad(set_to_none=True)
@@ -414,31 +432,30 @@ def main() -> int:
             total += loss.item()
             batches += 1
             total_steps += 1
+
+            if total_steps % VAL_EVERY == 0 or total_steps >= step_budget:
+                model.eval()
+                with torch.no_grad():
+                    pred = model(val_lr_d).clamp(0, 1)
+                    v = psnr(pred, val_hr_d)
+                if v > best:
+                    best = v
+                    # The SSIM *of the selected checkpoint*, not the best SSIM
+                    # seen at any point: reporting each metric's own maximum
+                    # describes a model that was never saved.
+                    with torch.no_grad():
+                        best_ssim = ssim(pred, val_hr_d)
+                    best_state = {k: t.detach().cpu().clone()
+                                  for k, t in model.state_dict().items()}
+                model.train()
             if args.max_steps > 0 and total_steps >= args.max_steps:
                 break
-        sched.step()
 
-        model.eval()
-        with torch.no_grad():
-            pred = model(val_lr_d).clamp(0, 1)
-            v = psnr(pred, val_hr_d)
-        if v > best:
-            best = v
-            # The SSIM *of the selected checkpoint*, not the best SSIM seen at
-            # any epoch: reporting each metric's own maximum describes a model
-            # that was never saved.
-            with torch.no_grad():
-                best_ssim = ssim(pred, val_hr_d)
-            best_state = {k: t.detach().cpu().clone() for k, t in model.state_dict().items()}
-        if epoch % 5 == 0 or epoch == args.epochs - 1:
-            print(
-                f"  epoch {epoch:3d}  loss {total / max(1, batches):.5f}  val {v:.2f} dB"
-                f"  best {best:.2f}"
-            )
-        # Checked here, after validation and checkpointing, so a step-capped run
-        # still selects a checkpoint on the epoch it stops in.
-        if args.max_steps > 0 and total_steps >= args.max_steps:
-            print(f"  step budget {args.max_steps} reached during epoch {epoch}", file=sys.stderr)
+        if epoch % max(1, args.epochs // 12) == 0 or epoch == args.epochs - 1:
+            print(f"  epoch {epoch:3d}  step {total_steps:6d}  "
+                  f"loss {total / max(1, batches):.5f}  best {best:.2f} dB")
+        if total_steps >= step_budget:
+            print(f"  step budget {step_budget} reached during epoch {epoch}", file=sys.stderr)
             break
 
     print(
@@ -571,6 +588,9 @@ def main() -> int:
             "stepBudget": step_budget,
             "optimizerSteps": total_steps,
             "stepsPerEpoch": steps_per_epoch,
+            "lrSchedule": "cosine over optimizer updates (T_max = step budget)",
+            "validationEverySteps": VAL_EVERY,
+            "validationOpportunities": step_budget // VAL_EVERY,
             "epochsCompleted": epoch + 1,
             "trainPatches": int(len(train_hr)),
             "patchesSeen": int(total_steps * args.batch),

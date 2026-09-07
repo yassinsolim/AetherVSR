@@ -111,6 +111,22 @@ def main() -> int:
         sel = [c for c in cand if c["category"] == cat]
         report["byCategory"][cat] = paired(list(per_clip(sel).values()))
 
+    # Per class AND per tier, because the acceptance criteria are written that
+    # way and pooling changes the answer. Averaging a class over CRF 18, 26 and
+    # 34 lets a strong high-quality result hide a weak heavy-compression one:
+    # motion pools to +0.237 with 2/2 wins while its CRF 34 cell is -0.073 with
+    # 0/2. "No class in collapse" cannot be assessed from the pooled column.
+    report["byCategoryAndTier"] = {}
+    for cat in cats:
+        for tier in tiers:
+            sel = [c for c in cand if c["category"] == cat and c["crf"] == tier]
+            if sel:
+                report["byCategoryAndTier"][f"{cat}/crf{tier}"] = paired(
+                    list(per_clip(sel).values()))
+    negatives = {k: v["mean"] for k, v in report["byCategoryAndTier"].items() if v["mean"] < 0}
+    report["negativeCategoryTierCells"] = negatives
+    report["allCategoryTierCellsPositive"] = not negatives
+
     if args.baseline and args.baseline in models:
         base = {(c["clip"], c["crf"]): c["delta"] for c in models[args.baseline]["perCell"]}
         diffs = [{**c, "delta": c["delta"] - base[(c["clip"], c["crf"])]}
@@ -134,9 +150,19 @@ def main() -> int:
     for k, v in report["vsCatmullRom"].items():
         print(f"  {k:<10}{v['mean']:>+10.4f}  [{v['ci95'][0]:+.4f},{v['ci95'][1]:+.4f}]"
               f"{str(v['wins'])+'/'+str(v['clips']):>9}{v['permutationP']:>9.4f}", file=sys.stderr)
-    print(f"\n  {'category':<12}{'mean dB':>10}{'wins':>9}", file=sys.stderr)
-    for k, v in report["byCategory"].items():
-        print(f"  {k:<12}{v['mean']:>+10.4f}{str(v['wins'])+'/'+str(v['clips']):>9}", file=sys.stderr)
+    print(f"\n  {'class':<12}" + "".join(f"{'crf'+str(t):>11}" for t in tiers)
+          + f"{'pooled':>11}", file=sys.stderr)
+    for cat in sorted({c["category"] for c in cand}):
+        row = ""
+        for t in tiers:
+            cell = report["byCategoryAndTier"].get(f"{cat}/crf{t}")
+            row += f"{cell['mean']:>+11.4f}" if cell else f"{'-':>11}"
+        flag = "  <-- negative" if any(
+            (report["byCategoryAndTier"].get(f"{cat}/crf{t}") or {}).get("mean", 0) < 0
+            for t in tiers) else ""
+        print(f"  {cat:<12}{row}{report['byCategory'][cat]['mean']:>+11.4f}{flag}", file=sys.stderr)
+    if report["negativeCategoryTierCells"]:
+        print(f"\n  NEGATIVE cells: {report['negativeCategoryTierCells']}", file=sys.stderr)
     if report["vsBaseline"]:
         print(f"\n  vs {args.baseline}\n", file=sys.stderr)
         for k, v in report["vsBaseline"].items():

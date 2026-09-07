@@ -95,7 +95,7 @@ describe('shipped default model', () => {
   it('is byte-identical to the model the benchmarks name', () => {
     const def = readFileSync(new URL('../public/models/aethersr-c16d2.json', import.meta.url));
     const named = readFileSync(
-      new URL('../public/models/aethersr-c16d2-gopvideo.json', import.meta.url),
+      new URL('../public/models/aethersr-c16d2-v2corpus.json', import.meta.url),
     );
     expect(def.equals(named)).toBe(true);
   });

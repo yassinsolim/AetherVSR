@@ -1,0 +1,111 @@
+{
+ "schema": "aethervsr.corpus-assembly/1",
+ "poolCandidates": 197,
+ "afterDedupe": 195,
+ "afterGate": 195,
+ "duplicatesDropped": [
+  {
+   "title": "File:Easton Lodge Walled Kitchen Garden wall scan Little Easton Essex, England.webm",
+   "reason": "duplicate",
+   "keptFrom": "PoolMotionTexture.json",
+   "droppedFrom": "PoolNatureUrban.json"
+  },
+  {
+   "title": "File:Air traffic in the Swiss night sky as seen from Oeschinensee Video by Giles Laurent.webm",
+   "reason": "duplicate",
+   "keptFrom": "PoolMotionTexture.json",
+   "droppedFrom": "PoolPeople.json"
+  }
+ ],
+ "rejected": [],
+ "roles": {
+  "training": {
+   "path": "data/captured-train-v2/manifest.json",
+   "clips": 151,
+   "creators": 107,
+   "shoots": 146,
+   "categories": {
+    "urban": 19,
+    "lowlight": 17,
+    "nature": 28,
+    "motion": 26,
+    "texture": 25,
+    "daylight": 12,
+    "faces": 18,
+    "text": 6
+   }
+  },
+  "validation": {
+   "path": "data/captured-val/manifest.json",
+   "clips": 16,
+   "creators": 15,
+   "shoots": 16,
+   "categories": {
+    "lowlight": 2,
+    "nature": 2,
+    "urban": 2,
+    "motion": 3,
+    "daylight": 2,
+    "texture": 2,
+    "faces": 2,
+    "text": 1
+   }
+  },
+  "confirmation": {
+   "path": "data/captured-confirm/manifest.json",
+   "clips": 19,
+   "creators": 12,
+   "shoots": 17,
+   "categories": {
+    "daylight": 2,
+    "nature": 2,
+    "urban": 3,
+    "lowlight": 2,
+    "faces": 2,
+    "motion": 2,
+    "text": 4,
+    "texture": 2
+   }
+  }
+ },
+ "cappedByCreatorLimit": [
+  {
+   "title": "File:Hillsdale Shopping Center - exterior 1 2022-12-05.webm",
+   "creator": "FASTILY",
+   "category": "urban"
+  },
+  {
+   "title": "File:20200722 182642 taughannock falls waterfall.webm",
+   "creator": "G. Edward Johnson",
+   "category": "motion"
+  },
+  {
+   "title": "File:Paycocke's House and Garden, Coggeshall, Essex, England.webm",
+   "creator": "Acabashi",
+   "category": "urban"
+  },
+  {
+   "title": "File:Paragliding over Fairy Meadow Wollongong NSW Australia.webm",
+   "creator": "skinduptruk",
+   "category": "nature"
+  },
+  {
+   "title": "File:Mekong Floating Markets , Ho Chi Minh ,Vietnam.webm",
+   "creator": "Le Monde en Vid\u00e9o",
+   "category": "urban"
+  },
+  {
+   "title": "File:Stockholm city Hall , Sweden (in Ultra 4K).webm",
+   "creator": "Le Monde en Vid\u00e9o",
+   "category": "urban"
+  }
+ ],
+ "maxClipsPerCreator": 3,
+ "disjointnessChecks": {
+  "confirmationCreatorDisjointFromTraining": true,
+  "validationCreatorDisjointFromTraining": true,
+  "confirmationCreatorDisjointFromValidation": true,
+  "sharedTrainVal": [],
+  "sharedTrainConfirm": []
+ }
+}
