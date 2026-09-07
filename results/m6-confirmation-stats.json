@@ -1,0 +1,346 @@
+{
+ "schema": "aethervsr.m6-confirm-stats/1",
+ "candidate": "aethersr-c16d2-v2corpus",
+ "baseline": "aethersr-c16d2",
+ "statisticalUnit": "clip; frames averaged within a clip before comparison",
+ "comparison": "paired: every method scores the same decoded frames",
+ "vsCatmullRom": {
+  "crf18": {
+   "clips": 17,
+   "mean": 1.3691655677907608,
+   "median": 1.2956276535987854,
+   "ci95": [
+    1.099974092315225,
+    1.6445651650428772
+   ],
+   "wins": 17,
+   "permutationP": 1.52587890625e-05,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  },
+  "crf26": {
+   "clips": 17,
+   "mean": 0.665501215878655,
+   "median": 0.7513725757598877,
+   "ci95": [
+    0.48086485441993265,
+    0.8484484167659984
+   ],
+   "wins": 17,
+   "permutationP": 1.52587890625e-05,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  },
+  "crf34": {
+   "clips": 17,
+   "mean": 0.13507641413632562,
+   "median": 0.17135381698608398,
+   "ci95": [
+    0.06726575248381671,
+    0.198576643186457
+   ],
+   "wins": 14,
+   "permutationP": 0.001983642578125,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  },
+  "allTiers": {
+   "clips": 17,
+   "mean": 0.7232477326019138,
+   "median": 0.7648326953252157,
+   "ci95": [
+    0.5542810933262694,
+    0.8920705727502412
+   ],
+   "wins": 17,
+   "permutationP": 1.52587890625e-05,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  }
+ },
+ "vsBaseline": {
+  "crf18": {
+   "clips": 17,
+   "mean": 0.40475890916936536,
+   "median": 0.3718775510787964,
+   "ci95": [
+    0.33003812327104454,
+    0.4820061255903805
+   ],
+   "wins": 17,
+   "permutationP": 1.52587890625e-05,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  },
+  "crf26": {
+   "clips": 17,
+   "mean": 0.201642583398258,
+   "median": 0.17873167991638184,
+   "ci95": [
+    0.16396848594441132,
+    0.24238263859468348
+   ],
+   "wins": 17,
+   "permutationP": 1.52587890625e-05,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  },
+  "crf34": {
+   "clips": 17,
+   "mean": 0.04956385668586282,
+   "median": 0.03482460975646973,
+   "ci95": [
+    0.03557196434806375,
+    0.06507363389520084
+   ],
+   "wins": 17,
+   "permutationP": 1.52587890625e-05,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  },
+  "allTiers": {
+   "clips": 17,
+   "mean": 0.21865511641782873,
+   "median": 0.19467016061147055,
+   "ci95": [
+    0.17777757317412132,
+    0.2623058475700079
+   ],
+   "wins": 17,
+   "permutationP": 1.52587890625e-05,
+   "permutationExact": true,
+   "smallestAttainableP": 1.52587890625e-05
+  }
+ },
+ "byCategory": {
+  "daylight": {
+   "clips": 2,
+   "mean": 0.8552926778793335,
+   "median": 0.8552926778793335,
+   "ci95": [
+    0.7648326953252157,
+    0.9457526604334513
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "faces": {
+   "clips": 2,
+   "mean": 1.1179542541503906,
+   "median": 1.1179542541503906,
+   "ci95": [
+    0.9567639231681824,
+    1.2791445851325989
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "lowlight": {
+   "clips": 2,
+   "mean": 0.6624936560789744,
+   "median": 0.6624936560789744,
+   "ci95": [
+    0.4528759916623433,
+    0.8721113204956055
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "motion": {
+   "clips": 2,
+   "mean": 0.23676400383313495,
+   "median": 0.23676400383313495,
+   "ci95": [
+    0.22875696420669556,
+    0.24477104345957437
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "nature": {
+   "clips": 2,
+   "mean": 0.5411755045255024,
+   "median": 0.5411755045255024,
+   "ci95": [
+    0.5249757568041483,
+    0.5573752522468567
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "text": {
+   "clips": 2,
+   "mean": 0.8032831052939097,
+   "median": 0.8032831052939097,
+   "ci95": [
+    0.3034241994222005,
+    1.303142011165619
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "texture": {
+   "clips": 2,
+   "mean": 0.43909897406895954,
+   "median": 0.43909897406895954,
+   "ci95": [
+    0.18770764271418253,
+    0.6904903054237366
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "urban": {
+   "clips": 3,
+   "mean": 0.9943623675240411,
+   "median": 0.9446990489959717,
+   "ci95": [
+    0.902773936589559,
+    1.1356141169865925
+   ],
+   "wins": 3,
+   "permutationP": 0.25,
+   "permutationExact": true,
+   "smallestAttainableP": 0.25
+  }
+ },
+ "byCategoryVsBaseline": {
+  "daylight": {
+   "clips": 2,
+   "mean": 0.25566334525744117,
+   "median": 0.25566334525744117,
+   "ci95": [
+    0.12318074703216553,
+    0.38814594348271686
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "faces": {
+   "clips": 2,
+   "mean": 0.35243411858876544,
+   "median": 0.35243411858876544,
+   "ci95": [
+    0.34389694531758624,
+    0.36097129185994464
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "lowlight": {
+   "clips": 2,
+   "mean": 0.22607882817586264,
+   "median": 0.22607882817586264,
+   "ci95": [
+    0.1977550983428955,
+    0.25440255800882977
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "motion": {
+   "clips": 2,
+   "mean": 0.1365305483341217,
+   "median": 0.1365305483341217,
+   "ci95": [
+    0.13503303130467734,
+    0.13802806536356607
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "nature": {
+   "clips": 2,
+   "mean": 0.18153831362724304,
+   "median": 0.18153831362724304,
+   "ci95": [
+    0.16840646664301553,
+    0.19467016061147055
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "text": {
+   "clips": 2,
+   "mean": 0.3082452714443207,
+   "median": 0.3082452714443207,
+   "ci95": [
+    0.3011031945546468,
+    0.31538734833399457
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "texture": {
+   "clips": 2,
+   "mean": 0.11418253183364868,
+   "median": 0.11418253183364868,
+   "ci95": [
+    0.0871036450068156,
+    0.14126141866048178
+   ],
+   "wins": 2,
+   "permutationP": 0.5,
+   "permutationExact": true,
+   "smallestAttainableP": 0.5
+  },
+  "urban": {
+   "clips": 3,
+   "mean": 0.18926368819342718,
+   "median": 0.17953256766001383,
+   "ci95": [
+    0.167769193649292,
+    0.22048930327097574
+   ],
+   "wins": 3,
+   "permutationP": 0.25,
+   "permutationExact": true,
+   "smallestAttainableP": 0.25
+  }
+ },
+ "perClip": {
+  "daylight-donetsk-botanical-garden-iphone-xr-cinematic-4k": 0.9458,
+  "daylight-outdoor-pool": 0.7648,
+  "faces-david-letterman-neal-brennan-call-bert-kreischer": 1.2791,
+  "faces-david-letterman-on-jay-leno": 0.9568,
+  "lowlight-ban-jela-i-square-zagreb-20240726-210003": 0.8721,
+  "lowlight-wien-by-night-212329": 0.4529,
+  "motion-alvin-ailey-american-dance-theater-performs-at-t": 0.2448,
+  "motion-nemesis-reborn-pov": 0.2288,
+  "nature-above-geneva-lake-083502": 0.5574,
+  "nature-oostende-beach-152354": 0.525,
+  "text-4k-drone-las-vegas-strip": 1.3031,
+  "text-split-flap-display-at-changi-airport-terminal-2-": 0.3034,
+  "texture-deska-fifteen-inches-of-pure-white-snow": 0.6905,
+  "texture-pteroplatytrygon-violacea-aquarium-of-the-pacifi": 0.1877,
+  "urban-2022-12-08-212th-way-se-bridge-over-the-green-ri": 0.9028,
+  "urban-2023-01-31-foothills-trail-puyallup-river-bridge": 0.9447,
+  "urban-st-peter-square-vatican-20250117-091435": 1.1356
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "schema": "aethervsr.m6-runtime/1",
+ "environment": {
+  "machine": "Apple M5 base, macOS 26.6.2",
+  "browser": "Chrome for Testing 152.0.7977.42",
+  "adapter": "apple / metal-3",
+  "clip": "/media/aethervsr-testclip-720p60-h264.mp4 (1280x720 -> 2560x1440)",
+  "protocol": "alternating A/B/A/B in one session; each arm waits for the neural stage to go live, settles 10 s, resets counters, then samples a clean 20 s window",
+  "note": "Both models are the same 6,291-parameter graph, so this measures whether anything regressed, not which is faster."
+ },
+ "measurements": [
+  {"model": "aethersr-c16d2 (production)", "rep": 1, "gpuMsP50": 5.90, "gpuMsP95": 6.63, "gpuMsMax": 7.07, "presentedFps": 59.7, "budget60hzPercent": 35.5, "decoderDropped": 40, "decoderDecoded": 1194, "fellBack": false},
+  {"model": "aethersr-c16d2-v2corpus (candidate)", "rep": 1, "gpuMsP50": 5.85, "gpuMsP95": 6.67, "gpuMsMax": 7.29, "presentedFps": 59.7, "budget60hzPercent": 35.1, "decoderDropped": 44, "decoderDecoded": 1193, "fellBack": false},
+  {"model": "aethersr-c16d2 (production)", "rep": 2, "gpuMsP50": 5.77, "gpuMsP95": 6.48, "gpuMsMax": 7.40, "presentedFps": 59.6, "budget60hzPercent": 34.9, "decoderDropped": 28, "decoderDecoded": 1193, "fellBack": false},
+  {"model": "aethersr-c16d2-v2corpus (candidate)", "rep": 2, "gpuMsP50": 5.77, "gpuMsP95": 6.62, "gpuMsMax": 6.88, "presentedFps": 59.7, "budget60hzPercent": 34.7, "decoderDropped": 47, "decoderDecoded": 1194, "fellBack": false}
+ ],
+ "preRegisteredTargets": {
+  "p50MsMax": 8, "p50Observed": 5.81, "p50Pass": true,
+  "p95MsMax": 10, "p95Observed": 6.65, "p95Pass": true,
+  "presented60fpsMaintained": true, "presentedObserved": 59.7,
+  "noBudgetFallback": true
+ },
+ "honestCaveats": [
+  "Decoder drops run 2.3-3.9% in this session for BOTH arms (28-47 of ~1193), against 0-10 in the Milestone 5.5 session on the same harness. The elevation is environmental and affects the two arms equally, so it is not attributed to either model.",
+  "An earlier attempt at this measurement was discarded: stale browser profiles from previous sessions were competing for the GPU, p95 reached 10.3 ms, and one candidate run tripped the budget guard and fell back to Catmull-Rom. Those numbers are not reported as results because the load was an artefact of the measurement environment, not of the model.",
+  "Two repetitions per arm. Enough to show the two are indistinguishable, which is the claim being made; not enough to resolve a small real difference, and none is claimed."
+ ],
+ "verdict": "Runtime is unchanged. p50 5.77-5.90 ms across both models, p95 6.48-6.67, ~35% of a 60 Hz budget, 59.7 presented fps, no budget fallback in any clean run. All pre-registered runtime targets met, as expected for a byte-identical inference graph differing only in weights."
+}

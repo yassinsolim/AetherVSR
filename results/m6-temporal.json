@@ -1,0 +1,405 @@
+{
+ "schema": "aethervsr.captured-temporal/1",
+ "model": "aethersr-c16d2-v2corpus.json",
+ "condition": "h264_typical",
+ "method": "Dense Farneback flow estimated on the HR reference only; each method's own output is warped by that flow and the residual measured. Flow error inflates every method equally, so only ratios between methods are interpreted.",
+ "controls": {
+  "flowError": "catmullOverReferenceResidual: how much residual is flow error rather than upscaler behaviour.",
+  "sharpness": "Blurring the reference cannot change the footage's real temporal consistency, so any residual drop measures the metric's response to spatial frequency. If the blur control moves the score as much as the methods do, the ratio cannot be read as a temporal cost."
+ },
+ "perClip": {
+  "motion-2023-maplefest-in-bowmanville-on-2": {
+   "reference": {
+    "mcResidual": 2.1458043401891533,
+    "staticRegionVariance": 11.580990357832475,
+    "sharpness": 0.03617012655983368
+   },
+   "neural": {
+    "mcResidual": 2.8765778758309106,
+    "staticRegionVariance": 6.654738491231745,
+    "sharpness": 0.02725124265998602
+   },
+   "catmull_rom": {
+    "mcResidual": 2.362082015384327,
+    "staticRegionVariance": 3.654956915161826,
+    "sharpness": 0.023360224130252998
+   },
+   "bilinear": {
+    "mcResidual": 1.8643572330474854,
+    "staticRegionVariance": 2.488393008708954,
+    "sharpness": 0.019661875752111275
+   },
+   "reference_blur0p5": {
+    "mcResidual": 1.571964675729925
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.7624690424312245
+   },
+   "blurControl0p5OverReference": 0.7325759605795913,
+   "blurControl1p0OverReference": 0.3553301799939563,
+   "neuralExcessSharpnessOverCatmull": 0.16656597591004707,
+   "neuralExcessResidualOverCatmull": 0.2178145623630563,
+   "excessResidualPerExcessSharpness": 1.307677400339465,
+   "neuralOverCatmullResidual": 1.2178145623630563,
+   "neuralOverReferenceResidual": 1.3405592588079767,
+   "catmullOverReferenceResidual": 1.100790958031201
+  },
+  "motion-rogla-slovenia-ostru-ica-1-4k-pov-": {
+   "reference": {
+    "mcResidual": 5.952510944821618,
+    "staticRegionVariance": 15.609506906772202,
+    "sharpness": 0.017171714765330155
+   },
+   "neural": {
+    "mcResidual": 5.762523989108476,
+    "staticRegionVariance": 14.69536343216896,
+    "sharpness": 0.012970771019657453
+   },
+   "catmull_rom": {
+    "mcResidual": 5.573542070659724,
+    "staticRegionVariance": 14.741331275213849,
+    "sharpness": 0.011741533487414321
+   },
+   "bilinear": {
+    "mcResidual": 5.258006670596925,
+    "staticRegionVariance": 14.567991454154253,
+    "sharpness": 0.00987791339866817
+   },
+   "reference_blur0p5": {
+    "mcResidual": 5.662439809604124
+   },
+   "reference_blur1p0": {
+    "mcResidual": 5.127739815380085
+   },
+   "blurControl0p5OverReference": 0.9512691135041355,
+   "blurControl1p0OverReference": 0.8614414761960175,
+   "neuralExcessSharpnessOverCatmull": 0.10469139602256766,
+   "neuralExcessResidualOverCatmull": 0.03390696904282686,
+   "excessResidualPerExcessSharpness": 0.32387541222124644,
+   "neuralOverCatmullResidual": 1.0339069690428269,
+   "neuralOverReferenceResidual": 0.9680828884693743,
+   "catmullOverReferenceResidual": 0.9363346195118587
+  },
+  "motion-aerial-drone-chase-of-a-train-webm": {
+   "reference": {
+    "mcResidual": 0.9783661311322992,
+    "staticRegionVariance": 0.8956658027388833,
+    "sharpness": 0.005215003426807622
+   },
+   "neural": {
+    "mcResidual": 0.8054027178070762,
+    "staticRegionVariance": 0.47226507284424524,
+    "sharpness": 0.003184870797364662
+   },
+   "catmull_rom": {
+    "mcResidual": 0.852604400027882,
+    "staticRegionVariance": 0.5293328680775382,
+    "sharpness": 0.0032972540939226747
+   },
+   "bilinear": {
+    "mcResidual": 0.7645960558544506,
+    "staticRegionVariance": 0.48298680782318115,
+    "sharpness": 0.0028795835096389055
+   },
+   "reference_blur0p5": {
+    "mcResidual": 0.879950073632327
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.7059604796496305
+   },
+   "blurControl0p5OverReference": 0.8994077427986273,
+   "blurControl1p0OverReference": 0.7215708487706912,
+   "neuralExcessSharpnessOverCatmull": -0.03408390538210315,
+   "neuralExcessResidualOverCatmull": -0.055361762406178294,
+   "excessResidualPerExcessSharpness": 1.6242787258542197,
+   "neuralOverCatmullResidual": 0.9446382375938217,
+   "neuralOverReferenceResidual": 0.823211977784793,
+   "catmullOverReferenceResidual": 0.8714573950358763
+  },
+  "urban-funchal-madeira-amazing-view-from-": {
+   "reference": {
+    "mcResidual": 0.576240368864753,
+    "staticRegionVariance": 2.6810203032060103,
+    "sharpness": 0.03432656576236089
+   },
+   "neural": {
+    "mcResidual": 0.4463089514862407,
+    "staticRegionVariance": 0.9792048876935785,
+    "sharpness": 0.028198117390275
+   },
+   "catmull_rom": {
+    "mcResidual": 0.3533434583382173,
+    "staticRegionVariance": 0.5541626133702018,
+    "sharpness": 0.021565248103191454
+   },
+   "bilinear": {
+    "mcResidual": 0.2916187969121066,
+    "staticRegionVariance": 0.3824681240049275,
+    "sharpness": 0.01745324193810423
+   },
+   "reference_blur0p5": {
+    "mcResidual": 0.4522114639932459
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.2794282382184809
+   },
+   "blurControl0p5OverReference": 0.7847618605481328,
+   "blurControl1p0OverReference": 0.4849161102145281,
+   "neuralExcessSharpnessOverCatmull": 0.30757212972207565,
+   "neuralExcessResidualOverCatmull": 0.26310234689285705,
+   "excessResidualPerExcessSharpness": 0.855416734704143,
+   "neuralOverCatmullResidual": 1.263102346892857,
+   "neuralOverReferenceResidual": 0.7745187175371117,
+   "catmullOverReferenceResidual": 0.613187616539842
+  },
+  "urban-drone-footage-in-new-orleans-2022-": {
+   "reference": {
+    "mcResidual": 2.243413946845315,
+    "staticRegionVariance": 0.46404473889957776,
+    "sharpness": 0.014464014597857991
+   },
+   "neural": {
+    "mcResidual": 2.3648915724320845,
+    "staticRegionVariance": 0.34564626149155875,
+    "sharpness": 0.0116861955417941
+   },
+   "catmull_rom": {
+    "mcResidual": 1.9388395222750576,
+    "staticRegionVariance": 0.2648802386088805,
+    "sharpness": 0.00972510656962792
+   },
+   "bilinear": {
+    "mcResidual": 1.5973575873808428,
+    "staticRegionVariance": 0.19881308959289032,
+    "sharpness": 0.008033294618750611
+   },
+   "reference_blur0p5": {
+    "mcResidual": 1.9160682938315652
+   },
+   "reference_blur1p0": {
+    "mcResidual": 1.2972684123299338
+   },
+   "blurControl0p5OverReference": 0.8540859329710138,
+   "blurControl1p0OverReference": 0.5782563731290654,
+   "neuralExcessSharpnessOverCatmull": 0.2016521832563539,
+   "neuralExcessResidualOverCatmull": 0.21974590741635613,
+   "excessResidualPerExcessSharpness": 1.089727390340229,
+   "neuralOverCatmullResidual": 1.2197459074163561,
+   "neuralOverReferenceResidual": 1.0541485559352928,
+   "catmullOverReferenceResidual": 0.8642361901161623
+  },
+  "nature-the-beautiful-blue-river-dji-phant": {
+   "reference": {
+    "mcResidual": 5.3274618062106045,
+    "staticRegionVariance": 14.073319781910289,
+    "sharpness": 0.018835265499850113
+   },
+   "neural": {
+    "mcResidual": 4.624107144095681,
+    "staticRegionVariance": 12.850141525268555,
+    "sharpness": 0.01452441893828412
+   },
+   "catmull_rom": {
+    "mcResidual": 4.367450215599754,
+    "staticRegionVariance": 13.045245430686258,
+    "sharpness": 0.013480551618461808
+   },
+   "bilinear": {
+    "mcResidual": 4.012302268635143,
+    "staticRegionVariance": 12.837331251664596,
+    "sharpness": 0.011746426112949848
+   },
+   "reference_blur0p5": {
+    "mcResidual": 4.923467072573575
+   },
+   "reference_blur1p0": {
+    "mcResidual": 4.200361641970548
+   },
+   "blurControl0p5OverReference": 0.9241675025870549,
+   "blurControl1p0OverReference": 0.7884358057853901,
+   "neuralExcessSharpnessOverCatmull": 0.07743505973395927,
+   "neuralExcessResidualOverCatmull": 0.05876585097162512,
+   "excessResidualPerExcessSharpness": 0.7589049607958559,
+   "neuralOverCatmullResidual": 1.0587658509716251,
+   "neuralOverReferenceResidual": 0.8679756537541061,
+   "catmullOverReferenceResidual": 0.8197994419234135
+  },
+  "nature-piz-neir-aerial-video-4k-webm": {
+   "reference": {
+    "mcResidual": 2.302375327457081,
+    "staticRegionVariance": 7.822255633094094,
+    "sharpness": 0.02434823444734017
+   },
+   "neural": {
+    "mcResidual": 2.7964427254416724,
+    "staticRegionVariance": 6.739746245470914,
+    "sharpness": 0.016014247201383114
+   },
+   "catmull_rom": {
+    "mcResidual": 2.4135451208461416,
+    "staticRegionVariance": 6.9759251421148125,
+    "sharpness": 0.013755665781597296
+   },
+   "bilinear": {
+    "mcResidual": 1.9915139241652056,
+    "staticRegionVariance": 6.765905943783847,
+    "sharpness": 0.011212531632433334
+   },
+   "reference_blur0p5": {
+    "mcResidual": 1.8565148440274326
+   },
+   "reference_blur1p0": {
+    "mcResidual": 1.1961554939096624
+   },
+   "blurControl0p5OverReference": 0.8063476106121712,
+   "blurControl1p0OverReference": 0.5195310597906675,
+   "neuralExcessSharpnessOverCatmull": 0.16419281012245948,
+   "neuralExcessResidualOverCatmull": 0.15864530614670858,
+   "excessResidualPerExcessSharpness": 0.966213478095579,
+   "neuralOverCatmullResidual": 1.1586453061467086,
+   "neuralOverReferenceResidual": 1.2145902938120332,
+   "catmullOverReferenceResidual": 1.048284826571628
+  },
+  "lowlight-hofer-weihnachtsmarkt-am-abend-202": {
+   "reference": {
+    "mcResidual": 0.8801467689600858,
+    "staticRegionVariance": 3.3420081355355005,
+    "sharpness": 0.010519475986560186
+   },
+   "neural": {
+    "mcResidual": 0.6903245449066162,
+    "staticRegionVariance": 1.9509956511584194,
+    "sharpness": 0.00869675811069707
+   },
+   "catmull_rom": {
+    "mcResidual": 0.5747234740040519,
+    "staticRegionVariance": 1.1634318340908398,
+    "sharpness": 0.007759027493496736
+   },
+   "bilinear": {
+    "mcResidual": 0.4730266711928628,
+    "staticRegionVariance": 0.8472990691661835,
+    "sharpness": 0.0067463129526004195
+   },
+   "reference_blur0p5": {
+    "mcResidual": 0.7074189294468273
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.4566542235287753
+   },
+   "blurControl0p5OverReference": 0.8037510951527544,
+   "blurControl1p0OverReference": 0.5188387205787542,
+   "neuralExcessSharpnessOverCatmull": 0.12085672050863304,
+   "neuralExcessResidualOverCatmull": 0.20114207289495423,
+   "excessResidualPerExcessSharpness": 1.6643019275091635,
+   "neuralOverCatmullResidual": 1.2011420728949542,
+   "neuralOverReferenceResidual": 0.7843288974658749,
+   "catmullOverReferenceResidual": 0.6529859499263984
+  },
+  "texture-snowex-field-campaign-4k-b-roll-fr": {
+   "reference": {
+    "mcResidual": 1.230784622105685,
+    "staticRegionVariance": 1.07948115197095,
+    "sharpness": 0.015273491231103739
+   },
+   "neural": {
+    "mcResidual": 1.1467082825574009,
+    "staticRegionVariance": 0.5675254735079679,
+    "sharpness": 0.011719683573270837
+   },
+   "catmull_rom": {
+    "mcResidual": 1.0237101099707864,
+    "staticRegionVariance": 0.51660940322009,
+    "sharpness": 0.010649929521605372
+   },
+   "bilinear": {
+    "mcResidual": 0.8555349653417413,
+    "staticRegionVariance": 0.44110624356703326,
+    "sharpness": 0.009039038248981038
+   },
+   "reference_blur0p5": {
+    "mcResidual": 1.0776811675591902
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.8212638930840925
+   },
+   "blurControl0p5OverReference": 0.8756049987977927,
+   "blurControl1p0OverReference": 0.667268568629851,
+   "neuralExcessSharpnessOverCatmull": 0.10044705455517508,
+   "neuralExcessResidualOverCatmull": 0.1201494167036452,
+   "excessResidualPerExcessSharpness": 1.196146738555163,
+   "neuralOverCatmullResidual": 1.1201494167036452,
+   "neuralOverReferenceResidual": 0.9316888283797027,
+   "catmullOverReferenceResidual": 0.8317540628833778
+  },
+  "texture-4k-drone-footage-of-a-barge-on-the": {
+   "reference": {
+    "mcResidual": 0.1449035717682405,
+    "staticRegionVariance": 0.15771708569743417,
+    "sharpness": 0.0018601689177254836
+   },
+   "neural": {
+    "mcResidual": 0.15468040786006235,
+    "staticRegionVariance": 0.09825119850310413,
+    "sharpness": 0.001331203888791303
+   },
+   "catmull_rom": {
+    "mcResidual": 0.1577439016916535,
+    "staticRegionVariance": 0.11064783957871524,
+    "sharpness": 0.001360034104436636
+   },
+   "bilinear": {
+    "mcResidual": 0.13931672004136172,
+    "staticRegionVariance": 0.0919319296425039,
+    "sharpness": 0.001187217014376074
+   },
+   "reference_blur0p5": {
+    "mcResidual": 0.1278320070017468
+   },
+   "reference_blur1p0": {
+    "mcResidual": 0.10252438756552609
+   },
+   "blurControl0p5OverReference": 0.8821867221202935,
+   "blurControl1p0OverReference": 0.7075352685543467,
+   "neuralExcessSharpnessOverCatmull": -0.021198156392758502,
+   "neuralExcessResidualOverCatmull": -0.01942067996758101,
+   "excessResidualPerExcessSharpness": 0.9161494805376238,
+   "neuralOverCatmullResidual": 0.980579320032419,
+   "neuralOverReferenceResidual": 1.0674713257410864,
+   "catmullOverReferenceResidual": 1.0886129290446331
+  }
+ },
+ "aggregate": {
+  "neuralOverCatmullResidual": {
+   "mean": 1.1198489990058271,
+   "median": 1.139397361425177,
+   "min": 0.9446382375938217,
+   "max": 1.263102346892857,
+   "clipsWorseThanCatmull": 8,
+   "clips": 10
+  },
+  "catmullOverReferenceResidual": {
+   "mean": 0.8827443989584391
+  },
+  "blurControl0p5OverReference": {
+   "mean": 0.8514158539671568,
+   "min": 0.7325759605795913,
+   "max": 0.9512691135041355
+  },
+  "blurControl1p0OverReference": {
+   "mean": 0.6203124411643268,
+   "min": 0.3553301799939563,
+   "max": 0.8614414761960175
+  },
+  "neuralSharpness": {
+   "mean": 0.013557750912150368
+  },
+  "catmullSharpness": {
+   "mean": 0.011669457490400721
+  },
+  "excessResidualPerExcessSharpness": {
+   "mean": 1.0702692248952688,
+   "note": "Excess motion-compensated residual divided by excess output sharpness, both relative to Catmull-Rom. Two models landing on the same value means their residual difference is explained by sharpness alone, and neither is more temporally stable than the other."
+  }
+ }
+}
