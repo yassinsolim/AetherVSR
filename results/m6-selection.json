@@ -1,7 +1,10 @@
 {
- "schema": "aethervsr.m6-selection/1",
- "decidedAt": "2026-09-07",
- "rulesCommittedIn": "e821425 docs: pre-register the Milestone 6 decision rule",
+ "schema": "aethervsr.m6-selection/2",
+ "supersedes": "aethervsr.m6-selection/1, whose seed set predated the committed rule",
+ "decidedAt": "2026-09-08",
+ "rulesCommittedIn": "e821425 (2026-09-07 09:34:27)",
+ "seedsTrainedAfterRule": true,
+ "provenanceNote": "The first final seed set was invalid: two of its five seeds were byte-identical to models already committed 42 seconds before the rule, and one of those was the selected candidate. Independent review caught it. Seeds 11-15 were trained afterwards, under the corrected step-based schedule, and every one postdates the rule commit.",
  "architecture": {
   "id": "aethersr-resizeconv",
   "parameters": 6291,
@@ -13,12 +16,14 @@
   "clips": 151,
   "creators": 109,
   "contentDigest": "9bf33e3ea9f88573be56c682e53e4628eecb13f59251c92339192c4b9df98776",
-  "subset": "N151 (all clips)"
+  "subset": "N151"
  },
  "degradation": "video:gop:uniform [18,36] per sequence",
  "training": {
   "epochs": 60,
   "optimizerSteps": 81180,
+  "lrSchedule": "cosine over optimizer updates (T_max = step budget)",
+  "validationOpportunities": 60,
   "trainPatches": 43296,
   "batch": 32,
   "lr": 0.002,
@@ -26,34 +31,39 @@
  },
  "seedProtocol": {
   "seeds": [
-   1,
-   2,
-   3,
-   4,
-   5
+   11,
+   12,
+   13,
+   14,
+   15
   ],
-  "selected": 2,
+  "selected": 14,
   "rule": "highest validation mean; ties within 0.01 dB go to the lowest seed number",
-  "argmaxWas": 4,
+  "argmaxWas": 14,
   "tiedWithin0p01": [
-   2,
-   3,
-   4
+   14,
+   15
   ],
-  "why": "seeds 2, 3 and 4 are within 0.01 dB, below the 0.0059 dB seed sd, so the argmax is noise"
+  "values": {
+   "11": 0.5895,
+   "12": 0.5925,
+   "13": 0.6005,
+   "14": 0.6124,
+   "15": 0.6089
+  },
+  "mean": 0.6008,
+  "sd": 0.01
  },
  "validation": {
-  "meanDelta": 0.6168,
-  "production": 0.4411,
-  "gain": 0.1757,
+  "meanDelta": 0.6124,
+  "shippedModel": 0.4411,
+  "gain": 0.1713,
   "threshold": 0.05,
   "passes": true,
-  "worstCategoryChangeVsProduction": 0.0642,
+  "worstCategoryChange": 0.064,
   "categoriesRegressed": 0
  },
  "modelFile": "public/models/aethersr-c16d2-v2corpus.json",
- "sha256": "29fce3fb1147a02d51c995b946d23047f823bbc29998fef86388da7e39632a7e",
- "primaryMetric": "paired clip-level neural-minus-Catmull-Rom PSNR on the validation corpus",
- "acceptanceCriteria": "see docs/M6-PREREGISTRATION.md, committed before this model was trained",
- "confirmationSetStatus": "UNOPENED at the time of this record"
+ "sha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+ "confirmationSetStatus": "Will be read a SECOND time for this candidate. The first read scored the superseded candidate; both reads are reported."
 }

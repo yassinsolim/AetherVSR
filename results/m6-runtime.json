@@ -9,15 +9,64 @@
   "note": "Both models are the same 6,291-parameter graph, so this measures whether anything regressed, not which is faster."
  },
  "measurements": [
-  {"model": "aethersr-c16d2 (production)", "rep": 1, "gpuMsP50": 5.90, "gpuMsP95": 6.63, "gpuMsMax": 7.07, "presentedFps": 59.7, "budget60hzPercent": 35.5, "decoderDropped": 40, "decoderDecoded": 1194, "fellBack": false},
-  {"model": "aethersr-c16d2-v2corpus (candidate)", "rep": 1, "gpuMsP50": 5.85, "gpuMsP95": 6.67, "gpuMsMax": 7.29, "presentedFps": 59.7, "budget60hzPercent": 35.1, "decoderDropped": 44, "decoderDecoded": 1193, "fellBack": false},
-  {"model": "aethersr-c16d2 (production)", "rep": 2, "gpuMsP50": 5.77, "gpuMsP95": 6.48, "gpuMsMax": 7.40, "presentedFps": 59.6, "budget60hzPercent": 34.9, "decoderDropped": 28, "decoderDecoded": 1193, "fellBack": false},
-  {"model": "aethersr-c16d2-v2corpus (candidate)", "rep": 2, "gpuMsP50": 5.77, "gpuMsP95": 6.62, "gpuMsMax": 6.88, "presentedFps": 59.7, "budget60hzPercent": 34.7, "decoderDropped": 47, "decoderDecoded": 1194, "fellBack": false}
+  {
+   "model": "aethersr-c16d2-gopvideo (M5.5 shipped)",
+   "rep": 1,
+   "gpuMsP50": 5.95,
+   "gpuMsP95": 6.96,
+   "gpuMsMax": 7.47,
+   "presentedFps": 59.7,
+   "budget60hzPercent": 36.0,
+   "decoderDropped": 23,
+   "decoderDecoded": 1191,
+   "fellBack": false
+  },
+  {
+   "model": "aethersr-c16d2-v2corpus (M6 candidate)",
+   "rep": 1,
+   "gpuMsP50": 5.8,
+   "gpuMsP95": 6.88,
+   "gpuMsMax": 8.05,
+   "presentedFps": 59.7,
+   "budget60hzPercent": 35.2,
+   "decoderDropped": 29,
+   "decoderDecoded": 1194,
+   "fellBack": false
+  },
+  {
+   "model": "aethersr-c16d2-gopvideo (M5.5 shipped)",
+   "rep": 2,
+   "gpuMsP50": 5.67,
+   "gpuMsP95": 6.85,
+   "gpuMsMax": 7.75,
+   "presentedFps": 59.7,
+   "budget60hzPercent": 35.1,
+   "decoderDropped": 29,
+   "decoderDecoded": 1193,
+   "fellBack": false
+  },
+  {
+   "model": "aethersr-c16d2-v2corpus (M6 candidate)",
+   "rep": 2,
+   "gpuMsP50": 5.61,
+   "gpuMsP95": 6.92,
+   "gpuMsMax": 7.65,
+   "presentedFps": 59.7,
+   "budget60hzPercent": 34.4,
+   "decoderDropped": 24,
+   "decoderDecoded": 1193,
+   "fellBack": false
+  }
  ],
  "preRegisteredTargets": {
-  "p50MsMax": 8, "p50Observed": 5.81, "p50Pass": true,
-  "p95MsMax": 10, "p95Observed": 6.65, "p95Pass": true,
-  "presented60fpsMaintained": true, "presentedObserved": 59.7,
+  "p50MsMax": 8,
+  "p50Observed": 5.71,
+  "p50Pass": true,
+  "p95MsMax": 10,
+  "p95Observed": 6.9,
+  "p95Pass": true,
+  "presented60fpsMaintained": true,
+  "presentedObserved": 59.7,
   "noBudgetFallback": true
  },
  "honestCaveats": [
@@ -25,5 +74,5 @@
   "An earlier attempt at this measurement was discarded: stale browser profiles from previous sessions were competing for the GPU, p95 reached 10.3 ms, and one candidate run tripped the budget guard and fell back to Catmull-Rom. Those numbers are not reported as results because the load was an artefact of the measurement environment, not of the model.",
   "Two repetitions per arm. Enough to show the two are indistinguishable, which is the claim being made; not enough to resolve a small real difference, and none is claimed."
  ],
- "verdict": "Runtime is unchanged. p50 5.77-5.90 ms across both models, p95 6.48-6.67, ~35% of a 60 Hz budget, 59.7 presented fps, no budget fallback in any clean run. All pre-registered runtime targets met, as expected for a byte-identical inference graph differing only in weights."
+ "verdict": "Runtime is unchanged. p50 5.61-5.95 ms across both models, p95 under 7.0, ~35% of a 60 Hz budget, 59.7 presented fps, no budget fallback in any run. All pre-registered targets met, as an identical inference graph requires."
 }

@@ -17,10 +17,10 @@
   "motion-alvin-ailey-american-dance-theater-performs-at-t",
   "motion-nemesis-reborn-pov",
   "nature-above-geneva-lake-083502",
+  "nature-deska-fifteen-inches-of-pure-white-snow",
   "nature-oostende-beach-152354",
   "text-4k-drone-las-vegas-strip",
   "text-split-flap-display-at-changi-airport-terminal-2-",
-  "texture-deska-fifteen-inches-of-pure-white-snow",
   "texture-pteroplatytrygon-violacea-aquarium-of-the-pacifi",
   "urban-2022-12-08-212th-way-se-bridge-over-the-green-ri",
   "urban-2023-01-31-foothills-trail-puyallup-river-bridge",
@@ -31,499 +31,499 @@
   "faces": 6,
   "lowlight": 6,
   "motion": 6,
-  "nature": 6,
+  "nature": 9,
   "text": 6,
-  "texture": 6,
+  "texture": 3,
   "urban": 9
  },
  "statisticalUnit": "clip; frames averaged within a clip first",
  "models": {
   "aethersr-c16d2-v2corpus": {
-   "meanDelta": 0.7232477326019138,
-   "clipMeanDelta": 0.7232477326019138,
+   "meanDelta": 0.7214238772205278,
+   "clipMeanDelta": 0.7214238772205278,
    "clipWins": 17,
    "clips": 17,
    "byCrf": {
-    "18": 1.3691655677907608,
-    "26": 0.665501215878655,
-    "34": 0.13507641413632562
+    "18": 1.38677295516519,
+    "26": 0.6561047890607048,
+    "34": 0.12139388743568869
    },
    "byCategory": {
-    "daylight": 0.8552926778793335,
-    "faces": 1.1179542541503906,
-    "lowlight": 0.6624936560789744,
-    "motion": 0.23676400383313498,
-    "nature": 0.5411755045255026,
-    "text": 0.8032831052939097,
-    "texture": 0.43909897406895954,
-    "urban": 0.9943623675240411
+    "daylight": 0.8595182498296102,
+    "faces": 1.1180855830510457,
+    "lowlight": 0.6530989706516266,
+    "motion": 0.2345376710096995,
+    "nature": 0.6000736686918471,
+    "text": 0.7708693047364553,
+    "texture": 0.19610732793807983,
+    "urban": 0.9985526733928256
    },
-   "worstCategory": "motion",
-   "worstCategoryDelta": 0.23676400383313498,
-   "meanDeltaSsim": 0.009600536934300965,
+   "worstCategory": "texture",
+   "worstCategoryDelta": 0.19610732793807983,
+   "meanDeltaSsim": 0.009591573009303972,
    "perCell": [
     {
      "clip": "daylight-outdoor-pool",
      "category": "daylight",
      "crf": 18,
-     "psnr": 29.34994876384735,
-     "ssim": 0.9089607372879982,
-     "delta": 1.2956276535987854,
-     "deltaSsim": 0.030330829322338104
+     "psnr": 29.36697483062744,
+     "ssim": 0.9093041494488716,
+     "delta": 1.3126537203788757,
+     "deltaSsim": 0.030674241483211517
     },
     {
      "clip": "daylight-outdoor-pool",
      "category": "daylight",
      "crf": 26,
-     "psnr": 27.937076091766357,
-     "ssim": 0.8693859130144119,
-     "delta": 0.8137202262878418,
-     "deltaSsim": 0.025751061737537384
+     "psnr": 27.94325977563858,
+     "ssim": 0.8697789758443832,
+     "delta": 0.8199039101600647,
+     "deltaSsim": 0.026144124567508698
     },
     {
      "clip": "daylight-outdoor-pool",
      "category": "daylight",
      "crf": 34,
-     "psnr": 25.34411311149597,
-     "ssim": 0.7636749446392059,
-     "delta": 0.18515020608901978,
-     "deltaSsim": 0.012105308473110199
+     "psnr": 25.341669023036957,
+     "ssim": 0.7637782171368599,
+     "delta": 0.18270611763000488,
+     "deltaSsim": 0.01220858097076416
     },
     {
      "clip": "daylight-donetsk-botanical-garden-iphone-xr-cinematic-4k",
      "category": "daylight",
      "crf": 18,
-     "psnr": 32.666271924972534,
-     "ssim": 0.9535105228424072,
-     "delta": 1.8061268329620361,
-     "deltaSsim": 0.016913428902626038
+     "psnr": 32.69305199384689,
+     "ssim": 0.9535944387316704,
+     "delta": 1.8329069018363953,
+     "deltaSsim": 0.01699734479188919
     },
     {
      "clip": "daylight-donetsk-botanical-garden-iphone-xr-cinematic-4k",
      "category": "daylight",
      "crf": 26,
-     "psnr": 29.703868329524994,
-     "ssim": 0.9084949865937233,
-     "delta": 0.8597773313522339,
-     "deltaSsim": 0.014966323971748352
+     "psnr": 29.695692658424377,
+     "ssim": 0.9082196205854416,
+     "delta": 0.8516016602516174,
+     "deltaSsim": 0.014690957963466644
     },
     {
      "clip": "daylight-donetsk-botanical-garden-iphone-xr-cinematic-4k",
      "category": "daylight",
      "crf": 34,
-     "psnr": 25.913697481155396,
-     "ssim": 0.8034174516797066,
-     "delta": 0.17135381698608398,
-     "deltaSsim": 0.007589176297187805
+     "psnr": 25.899680852890015,
+     "ssim": 0.8029682040214539,
+     "delta": 0.15733718872070312,
+     "deltaSsim": 0.007139928638935089
     },
     {
      "clip": "faces-david-letterman-neal-brennan-call-bert-kreischer",
      "category": "faces",
      "crf": 18,
-     "psnr": 37.59415626525879,
-     "ssim": 0.9698985069990158,
-     "delta": 2.2086766362190247,
-     "deltaSsim": 0.007426805794239044
+     "psnr": 37.620726227760315,
+     "ssim": 0.970027282834053,
+     "delta": 2.2352465987205505,
+     "deltaSsim": 0.007555581629276276
     },
     {
      "clip": "faces-david-letterman-neal-brennan-call-bert-kreischer",
      "category": "faces",
      "crf": 26,
-     "psnr": 34.79918330907822,
-     "ssim": 0.9472995400428772,
-     "delta": 1.2381342053413391,
-     "deltaSsim": 0.007356800138950348
+     "psnr": 34.79263871908188,
+     "ssim": 0.9473198279738426,
+     "delta": 1.2315896153450012,
+     "deltaSsim": 0.0073770880699157715
     },
     {
      "clip": "faces-david-letterman-neal-brennan-call-bert-kreischer",
      "category": "faces",
      "crf": 34,
-     "psnr": 31.02926194667816,
-     "ssim": 0.8988009691238403,
-     "delta": 0.39062291383743286,
-     "deltaSsim": 0.0049641430377960205
+     "psnr": 31.01797103881836,
+     "ssim": 0.8987134695053101,
+     "delta": 0.3793320059776306,
+     "deltaSsim": 0.004876643419265747
     },
     {
      "clip": "faces-david-letterman-on-jay-leno",
      "category": "faces",
      "crf": 18,
-     "psnr": 41.46117329597473,
-     "ssim": 0.9876263067126274,
-     "delta": 1.780480146408081,
-     "deltaSsim": 0.00311414897441864
+     "psnr": 41.49017035961151,
+     "ssim": 0.9877159297466278,
+     "delta": 1.8094772100448608,
+     "deltaSsim": 0.003203772008419037
     },
     {
      "clip": "faces-david-letterman-on-jay-leno",
      "category": "faces",
      "crf": 26,
-     "psnr": 38.163792192935944,
-     "ssim": 0.9777438193559647,
-     "delta": 0.8520534634590149,
-     "deltaSsim": 0.002985723316669464
+     "psnr": 38.147267401218414,
+     "ssim": 0.9777685329318047,
+     "delta": 0.8355286717414856,
+     "deltaSsim": 0.0030104368925094604
     },
     {
      "clip": "faces-david-letterman-on-jay-leno",
      "category": "faces",
      "crf": 34,
-     "psnr": 34.20442670583725,
-     "ssim": 0.9586849510669708,
-     "delta": 0.23775815963745117,
-     "deltaSsim": 0.0023930445313453674
+     "psnr": 34.184007942676544,
+     "ssim": 0.9586557820439339,
+     "delta": 0.2173393964767456,
+     "deltaSsim": 0.0023638755083084106
     },
     {
      "clip": "lowlight-ban-jela-i-square-zagreb-20240726-210003",
      "category": "lowlight",
      "crf": 18,
-     "psnr": 37.22537845373154,
-     "ssim": 0.9791846573352814,
-     "delta": 1.6776633262634277,
-     "deltaSsim": 0.0061237141489982605
+     "psnr": 37.23704308271408,
+     "ssim": 0.9792564511299133,
+     "delta": 1.6893279552459717,
+     "deltaSsim": 0.0061955079436302185
     },
     {
      "clip": "lowlight-ban-jela-i-square-zagreb-20240726-210003",
      "category": "lowlight",
      "crf": 26,
-     "psnr": 33.77299875020981,
-     "ssim": 0.9577826708555222,
-     "delta": 0.7513725757598877,
-     "deltaSsim": 0.005466863512992859
+     "psnr": 33.75365823507309,
+     "ssim": 0.9577654972672462,
+     "delta": 0.732032060623169,
+     "deltaSsim": 0.0054496899247169495
     },
     {
      "clip": "lowlight-ban-jela-i-square-zagreb-20240726-210003",
      "category": "lowlight",
      "crf": 34,
-     "psnr": 29.97821182012558,
-     "ssim": 0.9185591638088226,
-     "delta": 0.18729805946350098,
-     "deltaSsim": 0.0036422833800315857
+     "psnr": 29.96077686548233,
+     "ssim": 0.9184880778193474,
+     "delta": 0.16986310482025146,
+     "deltaSsim": 0.0035711973905563354
     },
     {
      "clip": "lowlight-wien-by-night-212329",
      "category": "lowlight",
      "crf": 18,
-     "psnr": 39.96332228183746,
-     "ssim": 0.9834633618593216,
-     "delta": 0.9316512942314148,
-     "deltaSsim": 0.0032528191804885864
+     "psnr": 39.98530000448227,
+     "ssim": 0.9835873171687126,
+     "delta": 0.9536290168762207,
+     "deltaSsim": 0.003376774489879608
     },
     {
      "clip": "lowlight-wien-by-night-212329",
      "category": "lowlight",
      "crf": 26,
-     "psnr": 36.04539483785629,
-     "ssim": 0.9667517840862274,
-     "delta": 0.32229334115982056,
-     "deltaSsim": 0.002965293824672699
+     "psnr": 36.02066248655319,
+     "ssim": 0.9667613580822945,
+     "delta": 0.29756098985671997,
+     "deltaSsim": 0.002974867820739746
     },
     {
      "clip": "lowlight-wien-by-night-212329",
      "category": "lowlight",
      "crf": 34,
-     "psnr": 32.44573920965195,
-     "ssim": 0.9428301826119423,
-     "delta": 0.10468333959579468,
-     "deltaSsim": 0.002632714807987213
+     "psnr": 32.41723656654358,
+     "ssim": 0.942766897380352,
+     "delta": 0.07618069648742676,
+     "deltaSsim": 0.002569429576396942
     },
     {
      "clip": "motion-alvin-ailey-american-dance-theater-performs-at-t",
      "category": "motion",
      "crf": 18,
-     "psnr": 41.18274927139282,
-     "ssim": 0.98792315274477,
-     "delta": 0.5991041660308838,
-     "deltaSsim": 0.0015671998262405396
+     "psnr": 41.18223190307617,
+     "ssim": 0.9879291206598282,
+     "delta": 0.5985867977142334,
+     "deltaSsim": 0.0015731677412986755
     },
     {
      "clip": "motion-alvin-ailey-american-dance-theater-performs-at-t",
      "category": "motion",
      "crf": 26,
-     "psnr": 37.28642523288727,
-     "ssim": 0.9762892201542854,
-     "delta": 0.15549719333648682,
-     "deltaSsim": 0.00162612646818161
+     "psnr": 37.26383417844772,
+     "ssim": 0.9762259498238564,
+     "delta": 0.13290613889694214,
+     "deltaSsim": 0.001562856137752533
     },
     {
      "clip": "motion-alvin-ailey-american-dance-theater-performs-at-t",
      "category": "motion",
      "crf": 34,
-     "psnr": 33.276678025722504,
-     "ssim": 0.9543770924210548,
-     "delta": -0.02028822898864746,
-     "deltaSsim": 0.0016976967453956604
+     "psnr": 33.259181678295135,
+     "ssim": 0.954315647482872,
+     "delta": -0.037784576416015625,
+     "deltaSsim": 0.0016362518072128296
     },
     {
      "clip": "motion-nemesis-reborn-pov",
      "category": "motion",
      "crf": 18,
-     "psnr": 35.51738649606705,
-     "ssim": 0.9666209071874619,
-     "delta": 0.7166916131973267,
-     "deltaSsim": 0.005317822098731995
+     "psnr": 35.570266246795654,
+     "ssim": 0.9669067338109016,
+     "delta": 0.7695713639259338,
+     "deltaSsim": 0.0056036487221717834
     },
     {
      "clip": "motion-nemesis-reborn-pov",
      "category": "motion",
      "crf": 26,
-     "psnr": 31.46843671798706,
-     "ssim": 0.9251802265644073,
-     "delta": 0.09606897830963135,
-     "deltaSsim": 0.0036163628101348877
+     "psnr": 31.45988553762436,
+     "ssim": 0.925166130065918,
+     "delta": 0.08751779794692993,
+     "deltaSsim": 0.003602266311645508
     },
     {
      "clip": "motion-nemesis-reborn-pov",
      "category": "motion",
      "crf": 34,
-     "psnr": 26.949480175971985,
-     "ssim": 0.8329019919037819,
-     "delta": -0.12648969888687134,
-     "deltaSsim": 0.0006229430437088013
+     "psnr": 26.93239837884903,
+     "ssim": 0.8326685652136803,
+     "delta": -0.14357149600982666,
+     "deltaSsim": 0.00038951635360717773
     },
     {
      "clip": "nature-above-geneva-lake-083502",
      "category": "nature",
      "crf": 18,
-     "psnr": 44.16052043437958,
-     "ssim": 0.9913074746727943,
-     "delta": 1.0149818658828735,
-     "deltaSsim": 0.001979634165763855
+     "psnr": 44.18747663497925,
+     "ssim": 0.991469144821167,
+     "delta": 1.041938066482544,
+     "deltaSsim": 0.002141304314136505
     },
     {
      "clip": "nature-above-geneva-lake-083502",
      "category": "nature",
      "crf": 26,
-     "psnr": 41.577184200286865,
-     "ssim": 0.986561544239521,
-     "delta": 0.49366652965545654,
-     "deltaSsim": 0.0015584900975227356
+     "psnr": 41.59956872463226,
+     "ssim": 0.986742839217186,
+     "delta": 0.5160510540008545,
+     "deltaSsim": 0.001739785075187683
     },
     {
      "clip": "nature-above-geneva-lake-083502",
      "category": "nature",
      "crf": 34,
-     "psnr": 38.41175198554993,
-     "ssim": 0.9793883189558983,
-     "delta": 0.16347736120224,
-     "deltaSsim": 0.0010603666305541992
+     "psnr": 38.42095047235489,
+     "ssim": 0.9795218333601952,
+     "delta": 0.17267584800720215,
+     "deltaSsim": 0.0011938810348510742
     },
     {
      "clip": "nature-oostende-beach-152354",
      "category": "nature",
      "crf": 18,
-     "psnr": 39.653925001621246,
-     "ssim": 0.9760765060782433,
-     "delta": 1.1361974477767944,
-     "deltaSsim": 0.005076974630355835
+     "psnr": 39.657375514507294,
+     "ssim": 0.9761706441640854,
+     "delta": 1.1396479606628418,
+     "deltaSsim": 0.0051711127161979675
     },
     {
      "clip": "nature-oostende-beach-152354",
      "category": "nature",
      "crf": 26,
-     "psnr": 36.23892456293106,
-     "ssim": 0.949370414018631,
-     "delta": 0.3980088233947754,
-     "deltaSsim": 0.0037966370582580566
+     "psnr": 36.24281942844391,
+     "ssim": 0.9495558738708496,
+     "delta": 0.4019036889076233,
+     "deltaSsim": 0.003982096910476685
     },
     {
      "clip": "nature-oostende-beach-152354",
      "category": "nature",
      "crf": 34,
-     "psnr": 32.24759668111801,
-     "ssim": 0.895525760948658,
-     "delta": 0.040720999240875244,
-     "deltaSsim": 0.001493498682975769
+     "psnr": 32.24657863378525,
+     "ssim": 0.8956261426210403,
+     "delta": 0.03970295190811157,
+     "deltaSsim": 0.0015938803553581238
     },
     {
      "clip": "text-4k-drone-las-vegas-strip",
      "category": "text",
      "crf": 18,
-     "psnr": 32.56850332021713,
-     "ssim": 0.9582842364907265,
-     "delta": 2.321385145187378,
-     "deltaSsim": 0.016970239579677582
+     "psnr": 32.607580721378326,
+     "ssim": 0.9585091024637222,
+     "delta": 2.3604625463485718,
+     "deltaSsim": 0.01719510555267334
     },
     {
      "clip": "text-4k-drone-las-vegas-strip",
      "category": "text",
      "crf": 26,
-     "psnr": 29.91563618183136,
-     "ssim": 0.9201286807656288,
-     "delta": 1.274685561656952,
-     "deltaSsim": 0.016049697995185852
+     "psnr": 29.912461042404175,
+     "ssim": 0.9199908301234245,
+     "delta": 1.2715104222297668,
+     "deltaSsim": 0.015911847352981567
     },
     {
      "clip": "text-4k-drone-las-vegas-strip",
      "category": "text",
      "crf": 34,
-     "psnr": 26.230855882167816,
-     "ssim": 0.8317333459854126,
-     "delta": 0.31335532665252686,
-     "deltaSsim": 0.009055286645889282
+     "psnr": 26.21376782655716,
+     "ssim": 0.831288293004036,
+     "delta": 0.2962672710418701,
+     "deltaSsim": 0.008610233664512634
     },
     {
      "clip": "text-split-flap-display-at-changi-airport-terminal-2-",
      "category": "text",
      "crf": 18,
-     "psnr": 35.90275198221207,
-     "ssim": 0.9675941616296768,
-     "delta": 0.8255013823509216,
-     "deltaSsim": 0.006429128348827362
+     "psnr": 35.82973688840866,
+     "ssim": 0.9672476053237915,
+     "delta": 0.7524862885475159,
+     "deltaSsim": 0.006082572042942047
     },
     {
      "clip": "text-split-flap-display-at-changi-airport-terminal-2-",
      "category": "text",
      "crf": 26,
-     "psnr": 31.92933887243271,
-     "ssim": 0.9316541329026222,
-     "delta": 0.2190709114074707,
-     "deltaSsim": 0.005584247410297394
+     "psnr": 31.83737963438034,
+     "ssim": 0.9307457730174065,
+     "delta": 0.12711167335510254,
+     "deltaSsim": 0.0046758875250816345
     },
     {
      "clip": "text-split-flap-display-at-changi-airport-terminal-2-",
      "category": "text",
      "crf": 34,
-     "psnr": 27.175848186016083,
-     "ssim": 0.853626124560833,
-     "delta": -0.13429969549179077,
-     "deltaSsim": 0.0018926188349723816
+     "psnr": 27.127525508403778,
+     "ssim": 0.8524802103638649,
+     "delta": -0.18262237310409546,
+     "deltaSsim": 0.000746704638004303
     },
     {
-     "clip": "texture-deska-fifteen-inches-of-pure-white-snow",
-     "category": "texture",
+     "clip": "nature-deska-fifteen-inches-of-pure-white-snow",
+     "category": "nature",
      "crf": 18,
-     "psnr": 28.880602419376373,
-     "ssim": 0.8981012627482414,
-     "delta": 1.115245521068573,
-     "deltaSsim": 0.019968442618846893
+     "psnr": 28.896162509918213,
+     "ssim": 0.8983086720108986,
+     "delta": 1.1308056116104126,
+     "deltaSsim": 0.02017585188150406
     },
     {
-     "clip": "texture-deska-fifteen-inches-of-pure-white-snow",
-     "category": "texture",
+     "clip": "nature-deska-fifteen-inches-of-pure-white-snow",
+     "category": "nature",
      "crf": 26,
-     "psnr": 27.572368681430817,
-     "ssim": 0.8613046556711197,
-     "delta": 0.7220610976219177,
-     "deltaSsim": 0.015898503363132477
+     "psnr": 27.580224871635437,
+     "ssim": 0.861534409224987,
+     "delta": 0.7299172878265381,
+     "deltaSsim": 0.016128256916999817
     },
     {
-     "clip": "texture-deska-fifteen-inches-of-pure-white-snow",
-     "category": "texture",
+     "clip": "nature-deska-fifteen-inches-of-pure-white-snow",
+     "category": "nature",
      "crf": 34,
-     "psnr": 25.247519612312317,
-     "ssim": 0.7614567205309868,
-     "delta": 0.234164297580719,
-     "deltaSsim": 0.006455659866333008
+     "psnr": 25.241375863552094,
+     "ssim": 0.7612984031438828,
+     "delta": 0.2280205488204956,
+     "deltaSsim": 0.006297342479228973
     },
     {
      "clip": "texture-pteroplatytrygon-violacea-aquarium-of-the-pacifi",
      "category": "texture",
      "crf": 18,
-     "psnr": 37.98943668603897,
-     "ssim": 0.9583761170506477,
-     "delta": 0.45685023069381714,
-     "deltaSsim": 0.002142474055290222
+     "psnr": 38.02525967359543,
+     "ssim": 0.9588156417012215,
+     "delta": 0.49267321825027466,
+     "deltaSsim": 0.0025819987058639526
     },
     {
      "clip": "texture-pteroplatytrygon-violacea-aquarium-of-the-pacifi",
      "category": "texture",
      "crf": 26,
-     "psnr": 34.29188370704651,
-     "ssim": 0.917557068169117,
-     "delta": 0.10368078947067261,
-     "deltaSsim": 0.0010482221841812134
+     "psnr": 34.29072856903076,
+     "ssim": 0.9177394434809685,
+     "delta": 0.10252565145492554,
+     "deltaSsim": 0.0012305974960327148
     },
     {
      "clip": "texture-pteroplatytrygon-violacea-aquarium-of-the-pacifi",
      "category": "texture",
      "crf": 34,
-     "psnr": 30.522170066833496,
-     "ssim": 0.8380785956978798,
-     "delta": 0.0025919079780578613,
-     "deltaSsim": 0.00030121952295303345
+     "psnr": 30.512701272964478,
+     "ssim": 0.837926097214222,
+     "delta": -0.006876885890960693,
+     "deltaSsim": 0.00014872103929519653
     },
     {
      "clip": "urban-2022-12-08-212th-way-se-bridge-over-the-green-ri",
      "category": "urban",
      "crf": 18,
-     "psnr": 28.31101030111313,
-     "ssim": 0.9093127548694611,
-     "delta": 1.5211999416351318,
-     "deltaSsim": 0.03294534236192703
+     "psnr": 28.340389728546143,
+     "ssim": 0.9094375222921371,
+     "delta": 1.5505793690681458,
+     "deltaSsim": 0.03307010978460312
     },
     {
      "clip": "urban-2022-12-08-212th-way-se-bridge-over-the-green-ri",
      "category": "urban",
      "crf": 26,
-     "psnr": 26.777024567127228,
-     "ssim": 0.8506641238927841,
-     "delta": 0.9775367379188538,
-     "deltaSsim": 0.028436601161956787
+     "psnr": 26.786595284938812,
+     "ssim": 0.8507256880402565,
+     "delta": 0.9871074557304382,
+     "deltaSsim": 0.02849816530942917
     },
     {
      "clip": "urban-2022-12-08-212th-way-se-bridge-over-the-green-ri",
      "category": "urban",
      "crf": 34,
-     "psnr": 23.877649307250977,
-     "ssim": 0.7196994200348854,
-     "delta": 0.20958513021469116,
-     "deltaSsim": 0.01462499052286148
+     "psnr": 23.870570957660675,
+     "ssim": 0.7195367217063904,
+     "delta": 0.20250678062438965,
+     "deltaSsim": 0.014462292194366455
     },
     {
      "clip": "urban-2023-01-31-foothills-trail-puyallup-river-bridge",
      "category": "urban",
      "crf": 18,
-     "psnr": 29.76263076066971,
-     "ssim": 0.9187683165073395,
-     "delta": 1.6757410764694214,
-     "deltaSsim": 0.029424436390399933
+     "psnr": 29.78875458240509,
+     "ssim": 0.9188697412610054,
+     "delta": 1.7018648982048035,
+     "deltaSsim": 0.029525861144065857
     },
     {
      "clip": "urban-2023-01-31-foothills-trail-puyallup-river-bridge",
      "category": "urban",
      "crf": 26,
-     "psnr": 28.06265562772751,
-     "ssim": 0.8684443980455399,
-     "delta": 1.0266831517219543,
-     "deltaSsim": 0.025629214942455292
+     "psnr": 28.06599259376526,
+     "ssim": 0.8685646802186966,
+     "delta": 1.0300201177597046,
+     "deltaSsim": 0.02574949711561203
     },
     {
      "clip": "urban-2023-01-31-foothills-trail-puyallup-river-bridge",
      "category": "urban",
      "crf": 34,
-     "psnr": 24.806878566741943,
-     "ssim": 0.7372887134552002,
-     "delta": 0.1316729187965393,
-     "deltaSsim": 0.010596893727779388
+     "psnr": 24.795309603214264,
+     "ssim": 0.7371884062886238,
+     "delta": 0.12010395526885986,
+     "deltaSsim": 0.010496586561203003
     },
     {
      "clip": "urban-st-peter-square-vatican-20250117-091435",
      "category": "urban",
      "crf": 18,
-     "psnr": 32.82148778438568,
-     "ssim": 0.9478003680706024,
-     "delta": 2.192690372467041,
-     "deltaSsim": 0.024229884147644043
+     "psnr": 32.832080125808716,
+     "ssim": 0.9480415657162666,
+     "delta": 2.2032827138900757,
+     "deltaSsim": 0.024471081793308258
     },
     {
      "clip": "urban-st-peter-square-vatican-20250117-091435",
      "category": "urban",
      "crf": 26,
-     "psnr": 29.64629292488098,
-     "ssim": 0.8934902027249336,
-     "delta": 1.0092097520828247,
-     "deltaSsim": 0.021034397184848785
+     "psnr": 29.636076390743256,
+     "ssim": 0.8936104252934456,
+     "delta": 0.9989932179450989,
+     "deltaSsim": 0.02115461975336075
     },
     {
      "clip": "urban-st-peter-square-vatican-20250117-091435",
      "category": "urban",
      "crf": 34,
-     "psnr": 25.906745493412018,
-     "ssim": 0.7852912992238998,
-     "delta": 0.2049422264099121,
-     "deltaSsim": 0.011515647172927856
+     "psnr": 25.89431881904602,
+     "ssim": 0.7851627320051193,
+     "delta": 0.1925155520439148,
+     "deltaSsim": 0.011387079954147339
     }
    ]
   },
-  "aethersr-c16d2": {
+  "aethersr-c16d2-gopvideo": {
    "meanDelta": 0.504592616184085,
    "clipMeanDelta": 0.504592616184085,
    "clipWins": 17,
@@ -538,9 +538,9 @@
     "faces": 0.7655201355616251,
     "lowlight": 0.43641482790311176,
     "motion": 0.10023345549901326,
-    "nature": 0.35963719089825946,
+    "nature": 0.4228344228532579,
     "text": 0.49503783384958905,
-    "texture": 0.32491644223531085,
+    "texture": 0.10060399770736694,
     "urban": 0.8050986793306139
    },
    "worstCategory": "motion",
@@ -872,8 +872,8 @@
      "deltaSsim": -0.0037231817841529846
     },
     {
-     "clip": "texture-deska-fifteen-inches-of-pure-white-snow",
-     "category": "texture",
+     "clip": "nature-deska-fifteen-inches-of-pure-white-snow",
+     "category": "nature",
      "crf": 18,
      "psnr": 28.647299110889435,
      "ssim": 0.8959992155432701,
@@ -881,8 +881,8 @@
      "deltaSsim": 0.01786639541387558
     },
     {
-     "clip": "texture-deska-fifteen-inches-of-pure-white-snow",
-     "category": "texture",
+     "clip": "nature-deska-fifteen-inches-of-pure-white-snow",
+     "category": "nature",
      "crf": 26,
      "psnr": 27.423337697982788,
      "ssim": 0.8587565124034882,
@@ -890,8 +890,8 @@
      "deltaSsim": 0.013350360095500946
     },
     {
-     "clip": "texture-deska-fifteen-inches-of-pure-white-snow",
-     "category": "texture",
+     "clip": "nature-deska-fifteen-inches-of-pure-white-snow",
+     "category": "nature",
      "crf": 34,
      "psnr": 25.20606964826584,
      "ssim": 0.7598510533571243,
