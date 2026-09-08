@@ -258,6 +258,37 @@ null result was Simpson's paradox and inverts on a within-clip analysis; the
 matched-quality comparison had clamped two extrapolated points; and the visual
 comparison sheets had been rendered against the wrong model's scores.
 
+## Milestone 6 — Training-data scale and diversity [DONE]
+
+Milestone 5.5 concluded data was the bottleneck. This milestone tested how far
+that goes, holding the 6,291-parameter architecture fixed throughout.
+
+The corpus grew from 12 clips / 8 creators / no category labels to **151 clips
+from 108 creators across 146 shoots and 8 content categories**, with validation
+and confirmation corpora that are creator-disjoint from training by
+construction. Nothing was downloaded: clips are streamed and pinned by Commons
+hash plus a prefix digest.
+
+The shipped model improves on independently sourced footage by **+1.39 / +0.66 /
++0.12 dB** at CRF 18 / 26 / 34, 17/17 clips at the first two tiers, at unchanged
+runtime.
+
+**But data scale is not what did it.** At equal optimizer updates, twelve times
+the corpus is worth +0.103 dB, the curve is non-monotonic, and nothing clears
+significance at three seeds. At fixed epochs the same contrast reads +0.358 dB —
+about 71% of it is extra gradient updates. A milestone reporting only the second
+number would have drawn the opposite conclusion.
+
+Corrections made after independent review, recorded because they matter more
+than the headline: the learning-rate schedule was stepping per epoch and gave
+larger corpora a 7.8% cumulative advantage, so every experiment was rerun; the
+first final seed set predated its own selection rule by 42 seconds and was
+discarded and retrained; a confirmation clip labelled "texture" was a rendered
+title card; per-class results were pooled across compression tiers and hid two
+negative cells; and the creator-diversity ablation was withdrawn as unmatched.
+
+**Verdict: diminishing returns.** Another 150 clips is not indicated.
+
 ## Milestone 6 — Dynamic quality selection
 
 Measure the per-frame budget continuously and choose the most expensive model

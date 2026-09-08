@@ -1198,3 +1198,74 @@ leaves the graph alone.** A weights-only change is measurable, reversible, and
 cannot regress the runtime. The milestone's central rule — do not enlarge the
 network until the training process has been tested — produced a model that is
 better at every measured compression level while costing nothing at run time.
+
+## ADR-0036 — Captured-video data scaling shows diminishing returns
+
+**Status:** accepted (Milestone 6).
+
+Milestone 5.5 established that data, not architecture, was the binding
+constraint: a 48× larger model bought +0.18 dB at CRF 34, while changing the
+training corpus bought the same at zero runtime cost. Milestone 6 tested how
+far that goes by building a corpus twelve times larger — 151 clips from 108
+creators across eight content categories, against 12 clips from 8 creators with
+no labels.
+
+**It does not go far.** At equal optimizer updates, going from 12 clips to 151
+is worth **+0.103 dB**, the curve is not monotonic, and no adjacent contrast
+clears significance at three seeds per arm. The honest summary is a point
+estimate with a wide shrug attached.
+
+The compute control is what makes that number meaningful. At a fixed 60 epochs
+the same contrast reads +0.358 dB, and a milestone that reported only that
+figure would have concluded data scale was hugely valuable. Roughly 71% of it is
+extra gradient updates: a larger corpus at fixed epochs simply trains longer.
+Both protocols are reported.
+
+Two methodological findings are worth more than the headline:
+
+* **The learning-rate schedule was the real confound.** Stepping a cosine per
+  epoch while equalising *updates* gave larger corpora a 7.8% cumulative
+  learning-rate advantage and 159 versus 12 chances to pick a lucky checkpoint.
+  Moving both onto optimizer updates raised every model by about +0.11 dB and
+  left the curve's shape unchanged. Any future scaling work must schedule on
+  updates.
+* **Diversity claims did not survive scrutiny.** Content diversity at fixed
+  volume is +0.024 dB (p = 0.200), and a creator-count ablation was withdrawn
+  entirely because its arms were not matched. This milestone does not support
+  "content diversity helps, creator diversity does not", and that sentence must
+  not be quoted from it.
+
+The corpus was still worth building. It is what makes a long training run
+something other than repetition, and the shipped model improves by +0.217 dB on
+independently sourced footage. But **another 150 clips is not indicated**, and
+the next milestone should not be more data.
+
+## ADR-0037 — Evaluation corpora are creator-disjoint, and where they are not, it is measured
+
+**Status:** accepted (Milestone 6).
+
+Milestone 5.5 split a training corpus by file and leaked two clips from one
+shoot across the train/validation boundary. Milestone 6 assigns whole creators
+to exactly one role before any clip is selected, so a shoot cannot span a
+boundary by construction rather than being checked for afterwards.
+
+That holds for the corpora built this milestone. It does not hold between the
+new training corpus and the two older benchmarks: training shares three creators
+with the frozen ten-clip set and two with the faces set, including a pair shot
+on the same river with the same drone a month apart. Discovery searches the same
+public archive the benchmarks came from, so rediscovery is the normal case, not
+an accident.
+
+Two responses, because one alone is insufficient:
+
+1. The assembler excludes anything already present in an evaluation corpus by
+   URL, page id, title or hash — which caught two rediscovered benchmark clips.
+2. Where overlap survives that gate, **it is measured rather than described**.
+   Every benchmark number is reported twice, with and without the shared-creator
+   clips, and the creator-disjoint column is the one quoted. On the regression
+   set the CRF 34 gain moves +0.270 → +0.204 and stays positive on all seven
+   disjoint clips.
+
+The general rule: a leakage guard that cannot be satisfied should still be
+quantified. "We could not eliminate this, and here is what it is worth" is a
+result; silence is not.

@@ -1858,6 +1858,192 @@ might. `lumaVariance`, a pure content control, correlates as strongly as the
 sharpness signals, which warns that within a clip they largely measure the same
 thing.
 
+## Milestone 6 — Training-data scale and diversity
+
+Milestone 5.5 showed the bottleneck was data, not architecture. This milestone
+asked how far the existing 6,291-parameter network goes on a much larger and
+more varied captured-video corpus. The short answer: **the model improves
+substantially, but very little of that improvement comes from corpus size.**
+
+Environment: Apple M5 base, macOS 26.6.2, Chrome for Testing 152.0.7977.42,
+adapter `apple / metal-3`. Training on MPS, evaluation on CPU.
+
+### Corpus
+
+| | v1 (M5.5) | v2 (this milestone) |
+|---|---|---|
+| clips | 12 | **151** |
+| creators | 8 | **108** |
+| shoots | 10 | **146** |
+| categories | 0 (unlabelled) | **8** |
+| duration | — | **315 min** |
+| effective creators (1/HHI) | 6.5 | **84.8** |
+| largest creator share | 25% | **2.0%** |
+
+Nothing is downloaded: ffmpeg seeks into each source over HTTP and decodes only
+the ~3 seconds it contributes, which turned 52 GB of transfers into a rounding
+error. Identity is pinned by the Commons SHA-1, a 2 MiB prefix SHA-256 and the
+exact byte length. That is weaker than a whole-file hash and is labelled as
+such: it detects replacement behind a stable URL, not a re-encode preserving
+the header.
+
+Validation (16 clips) and confirmation (17 clips) are creator-disjoint from
+training **by construction** — whole creators are assigned to one role before
+any clip is chosen.
+
+### Data-scaling curve, architecture fixed
+
+Equal-step: 16,200 optimizer updates at every scale, with the cosine schedule
+and checkpoint cadence both running on **updates**, so all scales execute the
+same schedule shape and get the same 60 validation opportunities. Three seeds.
+
+| scale | clips | mean dB | seed sd | CRF 18 | CRF 26 | CRF 34 |
+|---|---|---|---|---|---|---|
+| `N12` | 12 | +0.5214 | 0.0172 | +0.947 | +0.491 | +0.126 |
+| `N24` | 24 | +0.5980 | 0.0087 | +1.067 | +0.568 | +0.159 |
+| `N48` | 48 | +0.5707 | 0.0188 | +1.048 | +0.530 | +0.134 |
+| `N96` | 96 | +0.5978 | 0.0216 | +1.095 | +0.557 | +0.142 |
+| `N151` | 151 | +0.6242 | 0.0165 | +1.127 | +0.588 | +0.158 |
+| M5.5 shipped | 12 | +0.5594 | — | +0.992 | +0.530 | +0.157 |
+
+**Twelve times the data buys +0.103 dB, and none of it is statistically
+established.** The curve is not monotonic — N24 sits above N48 — and the four
+adjacent permutation p-values are 0.100, 0.100, 0.200, 0.200, where 0.100 is
+the attainable floor at three seeds per arm. The endpoint contrast sits at that
+floor too. These are point estimates; the word "buys" is descriptive.
+
+An earlier version of this table was measured with the cosine stepped per
+epoch, which gave the larger corpora a 7.8% cumulative learning-rate advantage
+and 159 versus 12 chances to draw a lucky checkpoint. Fixing that raised every
+model by roughly +0.11 dB and left the shape unchanged.
+
+### Separating more data from more gradient updates
+
+| scale | protocol | steps | mean dB |
+|---|---|---|---|
+| `N12` | equal-step | 16,200 | +0.5214 |
+| `N12` | equal-epoch | 6,120 | +0.2506 |
+| `N151` | equal-step | 16,200 | +0.6242 |
+| `N151` | equal-epoch | 81,180 | +0.6086 |
+
+At 60 epochs each, N151 beats N12 by **+0.3580 dB** — the figure a naive
+dataset-size comparison reports. At equal updates the same contrast is
+**+0.1028 dB**, so only **29%** of it survives equalising compute.
+This is a decomposition at one chosen reference budget, not a unique causal
+split: repetition is inherent to fixed compute, and N12 itself gains +0.27 dB
+going from 60 to 159 passes. The defensible claim is narrow — most of what
+looks like a corpus-size effect is training length.
+
+### Diversity and creators
+
+At a fixed 48 clips, the content-diverse arm beats the concentrated arm by
+**+0.0243 dB (p = 0.200)** — not established.
+
+A creator-count ablation was also run and **is withdrawn**: review showed its
+arms were not matched (48 versus 47 clips, 14,016 versus 13,152 patches, and
+differing per-category patch weights), and the pipeline that produced them is
+not reproducible from the committed tools. The earlier claim that content
+diversity helps while creator diversity does not is **not supported** by this
+milestone and should not be quoted.
+
+### Final candidate
+
+Five seeds on the full corpus, 60 epochs, **all trained after the selection
+rule was committed**. The first attempt at this was invalid — two of its five
+seeds predated the rule by 42 seconds and one was the selected model — and was
+discarded rather than defended.
+
+| seed | mean dB | CRF 18 | CRF 26 | CRF 34 |
+|---|---|---|---|---|
+| 11 | +0.5895 | +1.324 | +0.710 | +0.207 |
+| 12 | +0.5925 | +1.336 | +0.716 | +0.205 |
+| 13 | +0.6005 | +1.361 | +0.727 | +0.205 |
+| 14 **(selected)** | +0.6124 | +1.392 | +0.741 | +0.207 |
+| 15 | +0.6089 | +1.377 | +0.737 | +0.208 |
+
+Mean +0.6008, sd 0.0100; M5.5 shipped model on the same set
++0.4411. Seed 14 is both the argmax and the lower of the
+two seeds inside the 0.01 dB tie band, so the rule and the argmax agree here.
+
+### Confirmation set
+
+Seventeen clips, eleven creators, all eight classes, creator-disjoint from
+training. **Read twice**: once for the superseded candidate, once for this one.
+Both reads are reported; the set is no longer virgin and the milestone says so.
+
+| tier | vs Catmull-Rom | vs M5.5 shipped |
+|---|---|---|
+| CRF 18 | **+1.3868** [+1.115, +1.666] 17/17 | **+0.4224** [+0.350, +0.499] 17/17 |
+| CRF 26 | **+0.6561** [+0.467, +0.842] 17/17 | **+0.1922** [+0.156, +0.232] 17/17 |
+| CRF 34 | **+0.1214** [+0.051, +0.187] 13/17 | **+0.0359** [+0.023, +0.050] 17/17 |
+| all tiers | **+0.7214** [+0.550, +0.893] 17/17 | **+0.2168** [+0.178, +0.259] 17/17 |
+
+**By class and tier** — pooled columns are not quoted, because pooling hid a
+negative cell in the first version of this analysis:
+
+| class | CRF 18 | CRF 26 | CRF 34 |
+|---|---|---|---|
+| daylight | +1.5728 | +0.8358 | +0.1700 |
+| faces | +2.0224 | +1.0336 | +0.2983 |
+| lowlight | +1.3215 | +0.5148 | +0.1230 |
+| motion | +0.6841 | +0.1102 | -0.0907 |
+| nature | +1.1041 | +0.5493 | +0.1468 |
+| text | +1.5565 | +0.6993 | +0.0568 |
+| texture | +0.4927 | +0.1025 | -0.0069 |
+| urban | +1.8186 | +1.0054 | +0.1717 |
+
+Three of four pre-registered criteria hold outright: positive at every tier,
+intervals excluding zero at typical and poor, and clear majorities. The fourth
+does not — **motion at CRF 34 is −0.0907 and texture at CRF 34 is −0.0069**,
+both on two clips. Neither is a collapse, but neither is positive, and with
+most classes resting on two clips the per-class ordering is indicative only.
+
+### Regression and faces benchmarks
+
+Both share creators with the training corpus — three with the ten-clip set,
+two with faces, including a pair shot on the same river with the same drone a
+month apart. Every number is therefore given twice, and the creator-disjoint
+column is the one to quote.
+
+| condition | M5.5 shipped | M6, all clips | M6, creator-disjoint |
+|---|---|---|---|
+| CRF 18 | +0.9089 (10/10) | +1.1527 (10/10) | **+1.1518** (7/7) |
+| CRF 26 | +0.5961 (10/10) | +0.7479 (10/10) | **+0.6900** (7/7) |
+| CRF 34 | +0.2306 (10/10) | +0.2697 (10/10) | **+0.2035** (7/7) |
+
+| faces | M5.5 shipped | M6, all clips | M6, creator-disjoint |
+|---|---|---|---|
+| CRF 18 | +1.4341 | +1.9951 | **+1.9167** (3/3) |
+| CRF 26 | +0.9457 | +1.2696 | **+1.1654** (3/3) |
+| CRF 34 | +0.4462 | +0.5524 | **+0.5394** (3/3) |
+
+The faces benchmark is eight clips from largely one institution, and only three
+survive the creator-disjoint filter. It cannot carry a general faces claim.
+
+### Temporal and runtime
+
+Residual ratio 1.1624 → 1.1191 on a -1.1% sharpness change. **No temporal
+regression, and no improvement claimed** — this metric answers to spatial
+frequency, as Milestone 5.5 established at the cost of a retraction.
+
+| model | p50 | p95 | budget | presented | fallback |
+|---|---|---|---|---|---|
+| aethersr-c16d2-gopvideo rep1 | 5.95 ms | 6.96 ms | 36.0% | 59.7 | no |
+| aethersr-c16d2-v2corpus rep1 | 5.80 ms | 6.88 ms | 35.2% | 59.7 | no |
+| aethersr-c16d2-gopvideo rep2 | 5.67 ms | 6.85 ms | 35.1% | 59.7 | no |
+| aethersr-c16d2-v2corpus rep2 | 5.61 ms | 6.92 ms | 34.4% | 59.7 | no |
+
+Runtime is unchanged, as a byte-identical inference graph requires.
+
+### Verdict
+
+**Data scaling: diminishing returns.** Over 12 → 151 clips the return is
++0.103 dB at equal compute, not statistically established, and non-monotonic.
+The corpus was still worth building — it is what makes a long training run
+something other than repetition, and the shipped model gains +0.217 dB on
+independent footage — but the gain is mostly training length, and another 150
+clips is not indicated.
+
 ## Reproducing
 
 ```bash

@@ -8,44 +8,40 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine �
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 5.5 complete — heavy-compression and GOP-aware training.**
-A 6,291-parameter neural upscaler runs in the production pipeline at **6.3 ms
-p50, 39% of a 60 Hz frame budget**, 2560x1440 output from a 1280x720 source,
+**Status: Milestone 6 complete — training-data scale and diversity.** A
+6,291-parameter neural upscaler runs in the production pipeline at **5.7 ms
+p50, ~35% of a 60 Hz frame budget**, 2560×1440 output from a 1280×720 source,
 with automatic fallback to a conventional scaler when it cannot hold the budget.
 
 ## What the evidence supports
 
-Measured on 10 independently sourced captured clips under controlled 720p H.264,
-against the production Catmull-Rom baseline this project actually ships. The
-test set was frozen by content hash before the current model was trained, and
-read once after model selection closed.
+Measured on **17 independently sourced captured clips** that share no creator
+with the training corpus, under controlled 720p H.264, against the production
+Catmull-Rom baseline this project ships. The set was frozen before the model was
+trained and read after model selection closed.
 
-| Input quality | Gain over Catmull-Rom | Clips won | p |
+| Input quality | Gain over Catmull-Rom | Clips won | vs previous model |
 | --- | ---: | ---: | ---: |
-| high (CRF 18) | **+0.91 dB** | 10/10 | 0.002 |
-| typical (CRF 26) | **+0.60 dB** | 10/10 | 0.002 |
-| poor (CRF 34) | **+0.23 dB** | 10/10 | 0.002 |
+| high (CRF 18) | **+1.39 dB** | 17/17 | +0.42 dB |
+| typical (CRF 26) | **+0.66 dB** | 17/17 | +0.19 dB |
+| poor (CRF 34) | **+0.12 dB** | 13/17 | +0.04 dB |
 
-Milestone 5 shipped a model that added nothing measurable at CRF 34 (+0.05 dB,
-7/10, not significant). Retraining on captured *video* rather than still
-photographs, with a real GOP-structured H.264 degradation, improved every
-compression level at identical runtime — the inference graph is unchanged and
-only the weights differ. The gain now decays gradually with compression instead
-of collapsing: it is still +0.18 dB at CRF 36.
+Retraining on a corpus of 151 clips from 108 creators — against 12 clips from 8
+creators — improved every compression tier at identical runtime. The inference
+graph is unchanged; only the weights differ.
 
-**What it does not support.** The corpus is predominantly aerial, web-sourced 4K
-footage; low-light is a single clip. Faces are measured only on a separate
-eight-clip NASA/Artemis set — one institution, largely one event, mostly static
-talking heads — which cannot support a general claim about faces. The model
-remains **less temporally stable than Catmull-Rom**, and the apparent
-improvement in that metric this milestone is explained by the new model being
-7.5% softer, not by better temporal behaviour. The two corpora are disjoint by
-content hash, id and upload but share one creator; removing that clip leaves
-+0.20 dB at CRF 34, 9/9.
+**What it does not support.** The gain is mostly *training length*, not corpus
+size: at equal optimizer updates, twelve times the data is worth only +0.10 dB
+and that is not statistically established. Two content classes are negative at
+heavy compression (motion −0.09 dB, texture −0.01 dB, both on two clips). The
+model remains **less temporally stable than Catmull-Rom**. Faces are measured
+only on a narrow eight-clip set, of which three survive a creator-disjoint
+filter. Most per-class results rest on two clips and are indicative only.
 
-So: a real, reproducible improvement across the compression range this corpus
-covers, not a general "better web video" claim. `BENCHMARKS.md` gives the full
-evidence, including every retracted or corrected number.
+So: a real, reproducible improvement across the compression range on
+independently sourced footage, with the caveat that more data is no longer the
+lever it looked like. `BENCHMARKS.md` gives the full evidence, including every
+withdrawn and corrected claim.
 
 ## Evaluation methodology
 
