@@ -289,7 +289,21 @@ negative cells; and the creator-diversity ablation was withdrawn as unmatched.
 
 **Verdict: diminishing returns.** Another 150 clips is not indicated.
 
-## Milestone 6 — Dynamic quality selection
+## Milestone 7 — Architecture / structural reparameterization [IN PROGRESS]
+
+Test whether linear training-only branches before the existing tanh activations
+learn better fused weights for the current 6,291-parameter C16D2 inference graph.
+Start with body-only 3x3 + 1x1, then identity; advance to richer branches only
+when validation supports it. Prove block, full-network, export and WebGPU
+equivalence before interpreting quality or claiming unchanged runtime cost.
+
+Keep the current model as the frozen comparison baseline. No model routing,
+extension integration or temporal VSR is part of this milestone. Reassess the
+next milestone from the measured results; do not mark this complete prematurely.
+
+---
+
+## Milestone 8 — Dynamic quality selection
 
 Measure the per-frame budget continuously and choose the most expensive model
 that fits, degrading to the baseline under pressure. Milestone 1's metrics are
@@ -297,7 +311,7 @@ the input; the control loop must be damped enough not to oscillate.
 
 ---
 
-## Milestone 7 — Chrome/Chromium extension
+## Milestone 9 — Chrome/Chromium extension
 
 Package the pipeline as an MV3 extension that attaches to video elements on
 third-party pages: injection, lifecycle, per-site controls, and the security
@@ -305,7 +319,7 @@ and performance implications of running on pages we do not control.
 
 ---
 
-## Milestone 8 — Cross-vendor validation
+## Milestone 10 — Cross-vendor validation
 
 Verify on NVIDIA, AMD and Intel GPUs across Windows and Linux. Everything
 measured so far is one Apple Silicon machine; nothing here should be assumed to

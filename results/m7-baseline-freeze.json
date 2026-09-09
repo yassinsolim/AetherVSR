@@ -1,0 +1,162 @@
+{
+ "schema": "aethervsr.m7-baseline-freeze/1",
+ "purpose": "Frozen Milestone 6 production baseline for Milestone 7. Structural reparameterization is judged against THIS model, not against Catmull-Rom, because the shipped model already beats Catmull-Rom and the only open question is whether a richer training graph beats it.",
+ "frozenAt": "2026-09-09",
+ "gitCommit": "9e82b9531c129f9bf44f03678e8bf596fb50d1e5",
+ "model": {
+  "deployedPath": "public/models/aethersr-c16d2.json",
+  "comparisonAliasPath": "public/models/aethersr-c16d2-v2corpus.json",
+  "aliasIsByteIdentical": true,
+  "sha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "architecture": "aethersr-resizeconv",
+  "architectureVersion": 2,
+  "parameters": 6291,
+  "scale": 2,
+  "tensorNames": [
+   "body.0.bias",
+   "body.0.weight",
+   "body.1.bias",
+   "body.1.weight",
+   "head.bias",
+   "head.weight",
+   "stem.bias",
+   "stem.weight"
+  ],
+  "tensorLengths": {
+   "body.0.bias": 16,
+   "body.0.weight": 2304,
+   "body.1.bias": 16,
+   "body.1.weight": 2304,
+   "head.bias": 3,
+   "head.weight": 432,
+   "stem.bias": 16,
+   "stem.weight": 1200
+  }
+ },
+ "corpus": {
+  "version": "captured-train-v2",
+  "manifestSha256": "6d3d91058755eaf59ba7c8912a90e2aeecdb1d4ce9d433791169b9884ba2b428",
+  "trainClips": 151,
+  "valClips": 16,
+  "degradation": "video:gop:uniform [18,36] per sequence"
+ },
+ "trainingConfig": {
+  "epochs": 60,
+  "optimizerSteps": 81180,
+  "stepBudget": 81180,
+  "stepsPerEpoch": 1353,
+  "validationEverySteps": 1353,
+  "validationOpportunities": 60,
+  "batch": 32,
+  "lr": 0.002,
+  "lrSchedule": "cosine over optimizer updates (T_max = step budget)",
+  "loss": "L1",
+  "patch": 128,
+  "seed": 14,
+  "trainPatches": 43296
+ },
+ "validation": {
+  "ownValPsnrDb": 30.397,
+  "clipMeanDeltaVsCatmull": 0.612386938716684,
+  "clipWins": 16,
+  "clips": 16,
+  "byCrf": {
+   "18": 1.3918526656925678,
+   "22": 1.077441070228815,
+   "26": 0.7409781590104103,
+   "30": 0.43223218992352486,
+   "32": 0.3074456937611103,
+   "34": 0.20674586296081543,
+   "36": 0.13001292943954468
+  },
+  "byCategory": {
+   "daylight": 0.4874655604362488,
+   "faces": 0.6972362526825496,
+   "lowlight": 0.4848753128732954,
+   "motion": 0.32081237861088346,
+   "nature": 0.36533968789236887,
+   "text": 0.6796541951951527,
+   "texture": 0.8159631277833667,
+   "urban": 0.9516546768801553
+  }
+ },
+ "confirmation": {
+  "vsCatmullRom": {
+   "crf18": {
+    "mean": 1.38677295516519,
+    "ci95": [
+     1.1145941474858452,
+     1.6658598535201128
+    ],
+    "wins": 17,
+    "clips": 17
+   },
+   "crf26": {
+    "mean": 0.6561047890607048,
+    "ci95": [
+     0.4671402187908397,
+     0.8421339006984935
+    ],
+    "wins": 17,
+    "clips": 17
+   },
+   "crf34": {
+    "mean": 0.12139388743568869,
+    "ci95": [
+     0.05065690068637624,
+     0.18688985530067892
+    ],
+    "wins": 13,
+    "clips": 17
+   },
+   "allTiers": {
+    "mean": 0.7214238772205278,
+    "ci95": [
+     0.5495793211693857,
+     0.8928959509905647
+    ],
+    "wins": 17,
+    "clips": 17
+   }
+  },
+  "note": "Milestone 6 confirmation corpus is now EXPOSED and is a regression benchmark for Milestone 7."
+ },
+ "runtime": {
+  "measurements": [
+   {
+    "model": "aethersr-c16d2-v2corpus (M6 candidate)",
+    "rep": 1,
+    "gpuMsP50": 5.8,
+    "gpuMsP95": 6.88,
+    "gpuMsMax": 8.05,
+    "presentedFps": 59.7,
+    "budget60hzPercent": 35.2,
+    "decoderDropped": 29,
+    "decoderDecoded": 1194,
+    "fellBack": false
+   },
+   {
+    "model": "aethersr-c16d2-v2corpus (M6 candidate)",
+    "rep": 2,
+    "gpuMsP50": 5.61,
+    "gpuMsP95": 6.92,
+    "gpuMsMax": 7.65,
+    "presentedFps": 59.7,
+    "budget60hzPercent": 34.4,
+    "decoderDropped": 24,
+    "decoderDecoded": 1193,
+    "fellBack": false
+   }
+  ],
+  "p50Range": [
+   5.61,
+   5.8
+  ],
+  "p95Range": [
+   6.88,
+   6.92
+  ],
+  "source": "results/m6-runtime.json"
+ },
+ "replacementPolicy": "This file is not overwritten. A Milestone 7 candidate ships only by passing the criteria in docs/M7-PREREGISTRATION.md."
+}
