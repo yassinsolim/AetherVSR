@@ -60,6 +60,26 @@ CRF uniform [18,36], Adam, L1, batch 32, `lr` 2e-3, cosine **over optimizer
 updates**, the same step budget, the same augmentation RNG, and best-validation
 checkpoint selection. Only the training-time block structure changes.
 
+### One asymmetry, recorded rather than hidden
+
+Learnable added branches (1×1, 1×3, 3×1) are zero-initialized, so `R1` begins
+numerically identical to `R0`. The identity branch cannot: it is a fixed `+x`
+with no parameters, so `R2` and `R3` begin at `k3(x) + x` — their fused kernel
+starts with a diagonal `+1` that `R0` does not have.
+
+This is inherent to having an identity branch at all, not an implementation
+choice, and it means an `R2`-vs-`R0` difference could in principle be an
+initialization effect rather than an optimization one. Two consequences, fixed
+now rather than after seeing results:
+
+* `R1` is the clean test of the hypothesis, because it isolates
+  parameterization with initialization held identical.
+* If `R2` wins and `R1` does not, that is reported as *possibly an
+  initialization effect*, not as evidence for reparameterization.
+
+`tools/test_reparam.py::test_added_branches_start_as_intended` asserts both
+behaviours so the distinction stays visible in the test suite.
+
 ## Fusion correctness gate
 
 Before any rung is trained, for randomized weights and randomized inputs across
