@@ -105,10 +105,25 @@ class RepBody(nn.Module):
         self.branches = tuple(branches)
 
         self.k3 = nn.Conv2d(channels, channels, 3, padding=1)
-        # Each optional branch keeps resolution, so its padding is kernel // 2 per axis.
-        self.k1 = nn.Conv2d(channels, channels, 1, padding=0) if "k1" in branches else None
-        self.k1x3 = nn.Conv2d(channels, channels, (1, 3), padding=(0, 1)) if "k1x3" in branches else None
-        self.k3x1 = nn.Conv2d(channels, channels, (3, 1), padding=(1, 0)) if "k3x1" in branches else None
+
+        # Optional branches are built inside a forked RNG so they consume no
+        # draws from the global stream. nn.Conv2d takes its default init from
+        # that stream, and here those draws are pure waste - every added branch
+        # is zeroed on the next line - but they desynchronise everything built
+        # afterwards: body.1, the head, and every later draw such as data
+        # shuffling and augmentation.
+        #
+        # Left unforked, the ladder would compare block structure *plus* a
+        # different initialisation *plus* a different data order, which is not
+        # the experiment. The pre-registration claims R1 begins numerically
+        # identical to R0; this is what makes that true rather than intended.
+        # devices=[] forks the CPU generator only, which is where module init
+        # draws from - parameters are moved to the accelerator after construction.
+        with torch.random.fork_rng(devices=[]):
+            # Each optional branch keeps resolution, so its padding is kernel // 2 per axis.
+            self.k1 = nn.Conv2d(channels, channels, 1, padding=0) if "k1" in branches else None
+            self.k1x3 = nn.Conv2d(channels, channels, (1, 3), padding=(0, 1)) if "k1x3" in branches else None
+            self.k3x1 = nn.Conv2d(channels, channels, (3, 1), padding=(1, 0)) if "k3x1" in branches else None
         self.use_identity = "id" in branches
 
         # Start every added branch at zero so the block begins numerically identical

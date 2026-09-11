@@ -259,3 +259,43 @@ def test_network_fuse_preserves_dtype_and_device(rung: str) -> None:
     x = torch.randn(1, 3, 12, 16, dtype=torch.float64)
     with torch.no_grad():
         assert (rep(x) - fused(x)).abs().max().item() <= 1e-12
+
+
+@pytest.mark.parametrize("rung", [r for r in sorted(LADDERS) if r != "R0"])
+def test_rung_choice_does_not_disturb_initialisation(rung: str) -> None:
+    """Every rung must start from the same weights and the same RNG stream as R0.
+
+    The ladder is supposed to vary one thing: the training-time block structure.
+    Constructing the optional branches used to consume draws from the global
+    generator, so `body.1` and `head` were initialised differently and the data
+    order diverged - every arm differed by structure *plus* initialisation
+    *plus* shuffling, and a 0.02 dB reading could have been any of the three.
+
+    Checks both halves, because either alone is passable while the experiment is
+    still confounded: the shared tensors must be bit-identical, and the stream
+    left behind must be untouched so everything drawn later agrees.
+    """
+
+    def build(name: str) -> tuple[dict[str, torch.Tensor], list[float]]:
+        torch.manual_seed(1)
+        model = RepAetherSR(16, 2, branches=LADDERS[name])
+        params = {k: v.detach().clone() for k, v in model.named_parameters()}
+        # Stands in for every draw the training loop makes after construction:
+        # the epoch shuffle, augmentation, dropout masks.
+        return params, torch.randn(4).tolist()
+
+    base, base_stream = build("R0")
+    other, other_stream = build(rung)
+
+    for name, tensor in base.items():
+        assert name in other, f"{name} missing from {rung}"
+        assert torch.equal(tensor, other[name]), f"{rung} changed the init of {name}"
+
+    assert base_stream == other_stream, f"{rung} left the RNG stream shifted"
+
+    # The added branches exist and are zeroed, so the extra tensors are real
+    # but contribute nothing at step 0.
+    extra = sorted(set(other) - set(base))
+    assert extra, f"{rung} added no branch tensors"
+    for name in extra:
+        assert torch.count_nonzero(other[name]) == 0, f"{name} did not start at zero"
