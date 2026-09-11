@@ -163,10 +163,21 @@ The candidate replaces the shipped model only if **all** hold:
 5. Runtime parity: identical tensor names, shapes and parameter count, p50
    ≤ 8 ms, p95 < 10 ms, ~60 fps, no budget fallback.
 
-If the gain is smaller or uncertain, the current default is retained. **A null
-result is an acceptable and expected outcome** and will be reported as one; it
-would be evidence that the existing optimizer already finds equally good fused
-kernels.
+If the gain is smaller or uncertain, the current default is retained. **A
+non-win is an acceptable and expected outcome** and will be reported as one.
+
+Corrected after the fact, and marked as a correction rather than silently
+rewritten: an earlier draft of this paragraph said a null "would be evidence
+that the existing optimizer already finds equally good fused kernels". That is
+an equivalence claim, and no non-detection can support one — least of all a
+three-seed test whose smallest attainable p is 0.100. The accurate statement is
+that a non-win means **no gain was selected at this budget under this rule**;
+it does not establish optimization equivalence, and retaining production means
+the replacement criteria were not met, not that the rung experiment was null.
+
+As it happens the corrected screen was not a null at all: `R3` won the ladder.
+The paragraph is corrected anyway, because it would have licensed a wrong
+conclusion had the result gone the other way.
 
 ## Confirmation corpus
 
@@ -225,13 +236,28 @@ confound is the same size as the signal, so it cannot be argued away as small.
 
 ### An honest statement of what this does and does not change
 
-An earlier draft of this amendment argued that because the confound adds
-variance, and added variance makes a true effect harder to see, the null was
-unlikely to be an artefact of it. That reasoning is backwards and is retracted.
-Added variance raises the **false-negative** risk, and the conclusion here *is*
-a null — so the confound is precisely the kind of defect that could have
-produced it. It cannot manufacture a spurious *win*, but a spurious null is
-exactly what it can manufacture.
+This paragraph has now been corrected twice, and both corrections stay visible
+because each was a reasoning error, not a wording slip.
+
+The first draft argued that because the confound adds variance, and added
+variance makes a true effect harder to see, the null was unlikely to be an
+artefact of it. That is backwards: added variance raises the **false-negative**
+risk, and the pilot's conclusion was a null.
+
+The second draft then said the confound "cannot manufacture a spurious win, but
+a spurious null is exactly what it can manufacture". That is also wrong, and a
+reviewer caught it. Shifting the RNG stream changes the initialisation of every
+later layer and the data order, which moves an arm's finite-seed mean in
+**either** direction. The registered winner is decided by that mean against a
+fixed 0.01 dB band, not by a test establishing the gain is real, so a confounded
+design can hand out a spurious win just as readily as a spurious null. Nothing
+committed measures this confound's direction or magnitude, and none is assigned
+here.
+
+The correct statement is the plain one: **no result from the pilot is usable in
+either direction.** That is why it was withdrawn rather than annotated, and why
+the corrected screen's opposite-direction result rests on the corrected run
+alone, never on the pilot agreeing or disagreeing with it.
 
 What can be said is narrower, and it is the whole of it: **the pilot cannot
 establish a null.** Added variance can mask a real effect, so a non-detection

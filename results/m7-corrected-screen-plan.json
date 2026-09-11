@@ -528,7 +528,8 @@
     "results/m7-final-validation.json"
    ]
   },
-  "expectedOutcomeStatedInAdvance": "Every screen arm sits about 0.14 dB below the shipped model because all trained for 16,200 updates against its 81,180. A final seed at the same held-constant budget therefore cannot reach the +0.10 dB replacement threshold, and the registered protocol is expected to end in retaining production. That is recorded now, before these seeds exist, so the outcome cannot be reframed afterwards. The seeds are still trained because the protocol registered them and because they quantify how far short the best rung falls.",
+  "expectedOutcomeStatedInAdvance": "Every screen arm sits about 0.14 dB below the shipped model, and every arm trained 16,200 updates against its 81,180. Recorded before these seeds exist: I expect a final seed at the same held-constant budget to fall short of the +0.10 dB replacement threshold, and the registered protocol to end in retaining production. That is a conditional prediction from an observed budget asymmetry, not a proof: no matched-budget arm has been trained and no bound on a fresh seed exists, so the asymmetry is a confound large enough to explain the gap rather than a demonstrated cause of it. The seeds are trained because the protocol registered them and because they quantify how far short the best rung falls.",
   "bindingRule": "The first run of these commands and this scoring invocation is binding."
- }
+ },
+ "correctionAfterTheFact": "The sentence above originally asserted that a 16,200-update seed \"cannot\" reach the threshold and that budget was the cause of the gap. Commits b54a4e2 and ecda18e repeat that wording and stand as history. Both claims exceeded the evidence: five later failures do not establish impossibility, and no matched-budget run was ever made. results/m7-diagnosis.json carries the corrected statement."
 }

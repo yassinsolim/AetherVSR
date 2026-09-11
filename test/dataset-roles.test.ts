@@ -32,6 +32,7 @@ const EVALUATION = [
   '../data/captured/manifest.json',
   '../data/captured-faces/manifest.json',
   '../data/captured-val/manifest.json',
+  '../data/captured-val-m7/manifest.json',
   '../data/captured-confirm/manifest.json',
 ];
 

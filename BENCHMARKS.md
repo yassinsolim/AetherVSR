@@ -2079,12 +2079,24 @@ its **smallest attainable two-sided p is 0.100**, and that is what it returned.
 It therefore establishes nothing either way, and `R3` winning is a *selection
 under a pre-committed rule*, not a significance claim.
 
-Post-hoc and reported as description only: `R3` beats `R0` on **14 of 16
-clips** (paired sign test, p = 0.0042). That says the advantage is spread
-across the corpus rather than carried by one or two clips. It is not a
-substitute for the seed-level test, because it conditions on the three seeds
-actually trained and cannot separate a parameterization effect from a lucky
-seed draw.
+Three post-hoc re-poolings, reported as description only because they were
+computed after the binding result:
+
+| Pooling | Result |
+| --- | --- |
+| per clip, across CRFs | `R3` beats `R0` on **14 of 16** clips (sign test p = 0.0042) |
+| per category × CRF | `R3` beats `R0` in **20 of 24** cells |
+| per category × CRF | `R3` is best of all four rungs in only **15 of 24** cells |
+
+The last row is the least flattering and the most informative: nine cells are
+led by a different rung, and `R3` loses to `R0` outright at faces@18, faces@26,
+lowlight@34 and texture@18.
+
+None of these are independent replications. All three re-pool **the same 16
+clips and the same 3 seeds** the registered test already used, so a favourable
+count here cannot rescue a p sitting on its floor. What they show is that the
+advantage is spread across the corpus rather than carried by one or two clips —
+and, in the 15/24 row, that it is not uniform.
 
 ### Nothing shipped, and why
 

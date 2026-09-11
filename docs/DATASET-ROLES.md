@@ -13,7 +13,8 @@ and anything evaluated on.
 | `data/corpus` | TRAINING (stills) | Milestone 4 still-photograph corpus, CC0 only per ADR-0026 |
 | `data/captured-train` | TRAINING (video) | **v1**, 12 clips — superseded by v2, retained for the scaling curve |
 | `data/captured-train-v2` | TRAINING (video) | Milestone 6 expanded corpus |
-| `data/captured-val` | VALIDATION | Model and seed selection. Never a headline number |
+| `data/captured-val` | VALIDATION (superseded) | Milestone 6 split. Retained as history: one clip shared a creator with training |
+| `data/captured-val-m7` | VALIDATION | Milestone 7 onward. Same 16 clips with that one replaced; creator-disjoint from both training corpora |
 | `data/captured` | REGRESSION BENCHMARK | The ten-clip Milestone 5 set |
 | `data/captured-faces` | FACES BENCHMARK | Eight clips, narrow scope |
 | `data/captured-confirm` | CONFIRMATION TEST | Opened once, after every decision is frozen |
