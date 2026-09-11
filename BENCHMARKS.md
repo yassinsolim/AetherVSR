@@ -2111,13 +2111,13 @@ than reinterpreted after the fact.
 
 ### Runtime parity
 
-Alternating A/B/A/B, 720p60 H.264 → 2560×1440. Each pass discards a 15 s
-warm-up, resets counters, then measures a 30 s window of n=240 GPU timestamp
-samples with training stopped. The `gpu upscale` bracket spans the **whole
-upscale stage** on the `importExternalTexture` path — every neural compute pass
-plus the pipeline's ingest and present brackets — and excludes video decode.
-Our code adds no separate upload pass there, but whether the browser copied
-internally was not observable.
+Alternating A/B/A/B, 720p60 H.264 → 2560×1440, training stopped so nothing else
+held a Metal context. Each pass discards a 15 s warm-up, resets counters, then
+runs a 30 s window. The `gpu upscale` bracket opens at ingest and closes at our
+own present/blit — the whole upscale stage on the `importExternalTexture` path —
+and excludes video decode and the browser's own compositing. `n=240` is the
+trailing window the stats ring buffer keeps, not every frame: each pass rendered
+~1,750 frames and the percentiles describe the last 240.
 
 | Pass | GPU p50 | GPU p95 | 60 Hz budget | Presented | Fallback |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -2126,10 +2126,18 @@ internally was not observable.
 | production rep2 | 6.31 ms | 7.63 ms | 38.6% | 59.6 fps | none |
 | R3-seed12 rep2 | 6.63 ms | 7.94 ms | 39.9% | 59.6 fps | none |
 
-The 0.125 ms mean p50 difference is **smaller than the production model's own
-run-to-run spread**, so no cost difference is resolvable. The zero-cost
-property holds: 9,971 training parameters deploy as 6,291, with identical
-tensor names, lengths, layer descriptors and normalisation.
+Pairwise, the candidate is **−0.07 ms** on the first pass and **+0.32 ms** on
+the second, against a production model whose own two passes differ by
+**0.22 ms**. So one pair sits inside production's own variation and one does
+not; only the *mean* difference, 0.125 ms, is smaller than that spread. Two
+paired passes cannot bound a sub-millisecond difference and no such bound is
+claimed — what the data supports is that both models held every gate and the
+between-model differences are the size of the production model's own
+run-to-run variation.
+
+The zero-cost property is established structurally rather than by these
+timings: 9,971 training parameters deploy as 6,291, with tensor names, lengths,
+layer descriptors and normalisation identical to the shipped model.
 
 An earlier runtime attempt was discarded, not reported: it ran while training
 held the MPS context, both second passes fell back to Catmull-Rom, and the

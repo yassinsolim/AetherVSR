@@ -75,17 +75,24 @@
    6.63
   ],
   "p50DifferenceMs": 0.125,
-  "withinRunToRunSpread": true,
+  "withinRunToRunSpread": null,
   "gates": {
    "p50Under8ms": true,
    "p95Under10ms": true,
    "presentedNear60": true,
    "noBudgetFallback": true
   },
-  "verdict": "Runtime parity holds. The candidate deploys the identical graph, and its per-pass p50 difference is smaller than the run-to-run spread of the production model itself, so no cost difference is resolvable here."
+  "verdict": "No cost difference is resolvable from two paired passes. The candidate deploys a bit-identical graph shape, both models held every gate, and the between-model differences are the same size as the production model's own variation between its two passes. Two passes per model is too few to bound a sub-millisecond difference, and no such bound is claimed.",
+  "pairwiseP50DifferencesMs": [
+   -0.07,
+   0.32
+  ],
+  "productionOwnSpreadMs": 0.22,
+  "spreadComparison": "Pairwise candidate-minus-production p50 differences are -0.070 and +0.320 ms. The production model's own run-to-run spread is 0.220 ms, so the first pair sits inside it and the second does not. Only the mean difference, 0.125 ms, is smaller than that spread."
  },
  "candidate": "models/m7-final/R3-seed12.json (selected final seed), served as /models/m7-r3-candidate.json during measurement",
- "timingScope": "GPU timestamp bracket spanning the whole upscale stage - all of the neural upscaler's compute passes plus the pipeline-level ingest and present brackets around them - on the importExternalTexture path, where our code adds no separate upload pass but whether the browser copied internally was not observable. It excludes video decode. Each figure aggregates n=240 samples over a 30 s steady-state window after a discarded 15 s warm-up.",
+ "timingScope": "GPU timestamp bracket that opens at ingest and closes at our own present/blit. It spans the whole upscale stage - every neural compute pass plus the pipeline ingest and present brackets - on the importExternalTexture path, and excludes video decode and the browser's own compositing. Our code adds no separate upload pass there, but whether the browser copied internally was not observable.",
  "discardedAttempt": "An earlier attempt on the same day was discarded and is not reported as a measurement. It ran while final-seed training held the MPS context: both second passes fell back to the Catmull-Rom scaler, and the sample windows were unequal (n=39 against n=240). Recorded here because why a number was discarded is worth more than the number was.",
- "importPath": "importExternalTexture"
+ "importPath": "importExternalTexture",
+ "samplingScope": "n=240 is the trailing window the stats ring buffer retains, not every frame in the pass. Each 30 s pass rendered about 1,750 frames; the reported percentiles describe the last 240 of them, after a discarded 15 s warm-up."
 }
