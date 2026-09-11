@@ -2044,6 +2044,112 @@ something other than repetition, and the shipped model gains +0.217 dB on
 independent footage — but the gain is mostly training length, and another 150
 clips is not indicated.
 
+## Milestone 7 — Structural reparameterization
+
+Machine: Apple M5, macOS 26.6.2. Browser: Chrome for Testing 152.0.7977.42,
+`apple / metal-3`. Training on MPS, `torch 2.14.0`.
+
+The question: does a training-time block of **linear** branches sitting before
+the existing `tanh` — which collapses exactly into the deployed 3×3
+convolution — reach a better optimum than the ordinary network? The fused graph
+is unchanged, so this is a claim about optimization, never about capacity.
+
+### What was compared
+
+Four rungs × three seeds, all on one frozen 151-clip corpus (43,488 patches,
+digest `3f73af7f…`), all 16,200 optimizer updates, scored on a 16-clip
+validation corpus at CRF 18/26/34.
+
+| Rung | Training-time block | Train params | Deployed params | Mean Δ vs production | Seed sd |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `R0` | 3×3 (control) | 6,291 | 6,291 | −0.1620 dB | 0.0181 |
+| `R1` | 3×3 + 1×1 | 6,835 | 6,291 | −0.1504 dB | 0.0055 |
+| `R2` | R1 + identity | 6,835 | 6,291 | −0.1535 dB | 0.0035 |
+| `R3` | R2 + 1×3 + 3×1 | 9,971 | 6,291 | **−0.1373 dB** | 0.0126 |
+
+`R3` wins the ladder outright: **+0.0247 dB over the R0 control**, outside the
+0.01 dB tie band, so the simplicity tie-break never engages. It leads at every
+compression tier — CRF 18 −0.239 against R0's −0.276, CRF 26 −0.133 against
+−0.158, CRF 34 −0.040 against −0.051.
+
+### What the statistics do and do not say
+
+The registered test is an exact seed-level permutation. At three seeds per arm
+its **smallest attainable two-sided p is 0.100**, and that is what it returned.
+It therefore establishes nothing either way, and `R3` winning is a *selection
+under a pre-committed rule*, not a significance claim.
+
+Post-hoc and reported as description only: `R3` beats `R0` on **14 of 16
+clips** (paired sign test, p = 0.0042). That says the advantage is spread
+across the corpus rather than carried by one or two clips. It is not a
+substitute for the seed-level test, because it conditions on the three seeds
+actually trained and cannot separate a parameterization effect from a lucky
+seed draw.
+
+### Nothing shipped, and why
+
+Five fresh seeds (11–15) were trained for `R3` alone. The best, seed 12, scores
+**−0.1259 dB against the frozen production model**. The pre-registered
+replacement criterion requires **≥ +0.10 dB**, so it fails at its first
+condition and the remaining conditions were never reached. **The production
+model is retained, unchanged.**
+
+What is measured: every arm here trained 16,200 optimizer updates, the shipped
+model trained 81,180, and all four rungs land ~0.14 dB below it. What is **not**
+measured: any arm at the production budget. No matched-budget run exists in this
+milestone, so the budget asymmetry is a **confound large enough to explain the
+gap, not a demonstrated cause of it** — an architecture explanation has not been
+excluded by measurement, only rendered untestable by the design.
+
+The design itself is the defect, and it is mine. Holding the budget constant is
+correct for comparing rungs against each other; setting the replacement gate
+against a model trained five times longer then made the two halves of the
+protocol incommensurable. The nearest arm missed the +0.10 dB threshold by
+0.23 dB, so no candidate came close — but "would never have passed" is a claim
+about runs nobody made, and it is not asserted here. Recorded as a flaw rather
+than reinterpreted after the fact.
+
+### Runtime parity
+
+Alternating A/B/A/B, 720p60 H.264 → 2560×1440. Each pass discards a 15 s
+warm-up, resets counters, then measures a 30 s window of n=240 GPU timestamp
+samples with training stopped. The `gpu upscale` bracket spans the **whole
+upscale stage** on the `importExternalTexture` path — every neural compute pass
+plus the pipeline's ingest and present brackets — and excludes video decode.
+Our code adds no separate upload pass there, but whether the browser copied
+internally was not observable.
+
+| Pass | GPU p50 | GPU p95 | 60 Hz budget | Presented | Fallback |
+| --- | ---: | ---: | ---: | ---: | --- |
+| production rep1 | 6.09 ms | 7.28 ms | 36.9% | 59.6 fps | none |
+| R3-seed12 rep1 | 6.02 ms | 7.34 ms | 36.6% | 59.6 fps | none |
+| production rep2 | 6.31 ms | 7.63 ms | 38.6% | 59.6 fps | none |
+| R3-seed12 rep2 | 6.63 ms | 7.94 ms | 39.9% | 59.6 fps | none |
+
+The 0.125 ms mean p50 difference is **smaller than the production model's own
+run-to-run spread**, so no cost difference is resolvable. The zero-cost
+property holds: 9,971 training parameters deploy as 6,291, with identical
+tensor names, lengths, layer descriptors and normalisation.
+
+An earlier runtime attempt was discarded, not reported: it ran while training
+held the MPS context, both second passes fell back to Catmull-Rom, and the
+windows were unequal (n=39 against n=240).
+
+### Equivalence evidence
+
+Nine randomized R1/R2/R3 models were exported with matching golden vectors and
+verified in-browser in both precisions, with both file hashes re-checked before
+dispatch. CPU branch→fused worst error 1.19e-6; JSON reload error exactly zero;
+WebGPU f32 stage maximum 1.41e-6, f16 maximum 5.67e-3.
+
+### Withdrawn
+
+An earlier nine-model screen is **withdrawn, not reported**. Constructing the
+optional branches consumed global RNG draws, so `body.1`, the head and the data
+order differed between arms — a confound the size of the signal. It read
+R1 − R0 = +0.0052 dB, the opposite direction from this corrected screen, which
+is exactly why it was withdrawn rather than published.
+
 ## Reproducing
 
 ```bash

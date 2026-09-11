@@ -1,7 +1,8 @@
 {
- "schema": "aethervsr.m7-deployment-compatibility/1",
- "createdAt": "2026-09-11T19:20:42.034623+00:00",
- "candidate": "models/m7-corrected/R3-seed2.json",
+ "schema": "aethervsr.m7-deployment-compatibility/2",
+ "createdAt": "2026-09-11T20:57:14.840298+00:00",
+ "candidate": "models/m7-final/R3-seed12.json",
+ "candidateRole": "selected final seed, the model the replacement criterion was applied to",
  "baseline": "public/models/aethersr-c16d2.json",
  "candidateTrainingParameters": 9971,
  "candidateDeployedParameters": 6291,
@@ -9,15 +10,16 @@
  "checks": {
   "architecture": true,
   "architectureVersion": true,
-  "scale/features/depth": true,
+  "scaleFeaturesDepth": true,
   "precision": true,
-  "layers identical": true,
-  "normalisation identical": true,
-  "tensor names identical": true,
-  "tensor lengths identical": true,
-  "deployed parameter count": true,
-  "no branch tensors leaked": true,
-  "weights differ in value": true
+  "layersIdentical": true,
+  "normalisationIdentical": true,
+  "tensorNamesIdentical": true,
+  "tensorLengthsIdentical": true,
+  "deployedParameterCount": true,
+  "noBranchTensorsLeaked": true,
+  "weightValuesDiffer": true
  },
+ "supersedes": "Version 1 of this record checked models/m7-corrected/R3-seed2.json, a screening arm rather than the selected candidate. The checks passed there too, but the artifact named a model the replacement decision was not about.",
  "note": "R3 trains 9,971 parameters and deploys 6,291. Tensor names, lengths, layer descriptors, normalisation and architecture version are identical to the shipped model; only weight values differ. No runtime or shader change is implied."
 }

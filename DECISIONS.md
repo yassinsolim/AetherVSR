@@ -1269,3 +1269,61 @@ Two responses, because one alone is insufficient:
 The general rule: a leakage guard that cannot be satisfied should still be
 quantified. "We could not eliminate this, and here is what it is worth" is a
 result; silence is not.
+
+## ADR-0038 — Training-time reparameterization is kept as a training option, not shipped
+
+**Status:** accepted (Milestone 7).
+
+A block of **linear** branches placed before the existing `tanh` collapses
+exactly into the deployed 3×3 convolution. The fused function class is
+therefore unchanged: `R1`–`R3` cannot represent anything `R0` could not. The
+only claim available is about **optimization** — whether an over-parameterized
+but algebraically equivalent training graph reaches a better point in the same
+weight space. Any statement that this adds inference capacity would be false.
+
+Measured at an equal 16,200-update budget on one frozen corpus, `R3` reached
+−0.1373 dB against the frozen production model where the `R0` control reached
+−0.1620, a **+0.0247 dB** advantage that holds at every compression tier and on
+14 of 16 clips. The registered three-seed permutation test returned p = 0.100,
+its attainable floor, so the rung was *selected* under a pre-committed rule and
+the effect was not *established*.
+
+**The production model is retained.** The best final seed missed the
+pre-registered +0.10 dB replacement threshold by 0.23 dB. Every arm trained at
+a fifth of production's schedule and no matched-budget arm was run, so that
+asymmetry is a confound large enough to explain the gap, not a measured cause.
+
+`tools/reparam.py` therefore stays in the tree as a training-time option behind
+`--rung`, defaulting to `R0`. It changes no deployed artifact: the exported
+model carries identical tensor names, lengths, layer descriptors, normalisation
+and parameter count, verified against the shipped model, and 71 fusion tests
+plus a browser parity script guard that equivalence in CI.
+
+Rejected alternative: shipping `R3-seed12` because it beat its control. It is
+0.126 dB *worse* than what users run today, and "better than a weaker sibling"
+is not a deployment argument.
+
+## ADR-0039 — Optional module construction must not consume the global RNG
+
+**Status:** accepted (Milestone 7).
+
+Milestone 7's first screen was withdrawn. Constructing an optional branch draws
+`nn.Conv2d`'s default initialisation from the global generator, and although
+every added branch is zeroed immediately afterwards, the draws still happened —
+so `body.1`, the head and the epoch shuffle all differed between arms. Measured
+at seed 1: `body.1.k3.weight` and `head.weight` differed between `R0` and `R1`,
+and the next three draws were `[0.60637, 0.65406, −0.54377]` against
+`[−0.80873, 0.13418, −0.09037]`.
+
+The effect under measurement is ~0.005–0.025 dB against a seed sd of ~0.017.
+A confound the size of the signal cannot be argued away as small, and the
+withdrawn run pointed the *opposite* direction from the corrected one.
+
+Optional branches are now built inside `torch.random.fork_rng(devices=[])`, and
+`test_rung_choice_does_not_disturb_initialisation` asserts both halves: shared
+tensors bit-identical, and the post-construction stream untouched. Either check
+alone passes while the experiment is still confounded.
+
+The general rule: **an experimental switch must not perturb anything except the
+thing it switches.** Where that cannot be guaranteed by construction, it is
+asserted by a test that fails loudly.

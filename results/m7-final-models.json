@@ -1,0 +1,94 @@
+{
+ "schema": "aethervsr.m7-final-models/1",
+ "createdAt": "2026-09-11T21:02:59.663157+00:00",
+ "rung": "R3",
+ "selected": "models/m7-final/R3-seed12.json",
+ "retentionPolicy": "The repository size guard caps the tracked tree at 40 MB, and seventeen model files are regenerable from the frozen corpus, the committed commands and the recorded seeds. Only the selected candidate stays in git, because it is the artifact the replacement decision was applied to and future work may need to score it without retraining. Every other model is identified here by SHA-256 so a re-roll is still visible.",
+ "finalSeeds": {
+  "models/m7-final/R3-seed11.json": {
+   "fileSha256": "dc4312b6a1b72ed97c45d4e0914e9caf42003c19319a231c6006a57fc1983879",
+   "modelSha256": "7d19589ac10cb86e708c75046cc6374a58241d4ab37b53c2c6f953fc874e55d3",
+   "seed": 11,
+   "rung": "R3",
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 31.0
+  },
+  "models/m7-final/R3-seed12.json": {
+   "fileSha256": "58b1febdecddae9451f938c0191d2293d2abd25dd503ee36004d1f2ea810df43",
+   "modelSha256": "f1b0d74068b3fca16f0368f944e6f46825fb7fafe4a79c358f663f9f5168fc01",
+   "seed": 12,
+   "rung": "R3",
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 31.027
+  },
+  "models/m7-final/R3-seed13.json": {
+   "fileSha256": "ac4f85b47f8f7dd4c2d4de8ce39c618ddd9f392bd6727a21cb186d8fb4b01290",
+   "modelSha256": "b4a50f7a2e461738a716c05480c6fc149f0d2227efb12250355af660fc69ee1e",
+   "seed": 13,
+   "rung": "R3",
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 31.003
+  },
+  "models/m7-final/R3-seed14.json": {
+   "fileSha256": "d5e3368175e223ee414acb0ac7117e304dfc3610294c6f81cd298a61b4b72f50",
+   "modelSha256": "78575c4499ea9771bf800773c23a4885c0f8eaacad4778f8ebcb6ee44a819fba",
+   "seed": 14,
+   "rung": "R3",
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 31.009
+  },
+  "models/m7-final/R3-seed15.json": {
+   "fileSha256": "9924f6bb61d7baff67bcc25aa673ef6fd1dadd8c255c4d162fc1843603ce4cea",
+   "modelSha256": "585ef0d982aaab4377c3325482b065e1dcb51d0c1f009949f6d09d1104056079",
+   "seed": 15,
+   "rung": "R3",
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 30.991
+  }
+ },
+ "withdrawnPilotModels": {
+  "models/m7-pilot-confounded/R0-seed1.json": {
+   "fileSha256": "cf315bdab2c44808350f14415d63c4a25da33c43a1fc7d3a4192e58d92f20c9a"
+  },
+  "models/m7-pilot-confounded/R0-seed2.json": {
+   "fileSha256": "13abdc9196b173c5e11b22906ae1fec7e66f5321e4b9e963fc093d20ded83fdf"
+  },
+  "models/m7-pilot-confounded/R0-seed3.json": {
+   "fileSha256": "99ea7ca50508cbad7114ca935bbb1125489b10b6a93ffe7472b261c2eb1dbba8"
+  },
+  "models/m7-pilot-confounded/R1-seed1.json": {
+   "fileSha256": "8475b4f1ed1466a45ff3001fc9fb1360dc11917bfca90f927dde8cb9897b7fe0"
+  },
+  "models/m7-pilot-confounded/R1-seed2.json": {
+   "fileSha256": "1a50d009c13cf13c3288448aa41122dc7463f6e546342a715c4455d7abb70cf4"
+  },
+  "models/m7-pilot-confounded/R1-seed3.json": {
+   "fileSha256": "7769da2d1d1338a90ea06016c247e98197cdfbf8578b72d4a410076634db8dcc"
+  },
+  "models/m7-pilot-confounded/R2-seed1.json": {
+   "fileSha256": "b230350b31acb876b7a6658005e17d527031b1b1e4f6d454da8677555d9516ca"
+  },
+  "models/m7-pilot-confounded/R2-seed2.json": {
+   "fileSha256": "bad1a5f3f4e1c544324c346bcc3008643e781fbd9bdbad60a13d42b82b44b36a"
+  },
+  "models/m7-pilot-confounded/R2-seed3.json": {
+   "fileSha256": "f2c7bf559187e9137e964d772a8de06fe103064ac6c6a98bc9cb4d0ef8142a6b"
+  }
+ },
+ "correctedScreenModels": "results/m7-corrected-models.json"
+}

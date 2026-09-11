@@ -83,5 +83,9 @@
    "noBudgetFallback": true
   },
   "verdict": "Runtime parity holds. The candidate deploys the identical graph, and its per-pass p50 difference is smaller than the run-to-run spread of the production model itself, so no cost difference is resolvable here."
- }
+ },
+ "candidate": "models/m7-final/R3-seed12.json (selected final seed), served as /models/m7-r3-candidate.json during measurement",
+ "timingScope": "GPU timestamp bracket spanning the whole upscale stage - all of the neural upscaler's compute passes plus the pipeline-level ingest and present brackets around them - on the importExternalTexture path, where our code adds no separate upload pass but whether the browser copied internally was not observable. It excludes video decode. Each figure aggregates n=240 samples over a 30 s steady-state window after a discarded 15 s warm-up.",
+ "discardedAttempt": "An earlier attempt on the same day was discarded and is not reported as a measurement. It ran while final-seed training held the MPS context: both second passes fell back to the Catmull-Rom scaler, and the sample windows were unequal (n=39 against n=240). Recorded here because why a number was discarded is worth more than the number was.",
+ "importPath": "importExternalTexture"
 }

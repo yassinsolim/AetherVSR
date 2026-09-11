@@ -289,17 +289,51 @@ negative cells; and the creator-diversity ablation was withdrawn as unmatched.
 
 **Verdict: diminishing returns.** Another 150 clips is not indicated.
 
-## Milestone 7 — Architecture / structural reparameterization [IN PROGRESS]
+## Milestone 7 — Architecture / structural reparameterization [DONE]
 
-Test whether linear training-only branches before the existing tanh activations
-learn better fused weights for the current 6,291-parameter C16D2 inference graph.
-Start with body-only 3x3 + 1x1, then identity; advance to richer branches only
-when validation supports it. Prove block, full-network, export and WebGPU
-equivalence before interpreting quality or claiming unchanged runtime cost.
+Tested whether linear training-only branches before the existing `tanh` learn
+better fused weights for the 6,291-parameter C16D2 inference graph. Four rungs
+× three seeds on one frozen corpus at an equal 16,200-update budget, then five
+fresh seeds for the winner.
 
-Keep the current model as the frozen comparison baseline. No model routing,
-extension integration or temporal VSR is part of this milestone. Reassess the
-next milestone from the measured results; do not mark this complete prematurely.
+**Verdict: `R3` wins the ladder, production is retained.** `R3` (3×3 + 1×1 +
+identity + 1×3 + 3×1) scored −0.1373 dB against the frozen production model
+versus the `R0` control's −0.1620 — **+0.0247 dB**, outside the 0.01 dB tie
+band, leading at every compression tier and on 14 of 16 clips. The registered
+seed-level test returned p = 0.100, which is its floor at three seeds, so the
+effect is selected but not established.
+
+No candidate shipped. The best final seed reached −0.1259 dB against
+production, missing the pre-registered +0.10 dB replacement threshold by
+0.23 dB. Every arm trained 16,200 updates against production's 81,180 and no
+matched-budget arm was run, so that asymmetry is a confound large enough to
+explain the gap rather than a measured cause of it.
+
+The zero-cost property held: 9,971 training parameters deploy as 6,291, with
+identical tensor names, layers and normalisation, and a runtime p50 difference
+smaller than the production model's own run-to-run spread.
+
+Corrections recorded rather than buried: the first nine-model screen was
+withdrawn for an RNG confound that desynchronised initialisation between arms;
+a creator overlap between training and validation was repaired into a versioned
+split; and one source's absolute container timestamps were corrected against a
+verified relative duration.
+
+## Milestone 8 — Budget-matched architecture confirmation [NEXT]
+
+Answer the question Milestone 7 could not: does `R3`'s advantage survive at the
+production budget? Train `R0` and `R3` at 81,180 updates on the same frozen
+corpus, three seeds each, declared before running and uniformly applied. That
+is the only comparison that can produce a deployable candidate, and it also
+tests whether the +0.0247 dB at a fifth of the schedule was a head start that
+the control catches up on.
+
+Prerequisites already in place: frozen corpus and hashes, a repaired
+creator-disjoint validation split, a registered scoring and reporting
+invocation, and 102 corpus/report/fusion tests in CI. Still outstanding: the
+architecture confirmation corpus at `data/captured-confirm-m7/proposal.json`
+is a 16-clip **proposal**, not frozen, and must be independently verified
+before any candidate scores against it.
 
 ---
 

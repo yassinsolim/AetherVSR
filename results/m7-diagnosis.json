@@ -36,8 +36,8 @@
   "meanVsProduction": -0.1259,
   "threshold": 0.1,
   "criterionMet": false,
-  "cause": "Not architecture. Every arm trained 16,200 optimizer updates; the shipped model trained 81,180. The whole ladder sits about 0.14 dB below production for that reason, and the registered replacement criterion compares against production, so no screening-budget model could ever satisfy it.",
-  "preRegistrationFlaw": "This is a defect in my own pre-registration: it held the step budget constant across the ladder, which is right for comparing rungs, and then applied a replacement threshold against a model trained at five times that budget, which no arm could reach. The comparison between rungs remains valid; the replacement gate was unreachable by construction and is recorded as such rather than quietly reinterpreted."
+  "cause": "Measured: every arm trained 16,200 optimizer updates, the shipped model trained 81,180, and all four rungs land about 0.14 dB below it. Not measured: any arm at the production budget. The budget asymmetry is therefore a confound large enough to explain the gap, not a demonstrated cause of it. An architecture explanation has not been excluded by measurement; the design simply made it untestable here.",
+  "preRegistrationFlaw": "A defect in my own pre-registration. Holding the step budget constant is correct for comparing rungs against each other, but setting the replacement gate against a model trained five times longer made the two halves of the protocol incommensurable. The nearest arm missed the +0.10 dB threshold by 0.23 dB, so no candidate came close; \"could never have passed\" would be a claim about runs nobody made and is not asserted. Recorded as a flaw rather than reinterpreted after the fact."
  },
  "deployedCost": {
   "trainingParameters": 9971,
@@ -45,5 +45,6 @@
   "runtime": "results/m7-runtime-parity.json: candidate p50 6.02 and 6.63 ms against production 6.09 and 6.31 ms, difference below run-to-run spread",
   "note": "The zero-cost property holds: R3 deploys the identical graph at indistinguishable runtime."
  },
- "conclusion": "Structural reparameterization did not fail. R3 is the best rung by the registered rule and its advantage is broad across the corpus, but at three seeds the registered test cannot establish it, and the budget asymmetry means no candidate could replace production. The open question is whether R3 still leads at the production budget."
+ "conclusion": "Structural reparameterization did not fail. R3 is the best rung by the registered rule and its advantage is broad across the corpus, but at three seeds the registered test cannot establish it, and no candidate met the replacement criterion. Whether R3 still leads at the production budget is unmeasured and is the open question.",
+ "correctsEarlierClaim": "Earlier wording in results/m7-corrected-screen-plan.json and in commit messages b54a4e2 and ecda18e asserted that budget caused the gap and that a screening-budget seed could not reach the threshold. Those commits stand as history; this record is the correction. Both statements went beyond the evidence, because no matched-budget arm was ever trained."
 }
