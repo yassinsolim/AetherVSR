@@ -111,11 +111,24 @@ def load_video_pairs(
     """
     with open(os.path.join(pairs_dir, "pairs.json"), encoding="utf-8") as fh:
         meta = json.load(fh)
+
+    # Hash the bytes actually read, not the metadata describing them. Matching
+    # split counts and CRF histograms cannot prove two runs saw identical
+    # patches: corpus-prepare.py conditions its CRF draws on extraction
+    # succeeding, so two rebuilds from the same manifest and the same seed can
+    # legitimately differ wherever the network behaved differently. Without this
+    # digest an architecture comparison could silently be a data comparison.
+    digest = hashlib.sha256()
+    digest.update(json.dumps(meta.get("index", []), sort_keys=True).encode())
+
     out: list[torch.Tensor] = []
     for split in ("train", "val"):
         path = os.path.join(pairs_dir, f"{split}.pt")
         if not os.path.exists(path):
             raise SystemExit(f"missing {path}; run tools/video-degrade.py first")
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda fh=fh: fh.read(1 << 20), b""):
+                digest.update(chunk)
         blob = torch.load(path)
         lr, hr = blob["lr"], blob["hr"]
         if lr.shape[0] != hr.shape[0]:
@@ -123,6 +136,9 @@ def load_video_pairs(
         if hr.shape[-1] != lr.shape[-1] * 2 or hr.shape[-2] != lr.shape[-2] * 2:
             raise SystemExit(f"{split}: hr {tuple(hr.shape)} is not 2x lr {tuple(lr.shape)}")
         out += [lr.float().div_(255.0), hr.float().div_(255.0)]
+
+    meta = dict(meta)
+    meta["corpusDigest"] = digest.hexdigest()
     return meta, out[0], out[1], out[2], out[3]
 
 
@@ -570,7 +586,10 @@ def main() -> int:
         "training": {
             "corpus": pairs_meta["sourceManifest"] if args.pairs else manifest["source"],
             "corpusImages": pairs_meta["trainPatches"] if args.pairs else manifest["count"],
-            "corpusDigest": None if args.pairs else corpus_digest,
+            # Direct index, not .get(): this was silently null for every
+            # video-trained model until now, and a missing digest must fail
+            # loudly rather than quietly restore the hole.
+            "corpusDigest": pairs_meta["corpusDigest"] if args.pairs else corpus_digest,
             "corpusLicencePolicy": (
                 "CC0/CC BY/CC BY-SA/public domain captured video; see manifest"
                 if args.pairs
