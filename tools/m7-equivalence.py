@@ -7,9 +7,14 @@ measured separately rather than end to end:
 
     multi-branch PyTorch  ->  fused PyTorch  ->  exported JSON  ->  WebGPU
 
-This tool covers the first three. The fourth is the browser golden check, which
-now refuses vectors that were not exported from the model under test; this tool
-writes those vectors so that comparison is anchored to the fused candidate.
+This tool covers the first three links. The fourth is the browser golden check
+in results/m7-webgpu-golden.json, which was run against the *frozen production
+model* and proves the WGSL graph reproduces PyTorch for the weights that ship
+today. It is not anchored to the synthetic weights used here, and no candidate
+has been selected, so no candidate-specific WebGPU chain exists yet. If a rung
+ever wins, that model gets its own golden export and its own browser run before
+any replacement claim is made; the verifier now refuses vectors that did not
+come from the model under test, so that step cannot be skipped silently.
 
 Reporting one end-to-end number would hide which link moved, and two errors that
 cancel would look like success.
