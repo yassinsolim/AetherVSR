@@ -2172,6 +2172,65 @@ verified in-browser in both precisions, with both file hashes re-checked before
 dispatch. CPU branch→fused worst error 1.19e-6; JSON reload error exactly zero;
 WebGPU f32 stage maximum 1.41e-6, f16 maximum 5.67e-3.
 
+### Against the published literature
+
+Every row below is from the primary paper. Deltas are that paper's own metric on
+its own data, never an AetherVSR result.
+
+| Work | Reparameterized | Deployed size | Task / data | Reported gain | Matched-budget plain control? |
+| --- | --- | ---: | --- | ---: | --- |
+| RepVGG, CVPR 2021 ([2101.03697](https://arxiv.org/abs/2101.03697)) | 3×3 + 1×1 + identity | 14.33 M (B0) | ImageNet top-1 | plain 72.39 → 75.14 (**+2.75 pp**) | yes, 120 epochs, same settings |
+| DBB, CVPR 2021 ([2103.13425](https://arxiv.org/abs/2103.13425)) | K×K + 1×1 + avg-pool + branches | 11.68 M | ImageNet top-1 | ResNet-18 69.54 → 70.99 (**+1.45 pp**) | yes, plus duplicate-branch controls |
+| RepSR, 2022 ([2205.05671](https://arxiv.org/abs/2205.05671)) | Rep block, frozen BN | **3.70 K** – 602.9 K | ×4 SR, Set14 Y-PSNR | **+0.10 – +0.13 dB** vs ECBSR at equal size | no — vs ECBSR, not a plain control |
+| ECBSR, ACM MM 2021 | ECB vs RepVGG/DBB | 2.80 K – 596 K | ×2/×4 SR | DBB **< 0.05 dB**, ECB **≈ 0.1 dB** | yes, same setting ablation |
+| PlainUSR, 2024 ([2409.13435](https://arxiv.org/abs/2409.13435)) | RepMBConv | 333 K | ×4 SR, DIV2K-valid | **+0.08 dB** at identical 26.8 ms | yes, same config |
+| SPAN, CVPRW 2024 | rep vs no-rep | 48-channel | ×4 SR | **+0.02 – +0.08 dB** | same 1e6 iterations |
+| ESPAN, CVPRW 2025 | RepVGG/EDBB/RRRB/GRep | ~192 K | ×4 SR, NTIRE'25 LD-valid | see below | yes, same settings |
+| NTIRE 2022 efficient-SR report | 3×3 + 1×1 + derivative + skip | small models | ×4 SR | "slight gain", explicitly **0.02 dB** | no controlled schedule |
+
+**Our +0.0247 dB is at the low end of this range, and that is the honest
+reading.** It sits alongside NTIRE 2022's "0.02 dB for small models" and SPAN's
++0.02–0.08 dB, below ECBSR's ≈0.1 dB for ECB and well below RepVGG's and DBB's
+classification gains.
+
+**Scale — our size is covered, and that is the surprise.** RepSR reports
+M4C8 at **3.70 K** and M4C16 at **11.90 K** deployed parameters, bracketing our
+6,291, with gains of +0.10 to +0.13 dB on Set14. So the literature does reach
+our scale, and reports roughly 4–5× more than we measured. Two caveats keep this
+from being a clean contradiction: RepSR's comparison is against ECBSR at equal
+deployed size, not against a plain matched-budget control, and its task is ×4 SR
+on DIV2K stills, not ×2 on compressed captured video.
+
+**Training length — the finding that most threatens our result.** ESPAN's
+Table 7 trains identical architectures to 300 k and 500 k iterations. Every
+reparameterized variant's advantage *shrinks* as training lengthens: RepVGG
++0.208 → +0.134 dB, EDBB +0.303 → +0.205, GRep[2,0] +0.317 → +0.223. Gains
+persist but decay by roughly a third over that stretch. Our arms ran 16,200
+updates against production's 81,180, so if that pattern holds here, our
++0.0247 dB is more likely an **over**-estimate of what survives at full
+schedule than an under-estimate. This is the opposite of a convenient reading
+and it is why Milestone 8 is a budget-matched rerun rather than a victory lap.
+
+**Branch vocabulary — agrees with us.** RepVGG's own ablation climbs
+monotonically (plain 72.39, +1×1 73.15, +identity 74.79, full 75.14), DBB shows
+diverse branches beating duplicated ones at equal training cost (70.99 against
+70.29), and ESPAN's GRep variants with more branches lead. Our ordering, with
+R3 (1×3 + 3×1 + identity + 1×1) ahead of R1, matches. Our R2 does not: adding
+the identity alone scored slightly *below* R1, where RepVGG's identity was its
+single largest step. At our effect size that inversion is well inside seed
+noise and we do not read anything into it.
+
+**Statistical practice — we report more than most, but the field is not
+silent.** DBB does report mean ± sd over five runs, though only for its CIFAR
+ablations; its ImageNet rows, and the primary sections of RepVGG, RepSR, ECBSR,
+PlainUSR and the NTIRE reports, give single runs per configuration. SPAN's
+"mean of 5" is runtime timing on an RTX 3090, not seed variance. So the
+literature does **not** establish whether our 0.004–0.018 dB seed sd is typical
+for this kind of model, and we should not claim it does. What can be said is
+narrower: our registered test could not establish a +0.0247 dB effect precisely
+because we measured that spread, and had we reported one run per configuration
+as most of these papers do, this milestone would have declared a clean win.
+
 ### Withdrawn
 
 An earlier nine-model screen is **withdrawn, not reported**. Constructing the
