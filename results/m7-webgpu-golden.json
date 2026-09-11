@@ -1,0 +1,59 @@
+{
+ "schema": "aethervsr.m7-webgpu-golden/1",
+ "purpose": "The fourth link of the Milestone 7 equivalence chain, executed on real hardware. The first three links are in results/m7-equivalence.json; this one cannot be measured without a GPU.",
+ "machine": "Apple M5 base, macOS 26.6.2",
+ "browser": "Chrome for Testing 152.0.7977.42",
+ "adapter": "apple / metal-3",
+ "model": "public/models/aethersr-c16d2.json",
+ "modelSha256": "9154d9490b02d8fdf136edd990217cfb6f0e9956ed928da7179d7781832c8e02",
+ "goldenVectors": "public/models/golden-c16d2.json",
+ "note": "Vectors regenerated in commit 802b0e4; before that they carried a stale modelSha256 and the verifier did not check it, so every prior golden run compared the runtime against the wrong weights.",
+ "outputToleranceNote": "The output stage is quantised to 8 bits by the storage texture, so it carries a 1.5/255 floor. A tighter bound would measure the texture format rather than the graph.",
+ "precisions": {
+  "f16": {
+   "tolerance": 0.05,
+   "passed": true,
+   "stages": {
+    "stem": {
+     "maxAbsError": 0.005542665719985962,
+     "meanAbsError": 0.0005014222279259665
+    },
+    "body.0": {
+     "maxAbsError": 0.00835263729095459,
+     "meanAbsError": 0.0006134810016493001
+    },
+    "body.1": {
+     "maxAbsError": 0.008304506540298462,
+     "meanAbsError": 0.0006863170079697648
+    }
+   },
+   "output": {
+    "maxAbsError": 0.0032279491424560547,
+    "meanAbsError": 0.000961004361165073
+   }
+  },
+  "f32": {
+   "tolerance": 0.001,
+   "passed": true,
+   "stages": {
+    "stem": {
+     "maxAbsError": 6.798654794692993e-07,
+     "meanAbsError": 7.740573219431705e-08
+    },
+    "body.0": {
+     "maxAbsError": 1.4901161193847656e-06,
+     "meanAbsError": 1.1447788850205143e-07
+    },
+    "body.1": {
+     "maxAbsError": 1.9744038581848145e-06,
+     "meanAbsError": 1.3916546344934963e-07
+    }
+   },
+   "output": {
+    "maxAbsError": 0.001960664987564087,
+    "meanAbsError": 0.0009259746822054796
+   }
+  }
+ },
+ "verdict": "The WGSL graph reproduces the PyTorch reference stage by stage. In f32 every intermediate stage agrees to ~2e-6, which is float32 rounding; the f16 path stays well inside its 5e-2 budget."
+}
