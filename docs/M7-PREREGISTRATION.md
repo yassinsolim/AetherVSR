@@ -224,3 +224,26 @@ corroboration.
   would be the same outcome-dependent editing this amendment exists to correct.
 * Nothing else moves. Same corpus, same split, same budget, same selection rule,
   same replacement criterion, same tie-break toward simplicity.
+
+### Cache recovery and eligibility gates
+
+The original N151 patch cache was lost from `/tmp`. Its replacement cannot be
+claimed byte-identical: extraction failures affect the retained sequences and
+the subsequent CRF draws. All corrected R0–R3 arms must therefore use one newly
+frozen cache, with its exact post-subset tensor digest recorded in every model.
+No old pilot arm may be pooled with a replacement arm.
+
+The first recovery attempt retained 136/151 training clips but only 294/453
+requested sequences, and 14/16 validation clips with 22/32 sequences. Clip
+presence alone is insufficient. Preparation and merging now reject partial
+sequence coverage; failed preparation writes diagnostics but no `all.pt`.
+The required recovery coverage is all three sequence slots per training clip
+and both slots per validation clip. The 16,200-update budget and selection rule
+remain unchanged. No corrected training has started.
+
+`tools/m7-screen-report.py` requires declared `inputStatus` (or `--input-status`
+when absent). Withdrawn inputs produce arithmetic-only reports with no winner,
+argmax or null verdict. Corrected reports require all four rungs, three seeds
+each, and complete matched validation cells. Dataset identity, frozen baseline
+identity and model training records remain separate prerequisites for accepting
+that ranking as an eligible selection.

@@ -67,7 +67,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install
-        run: pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu && pip install --quiet pytest
+        run: pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu && pip install --quiet pytest numpy pillow
 
-      - name: Fusion equivalence
-        run: python -m pytest tools/test_reparam.py -q
+      - name: Fusion and experiment integrity
+        run: python -m pytest tools/test_reparam.py tools/test_corpus_prepare.py tools/test_corpus_shard.py tools/test_m7_screen_report.py -q

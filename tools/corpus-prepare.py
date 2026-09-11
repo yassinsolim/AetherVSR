@@ -84,7 +84,7 @@ def prefix_hash(url: str, pause: float) -> tuple[str | None, int | None]:
     for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=90) as resp:
-                blob = resp.read()
+                blob = resp.read(PREFIX_BYTES)
             return hashlib.sha256(blob).hexdigest(), len(blob)
         except Exception:
             time.sleep(4 * (attempt + 1))
@@ -94,8 +94,11 @@ def prefix_hash(url: str, pause: float) -> tuple[str | None, int | None]:
 def run(cmd: list[str], timeout: int = 600) -> bool:
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        if r.returncode:
+            print(f"  command failed ({r.returncode}): {r.stderr.strip()}", file=sys.stderr)
         return r.returncode == 0
     except subprocess.TimeoutExpired:
+        print(f"  command timed out after {timeout}s: {cmd[0]}", file=sys.stderr)
         return False
 
 
@@ -194,10 +197,17 @@ def main() -> int:
         url = clip["source_url"]
         ii = info.get(clip.get("title") or "", {})
         ph, plen = prefix_hash(url, args.pause)
-        clip["commonsSha1"] = ii.get("sha1")
-        clip["byteLength"] = ii.get("size")
-        clip["prefixSha256"] = ph
-        clip["prefixBytes"] = plen
+        observed = {"commonsSha1": ii.get("sha1"), "byteLength": ii.get("size"),
+                    "prefixSha256": ph, "prefixBytes": plen}
+        unavailable = [key for key, value in observed.items() if value is None]
+        mismatched = [key for key, value in observed.items()
+                      if clip.get(key) is not None and clip[key] != value]
+        if unavailable or mismatched:
+            reason = f"source identity unavailable={unavailable}, mismatched={mismatched}"
+            failures.append({"clip": cid, "url": url, "reason": reason})
+            print(f"  [{n}/{len(clips)}] {cid}: {reason}", file=sys.stderr)
+            continue
+        clip.update(observed)
         clip["pinnedAt"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
         gen = rng_for("seq", args.seed, cid)
@@ -227,8 +237,9 @@ def main() -> int:
             got += 1
             import shutil
             shutil.rmtree(os.path.join(args.out, "_work", tag), ignore_errors=True)
-        if got == 0:
-            failures.append({"clip": cid, "url": url, "reason": "no sequence extracted"})
+        if got != args.sequences:
+            failures.append({"clip": cid, "url": url, "expectedSequences": args.sequences,
+                             "actualSequences": got, "reason": "incomplete sequence coverage"})
         print(f"  [{n:>3}/{len(clips)}] {cid[:44]:<44} {got}/{args.sequences} seq  "
               f"{len(patches['hr']):>6} patches", file=sys.stderr)
         time.sleep(args.pause)
@@ -236,7 +247,7 @@ def main() -> int:
     import shutil
     shutil.rmtree(os.path.join(args.out, "_work"), ignore_errors=True)
 
-    if patches["hr"]:
+    if patches["hr"] and not failures:
         torch.save({"lr": torch.stack(patches["lr"]), "hr": torch.stack(patches["hr"])},
                    os.path.join(args.out, "all.pt"))
     meta = {
@@ -266,7 +277,7 @@ def main() -> int:
 
     print(f"\n  {meta['clipsPrepared']}/{len(clips)} clips, {len(index)} sequences, "
           f"{len(patches['hr'])} patches, {len(failures)} failed", file=sys.stderr)
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":
