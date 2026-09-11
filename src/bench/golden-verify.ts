@@ -71,6 +71,19 @@ export async function verifyGolden(
     );
   }
 
+  // Shape agreement is not identity. C16D2 describes every model this project
+  // has ever shipped, so vectors exported from one set of weights will happily
+  // "verify" a different set and report parity that was never tested. Milestone
+  // 7 depends on this comparison to prove a fused model matches PyTorch, so the
+  // vectors must be bound to the exact weights they came from.
+  if (golden.modelSha256 !== modelFile.sha256) {
+    throw new Error(
+      `golden vectors were exported from model sha256 ${golden.modelSha256}, ` +
+        `but the loaded model is ${modelFile.sha256}. Regenerate them with ` +
+        `tools/export-golden.py before trusting this comparison.`,
+    );
+  }
+
   device.pushErrorScope('validation');
 
   // Input as an 8-bit texture, matching what ingest hands the stem. The golden
