@@ -1,0 +1,114 @@
+{
+ "schema": "aethervsr.m7-review-coverage/1",
+ "createdAt": "2026-09-11T21:34:16.967441+00:00",
+ "reviewers": {
+  "M7Math": "fusion algebra and tests",
+  "M7Discipline": "pilot audit and protocol constancy",
+  "M7Numerics": "fusion, export and artifact-linked WebGPU",
+  "M7DataIntegrity": "corpus, split and provenance",
+  "M7Discipline2": "amendment chronology and report gating",
+  "M7Verdict": "independent recomputation of the verdict",
+  "M7Honesty": "documentation against measurement"
+ },
+ "areas": [
+  {
+   "area": "1 reparameterization mathematics",
+   "reviewedBy": "M7Math, M7Numerics",
+   "status": "covered",
+   "evidence": "Exact embedding of 1x1/1x3/3x1/identity audited; independent fp64 probe peaked 9.95e-14 against a 1e-12 bound; injected mutants rejected."
+  },
+  {
+   "area": "2 border and padding equivalence",
+   "reviewedBy": "M7Math, M7Numerics",
+   "status": "covered",
+   "evidence": "Zero-padding border equality checked explicitly, not just interior; 20 integer-valued cases bitwise equal."
+  },
+  {
+   "area": "3 bias handling",
+   "reviewedBy": "M7Math, M7Numerics",
+   "status": "covered",
+   "evidence": "Branch bias summation audited; bias=None is unsupported but has no constructor or callsite path."
+  },
+  {
+   "area": "4 BatchNorm folding",
+   "reviewedBy": "n/a",
+   "status": "not applicable",
+   "evidence": "No BatchNorm was introduced. The registered ladder is linear-branch only; the BN experiment was conditional and never run."
+  },
+  {
+   "area": "5 PyTorch pre/post-fusion equivalence",
+   "reviewedBy": "M7Math, M7Numerics",
+   "status": "covered",
+   "evidence": "71 fusion tests; worst branch-vs-fused 1.19e-6 float32, 7.2e-16 in float64 after the dtype fix."
+  },
+  {
+   "area": "6 fused export",
+   "reviewedBy": "M7Math, M7Numerics, M7Verdict",
+   "status": "covered",
+   "evidence": "Export round-trips bit-exactly through real JSON text; 17 models carry 6,291 deployed weights and no branch tensors."
+  },
+  {
+   "area": "7 WebGPU parity",
+   "reviewedBy": "M7Numerics",
+   "status": "covered",
+   "evidence": "Nine artifact-linked models verified in Chrome on apple/metal-3, f32 stage max 1.41e-6, f16 max 5.67e-3, file hashes re-checked before dispatch."
+  },
+  {
+   "area": "8 experiment attribution",
+   "reviewedBy": "M7Discipline, M7Discipline2",
+   "status": "covered",
+   "evidence": "Amendment chronology verified against git timestamps; every amendment predates the evidence it governs."
+  },
+  {
+   "area": "9 model-selection discipline",
+   "reviewedBy": "M7Discipline2, M7Verdict",
+   "status": "covered",
+   "evidence": "Tie rule, clip-first metric and the 3-seed permutation floor implemented as registered; withdrawn pilot cannot produce a selection."
+  },
+  {
+   "area": "10 confirmation-set freeze",
+   "reviewedBy": "M7Honesty",
+   "status": "covered, and the finding stands open",
+   "evidence": "The corpus is an unfrozen 16-clip proposal missing the text category. It was never opened and no model scored against it."
+  },
+  {
+   "area": "11 temporal interpretation",
+   "reviewedBy": "n/a",
+   "status": "not applicable",
+   "evidence": "No temporal claim is made. The temporal study was conditional on a deployable candidate and none was produced."
+  },
+  {
+   "area": "12 runtime parity",
+   "reviewedBy": "M7Honesty",
+   "status": "covered, two claims corrected",
+   "evidence": "Sampling scope and the per-pass spread claim were both corrected after review; GPU memory is recorded as not measured."
+  },
+  {
+   "area": "13 final replacement decision",
+   "reviewedBy": "M7Verdict",
+   "status": "covered",
+   "evidence": "Criterion 1 recomputed independently: selected seed -0.1259 dB, shortfall 0.2259 dB; failing condition 1 legitimately stops the remaining conditions."
+  }
+ ],
+ "notApplicable": [
+  "4 BatchNorm folding",
+  "11 temporal interpretation"
+ ],
+ "p0Findings": "none outstanding",
+ "correctionsMade": [
+  "golden vectors bound to model identity",
+  "fuse() dtype/device preserved",
+  "RNG confound fixed and first screen withdrawn",
+  "corpusDigest recorded",
+  "merger failure records no longer dropped",
+  "validation creator leak repaired",
+  "source timing corrected",
+  "scoring step registered",
+  "seed roster tightened",
+  "three overclaims retracted: inverted variance argument, one-directional confound, budget as proven cause"
+ ],
+ "openFindings": [
+  "confirmation corpus unfrozen and missing the text category",
+  "GPU memory not measurable through WebGPU"
+ ]
+}
