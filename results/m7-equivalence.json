@@ -1,6 +1,7 @@
 {
  "schema": "aethervsr.m7-equivalence/1",
- "chain": "multi-branch PyTorch -> fused PyTorch -> exported JSON -> (WebGPU, browser golden)",
+ "chain": "multi-branch PyTorch -> fused PyTorch -> parsed exported JSON",
+ "webgpuMeasured": false,
  "tolerance": 1e-05,
  "worstBoundaryError": 1.3113021850585938e-06,
  "passed": true,
@@ -14,7 +15,11 @@
    "multiBranchVsFused": 8.046627044677734e-07,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 8.046627044677734e-07,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 7.429625270560791e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 7.429625270560791e-08,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R1",
@@ -24,7 +29,11 @@
    "multiBranchVsFused": 7.748603820800781e-07,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 7.748603820800781e-07,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 9.882925411375254e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 9.882925411375254e-08,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R1",
@@ -34,7 +43,11 @@
    "multiBranchVsFused": 8.940696716308594e-07,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 8.940696716308594e-07,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 8.082653835117526e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 8.082653835117526e-08,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R2",
@@ -44,7 +57,11 @@
    "multiBranchVsFused": 1.0132789611816406e-06,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 1.0132789611816406e-06,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 8.062902878691602e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 8.062902878691602e-08,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R2",
@@ -54,7 +71,11 @@
    "multiBranchVsFused": 1.0132789611816406e-06,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 1.0132789611816406e-06,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 1.3497941608875408e-07,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 1.3497941608875408e-07,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R2",
@@ -64,7 +85,11 @@
    "multiBranchVsFused": 1.0728836059570312e-06,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 1.0728836059570312e-06,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 9.365935937921677e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 9.365935937921677e-08,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R3",
@@ -74,7 +99,11 @@
    "multiBranchVsFused": 1.1920928955078125e-06,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 1.1920928955078125e-06,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 1.0595421429115959e-07,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 1.0595421429115959e-07,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R3",
@@ -84,7 +113,11 @@
    "multiBranchVsFused": 1.1920928955078125e-06,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 1.1920928955078125e-06,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 9.754406704587382e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 9.754406704587382e-08,
+   "tensorNamesMatch": true,
+   "artifacts": null
   },
   {
    "rung": "R3",
@@ -94,7 +127,11 @@
    "multiBranchVsFused": 1.3113021850585938e-06,
    "fusedVsReloaded": 0.0,
    "multiBranchVsReloaded": 1.3113021850585938e-06,
-   "tensorNamesMatch": true
+   "multiBranchVsFusedMeanAbs": 1.0178918330439046e-07,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 1.0178918330439046e-07,
+   "tensorNamesMatch": true,
+   "artifacts": null
   }
  ]
 }

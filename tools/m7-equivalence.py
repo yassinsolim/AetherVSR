@@ -7,14 +7,12 @@ measured separately rather than end to end:
 
     multi-branch PyTorch  ->  fused PyTorch  ->  exported JSON  ->  WebGPU
 
-This tool covers the first three links. The fourth is the browser golden check
-in results/m7-webgpu-golden.json, which was run against the *frozen production
-model* and proves the WGSL graph reproduces PyTorch for the weights that ship
-today. It is not anchored to the synthetic weights used here, and no candidate
-has been selected, so no candidate-specific WebGPU chain exists yet. If a rung
-ever wins, that model gets its own golden export and its own browser run before
-any replacement claim is made; the verifier now refuses vectors that did not
-come from the model under test, so that step cannot be skipped silently.
+This tool measures the first three links. With --export-dir it also writes each
+fused model and invokes the existing golden exporter, recording both file hashes
+and measuring the CPU boundaries on that exact golden input. Those files can
+then be passed to the browser's aethervsrGolden hook. CPU success alone never
+sets a WebGPU pass: browser results must be recorded separately for these same
+artifacts. Synthetic proof models are not trained quality candidates.
 
 Reporting one end-to-end number would hide which link moved, and two errors that
 cancel would look like success.
@@ -27,6 +25,7 @@ import hashlib
 import json
 import os
 import sys
+import subprocess
 
 import torch
 
@@ -41,9 +40,8 @@ TOL = 1e-5
 def rebuild_from_export(payload: dict) -> AetherSR:
     """Reconstruct the network from the exported planar tensors.
 
-    Deliberately goes through the *file*, not the in-memory model: this is what
-    proves the export layout round-trips, which is the link where a silent
-    reshape or a transposed kernel would hide.
+    Reconstruct from the exported planar layout. With --export-dir the payload
+    is parsed from the emitted file; otherwise it is parsed from JSON text.
     """
     model = AetherSR(channels=payload["features"], depth=payload["depth"])
     w = payload["weights"]
@@ -63,9 +61,17 @@ def main() -> int:
     ap.add_argument("--rungs", default="R1,R2,R3")
     ap.add_argument("--seeds", default="0,1,2")
     ap.add_argument("--out", default="results/m7-equivalence.json")
+    ap.add_argument("--export-dir", help="emit fused models and matching golden vectors for browser verification")
+    ap.add_argument("--model-template", default="public/models/aethersr-c16d2.json")
     args = ap.parse_args()
 
     boundaries: list[dict] = []
+    if args.export_dir:
+        with open(args.model_template, encoding="utf-8") as fh:
+            template = json.load(fh)
+        if template["features"] != 16 or template["depth"] != 2:
+            raise SystemExit("proof template must describe C16D2")
+        os.makedirs(args.export_dir, exist_ok=True)
     for rung in [r for r in args.rungs.split(",") if r.strip()]:
         for seed in [int(s) for s in args.seeds.split(",") if s.strip()]:
             torch.manual_seed(seed)
@@ -83,12 +89,39 @@ def main() -> int:
             # float64, but the tensors are float32 - so this measures whether
             # widening to double and back is lossless, which is the thing the
             # shipped loader actually does.
-            payload = json.loads(json.dumps({
-                "features": 16, "depth": 2, "weights": export_weights(fused),
-            }))
+            payload = {"features": 16, "depth": 2, "weights": export_weights(fused)}
+            artifacts = None
+            if args.export_dir:
+                payload = dict(template, **payload)
+                payload.pop("sha256", None)
+                payload["training"] = {"status": "untrained-synthetic-proof", "rung": rung, "seed": seed}
+                payload["provenance"] = "Randomized independent AetherVSR fusion proof; not a quality candidate."
+                body = json.dumps(payload, separators=(",", ":"), sort_keys=True)
+                payload["sha256"] = hashlib.sha256(body.encode()).hexdigest()
+                model_path = os.path.join(args.export_dir, f"{rung}-seed{seed}.json")
+                golden_path = os.path.join(args.export_dir, f"{rung}-seed{seed}-golden.json")
+                with open(model_path, "w", encoding="utf-8") as fh:
+                    json.dump(payload, fh, separators=(",", ":"), sort_keys=True)
+                subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "export-golden.py"),
+                                "--model", model_path, "--out", golden_path], check=True)
+                with open(model_path, "rb") as fh:
+                    model_bytes = fh.read()
+                with open(golden_path, "rb") as fh:
+                    golden_bytes = fh.read()
+                payload = json.loads(model_bytes)
+                golden = json.loads(golden_bytes)
+                if golden["modelSha256"] != payload["sha256"]:
+                    raise SystemExit("golden/model identity mismatch")
+                artifacts = {"model": model_path, "golden": golden_path,
+                             "modelSha256": payload["sha256"],
+                             "modelFileSha256": hashlib.sha256(model_bytes).hexdigest(),
+                             "goldenFileSha256": hashlib.sha256(golden_bytes).hexdigest()}
+                x = torch.tensor(golden["input"]).reshape(1, 3, golden["height"], golden["width"])
+            else:
+                payload = json.loads(json.dumps(payload))
             reloaded = rebuild_from_export(payload)
-
-            x = torch.rand(2, 3, 24, 32)
+            if not args.export_dir:
+                x = torch.rand(2, 3, 24, 32)
             with torch.no_grad():
                 a, b, c = rep(x), fused(x), reloaded(x)
 
@@ -99,7 +132,11 @@ def main() -> int:
                 "multiBranchVsFused": (a - b).abs().max().item(),
                 "fusedVsReloaded": (b - c).abs().max().item(),
                 "multiBranchVsReloaded": (a - c).abs().max().item(),
+                "multiBranchVsFusedMeanAbs": (a - b).abs().mean().item(),
+                "fusedVsReloadedMeanAbs": (b - c).abs().mean().item(),
+                "multiBranchVsReloadedMeanAbs": (a - c).abs().mean().item(),
                 "tensorNamesMatch": sorted(export_weights(fused)) == sorted(export_weights(reloaded)),
+                "artifacts": artifacts,
             })
 
     worst = max(
@@ -108,7 +145,8 @@ def main() -> int:
     )
     report = {
         "schema": "aethervsr.m7-equivalence/1",
-        "chain": "multi-branch PyTorch -> fused PyTorch -> exported JSON -> (WebGPU, browser golden)",
+        "chain": "multi-branch PyTorch -> fused PyTorch -> parsed exported JSON",
+        "webgpuMeasured": False,
         "tolerance": TOL,
         "worstBoundaryError": worst,
         "passed": worst <= TOL and all(b["tensorNamesMatch"] for b in boundaries),

@@ -1,0 +1,191 @@
+{
+ "schema": "aethervsr.m7-equivalence/1",
+ "chain": "multi-branch PyTorch -> fused PyTorch -> parsed exported JSON",
+ "webgpuMeasured": false,
+ "tolerance": 1e-05,
+ "worstBoundaryError": 1.1920928955078125e-06,
+ "passed": true,
+ "note": "Each link is measured separately. A single end-to-end number would hide which boundary moved, and two errors that cancel would look like success.",
+ "boundaries": [
+  {
+   "rung": "R1",
+   "seed": 0,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 6.556510925292969e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 6.556510925292969e-07,
+   "multiBranchVsFusedMeanAbs": 7.584680616901096e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 7.584680616901096e-08,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R1-seed0.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R1-seed0-golden.json",
+    "modelSha256": "148e2ff7207659389d255eb96b1e615e53db09c8cfabe9e0ffddd1df52a20734",
+    "modelFileSha256": "87cfd6cd4c2aa7e1716cc702bdaf576c5f6c141c682575cc2cd1830439294a28",
+    "goldenFileSha256": "f8e01aac5128bf9c88f7b3b9631988daeb06e4acbaac3f1c57e277b4a884210e"
+   }
+  },
+  {
+   "rung": "R1",
+   "seed": 1,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 7.152557373046875e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 7.152557373046875e-07,
+   "multiBranchVsFusedMeanAbs": 9.913229348512687e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 9.913229348512687e-08,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R1-seed1.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R1-seed1-golden.json",
+    "modelSha256": "a7f473c24f7464da2637cb4fdc6b01de5e04adc6b464598bf264a10b8803128d",
+    "modelFileSha256": "30322a72b12318938a9ccaa3b6a888611a18d5fed1eb4d88112885d9c17aa746",
+    "goldenFileSha256": "b533e1473fe56a9df2af494c7f787d7858f56c5dbae6ecaffb0822daa347813d"
+   }
+  },
+  {
+   "rung": "R1",
+   "seed": 2,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 7.748603820800781e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 7.748603820800781e-07,
+   "multiBranchVsFusedMeanAbs": 8.323574007818024e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 8.323574007818024e-08,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R1-seed2.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R1-seed2-golden.json",
+    "modelSha256": "09f6c953270752d6d2c97922693c55145898a9ff741de5aeae20ff93c4e46202",
+    "modelFileSha256": "dc7c9c22218d4a412283c6a5a6962d396eae92319d1d14e156e575b0a2996191",
+    "goldenFileSha256": "5b16f0c13b34b854d6272e762d6a6443c02652b0b61c99761de6d0552c2fc25e"
+   }
+  },
+  {
+   "rung": "R2",
+   "seed": 0,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 8.344650268554688e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 8.344650268554688e-07,
+   "multiBranchVsFusedMeanAbs": 8.328667178147953e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 8.328667178147953e-08,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R2-seed0.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R2-seed0-golden.json",
+    "modelSha256": "27fa1bb52ddaf738c4716d6262123cb8b0147d602e66e247f578f8589f27cbc1",
+    "modelFileSha256": "c8edcbc558852971f61c52ae698bc46d03c0ae80a31c8a9e09b4f092224d04ed",
+    "goldenFileSha256": "f133ace081d5f024bebef9186e3397c1fdf5b4c740fda15438bc9e574b496e6e"
+   }
+  },
+  {
+   "rung": "R2",
+   "seed": 1,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.0728836059570312e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.0728836059570312e-06,
+   "multiBranchVsFusedMeanAbs": 1.278749550692737e-07,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 1.278749550692737e-07,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R2-seed1.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R2-seed1-golden.json",
+    "modelSha256": "497cf62c20ef4e563a5d85c3c2c84fc95240e172d62069ca153028ebe93942bb",
+    "modelFileSha256": "707e2c469477b25c31652243008be1768d5f3c41e67d41b0f50e96340b75e46a",
+    "goldenFileSha256": "e5e3a77c2287b77fcf61fc0aa70e3614345cbce3f2415348964b9fca816a78e6"
+   }
+  },
+  {
+   "rung": "R2",
+   "seed": 2,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.0728836059570312e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.0728836059570312e-06,
+   "multiBranchVsFusedMeanAbs": 9.341359685777206e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 9.341359685777206e-08,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R2-seed2.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R2-seed2-golden.json",
+    "modelSha256": "f733a27240bf5341925357685c0feb4aa9afaeafa31cd54efa91059a0acbd371",
+    "modelFileSha256": "30702f82ad8f99b25cccad7aeee3add75954229f3f73cbd718181b2a88b98ba1",
+    "goldenFileSha256": "9cd4be12476ce6926054d6807fb44c16ad6069e9f31471cd713a7cdc18a010f3"
+   }
+  },
+  {
+   "rung": "R3",
+   "seed": 0,
+   "trainingParameters": 9971,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.1324882507324219e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.1324882507324219e-06,
+   "multiBranchVsFusedMeanAbs": 1.028604117436771e-07,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 1.028604117436771e-07,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R3-seed0.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R3-seed0-golden.json",
+    "modelSha256": "fefb1e4dde72388cfe293244a4449cbcb062b5e284dcb9e349b9c536568df645",
+    "modelFileSha256": "b9ba795f50396c7ec34756b694d437c0ef21a49fd66919fb827acc8dd7878b88",
+    "goldenFileSha256": "b31952623f1e19b781a8144b5261c87e136b0ae298ac0067b0f2540a7e69cd16"
+   }
+  },
+  {
+   "rung": "R3",
+   "seed": 1,
+   "trainingParameters": 9971,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 9.5367431640625e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 9.5367431640625e-07,
+   "multiBranchVsFusedMeanAbs": 9.8482914268061e-08,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 9.8482914268061e-08,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R3-seed1.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R3-seed1-golden.json",
+    "modelSha256": "dbb664f4f96603750003f660aef197ceba5b99846f5e698449d1db166dd3186d",
+    "modelFileSha256": "cf6c9c01596ad95a421a05f99a9d7baf3dd1dcdb678e4bc1daeccdb2190f55b3",
+    "goldenFileSha256": "e2b8449400f701805a15f5fb6e941d35a44bc1fc9c41c86cdd9aeaadfb86323f"
+   }
+  },
+  {
+   "rung": "R3",
+   "seed": 2,
+   "trainingParameters": 9971,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.1920928955078125e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.1920928955078125e-06,
+   "multiBranchVsFusedMeanAbs": 1.0702044050958648e-07,
+   "fusedVsReloadedMeanAbs": 0.0,
+   "multiBranchVsReloadedMeanAbs": 1.0702044050958648e-07,
+   "tensorNamesMatch": true,
+   "artifacts": {
+    "model": "data/captured-train-v2/sources/m7-recovery/parity/R3-seed2.json",
+    "golden": "data/captured-train-v2/sources/m7-recovery/parity/R3-seed2-golden.json",
+    "modelSha256": "8c278ad39eaf50dbd413ca91ae74164f549dc992925bf08455d704e2cf4b5b31",
+    "modelFileSha256": "925e0fd627931e9288a567e0cfd2c2b83fe2452c6779c345368fae497ccf1771",
+    "goldenFileSha256": "c2abe69321d3f15bbacb62e513da91ae8982933791eeb183d8ae683083d03098"
+   }
+  }
+ ]
+}

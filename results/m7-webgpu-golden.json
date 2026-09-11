@@ -1,13 +1,13 @@
 {
  "schema": "aethervsr.m7-webgpu-golden/1",
- "purpose": "The fourth link of the Milestone 7 equivalence chain, executed on real hardware. The first three links are in results/m7-equivalence.json; this one cannot be measured without a GPU.",
+ "purpose": "Historical WebGPU verification of frozen production weights only. This run was not linked to the synthetic weights in m7-equivalence.json; the artifact-linked structural proof is recorded separately in m7-linked-equivalence.json and m7-linked-webgpu.json.",
  "machine": "Apple M5 base, macOS 26.6.2",
  "browser": "Chrome for Testing 152.0.7977.42",
  "adapter": "apple / metal-3",
  "model": "public/models/aethersr-c16d2.json",
  "modelSha256": "9154d9490b02d8fdf136edd990217cfb6f0e9956ed928da7179d7781832c8e02",
  "goldenVectors": "public/models/golden-c16d2.json",
- "note": "Vectors regenerated in commit 802b0e4; before that they carried a stale modelSha256 and the verifier did not check it, so every prior golden run compared the runtime against the wrong weights.",
+ "note": "Vectors regenerated in commit 802b0e4 because their modelSha256 did not match the then-current production model. The guard now rejects that mismatch. This record does not establish which models were used by earlier browser runs.",
  "outputToleranceNote": "The output stage is quantised to 8 bits by the storage texture, so it carries a 1.5/255 floor. A tighter bound would measure the texture format rather than the graph.",
  "precisions": {
   "f16": {

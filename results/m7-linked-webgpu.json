@@ -1,0 +1,1092 @@
+{
+ "schema": "aethervsr.m7-linked-webgpu/1",
+ "measuredAt": "2026-09-11T12:27:06.842Z",
+ "scope": "Randomized R1/R2/R3 fusion proof; not trained quality candidates",
+ "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+ "adapter": {
+  "vendor": "apple",
+  "architecture": "metal-3",
+  "device": "",
+  "description": ""
+ },
+ "cpuReport": "/results/m7-linked-equivalence.json",
+ "runs": [
+  {
+   "rung": "R1",
+   "seed": 0,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R1-seed0.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R1-seed0-golden.json",
+   "modelSha256": "148e2ff7207659389d255eb96b1e615e53db09c8cfabe9e0ffddd1df52a20734",
+   "modelFileSha256": "87cfd6cd4c2aa7e1716cc702bdaf576c5f6c141c682575cc2cd1830439294a28",
+   "goldenFileSha256": "f8e01aac5128bf9c88f7b3b9631988daeb06e4acbaac3f1c57e277b4a884210e",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 2.682209014892578e-07,
+       "meanAbsError": 4.8583745619149944e-08,
+       "referenceRange": [
+        -0.8617312908172607,
+        0.9020889401435852
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 4.76837158203125e-07,
+       "meanAbsError": 8.489867823572676e-08,
+       "referenceRange": [
+        -0.8660610318183899,
+        0.8588120937347412
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 6.407499313354492e-07,
+       "meanAbsError": 1.1592802214484739e-07,
+       "referenceRange": [
+        -0.9086226224899292,
+        0.9004432559013367
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.0019603148102760315,
+      "meanAbsError": 0.0005269212741849413,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0016459822654724121,
+       "meanAbsError": 0.0002559432726201294,
+       "referenceRange": [
+        -0.8617312908172607,
+        0.9020889401435852
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.0020827054977416992,
+       "meanAbsError": 0.0003879459457445389,
+       "referenceRange": [
+        -0.8660610318183899,
+        0.8588120937347412
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.0029778778553009033,
+       "meanAbsError": 0.000526558323336701,
+       "referenceRange": [
+        -0.9086226224899292,
+        0.9004432559013367
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.00494229793548584,
+      "meanAbsError": 0.0006284764014910454,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R1",
+   "seed": 1,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R1-seed1.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R1-seed1-golden.json",
+   "modelSha256": "a7f473c24f7464da2637cb4fdc6b01de5e04adc6b464598bf264a10b8803128d",
+   "modelFileSha256": "30322a72b12318938a9ccaa3b6a888611a18d5fed1eb4d88112885d9c17aa746",
+   "goldenFileSha256": "b533e1473fe56a9df2af494c7f787d7858f56c5dbae6ecaffb0822daa347813d",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 3.5762786865234375e-07,
+       "meanAbsError": 5.224830819846223e-08,
+       "referenceRange": [
+        -0.9332066774368286,
+        0.9077243208885193
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 5.662441253662109e-07,
+       "meanAbsError": 9.398438235071656e-08,
+       "referenceRange": [
+        -0.9095346331596375,
+        0.9691715836524963
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 1.1324882507324219e-06,
+       "meanAbsError": 1.2702454199597923e-07,
+       "referenceRange": [
+        -0.9007548093795776,
+        0.9334980249404907
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.001960150897502899,
+      "meanAbsError": 0.0006385717504397487,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0015652179718017578,
+       "meanAbsError": 0.00025800484076654584,
+       "referenceRange": [
+        -0.9332066774368286,
+        0.9077243208885193
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.002293497323989868,
+       "meanAbsError": 0.00042311248022060727,
+       "referenceRange": [
+        -0.9095346331596375,
+        0.9691715836524963
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.0031634867191314697,
+       "meanAbsError": 0.000564455928037925,
+       "referenceRange": [
+        -0.9007548093795776,
+        0.9334980249404907
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.00496828556060791,
+      "meanAbsError": 0.000773845180244987,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R1",
+   "seed": 2,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R1-seed2.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R1-seed2-golden.json",
+   "modelSha256": "09f6c953270752d6d2c97922693c55145898a9ff741de5aeae20ff93c4e46202",
+   "modelFileSha256": "dc7c9c22218d4a412283c6a5a6962d396eae92319d1d14e156e575b0a2996191",
+   "goldenFileSha256": "5b16f0c13b34b854d6272e762d6a6443c02652b0b61c99761de6d0552c2fc25e",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 2.980232238769531e-07,
+       "meanAbsError": 5.0764377590439835e-08,
+       "referenceRange": [
+        -0.9391788244247437,
+        0.9034649133682251
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 5.066394805908203e-07,
+       "meanAbsError": 8.768135847011156e-08,
+       "referenceRange": [
+        -0.9451466798782349,
+        0.930342972278595
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 7.934868335723877e-07,
+       "meanAbsError": 1.224057584181537e-07,
+       "referenceRange": [
+        -0.8979624509811401,
+        0.9390048980712891
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.0019605308771133423,
+      "meanAbsError": 0.0005570550624219726,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0014302730560302734,
+       "meanAbsError": 0.0002534934656874081,
+       "referenceRange": [
+        -0.9391788244247437,
+        0.9034649133682251
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.0023492276668548584,
+       "meanAbsError": 0.00040965015906498553,
+       "referenceRange": [
+        -0.9451466798782349,
+        0.930342972278595
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.0029894299805164337,
+       "meanAbsError": 0.0005468805336358665,
+       "referenceRange": [
+        -0.8979624509811401,
+        0.9390048980712891
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.004265129566192627,
+      "meanAbsError": 0.0006736943153858496,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R2",
+   "seed": 0,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R2-seed0.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R2-seed0-golden.json",
+   "modelSha256": "27fa1bb52ddaf738c4716d6262123cb8b0147d602e66e247f578f8589f27cbc1",
+   "modelFileSha256": "c8edcbc558852971f61c52ae698bc46d03c0ae80a31c8a9e09b4f092224d04ed",
+   "goldenFileSha256": "f133ace081d5f024bebef9186e3397c1fdf5b4c740fda15438bc9e574b496e6e",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 2.682209014892578e-07,
+       "meanAbsError": 4.8583745619149944e-08,
+       "referenceRange": [
+        -0.8617312908172607,
+        0.9020889401435852
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 5.364418029785156e-07,
+       "meanAbsError": 9.595360713395469e-08,
+       "referenceRange": [
+        -0.9194673299789429,
+        0.9624872207641602
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 7.972121238708496e-07,
+       "meanAbsError": 1.3123631722085824e-07,
+       "referenceRange": [
+        -0.9855656027793884,
+        0.9819437265396118
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.001960545778274536,
+      "meanAbsError": 0.000501582668322145,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0016459822654724121,
+       "meanAbsError": 0.0002559432726201294,
+       "referenceRange": [
+        -0.8617312908172607,
+        0.9020889401435852
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.0025676190853118896,
+       "meanAbsError": 0.0004452711860407632,
+       "referenceRange": [
+        -0.9194673299789429,
+        0.9624872207641602
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.003922581672668457,
+       "meanAbsError": 0.0006016418944601772,
+       "referenceRange": [
+        -0.9855656027793884,
+        0.9819437265396118
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.005434997379779816,
+      "meanAbsError": 0.000638293713968273,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R2",
+   "seed": 1,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R2-seed1.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R2-seed1-golden.json",
+   "modelSha256": "497cf62c20ef4e563a5d85c3c2c84fc95240e172d62069ca153028ebe93942bb",
+   "modelFileSha256": "707e2c469477b25c31652243008be1768d5f3c41e67d41b0f50e96340b75e46a",
+   "goldenFileSha256": "e5e3a77c2287b77fcf61fc0aa70e3614345cbce3f2415348964b9fca816a78e6",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 3.5762786865234375e-07,
+       "meanAbsError": 5.224830819846223e-08,
+       "referenceRange": [
+        -0.9332066774368286,
+        0.9077243208885193
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 6.966292858123779e-07,
+       "meanAbsError": 9.934295756390081e-08,
+       "referenceRange": [
+        -0.9747143387794495,
+        0.9054065346717834
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 1.125037670135498e-06,
+       "meanAbsError": 1.5355751736834122e-07,
+       "referenceRange": [
+        -0.9946162104606628,
+        0.9679575562477112
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.001960158348083496,
+      "meanAbsError": 0.0006648908897154292,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0015652179718017578,
+       "meanAbsError": 0.00025800484076654584,
+       "referenceRange": [
+        -0.9332066774368286,
+        0.9077243208885193
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.002785235643386841,
+       "meanAbsError": 0.00048331715518775315,
+       "referenceRange": [
+        -0.9747143387794495,
+        0.9054065346717834
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.005310043692588806,
+       "meanAbsError": 0.0007046596698000821,
+       "referenceRange": [
+        -0.9946162104606628,
+        0.9679575562477112
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.006467074155807495,
+      "meanAbsError": 0.000881943531163011,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R2",
+   "seed": 2,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R2-seed2.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R2-seed2-golden.json",
+   "modelSha256": "f733a27240bf5341925357685c0feb4aa9afaeafa31cd54efa91059a0acbd371",
+   "modelFileSha256": "30702f82ad8f99b25cccad7aeee3add75954229f3f73cbd718181b2a88b98ba1",
+   "goldenFileSha256": "9cd4be12476ce6926054d6807fb44c16ad6069e9f31471cd713a7cdc18a010f3",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 2.980232238769531e-07,
+       "meanAbsError": 5.0764377590439835e-08,
+       "referenceRange": [
+        -0.9391788244247437,
+        0.9034649133682251
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 7.450580596923828e-07,
+       "meanAbsError": 1.0398675224602509e-07,
+       "referenceRange": [
+        -0.9739364981651306,
+        0.9434219598770142
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 1.1920928955078125e-06,
+       "meanAbsError": 1.5716277819895671e-07,
+       "referenceRange": [
+        -0.9881507754325867,
+        0.9790365695953369
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.0019603967666625977,
+      "meanAbsError": 0.0004590439445261533,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0014302730560302734,
+       "meanAbsError": 0.0002534934656874081,
+       "referenceRange": [
+        -0.9391788244247437,
+        0.9034649133682251
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.002921760082244873,
+       "meanAbsError": 0.00046780511057420426,
+       "referenceRange": [
+        -0.9739364981651306,
+        0.9434219598770142
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.004908151924610138,
+       "meanAbsError": 0.0006831482402157955,
+       "referenceRange": [
+        -0.9881507754325867,
+        0.9790365695953369
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.005424559116363525,
+      "meanAbsError": 0.0006101396997514206,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R3",
+   "seed": 0,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R3-seed0.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R3-seed0-golden.json",
+   "modelSha256": "fefb1e4dde72388cfe293244a4449cbcb062b5e284dcb9e349b9c536568df645",
+   "modelFileSha256": "b9ba795f50396c7ec34756b694d437c0ef21a49fd66919fb827acc8dd7878b88",
+   "goldenFileSha256": "b31952623f1e19b781a8144b5261c87e136b0ae298ac0067b0f2540a7e69cd16",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 2.682209014892578e-07,
+       "meanAbsError": 4.8583745619149944e-08,
+       "referenceRange": [
+        -0.8617312908172607,
+        0.9020889401435852
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 5.960464477539062e-07,
+       "meanAbsError": 1.0554977573444073e-07,
+       "referenceRange": [
+        -0.9628126621246338,
+        0.9833253026008606
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 1.1026859283447266e-06,
+       "meanAbsError": 1.4863553587929346e-07,
+       "referenceRange": [
+        -0.9985442161560059,
+        0.9965572953224182
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.0019606947898864746,
+      "meanAbsError": 0.000493375885626948,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0016459822654724121,
+       "meanAbsError": 0.0002559432726201294,
+       "referenceRange": [
+        -0.8617312908172607,
+        0.9020889401435852
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.0029277635912876576,
+       "meanAbsError": 0.0005097102918559434,
+       "referenceRange": [
+        -0.9628126621246338,
+        0.9833253026008606
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.005102425813674927,
+       "meanAbsError": 0.0007020232315018878,
+       "referenceRange": [
+        -0.9985442161560059,
+        0.9965572953224182
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.005828380584716797,
+      "meanAbsError": 0.0006823660442023538,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R3",
+   "seed": 1,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R3-seed1.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R3-seed1-golden.json",
+   "modelSha256": "dbb664f4f96603750003f660aef197ceba5b99846f5e698449d1db166dd3186d",
+   "modelFileSha256": "cf6c9c01596ad95a421a05f99a9d7baf3dd1dcdb678e4bc1daeccdb2190f55b3",
+   "goldenFileSha256": "e2b8449400f701805a15f5fb6e941d35a44bc1fc9c41c86cdd9aeaadfb86323f",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 3.5762786865234375e-07,
+       "meanAbsError": 5.224830819846223e-08,
+       "referenceRange": [
+        -0.9332066774368286,
+        0.9077243208885193
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 8.642673492431641e-07,
+       "meanAbsError": 1.1573676002759233e-07,
+       "referenceRange": [
+        -0.985558271408081,
+        0.9698675274848938
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 1.043081283569336e-06,
+       "meanAbsError": 1.5712241226613818e-07,
+       "referenceRange": [
+        -0.9997321367263794,
+        0.987114429473877
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.0019605159759521484,
+      "meanAbsError": 0.0004282869791091394,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0015652179718017578,
+       "meanAbsError": 0.00025800484076654584,
+       "referenceRange": [
+        -0.9332066774368286,
+        0.9077243208885193
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.0033505186438560486,
+       "meanAbsError": 0.0005198380182248977,
+       "referenceRange": [
+        -0.985558271408081,
+        0.9698675274848938
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.005665510892868042,
+       "meanAbsError": 0.0006884510363202404,
+       "referenceRange": [
+        -0.9997321367263794,
+        0.987114429473877
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.005634218454360962,
+      "meanAbsError": 0.0005957824004225484,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  },
+  {
+   "rung": "R3",
+   "seed": 2,
+   "modelUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R3-seed2.json",
+   "goldenUrl": "/data/captured-train-v2/sources/m7-recovery/parity/R3-seed2-golden.json",
+   "modelSha256": "8c278ad39eaf50dbd413ca91ae74164f549dc992925bf08455d704e2cf4b5b31",
+   "modelFileSha256": "925e0fd627931e9288a567e0cfd2c2b83fe2452c6779c345368fae497ccf1771",
+   "goldenFileSha256": "c2abe69321d3f15bbacb62e513da91ae8982933791eeb183d8ae683083d03098",
+   "precisions": {
+    "f32": {
+     "supported": true,
+     "useF16": false,
+     "tolerance": 0.001,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 2.980232238769531e-07,
+       "meanAbsError": 5.0764377590439835e-08,
+       "referenceRange": [
+        -0.9391788244247437,
+        0.9034649133682251
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 8.046627044677734e-07,
+       "meanAbsError": 1.1314554626551399e-07,
+       "referenceRange": [
+        -0.9974113702774048,
+        0.9755978584289551
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 1.4118850231170654e-06,
+       "meanAbsError": 1.7644127344359126e-07,
+       "referenceRange": [
+        -0.9929364323616028,
+        0.9927361607551575
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.001958608627319336,
+      "meanAbsError": 0.00046639388619951205,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.0058823529411764705
+    },
+    "f16": {
+     "supported": true,
+     "useF16": true,
+     "tolerance": 0.05,
+     "stages": [
+      {
+       "stage": "stem",
+       "maxAbsError": 0.0014302730560302734,
+       "meanAbsError": 0.0002534934656874081,
+       "referenceRange": [
+        -0.9391788244247437,
+        0.9034649133682251
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.0",
+       "maxAbsError": 0.0030135810375213623,
+       "meanAbsError": 0.0005169610379146169,
+       "referenceRange": [
+        -0.9974113702774048,
+        0.9755978584289551
+       ],
+       "elements": 6144,
+       "passed": true
+      },
+      {
+       "stage": "body.1",
+       "maxAbsError": 0.005497053265571594,
+       "meanAbsError": 0.0007651763662887371,
+       "referenceRange": [
+        -0.9929364323616028,
+        0.9927361607551575
+       ],
+       "elements": 6144,
+       "passed": true
+      }
+     ],
+     "output": {
+      "stage": "output",
+      "maxAbsError": 0.005610823631286621,
+      "meanAbsError": 0.0006701343979026811,
+      "referenceRange": [
+       0,
+       1
+      ],
+      "elements": 4608,
+      "passed": true
+     },
+     "passed": true,
+     "diagnostics": [],
+     "outputTolerance": 0.05
+    }
+   }
+  }
+ ],
+ "passed": true,
+ "environment": {
+  "cpu": "Apple M5",
+  "macOS": "26.6.2",
+  "browser": "Chrome/152.0.7977.42"
+ }
+}
