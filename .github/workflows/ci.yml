@@ -48,3 +48,26 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # The fusion equivalence gate. Milestone 7's entire safety argument is that a
+  # training-time reparameterized block collapses *exactly* into the deployed
+  # convolution, and that argument is only load-bearing if it is checked on
+  # every push rather than on the one machine where the model was trained.
+  #
+  # Separate job from `gate` because it needs Python and torch and nothing else
+  # here does; a red cross should say "fusion broke", not "the build is slow".
+  # CPU-only torch keeps the runner install from pulling a CUDA stack.
+  fusion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu && pip install --quiet pytest
+
+      - name: Fusion equivalence
+        run: python -m pytest tools/test_reparam.py -q
