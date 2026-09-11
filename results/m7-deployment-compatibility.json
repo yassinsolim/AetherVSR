@@ -1,0 +1,23 @@
+{
+ "schema": "aethervsr.m7-deployment-compatibility/1",
+ "createdAt": "2026-09-11T19:20:42.034623+00:00",
+ "candidate": "models/m7-corrected/R3-seed2.json",
+ "baseline": "public/models/aethersr-c16d2.json",
+ "candidateTrainingParameters": 9971,
+ "candidateDeployedParameters": 6291,
+ "baselineDeployedParameters": 6291,
+ "checks": {
+  "architecture": true,
+  "architectureVersion": true,
+  "scale/features/depth": true,
+  "precision": true,
+  "layers identical": true,
+  "normalisation identical": true,
+  "tensor names identical": true,
+  "tensor lengths identical": true,
+  "deployed parameter count": true,
+  "no branch tensors leaked": true,
+  "weights differ in value": true
+ },
+ "note": "R3 trains 9,971 parameters and deploys 6,291. Tensor names, lengths, layer descriptors, normalisation and architecture version are identical to the shipped model; only weight values differ. No runtime or shader change is implied."
+}

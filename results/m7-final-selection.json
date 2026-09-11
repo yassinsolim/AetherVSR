@@ -1,0 +1,22 @@
+{
+ "schema": "aethervsr.m7-final-selection/1",
+ "createdAt": "2026-09-11T20:50:03.984878+00:00",
+ "rung": "R3",
+ "perSeedMeanDeltaVsProduction": {
+  "R3-seed12": -0.12591284389297167,
+  "R3-seed14": -0.14531617984175682,
+  "R3-seed13": -0.1464558703203996,
+  "R3-seed11": -0.15322942286729813,
+  "R3-seed15": -0.15730221445361772
+ },
+ "argmax": "R3-seed12",
+ "tiedWithin0.01": [
+  "R3-seed12"
+ ],
+ "selected": "R3-seed12",
+ "selectedMeanDeltaVsProduction": -0.12591284389297167,
+ "replacementCriterion1Threshold": 0.1,
+ "replacementCriterion1Met": false,
+ "decision": "Retain the current production model. The selected candidate is below the frozen production model, so the pre-registered replacement criterion fails at its first condition and the remaining conditions are not reached.",
+ "budgetNote": "All arms trained 16,200 optimizer updates; the shipped model trained 81,180. This comparison selects a rung, not a deployable model."
+}
