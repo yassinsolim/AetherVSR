@@ -2187,11 +2187,15 @@ its own data, never an AetherVSR result.
 | SPAN, CVPRW 2024 | rep vs no-rep | 48-channel | ×4 SR | **+0.02 – +0.08 dB** | same 1e6 iterations |
 | ESPAN, CVPRW 2025 | RepVGG/EDBB/RRRB/GRep | ~192 K | ×4 SR, NTIRE'25 LD-valid | see below | yes, same settings |
 | NTIRE 2022 efficient-SR report | 3×3 + 1×1 + derivative + skip | small models | ×4 SR | "slight gain", explicitly **0.02 dB** | no controlled schedule |
+| CLB, CVPRW 2022 ([NTIRE](https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/papers/Wang_Efficient_Image_Super-Resolution_With_Collapsible_Linear_Blocks_CVPRW_2022_paper.pdf)) | collapsible linear blocks | 0.79 M | ×4 SR, DIV2K val | pruned IMDN 28.97 → 29.00 (**+0.03 dB**) | yes; a further +0.05 dB came from two-stage training, not the blocks |
 
 **Our +0.0247 dB is at the low end of this range, and that is the honest
-reading.** It sits alongside NTIRE 2022's "0.02 dB for small models" and SPAN's
-+0.02–0.08 dB, below ECBSR's ≈0.1 dB for ECB and well below RepVGG's and DBB's
-classification gains.
+reading.** The closest comparison in kind is CLB: isolating collapsible linear
+blocks from the training schedule leaves **+0.03 dB**, almost exactly our
+figure, and its authors are explicit that a further +0.05 dB came from two-stage
+training rather than from the blocks. Ours also sits alongside NTIRE 2022's
+"slight gain, 0.02 dB" for small models and SPAN's +0.02–0.08 dB, below ECBSR's
+≈0.1 dB for ECB, and far below RepVGG's and DBB's classification gains.
 
 **Scale — our size is covered, and that is the surprise.** RepSR reports
 M4C8 at **3.70 K** and M4C16 at **11.90 K** deployed parameters, bracketing our
