@@ -1,0 +1,87 @@
+{
+ "schema": "aethervsr.m7-runtime-parity/1",
+ "measuredAt": "2026-09-11T20:54:04.311402+00:00",
+ "machine": "Apple M5, macOS 26.6.2",
+ "browser": "Chrome for Testing 152.0.7977.42",
+ "adapter": "apple / metal-3",
+ "clip": "public/media/aethervsr-testclip-720p60-h264.mp4 (720p60 H.264)",
+ "output": "2560x1440 (2.00x)",
+ "protocol": "Alternating A/B/A/B. Each pass: navigate, 15 s warm-up discarded, counters reset, 30 s steady-state window, n=240 GPU timestamp samples. Measured with training stopped so nothing else held a Metal context.",
+ "passes": [
+  {
+   "model": "production",
+   "gpuMsAvg": 6.15,
+   "gpuP50": 6.09,
+   "gpuP95": 7.28,
+   "gpuMax": 8.37,
+   "cpuMsAvg": 0.18,
+   "budgetPct": 36.9,
+   "renderedFps": 58.1,
+   "presentedFps": 59.6,
+   "skipped": 45,
+   "framesInWindow": 1743,
+   "fallback": false
+  },
+  {
+   "model": "R3-seed12",
+   "gpuMsAvg": 6.1,
+   "gpuP50": 6.02,
+   "gpuP95": 7.34,
+   "gpuMax": 8.54,
+   "cpuMsAvg": 0.2,
+   "budgetPct": 36.6,
+   "renderedFps": 58.7,
+   "presentedFps": 59.6,
+   "skipped": 26,
+   "framesInWindow": 1762,
+   "fallback": false
+  },
+  {
+   "model": "production",
+   "gpuMsAvg": 6.43,
+   "gpuP50": 6.31,
+   "gpuP95": 7.63,
+   "gpuMax": 8.1,
+   "cpuMsAvg": 0.21,
+   "budgetPct": 38.6,
+   "renderedFps": 58.2,
+   "presentedFps": 59.6,
+   "skipped": 40,
+   "framesInWindow": 1747,
+   "fallback": false
+  },
+  {
+   "model": "R3-seed12",
+   "gpuMsAvg": 6.65,
+   "gpuP50": 6.63,
+   "gpuP95": 7.94,
+   "gpuMax": 10.95,
+   "cpuMsAvg": 0.21,
+   "budgetPct": 39.9,
+   "renderedFps": 58.3,
+   "presentedFps": 59.6,
+   "skipped": 38,
+   "framesInWindow": 1749,
+   "fallback": false
+  }
+ ],
+ "summary": {
+  "productionP50Range": [
+   6.09,
+   6.31
+  ],
+  "candidateP50Range": [
+   6.02,
+   6.63
+  ],
+  "p50DifferenceMs": 0.125,
+  "withinRunToRunSpread": true,
+  "gates": {
+   "p50Under8ms": true,
+   "p95Under10ms": true,
+   "presentedNear60": true,
+   "noBudgetFallback": true
+  },
+  "verdict": "Runtime parity holds. The candidate deploys the identical graph, and its per-pass p50 difference is smaller than the run-to-run spread of the production model itself, so no cost difference is resolvable here."
+ }
+}
