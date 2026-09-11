@@ -71,9 +71,16 @@ def main() -> int:
                 p.data = torch.randn(p.shape) * 0.1
 
             fused = rep.fuse()
-            payload = {
+            # Round-trip through actual JSON *text*, not an in-memory dict. The
+            # deployed model is a file the runtime parses, so a dict handoff
+            # would skip the very step that can lose precision: float repr and
+            # reparse. json.dumps uses repr(), which is round-trip exact for
+            # float64, but the tensors are float32 - so this measures whether
+            # widening to double and back is lossless, which is the thing the
+            # shipped loader actually does.
+            payload = json.loads(json.dumps({
                 "features": 16, "depth": 2, "weights": export_weights(fused),
-            }
+            }))
             reloaded = rebuild_from_export(payload)
 
             x = torch.rand(2, 3, 24, 32)

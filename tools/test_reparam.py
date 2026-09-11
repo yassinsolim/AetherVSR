@@ -237,3 +237,25 @@ def test_added_branches_start_as_intended() -> None:
         with torch.no_grad():
             assert torch.allclose(block(x), block.k3(x) + x, atol=TOL)
             assert not torch.allclose(block(x), block.k3(x), atol=TOL)
+
+
+@pytest.mark.parametrize("rung", sorted(LADDERS))
+def test_network_fuse_preserves_dtype_and_device(rung: str) -> None:
+    """`fuse()` must hand back a network in the same dtype and device it fused.
+
+    `Tensor.copy_` casts the values it writes but never moves the module it
+    writes into, so a default-constructed destination silently returns CPU
+    float32. That would quietly downcast the float64 exactness gate above -
+    turning a 1e-12 algebra check into a 1e-7 float32 rounding check that still
+    passes - and would drag an MPS model back to the CPU mid-run.
+    """
+    rep = RepAetherSR(16, 2, branches=LADDERS[rung]).double().eval()
+    fused = rep.fuse()
+    for name, p in fused.named_parameters():
+        assert p.dtype is torch.float64, f"{name} came back {p.dtype}"
+        assert p.device == next(rep.parameters()).device, f"{name} moved device"
+
+    # And the exactness the dtype exists to protect still holds through fuse().
+    x = torch.randn(1, 3, 12, 16, dtype=torch.float64)
+    with torch.no_grad():
+        assert (rep(x) - fused(x)).abs().max().item() <= 1e-12

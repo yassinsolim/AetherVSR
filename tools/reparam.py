@@ -210,7 +210,15 @@ class RepAetherSR(nn.Module):
         """Collapse to the deployed architecture. Import is local to avoid a cycle."""
         from aethersr import AetherSR
 
-        fused = AetherSR(channels=self.channels, depth=self.depth, scale=self.scale)
+        # Build the destination on the source's device and dtype. `copy_` casts
+        # the values it writes but never moves the module it writes into, so a
+        # default-constructed AetherSR would hand back a CPU float32 network no
+        # matter what was fused - silently downcasting a float64 equivalence
+        # check, or dragging an MPS model back to the CPU mid-run.
+        ref = next(self.parameters())
+        fused = AetherSR(channels=self.channels, depth=self.depth, scale=self.scale).to(
+            device=ref.device, dtype=ref.dtype
+        )
         fused.stem.weight.copy_(self.stem.weight)
         fused.stem.bias.copy_(self.stem.bias)
         for block, conv in zip(self.body, fused.body):
