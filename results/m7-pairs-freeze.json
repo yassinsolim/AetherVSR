@@ -1,0 +1,30 @@
+{
+ "schema": "aethervsr.m7-pairs-freeze/1",
+ "createdAt": "2026-09-11T13:59:45.214234+00:00",
+ "pairsDirectory": "data/captured-train-v2/sources/m7-recovery/frozen-pairs",
+ "files": {
+  "pairs.json": {
+   "sha256": "1ad3716618e645dc2160a95c0046191e32ec8577947891dc118b8270112f0e55",
+   "bytes": 159929
+  },
+  "train.pt": {
+   "sha256": "4c5cdea7bf38fed1f02fc637194ea783bf3e25a62d386705acf4a57f5bc0bf98",
+   "bytes": 2671904469
+  },
+  "val.pt": {
+   "sha256": "96169de3ae931f6efffce2fef202e5a43c1aa93acba0337684588ac6c846eb17",
+   "bytes": 188745413
+  }
+ },
+ "trainerCorpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+ "trainerDigestComposition": "sha256(canonical json.dumps(index,sort_keys=True), then raw train.pt, then raw val.pt)",
+ "trainClips": 151,
+ "validationClips": 16,
+ "trainSequences": 453,
+ "validationSequences": 32,
+ "trainPatches": 43488,
+ "validationPatches": 3072,
+ "validationFreeze": "results/m7-validation-freeze.json",
+ "timingCorrection": "results/m7-squirrels-timing.json",
+ "note": "All corrected rungs must load these same final post-subset files. This recovered cache is not claimed byte-identical to the lost M6/pilot cache."
+}
