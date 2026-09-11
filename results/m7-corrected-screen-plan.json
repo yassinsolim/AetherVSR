@@ -309,5 +309,64 @@
   "tools/train.py": "3e83d9f4c815f5bfbfe39d334eb3c5435680a51010f7e03a7ff969e0edfda63d",
   "tools/reparam.py": "4396ba4540579bb4ecda2209fa48dd282f0d6072f990013862b522b7c015cc12",
   "tools/aethersr.py": "8d13acfd902b1b56a1c0a0a798f0cba3e131f479a8074e88a7e4ea833c82e470"
- }
+ },
+ "scoring": {
+  "tool": "tools/m6-validate.py",
+  "command": [
+   "python",
+   "tools/m6-validate.py",
+   "--manifest",
+   "data/captured-val-m7/manifest.json",
+   "--cache",
+   "data/captured-train-v2/sources/m7-recovery/valcache",
+   "--crfs",
+   "18,26,34",
+   "--frames",
+   "8",
+   "--fps",
+   "24",
+   "--start",
+   "12.0",
+   "--models",
+   "<twelve corrected models in registered order>",
+   "public/models/aethersr-c16d2.json",
+   "--out",
+   "results/m7-corrected-screening.json"
+  ],
+  "modelOrder": [
+   "models/m7-corrected/R0-seed1.json",
+   "models/m7-corrected/R0-seed2.json",
+   "models/m7-corrected/R0-seed3.json",
+   "models/m7-corrected/R1-seed1.json",
+   "models/m7-corrected/R1-seed2.json",
+   "models/m7-corrected/R1-seed3.json",
+   "models/m7-corrected/R2-seed1.json",
+   "models/m7-corrected/R2-seed2.json",
+   "models/m7-corrected/R2-seed3.json",
+   "models/m7-corrected/R3-seed1.json",
+   "models/m7-corrected/R3-seed2.json",
+   "models/m7-corrected/R3-seed3.json"
+  ],
+  "baselineKey": "aethersr-c16d2",
+  "validationManifestSha256": "e7a4447fc88c38873826aa616a017aeb2eb8cc6b40257337957f2ea28cb403f1",
+  "cacheNote": "Cache built once from the frozen validation manifest before any corrected model was scored; 16 clips x CRF 18/26/34 = 48 cells.",
+  "report": {
+   "tool": "tools/m7-screen-report.py",
+   "inputStatus": "corrected",
+   "command": [
+    "python",
+    "tools/m7-screen-report.py",
+    "--screening",
+    "results/m7-corrected-screening.json",
+    "--input-status",
+    "corrected",
+    "--baseline-key",
+    "aethersr-c16d2",
+    "--out",
+    "results/m7-corrected-screen.json"
+   ]
+  }
+ },
+ "bindingRule": "The first report produced by this exact scoring and reporting invocation is binding. Its screening JSON, report JSON and per-model file hashes are committed with the verdict, whatever it says. Re-running after seeing the number, or altering seek, frames, fps, CRFs, cache, manifest or model list, is a protocol change that must be declared in this file before it is executed.",
+ "artifactRetention": "models/ is gitignored, so the twelve corrected models are force-added alongside the verdict, exactly as the withdrawn pilot models were, and their SHA-256 values are recorded in results/m7-corrected-models.json so a re-roll would be visible."
 }

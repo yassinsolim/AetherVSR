@@ -112,11 +112,20 @@ python tools/m7-equivalence.py \
   --out results/m7-linked-equivalence.json
 ```
 
-For every emitted pair, run `window.aethervsrGolden(modelUrl, goldenUrl, false)`
-and then `true` on `bench.html`. The recorded browser run verifies both file
-SHA-256 values against the CPU artifact before invoking that hook. These are
-synthetic structural proofs, not quality candidates; a selected trained model
-still requires its own export and browser verification before deployment.
+Then run `tools/m7-browser-parity.js` inside `bench.html`. That script, not a
+manual step, is what re-hashes the fetched model and golden bytes, refuses to
+dispatch when they differ from the CPU record, and calls
+`window.aethervsrGolden` in both precisions. It is committed as code because a
+verification that exists only as prose cannot be re-run or regression-tested,
+and the same sentence would otherwise be repeated for a future candidate whose
+files nobody hashed. Note the distinction it enforces: the runtime guard in
+`golden-verify.ts` compares self-declared `modelSha256` label fields, which
+catches vectors exported from a different model but proves nothing about file
+contents; the script hashes the bytes themselves.
+
+These are synthetic structural proofs, not quality candidates; a selected
+trained model still requires its own export and browser verification before
+deployment.
 
 ## Screening protocol
 

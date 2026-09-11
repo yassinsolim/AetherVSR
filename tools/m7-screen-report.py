@@ -21,6 +21,7 @@ import sys
 TIE_BAND_DB = 0.01
 SIMPLICITY_ORDER = ["R0", "R1", "R2", "R3", "R4"]
 EXPECTED_RUNGS = tuple(SIMPLICITY_ORDER[:4])
+EXPECTED_SEEDS = frozenset({"seed1", "seed2", "seed3"})
 EXPECTED_CRFS = (18, 26, 34)
 EXPECTED_CLIPS = 16
 EXPECTED_CATEGORIES = 8
@@ -205,9 +206,11 @@ def validate_roster(models: dict, baseline_key: str, corrected: bool,
 
     if corrected:
         for rung in EXPECTED_RUNGS:
-            count = len(arms[rung])
-            if count != 3:
-                errors.append(f"{rung} has {count} seed models; exactly 3 are required")
+            seeds = {seed for seed, _ in arms[rung]}
+            if seeds != EXPECTED_SEEDS:
+                errors.append(
+                    f"{rung} has seeds {sorted(seeds)}; exactly {sorted(EXPECTED_SEEDS)} are required"
+                )
 
     return {
         rung: [name for _, name in sorted(runs)]

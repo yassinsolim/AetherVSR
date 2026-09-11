@@ -66,9 +66,6 @@ def _randomise(block: RepBody, generator: torch.Generator, scale: float = REALIS
         param.data = torch.randn(param.shape, generator=generator) * scale
 
 
-def _max_rel_err(a: torch.Tensor, b: torch.Tensor) -> float:
-    scale = b.abs().max().clamp_min(1e-12)
-    return ((a - b).abs().max() / scale).item()
 
 
 @pytest.mark.parametrize("rung", sorted(LADDERS))
