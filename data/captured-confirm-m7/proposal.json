@@ -1,0 +1,1052 @@
+{
+ "schema": "aethervsr.captured-corpus/2",
+ "role": "confirmation",
+ "proposalStatus": "PROPOSED",
+ "frozen": false,
+ "selectionStatus": "No corrected model has been trained or selected. This is a source-research proposal only; final acceptance and freezing remain with Main.",
+ "proposalVersion": "captured-confirm-m7-source-research-2",
+ "evidenceCollectedOn": "2026-09-11",
+ "targetClipCount": 16,
+ "clipCount": 16,
+ "shortfall": 0,
+ "categoryCounts": {
+  "faces": 1,
+  "nature": 3,
+  "urban": 2,
+  "motion": 3,
+  "texture": 1,
+  "lowlight": 2,
+  "daylight": 4,
+  "text": 0
+ },
+ "clips": [
+  {
+   "id": "urban-mexico-city-cathedral-atrium",
+   "title": "File:Atrio sur de la Catedral Metropolitana de la Ciudad de México.webm",
+   "category": "urban",
+   "creator": "ProtoplasmaKid",
+   "creatorAliases": [
+    "ProtoplasmaKid"
+   ],
+   "normalizedCreator": "protoplasmakid",
+   "normalizedCreatorAliases": [
+    "protoplasmakid"
+   ],
+   "creatorSemantics": "Commons Artist metadata credits and links to User:ProtoplasmaKid; the same account uploaded the current file and Credit says Own work.",
+   "shootId": "protoplasmakid::atrio sur de la",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Atrio_sur_de_la_Catedral_Metropolitana_de_la_Ciudad_de_M%C3%A9xico.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Atrio_sur_de_la_Catedral_Metropolitana_de_la_Ciudad_de_M%C3%A9xico.webm",
+   "pageid": 64018195,
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 40545869,
+   "duration": 47.588,
+   "fps": 1000.0,
+   "codec": "vp9",
+   "commonsSha1": "429f86f0830e320ef12a892bab29cb1ab92cfa0d",
+   "prefixSha256": "1cbfa36bb5b183e65ee79af88bf5f82d39dff304d38b0b2a90c3264a8c7ec333",
+   "prefixBytes": 2097152,
+   "byteLength": 40545869,
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Atrio_sur_de_la_Catedral_Metropolitana_de_la_Ciudad_de_M%C3%A9xico.webm/1280px--Atrio_sur_de_la_Catedral_Metropolitana_de_la_Ciudad_de_M%C3%A9xico.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "visibleScene": "Pedestrians walk beside a wrought-iron fence and stone cathedral facade in daylight.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category urban follows the poster scene: Pedestrians walk beside a wrought-iron fence and stone cathedral facade in daylight. No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=64018195&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "commonsUploader": "ProtoplasmaKid",
+   "commonsUploadTimestamp": "2017-11-12T05:09:35Z",
+   "creatorAccount": "ProtoplasmaKid",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:ProtoplasmaKid",
+   "metadataCaveat": "Commons imageinfo reports video frame_rate 1000. It is retained as reported; no native decode was performed to reinterpret it.",
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader ProtoplasmaKid equals credited creator account."
+   }
+  },
+  {
+   "id": "motion-adac-stormarn-classic-opel-manta",
+   "title": "File:18. ADAC Stormarn Classic, Luetjensee (P1045374).webm",
+   "category": "motion",
+   "creator": "Matti Blume",
+   "creatorAliases": [
+    "Matti Blume",
+    "MB-one"
+   ],
+   "normalizedCreator": "matti blume",
+   "normalizedCreatorAliases": [
+    "matti blume",
+    "mb one"
+   ],
+   "creatorSemantics": "Commons Artist display name Matti Blume links to User:MB-one; the same account uploaded the current file and Credit says Own work.",
+   "shootId": "matti blume::adac stormarn classic luetjensee",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/18._ADAC_Stormarn_Classic%2C_Luetjensee_%28P1045374%29.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:18._ADAC_Stormarn_Classic,_Luetjensee_(P1045374).webm",
+   "pageid": 163237567,
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 127092715,
+   "duration": 7.026,
+   "fps": 29.97,
+   "codec": "vp9",
+   "commonsSha1": "b74d09c20c28158940735775a585f8f6a683f209",
+   "prefixSha256": "3222f49921ade8a6a81565dd3af70a42d3e39d9006005e8996e221790f5e2536",
+   "prefixBytes": 2097152,
+   "byteLength": 127092715,
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/18._ADAC_Stormarn_Classic%2C_Luetjensee_%28P1045374%29.webm/1280px--18._ADAC_Stormarn_Classic%2C_Luetjensee_%28P1045374%29.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "visibleScene": "A numbered dark classic car is on a rural road with traffic cones and roadside posts.",
+    "visibleOverlayOrFrameCaveat": "The car carries an in-scene competition number; no presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category motion follows the poster scene: A numbered dark classic car is on a rural road with traffic cones and roadside posts. The car carries an in-scene competition number; no presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=163237567&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "commonsUploader": "MB-one",
+   "commonsUploadTimestamp": "2025-04-06T11:11:05Z",
+   "creatorAccount": "MB-one",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:MB-one",
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader MB-one is the source-evidenced account alias of credited Matti Blume."
+   }
+  },
+  {
+   "id": "lowlight-sparkler-ultra-hd",
+   "title": "File:Sparkler in Ultra-HD 4k (5k-crop).webm",
+   "category": "lowlight",
+   "creator": "#Reaper",
+   "creatorAliases": [
+    "#Reaper",
+    "Reaper35"
+   ],
+   "normalizedCreator": "reaper",
+   "normalizedCreatorAliases": [
+    "reaper",
+    "reaper35"
+   ],
+   "creatorSemantics": "Commons Artist display name #Reaper links to User:Reaper35; the same account uploaded the current file and Credit says Own work.",
+   "shootId": "reaper::sparkler in ultra hd",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/28/Sparkler_in_Ultra-HD_4k_%285k-crop%29.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Sparkler_in_Ultra-HD_4k_(5k-crop).webm",
+   "pageid": 31239484,
+   "licence": "CC BY-SA 3.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/3.0",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 142841614,
+   "duration": 143.542,
+   "fps": 24.0,
+   "codec": "vp8",
+   "commonsSha1": "5b8a09e7bcb885458da6581ff0c98227bd4200c3",
+   "prefixSha256": "6d0b7d24e46118095fe5cde7abf67b1c1d1a068e4a0fe3f9f0b4ee87fba11133",
+   "prefixBytes": 2097152,
+   "byteLength": 142841614,
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Sparkler_in_Ultra-HD_4k_%285k-crop%29.webm/1280px--Sparkler_in_Ultra-HD_4k_%285k-crop%29.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "visibleScene": "A bright sparkler burst appears against a dark background.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster. The dark surrounding pixels are scene background, not classified as letterboxing.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category lowlight follows the poster scene: A bright sparkler burst appears against a dark background. No presentation overlay or letterbox/pillarbox edge is visible in this poster. The dark surrounding pixels are scene background, not classified as letterboxing.",
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=31239484&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 3.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "commonsUploader": "Reaper35",
+   "commonsUploadTimestamp": "2014-02-18T23:55:44Z",
+   "creatorAccount": "Reaper35",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Reaper35",
+   "metadataCaveat": "Commons description says the source was recorded at 96 fps and played back at 24 fps; imageinfo video metadata reports 24 fps, which is retained.",
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Reaper35 is the source-evidenced account alias of credited #Reaper."
+   }
+  },
+  {
+   "id": "nature-industrial-hemp-field-biedermannsdorf",
+   "title": "File:Industrial hemp field near Biedermannsdorf in Lower Austria, Austria-plant hover VNr°0024.webm",
+   "category": "nature",
+   "creator": "D-Kuru",
+   "creatorAliases": [
+    "D-Kuru"
+   ],
+   "normalizedCreator": "d kuru",
+   "normalizedCreatorAliases": [
+    "d kuru"
+   ],
+   "creatorSemantics": "Commons Artist metadata credits and links to User:D-Kuru; the same account uploaded the current file and Credit says Own work.",
+   "shootId": "d kuru::industrial hemp field near",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Industrial_hemp_field_near_Biedermannsdorf_in_Lower_Austria%2C_Austria-plant_hover_VNr%C2%B00024.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Industrial_hemp_field_near_Biedermannsdorf_in_Lower_Austria,_Austria-plant_hover_VNr%C2%B00024.webm",
+   "pageid": 198640722,
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 106913703,
+   "duration": 11.01,
+   "fps": 59.94,
+   "codec": "vp9",
+   "commonsSha1": "ffc3d415c885d99c6532f9b4f93f4f8237b528aa",
+   "prefixSha256": "7d1561008c7a332e8a0ea398b716c1c399e53df9b830300ce054d3bd03a0954e",
+   "prefixBytes": 2097152,
+   "byteLength": 106913703,
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Industrial_hemp_field_near_Biedermannsdorf_in_Lower_Austria%2C_Austria-plant_hover_VNr%C2%B00024.webm/1280px--Industrial_hemp_field_near_Biedermannsdorf_in_Lower_Austria%2C_Austria-plant_hover_VNr%C2%B00024.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "visibleScene": "Close vegetation view of industrial hemp plants in a field.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category nature follows the poster scene: Close vegetation view of industrial hemp plants in a field. No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=198640722&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "commonsUploader": "D-Kuru",
+   "commonsUploadTimestamp": "2026-09-01T17:32:38Z",
+   "creatorAccount": "D-Kuru",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:D-Kuru",
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader D-Kuru equals credited creator account."
+   }
+  },
+  {
+   "id": "motion-tree-trimming-cherry-picker",
+   "title": "File:Worker trimming a tree from a cherry picker.webm",
+   "category": "motion",
+   "creator": "Grendelkhan",
+   "creatorAliases": [
+    "Grendelkhan"
+   ],
+   "normalizedCreator": "grendelkhan",
+   "normalizedCreatorAliases": [
+    "grendelkhan"
+   ],
+   "creatorSemantics": "Commons Artist metadata credits and links to User:Grendelkhan; the same account uploaded the current file and Credit says Own work.",
+   "shootId": "grendelkhan::worker trimming a tree",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/20/Worker_trimming_a_tree_from_a_cherry_picker.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Worker_trimming_a_tree_from_a_cherry_picker.webm",
+   "pageid": 69447904,
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 106903472,
+   "duration": 18.04,
+   "fps": 30.0,
+   "codec": "vp9",
+   "commonsSha1": "f8088861127105fce70b89088ba37af2de7ae781",
+   "prefixSha256": "58b0f26d7d6f86a3d2dfb07a113e1c35903d445854fa374aa239689280c2b375",
+   "prefixBytes": 2097152,
+   "byteLength": 106903472,
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Worker_trimming_a_tree_from_a_cherry_picker.webm/1280px--Worker_trimming_a_tree_from_a_cherry_picker.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "visibleScene": "Workers use a cherry picker beside a residential street and a tree.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category motion follows the poster scene: Workers use a cherry picker beside a residential street and a tree. No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=69447904&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "commonsUploader": "Grendelkhan",
+   "commonsUploadTimestamp": "2018-05-25T18:28:51Z",
+   "creatorAccount": "Grendelkhan",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Grendelkhan",
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Grendelkhan equals credited creator account."
+   }
+  },
+  {
+   "id": "nature-saeuling-timelapse",
+   "title": "File:Säuling-timelapse.webm",
+   "category": "nature",
+   "creator": "Octagon",
+   "creatorAliases": [
+    "Octagon"
+   ],
+   "normalizedCreator": "octagon",
+   "normalizedCreatorAliases": [
+    "octagon"
+   ],
+   "creatorSemantics": "Commons Artist metadata credits and links to User:Octagon; the same account uploaded the current file and Credit says Own work.",
+   "shootId": "octagon::säuling timelapse",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c1/S%C3%A4uling-timelapse.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:S%C3%A4uling-timelapse.webm",
+   "pageid": 92847312,
+   "licence": "CC BY 3.0",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 29717058,
+   "duration": 69.6,
+   "fps": 25.0,
+   "codec": "vp9",
+   "commonsSha1": "ed5104d742691d2bfe9db433fa94d19be3729132",
+   "prefixSha256": "a6154f8e8adab89a8e555142652a9410392d54d30563f6b0de08be9c038a663a",
+   "prefixBytes": 2097152,
+   "byteLength": 29717058,
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/S%C3%A4uling-timelapse.webm/1280px--S%C3%A4uling-timelapse.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "visibleScene": "A rocky mountain summit, distant mountains, and small mountaineers are visible.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category nature follows the poster scene: A rocky mountain summit, distant mountains, and small mountaineers are visible. No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=92847312&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY 3.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "commonsUploader": "Octagon",
+   "commonsUploadTimestamp": "2020-08-03T13:40:44Z",
+   "creatorAccount": "Octagon",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Octagon",
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Octagon equals credited creator account."
+   }
+  },
+  {
+   "id": "faces-yuki-pcm-interview",
+   "title": "File:羅毓儀（Yuki）演員、歌手、作家成長路｜-PCM 1510 期封面人物.webm",
+   "category": "faces",
+   "creator": "PCM.TV",
+   "creatorAliases": [
+    "PCM.TV"
+   ],
+   "normalizedCreator": "pcm tv",
+   "normalizedCreatorAliases": [
+    "pcm tv"
+   ],
+   "creatorSemantics": "Commons Artist metadata credits PCM.TV; its Credit field identifies the linked YouTube source. Current Commons uploader 一条草 is recorded separately and is not asserted to be the creator.",
+   "shootId": "pcm tv::羅毓儀 yuki 演員 歌手",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/02/%E7%BE%85%E6%AF%93%E5%84%80%EF%BC%88Yuki%EF%BC%89%E6%BC%94%E5%93%A1%E3%80%81%E6%AD%8C%E6%89%8B%E3%80%81%E4%BD%9C%E5%AE%B6%E6%88%90%E9%95%B7%E8%B7%AF%EF%BD%9C-PCM_1510_%E6%9C%9F%E5%B0%81%E9%9D%A2%E4%BA%BA%E7%89%A9.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:%E7%BE%85%E6%AF%93%E5%84%80%EF%BC%88Yuki%EF%BC%89%E6%BC%94%E5%93%A1%E3%80%81%E6%AD%8C%E6%89%8B%E3%80%81%E4%BD%9C%E5%AE%B6%E6%88%90%E9%95%B7%E8%B7%AF%EF%BD%9C-PCM_1510_%E6%9C%9F%E5%B0%81%E9%9D%A2%E4%BA%BA%E7%89%A9.webm",
+   "pageid": 132407772,
+   "licence": "CC BY 3.0",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 784993863,
+   "duration": 600.261,
+   "fps": 29.97,
+   "codec": "vp9",
+   "commonsSha1": "ecfa77b58e0159c910c7759e338c6a678370d6a8",
+   "prefixSha256": "11033e54a967aaaa0a9a7c6039ef29c5d38477843a6710e3fc7c82d7e3e95b8a",
+   "prefixBytes": 2097152,
+   "byteLength": 784993863,
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/%E7%BE%85%E6%AF%93%E5%84%80%EF%BC%88Yuki%EF%BC%89%E6%BC%94%E5%93%A1%E3%80%81%E6%AD%8C%E6%89%8B%E3%80%81%E4%BD%9C%E5%AE%B6%E6%88%90%E9%95%B7%E8%B7%AF%EF%BD%9C-PCM_1510_%E6%9C%9F%E5%B0%81%E9%9D%A2%E4%BA%BA%E7%89%A9.webm/1280px--%E7%BE%85%E6%AF%93%E5%84%80%EF%BC%88Yuki%EF%BC%89%E6%BC%94%E5%93%A1%E3%80%81%E6%AD%8C%E6%89%8B%E3%80%81%E4%BD%9C%E5%AE%B6%E6%88%90%E9%95%B7%E8%B7%AF%EF%BD%9C-PCM_1510_%E6%9C%9F%E5%B0%81%E9%9D%A2%E4%BA%BA%E7%89%A9.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "visibleScene": "A seated interview subject is visible in a ball pit, with framed artwork behind.",
+    "visibleOverlayOrFrameCaveat": "The letters “PCM” are visible on a board at right and appear in-scene in this poster; this single image cannot establish whether other frames have presentation graphics. No letterbox/pillarbox edge is visible in this poster.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category faces follows the poster scene: A seated interview subject is visible in a ball pit, with framed artwork behind. The letters “PCM” are visible on a board at right and appear in-scene in this poster; this single image cannot establish whether other frames have presentation graphics. No letterbox/pillarbox edge is visible in this poster.",
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=132407772&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY 3.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "commonsUploader": "一条草",
+   "commonsUploadTimestamp": "2023-05-28T10:34:49Z",
+   "upstreamSourceUrl": "https://www.youtube.com/watch?v=2uRCKtE82aw",
+   "licenseReview": {
+    "requiredByProposalGate": true,
+    "templatePresent": true,
+    "template": "LicenseReview",
+    "passed": true,
+    "reviewer": "Shizhao",
+    "reviewedAt": "2023-05-28",
+    "state": "passed-manual-license-review-record",
+    "reviewerTrustEvidence": "Commons user-groups API currently lists Shizhao as sysop; Commons:License review states Image Reviewers and administrators perform manual reviews.",
+    "evidence": "Raw Commons file page has LicenseReview with reviewer and date for the YouTube source."
+   }
+  },
+  {
+   "id": "urban-bernie-sanders-rally",
+   "pageid": 48353914,
+   "title": "File:A Bernie Sanders 2016 rally in 45 seconds.webm",
+   "category": "urban",
+   "creator": "Sean Korbitz",
+   "creatorAliases": [
+    "Sean Korbitz",
+    "seankorbitz"
+   ],
+   "shootId": "sean korbitz::a bernie sanders rally",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/29/A_Bernie_Sanders_2016_rally_in_45_seconds.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:A_Bernie_Sanders_2016_rally_in_45_seconds.webm",
+   "licence": "CC BY 3.0",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY 3.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 81892832,
+   "byteLength": 81892832,
+   "commonsSha1": "f98f566daed4816eeba2aa31489bba6a290a57dc",
+   "prefixBytes": 2097152,
+   "prefixSha256": "06f2bf5c94bc420d39d385fd3ed0642e2320422d4b53c812b652d57c1d53685e",
+   "commonsUploader": "Czar",
+   "commonsUploadTimestamp": "2016-04-24T19:56:17Z",
+   "duration": 46.552,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=48353914&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/A_Bernie_Sanders_2016_rally_in_45_seconds.webm/1280px--A_Bernie_Sanders_2016_rally_in_45_seconds.webm.jpg",
+   "posterFrameCheck": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/A_Bernie_Sanders_2016_rally_in_45_seconds.webm/1280px--A_Bernie_Sanders_2016_rally_in_45_seconds.webm.jpg",
+    "checked": "2026-09-11",
+    "visibleScene": "A crowd gathers inside a venue lobby beneath directional signs.",
+    "visibleOverlayOrFrameCaveat": "The poster is monochrome and contains physical venue-sign text; no presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video."
+   },
+   "contentNote": "Category urban follows the single-poster observation: A crowd gathers inside a venue lobby beneath directional signs. The poster is monochrome and contains physical venue-sign text; no presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "creatorSemantics": "Commons Artist metadata credits Sean Korbitz and links to Vimeo account seankorbitz; both source-evidenced forms are preserved. Current Commons uploader Czar is recorded separately and is not asserted to be the creator.",
+   "normalizedCreator": "sean korbitz",
+   "normalizedCreatorAliases": [
+    "sean korbitz",
+    "seankorbitz"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": true,
+    "templatePresent": true,
+    "template": "LicenseReview",
+    "passed": true,
+    "reviewer": "INeverCry",
+    "reviewedAt": "2016-04-25",
+    "state": "passed-manual-license-review-record",
+    "reviewerTrustEvidence": "Commons raw page carries the signed LicenseReview record. Current user-group API does not prove historic role on the review date; reviewer was later logged as a sysop and image reviewer, so this audit does not independently reconstruct the 2016-04-25 group state.",
+    "evidence": "Raw Commons file page has LicenseReview with reviewer and date for the Vimeo source."
+   },
+   "mime": "video/webm",
+   "creatorAccount": "seankorbitz",
+   "creatorProfileUrl": "https://vimeo.com/seankorbitz",
+   "codec": "vp8",
+   "fps": 23.976,
+   "upstreamSourceUrl": "https://vimeo.com/155269534"
+  },
+  {
+   "id": "daylight-mont-tendre-jura",
+   "pageid": 55562878,
+   "title": "File:Mont Tendre Jura.webm",
+   "category": "daylight",
+   "creator": "Alexey M.",
+   "creatorAliases": [
+    "Alexey M."
+   ],
+   "shootId": "alexey m::mont tendre jura",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Mont_Tendre_Jura.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Mont_Tendre_Jura.webm",
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 934022177,
+   "byteLength": 934022177,
+   "commonsSha1": "e431bec64ae9aac3f597b4ed6a6b5a2f6ad51be9",
+   "prefixBytes": 2097152,
+   "prefixSha256": "7123b63944b9c61913c2dbe3dc06d581750d86e6f8354b56bda1decb4a1828eb",
+   "commonsUploader": "Alexey M.",
+   "commonsUploadTimestamp": "2017-01-29T22:29:52Z",
+   "duration": 237.251,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=55562878&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Mont_Tendre_Jura.webm/1280px--Mont_Tendre_Jura.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Mont_Tendre_Jura.webm/1280px--Mont_Tendre_Jura.webm.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "Aerial view of snow-patched mountain ridges and forest beneath an overcast daytime sky.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster. The raw page lists music, which is an audio-credit fact rather than a poster-based complete-video conclusion."
+   },
+   "contentNote": "Category daylight follows the single-poster observation: Aerial view of snow-patched mountain ridges and forest beneath an overcast daytime sky. No presentation overlay or letterbox/pillarbox edge is visible in this poster. The raw page lists music, which is an audio-credit fact rather than a poster-based complete-video conclusion.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits User:Alexey M.; imageinfo uploader is the same account.",
+   "normalizedCreator": "alexey m",
+   "normalizedCreatorAliases": [
+    "alexey m"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Alexey M. equals the credited creator account."
+   },
+   "mime": "video/webm",
+   "creatorAccount": "Alexey M.",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Alexey_M."
+  },
+  {
+   "id": "texture-szent-tamas-spring-tata",
+   "pageid": 176241872,
+   "title": "File:Szent Tamás forrás (Tata).webm",
+   "category": "texture",
+   "creator": "SIDLER22",
+   "creatorAliases": [
+    "SIDLER22"
+   ],
+   "shootId": "sidler22::szent tamás forrás tata",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Szent_Tam%C3%A1s_forr%C3%A1s_%28Tata%29.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Szent_Tam%C3%A1s_forr%C3%A1s_(Tata).webm",
+   "licence": "CC0",
+   "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC0 and its LicenseUrl; the matching Creative Commons CC0 deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 347114770,
+   "byteLength": 347114770,
+   "commonsSha1": "13f1ad7a874ab64346fb1f7bca42d808c8a84ba3",
+   "prefixBytes": 2097152,
+   "prefixSha256": "0d6f331a40b0f3fbf2150b1d711ba50f7022aaf34a62003011aa753d23a5c13d",
+   "commonsUploader": "SIDLER22",
+   "commonsUploadTimestamp": "2025-10-07T05:14:12Z",
+   "duration": 34.367,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=176241872&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Szent_Tam%C3%A1s_forr%C3%A1s_%28Tata%29.webm/1280px--Szent_Tam%C3%A1s_forr%C3%A1s_%28Tata%29.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Szent_Tam%C3%A1s_forr%C3%A1s_%28Tata%29.webm/1280px--Szent_Tam%C3%A1s_forr%C3%A1s_%28Tata%29.webm.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "Shaded spring water with roots, branches, and dense green foliage.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster. Texture categorization follows the visibly detailed water, roots, and vegetation, not a complete-video claim."
+   },
+   "contentNote": "Category texture follows the single-poster observation: Shaded spring water with roots, branches, and dense green foliage. No presentation overlay or letterbox/pillarbox edge is visible in this poster. Texture categorization follows the visibly detailed water, roots, and vegetation, not a complete-video claim.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits User:SIDLER22; imageinfo uploader is the same account.",
+   "normalizedCreator": "sidler22",
+   "normalizedCreatorAliases": [
+    "sidler22"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader SIDLER22 equals the credited creator account."
+   },
+   "mime": "video/webm",
+   "creatorAccount": "SIDLER22",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:SIDLER22"
+  },
+  {
+   "id": "daylight-kronenburger-see",
+   "pageid": 148363823,
+   "title": "File:Kronenburger See.webm",
+   "category": "daylight",
+   "creator": "Raimond Spekking and Elke Wetzig",
+   "creatorAliases": [
+    "Raimond Spekking",
+    "Raymond",
+    "Elke Wetzig",
+    "Elya"
+   ],
+   "shootId": "raimond spekking and elke wetzig::kronenburger see",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/38/Kronenburger_See.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Kronenburger_See.webm",
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 157989074,
+   "byteLength": 157989074,
+   "commonsSha1": "f8e6a9bc55bd0e621c6b3c5b3273fa27f207fbf1",
+   "prefixBytes": 2097152,
+   "prefixSha256": "ce67ae112cf0c0833baf24889b8810fe84e0196fc1fa2dcc02cd67cb3fa7f73d",
+   "commonsUploader": "Raymond",
+   "commonsUploadTimestamp": "2024-05-15T06:32:50Z",
+   "duration": 282.228,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=148363823&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Kronenburger_See.webm/1280px--Kronenburger_See.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Kronenburger_See.webm/1280px--Kronenburger_See.webm.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "Daytime aerial view over a lake, wooded slopes, watercourse, and nearby buildings.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster."
+   },
+   "contentNote": "Category daylight follows the single-poster observation: Daytime aerial view over a lake, wooded slopes, watercourse, and nearby buildings. No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits User:Raymond/author plus User:Elya. Commons artist metadata resolves the first author to Raimond Spekking; imageinfo uploader Raymond is one credited author account.",
+   "normalizedCreator": "raimond spekking and elke wetzig",
+   "normalizedCreatorAliases": [
+    "raimond spekking",
+    "raymond",
+    "elke wetzig",
+    "elya"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons page declares Source own; imageinfo uploader Raymond is one of the credited author accounts. The listed YouTube URL is explicitly labeled a cross upload, not a third-party source."
+   },
+   "mime": "video/webm",
+   "creatorAccount": "Raymond",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Raymond",
+   "sourceAmbiguity": "The raw page labels the YouTube link “Cross upload to”, not an upstream source. This audit treats the clip as own work because the raw page says Source own and uploader Raymond is a credited author; ownership of the linked cross-upload was not independently checked.",
+   "crossUploadUrl": "https://www.youtube.com/watch?v=6daaA1oi3tw"
+  },
+  {
+   "id": "nature-eurasian-wren-franconville",
+   "pageid": 142918827,
+   "title": "File:Eurasian wren 2023 12 25 02.webm",
+   "category": "nature",
+   "creator": "Alexis Lours",
+   "creatorAliases": [
+    "Alexis Lours"
+   ],
+   "shootId": "alexis lours::eurasian wren 12 25",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/45/Eurasian_wren_2023_12_25_02.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Eurasian_wren_2023_12_25_02.webm",
+   "licence": "CC BY 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by/4.0",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 337188084,
+   "byteLength": 337188084,
+   "commonsSha1": "f851dea0b272539cbc9ef3868d4deea979c5065d",
+   "prefixBytes": 2097152,
+   "prefixSha256": "da97dbb3b3890ef52a984d94eb9a8f97cc68ec2aeab59c02c3781b6e3e7d107b",
+   "commonsUploader": "Alexis Lours",
+   "commonsUploadTimestamp": "2023-12-27T18:11:36Z",
+   "duration": 71.746,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=142918827&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Eurasian_wren_2023_12_25_02.webm/1280px--Eurasian_wren_2023_12_25_02.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Eurasian_wren_2023_12_25_02.webm/1280px--Eurasian_wren_2023_12_25_02.webm.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "A Eurasian wren perches on a branch against a blurred outdoor background.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster."
+   },
+   "contentNote": "Category nature follows the single-poster observation: A Eurasian wren perches on a branch against a blurred outdoor background. No presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits Alexis Lours; imageinfo uploader is the same account.",
+   "normalizedCreator": "alexis lours",
+   "normalizedCreatorAliases": [
+    "alexis lours"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Alexis Lours equals the credited creator account."
+   },
+   "mime": "video/webm",
+   "creatorAccount": "Alexis Lours",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Alexis_Lours"
+  },
+  {
+   "id": "daylight-sunrise-pfuhler-see",
+   "pageid": 175308771,
+   "title": "File:2024 Sonnenaufgang Pfuhler See.webm",
+   "category": "daylight",
+   "creator": "-stk",
+   "creatorAliases": [
+    "-stk"
+   ],
+   "shootId": "stk::sonnenaufgang pfuhler see",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/50/2024_Sonnenaufgang_Pfuhler_See.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:2024_Sonnenaufgang_Pfuhler_See.webm",
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 98364876,
+   "byteLength": 98364876,
+   "commonsSha1": "f411ef729c863de7868d8c96e4b84c255086e3ac",
+   "prefixBytes": 2097152,
+   "prefixSha256": "3160d4192aca988f0f267ebebb1756dc7116dcb3d1eb994010ffe94c39701f35",
+   "commonsUploader": "-stk",
+   "commonsUploadTimestamp": "2025-09-20T15:25:15Z",
+   "duration": 21,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=175308771&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata%7Cuser%7Ctimestamp&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/2024_Sonnenaufgang_Pfuhler_See.webm/1280px--2024_Sonnenaufgang_Pfuhler_See.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/2024_Sonnenaufgang_Pfuhler_See.webm/1280px--2024_Sonnenaufgang_Pfuhler_See.webm.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "Aerial view over a lake at sunrise, with reflective water, tree-lined shore, and a bright sun above the horizon.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster. Daylight categorization follows the visibly sunlit sky and lake frame only."
+   },
+   "contentNote": "Category daylight follows the single-poster observation: Aerial view over a lake at sunrise, with reflective water, tree-lined shore, and a bright sun above the horizon. No presentation overlay or letterbox/pillarbox edge is visible in this poster. Daylight categorization follows the visibly sunlit sky and lake frame only.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits User:-stk; imageinfo uploader is the same account.",
+   "normalizedCreator": "stk",
+   "normalizedCreatorAliases": [
+    "stk"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader -stk equals the credited creator account."
+   },
+   "mime": "video/webm",
+   "creatorAccount": "-stk",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:-stk"
+  },
+  {
+   "id": "motion-r160-r-train-leaving-station",
+   "pageid": 39644014,
+   "title": "File:A R160 R train leaving station.ogv",
+   "category": "motion",
+   "creator": "Doorknob747",
+   "creatorAliases": [
+    "Doorknob747"
+   ],
+   "shootId": "doorknob747::a r160 r train",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b9/A_R160_R_train_leaving_station.ogv",
+   "description_url": "https://commons.wikimedia.org/wiki/File:A_R160_R_train_leaving_station.ogv",
+   "licence": "CC0",
+   "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC0 and its LicenseUrl; the matching Creative Commons CC0 deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 6286331,
+   "byteLength": 6286331,
+   "commonsSha1": "e26f2b8dd55674fae9fbb8f4a5f4f48d3b4ace60",
+   "prefixBytes": 2097152,
+   "prefixSha256": "7f00d5a22bce1874ff0f0eeaca67c666e08cb838176723bad59d8555895e2fb2",
+   "commonsUploader": "Doorknob747",
+   "commonsUploadTimestamp": "2015-04-18T04:45:00Z",
+   "duration": 21.730063396730063,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=39644014&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/A_R160_R_train_leaving_station.ogv/1280px--A_R160_R_train_leaving_station.ogv.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/A_R160_R_train_leaving_station.ogv/1280px--A_R160_R_train_leaving_station.ogv.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "Close view of a New York subway car, including physical car number, flag decal, and route display.",
+    "visibleOverlayOrFrameCaveat": "The route display and car markings are in-scene physical signage; no presentation overlay or letterbox/pillarbox edge is visible in this poster."
+   },
+   "contentNote": "Category motion follows the single-poster observation: Close view of a New York subway car, including physical car number, flag decal, and route display. The route display and car markings are in-scene physical signage; no presentation overlay or letterbox/pillarbox edge is visible in this poster.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits User:Doorknob747; imageinfo uploader is the same account.",
+   "normalizedCreator": "doorknob747",
+   "normalizedCreatorAliases": [
+    "doorknob747"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Doorknob747 equals the credited creator account."
+   },
+   "mime": "application/ogg",
+   "creatorAccount": "Doorknob747",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Doorknob747"
+  },
+  {
+   "id": "lowlight-eclipse-totale-saint-georges-beauce",
+   "pageid": 147246673,
+   "title": "File:Eclipse totale St-Georges Beauce 8 avril 2024.webm",
+   "category": "lowlight",
+   "creator": "Gabriel Picard",
+   "creatorAliases": [
+    "Gabriel Picard",
+    "Gacard"
+   ],
+   "shootId": "gabriel picard::eclipse totale st georges",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Eclipse_totale_St-Georges_Beauce_8_avril_2024.webm",
+   "description_url": "https://commons.wikimedia.org/wiki/File:Eclipse_totale_St-Georges_Beauce_8_avril_2024.webm",
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 39402701,
+   "byteLength": 39402701,
+   "commonsSha1": "8cdf7d3192d1ce1eba18de89e5a6b115fcb5420b",
+   "prefixBytes": 2097152,
+   "prefixSha256": "ea4f612000661830109fb6dada3cd41cf9b275352256b53500b05d59bbe9a02a",
+   "commonsUploader": "Gacard",
+   "commonsUploadTimestamp": "2024-04-09T23:11:58Z",
+   "duration": 21.054,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=147246673&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Eclipse_totale_St-Georges_Beauce_8_avril_2024.webm/1280px--Eclipse_totale_St-Georges_Beauce_8_avril_2024.webm.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Eclipse_totale_St-Georges_Beauce_8_avril_2024.webm/1280px--Eclipse_totale_St-Georges_Beauce_8_avril_2024.webm.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "A darkening twilight cityscape with a church spire, lit streets, and water.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster. Lowlight categorization follows this observed darkened city frame only."
+   },
+   "contentNote": "Category lowlight follows the single-poster observation: A darkening twilight cityscape with a church spire, lit streets, and water. No presentation overlay or letterbox/pillarbox edge is visible in this poster. Lowlight categorization follows this observed darkened city frame only.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits User:Gacard as Gabriel Picard; imageinfo uploader is the same account.",
+   "normalizedCreator": "gabriel picard",
+   "normalizedCreatorAliases": [
+    "gabriel picard",
+    "gacard"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Gacard is the credited creator account."
+   },
+   "mime": "video/webm",
+   "creatorAccount": "Gacard",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Gacard"
+  },
+  {
+   "id": "daylight-koeln-eifeltor-traffic-timelapse",
+   "pageid": 61241593,
+   "title": "File:Köln Eifeltor Verkehrskreuz 2017.ogv",
+   "category": "daylight",
+   "creator": "Maximilian Schönherr",
+   "creatorAliases": [
+    "Maximilian Schönherr"
+   ],
+   "shootId": "maximilian schönherr::köln eifeltor verkehrskreuz",
+   "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/6f/K%C3%B6ln_Eifeltor_Verkehrskreuz_2017.ogv",
+   "description_url": "https://commons.wikimedia.org/wiki/File:K%C3%B6ln_Eifeltor_Verkehrskreuz_2017.ogv",
+   "licence": "CC BY-SA 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+   "licenseEvidence": "Commons imageinfo extmetadata reports CC BY-SA 4.0 and its LicenseUrl; the matching Creative Commons deed was read.",
+   "source_width": 3840,
+   "source_height": 2160,
+   "source_bytes": 74449606,
+   "byteLength": 74449606,
+   "commonsSha1": "b3d9d3f3998eb1dd7fb5751c02e5e017afa6a425",
+   "prefixBytes": 2097152,
+   "prefixSha256": "3d50968b1e3a0fe0e2ccb43728db976a21e61297970bf524424b33fe9deb82ae",
+   "commonsUploader": "Maximilian Schönherr",
+   "commonsUploadTimestamp": "2017-07-22T10:23:59Z",
+   "duration": 161.3612,
+   "metadataEvidenceUrl": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&pageids=61241593&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cmetadata%7Cextmetadata&iiurlwidth=1280",
+   "sourcePosterUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/K%C3%B6ln_Eifeltor_Verkehrskreuz_2017.ogv/1280px--K%C3%B6ln_Eifeltor_Verkehrskreuz_2017.ogv.jpg",
+   "posterFrameCheck": {
+    "checked": "2026-09-11",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/K%C3%B6ln_Eifeltor_Verkehrskreuz_2017.ogv/1280px--K%C3%B6ln_Eifeltor_Verkehrskreuz_2017.ogv.jpg",
+    "scope": "Only this one official Commons poster image was inspected. Its visible contents do not establish conditions across the complete video.",
+    "visibleScene": "Daytime aerial view of roads, railway lines, freight trains, industrial buildings, and surrounding trees.",
+    "visibleOverlayOrFrameCaveat": "No presentation overlay or letterbox/pillarbox edge is visible in this poster. Daylight categorization follows the observed daytime frame."
+   },
+   "contentNote": "Category daylight follows the single-poster observation: Daytime aerial view of roads, railway lines, freight trains, industrial buildings, and surrounding trees. No presentation overlay or letterbox/pillarbox edge is visible in this poster. Daylight categorization follows the observed daytime frame.",
+   "creatorSemantics": "Raw Commons file page declares Source own and credits User:Maximilian Schönherr; imageinfo uploader is the same account.",
+   "normalizedCreator": "maximilian schönherr",
+   "normalizedCreatorAliases": [
+    "maximilian schönherr"
+   ],
+   "licenseReview": {
+    "requiredByProposalGate": false,
+    "templatePresent": false,
+    "template": null,
+    "passed": null,
+    "reviewer": null,
+    "reviewedAt": null,
+    "state": "not-required-own-work",
+    "evidence": "Raw Commons file page declares Source own; imageinfo uploader Maximilian Schönherr equals the credited creator account."
+   },
+   "mime": "application/ogg",
+   "creatorAccount": "Maximilian Schönherr",
+   "creatorProfileUrl": "https://commons.wikimedia.org/wiki/User:Maximilian_Sch%C3%B6nherr"
+  }
+ ],
+ "heldCandidates": [],
+ "rejectedCandidates": [
+  {
+   "pageid": 144337119,
+   "title": "File:Bristol Cathedral interior (4K, 60 FPS, 2023.08.12).webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 144337119,
+   "reasons": [
+    "Rejected under the mandatory licence-review gate: third-party YouTube import with no LicenseReview/reviewer template."
+   ]
+  },
+  {
+   "pageid": 175163588,
+   "title": "File:Trump Pence 2020 Yard Sign - Keep America Great.webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 175163588,
+   "reasons": [
+    "Rejected under the mandatory licence-review gate: third-party YouTube import with no LicenseReview/reviewer template."
+   ]
+  },
+  {
+   "pageid": 196447532,
+   "title": "File:AFSOC MC-130J conducts nighttime air drops (1015474).webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 196447532,
+   "reasons": [
+    "Rejected: current Commons SHA-1 conflicts with Structured Data checksum, and the uploader/credited-author mismatch has no LicenseReview."
+   ]
+  },
+  {
+   "pageid": 47838940,
+   "title": "File:Fireworks show.webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 47838940,
+   "reasons": [
+    "Rejected: exact historical identity collision with captured-train-v2/lowlight-fireworks-show, independent of its manual LicenseReview record."
+   ]
+  },
+  {
+   "pageid": 195356575,
+   "title": "File:B-ROLL- U S Army Southern European Task Force, Africa Soldiers strengthen community relations with the community of Tonezza del Cimone (965385).webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 195356575,
+   "reasons": [
+    "Rejected under the mandatory licence-review gate: uploader/credited-author mismatch and no LicenseReview, despite public-domain source tags."
+   ]
+  },
+  {
+   "pageid": 81108615,
+   "title": "File:Daphne Frias at GAG Rally for El Paso & Dayton.webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 81108615,
+   "reasons": [
+    "Rejected under the mandatory licence-review gate: YouTubeReview is automated-only and no human reviewer is recorded."
+   ]
+  },
+  {
+   "pageid": 195334336,
+   "title": "File:1-153rd Cavalry Regiment Assumes Authority from 3rd Battalion, 156th Infantry Regiment During Transfer of Authority Ceremony (997495).webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 195334336,
+   "reasons": [
+    "Rejected under the mandatory licence-review gate: uploader/credited-author mismatch and no LicenseReview, despite public-domain source tags."
+   ]
+  },
+  {
+   "pageid": 195355511,
+   "title": "File:B-Roll- 173rd Airborne Brigade Paratroopers Honor Fallen WWII Soldiers at C-47 Memorial in Picauville, France (965370).webm",
+   "disposition": "rejected",
+   "sourceAuditPageid": 195355511,
+   "reasons": [
+    "Rejected under the mandatory licence-review gate: uploader/credited-author mismatch and no LicenseReview, despite public-domain source tags."
+   ]
+  }
+ ],
+ "splitPolicy": "Candidate creators, source-evidenced aliases, creator accounts, derived shoot IDs, source URLs without query strings, titles, pageids, Commons SHA-1 values, and any existing historical SHA-256 values were checked against all six old captured manifests plus data/captured-val-m7/manifest.json. Veljo Runnel and Veljorunnel are reserved to validation and are excluded from confirmation.",
+ "identityPolicy": "Every proposed clip has the current Commons SHA-1 plus SHA-256 of exactly the first 2,097,152 HTTP bytes of its current Commons source URL. These are identity pins for a proposed manifest only, not freeze claims.",
+ "licenseReviewGate": "For uploader/credited-author mismatches or external third-party source URLs, a manual Commons LicenseReview record is required. Own-work uploads where the credited author and uploader are the same account do not require review. The source audit records template presence, pass state, reviewer, date, and caveats for every candidate.",
+ "sourceAudit": "data/captured-confirm-m7/source-audit.json",
+ "unresolvedIssues": [
+  {
+   "id": "manual-license-reviewer-history",
+   "pageids": [
+    48353914
+   ],
+   "status": "The raw page has a dated manual LicenseReview by INeverCry. Exact reviewer group membership on that historical date was not independently reconstructed; preserved for Main final review."
+  },
+  {
+   "id": "own-work-cross-upload-ambiguity",
+   "pageids": [
+    148363823
+   ],
+   "status": "The raw Commons page declares Source own and labels its YouTube link a cross-upload; the linked platform record was not independently owned/attributed. Preserved for Main final review."
+  },
+  {
+   "id": "mexico-reported-fps",
+   "pageid": 64018195,
+   "status": "Commons metadata says 1000 fps; retained verbatim and not independently decoded."
+  },
+  {
+   "id": "single-poster-scope",
+   "pageids": [
+    64018195,
+    163237567,
+    31239484,
+    198640722,
+    69447904,
+    92847312,
+    132407772,
+    48353914,
+    55562878,
+    176241872,
+    148363823,
+    142918827,
+    175308771,
+    39644014,
+    147246673,
+    61241593
+   ],
+   "status": "All visual observations are limited to one official Commons poster per clip; no complete-video facts are inferred from posters."
+  }
+ ],
+ "independentVerificationByMain": {
+  "verifiedAt": "2026-09-11T21:10:16.350765+00:00",
+  "checkedAndPassed": [
+   "corpus_schema.validate_manifest returns no problems",
+   "no normalized creator or alias overlaps any of the seven existing manifests",
+   "no stored or derived shootId overlaps",
+   "no source_url, title, pageid or commonsSha1 overlaps",
+   "every licence passes corpus_schema.licence_ok",
+   "every clip is >= 2560x1440",
+   "every clip carries both a Commons SHA-1 and a 2 MiB prefix SHA-256",
+   "every clip carries a structured licenseReview record"
+  ],
+  "notVerifiedByMain": [
+   "the poster-frame observations, which are the research agent's inspection, not mine",
+   "that each licence-review template is genuinely from a trusted reviewer",
+   "anything about frames beyond the single Commons poster image per clip"
+  ],
+  "knownGap": "Seven of the project's eight content categories are represented. There are no `text` clips: urban 2, motion 3, lowlight 2, nature 3, faces 1, daylight 4, texture 1. The validation corpus carries all eight, so this proposal is not yet category-complete.",
+  "status": "PROPOSED and unfrozen. No model has been scored against it and none may be until it is verified and frozen."
+ }
+}

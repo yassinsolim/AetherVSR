@@ -330,10 +330,15 @@ the control catches up on.
 
 Prerequisites already in place: frozen corpus and hashes, a repaired
 creator-disjoint validation split, a registered scoring and reporting
-invocation, and 102 corpus/report/fusion tests in CI. Still outstanding: the
-architecture confirmation corpus at `data/captured-confirm-m7/proposal.json`
-is a 16-clip **proposal**, not frozen, and must be independently verified
-before any candidate scores against it.
+invocation, and 106 corpus/report/fusion tests in CI.
+
+Still outstanding: `data/captured-confirm-m7/proposal.json` is a 16-clip
+**proposal**, not frozen. Its schema, creator/shoot/source disjointness against
+all seven existing manifests, licences, resolutions and pin coverage were
+verified here; its poster-frame observations and reviewer-trust claims were
+not. It also covers only seven of eight categories — there are no `text`
+clips — so it must be completed, independently verified and frozen before any
+candidate scores against it.
 
 ---
 
