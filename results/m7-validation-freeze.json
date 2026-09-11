@@ -1,0 +1,62 @@
+{
+ "schema": "aethervsr.m7-validation-freeze/1",
+ "createdAt": "2026-09-11T13:02:05.093963+00:00",
+ "manifest": "data/captured-val-m7/manifest.json",
+ "manifestSha256": "e7a4447fc88c38873826aa616a017aeb2eb8cc6b40257337957f2ea28cb403f1",
+ "historicalManifest": "data/captured-val/manifest.json",
+ "historicalManifestSha256": "fa7ff5c68b1fee6189cfada438b959deea05c3d76b309e515049d832a7757e9d",
+ "trainingManifest": "data/captured-train-v2/manifest.json",
+ "trainingManifestSha256": "6d3d91058755eaf59ba7c8912a90e2aeecdb1d4ce9d433791169b9884ba2b428",
+ "currentTrainingClips": 151,
+ "legacyTrainingClipsAudited": 12,
+ "validationClips": 16,
+ "audit": {
+  "schemaProblems": [],
+  "overlaps": [],
+  "trainingClips": 163,
+  "validationClips": 16,
+  "categories": {
+   "daylight": 1,
+   "faces": 2,
+   "lowlight": 2,
+   "motion": 2,
+   "nature": 2,
+   "text": 3,
+   "texture": 2,
+   "urban": 2
+  },
+  "validationCreators": 14
+ },
+ "replacement": {
+  "id": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+  "title": "File:Pikktiib-sooritsika (Conocephalus fuscus) laulev isend.webm",
+  "category": "nature",
+  "creator": "Veljo Runnel",
+  "creatorAccount": "Veljorunnel",
+  "creatorAliases": [
+   "Veljo Runnel",
+   "Veljorunnel"
+  ],
+  "creatorSemantics": "Copyright-holder author credit is Veljo Runnel; Commons uploader account is Veljorunnel; own work.",
+  "shootId": "veljo runnel::pikktiib sooritsika conocephalus fuscus",
+  "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Pikktiib-sooritsika_%28Conocephalus_fuscus%29_laulev_isend.webm",
+  "description_url": "https://commons.wikimedia.org/wiki/File:Pikktiib-sooritsika_(Conocephalus_fuscus)_laulev_isend.webm",
+  "pageid": 142193278,
+  "licence": "CC BY 4.0",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "source_width": 3840,
+  "source_height": 2160,
+  "duration": 22.061,
+  "commonsSha1": "164284e6cb67baec7d357e4ac72999cf27506aae",
+  "byteLength": 111413583,
+  "prefixSha256": "8ba8c3074371021893cf7d1f8e9841331c2713ef2b6f3b9dc4d6b75e35a6facc",
+  "prefixBytes": 2097152,
+  "pinnedAt": "2026-09-11T12:53:48.932394+00:00",
+  "hasBurnedInGraphics": false,
+  "contentNote": "Physical katydid on vegetation; source author describes own-work recording slowed fourfold. Commons poster inspected: no visible text overlay or letterboxing in that frame. No neural output inspected.",
+  "source_file": "nature-pikktiib-sooritsika-conocephalus-fuscus.webm"
+ },
+ "selectionState": "No corrected model trained or selected; no replacement-source neural scores inspected.",
+ "protocol": "docs/M7-PREREGISTRATION.md Amendment 2; same 16200-update training protocol for all arms",
+ "metadataNote": "The legacy source_sha256-only contentDigest was not copied. This record binds complete manifest bytes; per-clip streaming identity pins are retained inside that manifest."
+}

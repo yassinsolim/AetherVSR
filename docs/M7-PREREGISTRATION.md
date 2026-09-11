@@ -93,6 +93,31 @@ fused `Conv2d`:
 Border pixels are included, not cropped. A rung that cannot meet this is not
 trained. These become permanent tests.
 
+### Artifact-linked structural verification
+
+`results/m7-linked-equivalence.json` and `results/m7-linked-webgpu.json` bind
+the CPU and browser runs to the same model bytes, golden-vector bytes and
+24×16 input. Nine randomized R1/R2/R3 models (seeds 0–2) passed both f32 and
+f16 browser verification on Apple M5, macOS 26.6.2, Chrome 152.0.7977.42
+(`apple / metal-3`). CPU branch→fused max error was 1.1921e-6; JSON reload
+error was zero. Browser intermediate maxima were 1.4119e-6 (f32) and
+0.005666 (f16). Output uses `max(precision tolerance, 1.5/255)` because the
+storage texture quantizes to eight bits; both paths passed that bound.
+
+Reproduce the CPU/export side with:
+
+```sh
+python tools/m7-equivalence.py \
+  --export-dir data/captured-train-v2/sources/m7-recovery/parity \
+  --out results/m7-linked-equivalence.json
+```
+
+For every emitted pair, run `window.aethervsrGolden(modelUrl, goldenUrl, false)`
+and then `true` on `bench.html`. The recorded browser run verifies both file
+SHA-256 values against the CPU artifact before invoking that hook. These are
+synthetic structural proofs, not quality candidates; a selected trained model
+still requires its own export and browser verification before deployment.
+
 ## Screening protocol
 
 3 seeds per rung on the Milestone 6 validation corpus (16 clips, 8 categories,
@@ -247,3 +272,39 @@ argmax or null verdict. Corrected reports require all four rungs, three seeds
 each, and complete matched validation cells. Dataset identity, frozen baseline
 identity and model training records remain separate prerequisites for accepting
 that ranking as an eligible selection.
+
+## Amendment 2 — repair the validation creator overlap
+
+Before any corrected model was trained, a provenance audit found a real
+creator overlap: training contains `Foto: PantheraLeo1359531` (the closed
+butcher shop), while validation contains `PantheraLeo1359531` (Knollenteich).
+These are the same operator under the project's existing normalization rules.
+The original validation manifest's creator-disjoint flag is therefore not a
+valid independence claim. Recovery was stopped when this was identified.
+
+The 151 training sources remain unchanged. A versioned validation manifest,
+`data/captured-val-m7/manifest.json` (`captured-val-m7-v1`), retains 15 original
+entries verbatim and replaces only the conflicting nature clip with Veljo
+Runnel's own-work katydid recording (Commons page 142193278, CC BY 4.0).
+The copyright-holder name is Veljo Runnel; the uploader account is Veljorunnel.
+Both identities are checked against training. The 3840×2160, 22.061-second
+source is explicitly slowed fourfold; its Commons SHA1, byte length and 2-MiB
+prefix SHA256 are pinned in the new manifest. The inspected source poster
+shows a real insect on vegetation, not a rendered scene or title card.
+
+The replacement preserves 16 clips and all category counts. The disjointness
+audit covers both the current 151-clip training manifest and the legacy
+12-clip training manifest: 163 is the audit union, not a changed training size.
+It checks normalized creator aliases, stored and derived shoot IDs, URLs,
+titles, page IDs and available source hashes. The complete manifest SHA256 and
+audit result are recorded in `results/m7-validation-freeze.json`.
+
+This amendment supersedes earlier instructions to use the unchanged M6
+validation split. All corrected arms and the frozen production model must be
+evaluated on the new manifest; no old validation score may be pooled with
+that result. The training membership, 16,200 updates, rung ladder, seed counts,
+loss, selection metric, 0.01-dB tie rule and replacement threshold do not change.
+The historical validation manifest is retained for historical evidence and is
+not silently rewritten into the new split. No neural score was consulted in
+choosing the replacement. This new validation source is also excluded from
+the future architecture-confirmation corpus.
