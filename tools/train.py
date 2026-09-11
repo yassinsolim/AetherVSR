@@ -32,6 +32,7 @@ import torch.nn.functional as F
 from PIL import Image
 
 from aethersr import AetherSR, box_downsample2, count_parameters, export_weights
+from reparam import LADDERS, RepAetherSR
 from dataset import check_disjoint, load_split, split_files
 from degrade import degrade_tensor
 
@@ -265,6 +266,10 @@ def main() -> int:
         "Mutually exclusive with --corpus/--split/--degradation: the degradation "
         "already happened, at full frame resolution, inside a real video encode.",
     )
+    ap.add_argument("--rung", default="R0", choices=sorted(LADDERS),
+                    help="training-time body block (Milestone 7). R0 is the ordinary "
+                         "network; R1+ add linear branches that fuse back into the "
+                         "identical deployed 3x3 convolution before export")
     ap.add_argument("--device", default=None, choices=["cpu", "mps"],
                     help="override device selection; cpu is slower but reproducible "
                          "and does not deadlock when runs are queued")
@@ -330,8 +335,26 @@ def main() -> int:
         val_hr = load_patches(args.corpus, val_files, args.patch, args.per_image, args.limit, 20260101)
         print(f"patches: train {tuple(train_hr.shape)}  val {tuple(val_hr.shape)}")
 
-    model = AetherSR(channels=args.channels, depth=args.depth).to(device)
-    print(f"parameters: {count_parameters(model)}")
+    # Structural reparameterization (Milestone 7) changes the *training* graph
+    # only. R0 is the ordinary network; every other rung adds linear branches
+    # that are summed before the existing tanh and fused back into the identical
+    # deployed convolution before anything is exported. The training loop below
+    # is deliberately untouched, so a rung comparison varies the block and
+    # nothing else.
+    if args.rung == "R0":
+        model = AetherSR(channels=args.channels, depth=args.depth).to(device)
+    else:
+        model = RepAetherSR(
+            channels=args.channels, depth=args.depth, branches=LADDERS[args.rung]
+        ).to(device)
+    fused_params = (
+        model.fused_parameter_count() if hasattr(model, "fused_parameter_count")
+        else count_parameters(model)
+    )
+    print(
+        f"rung {args.rung}: {count_parameters(model)} training parameters, "
+        f"{fused_params} fused inference parameters"
+    )
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     val_hr_d = val_hr.to(device)
@@ -467,6 +490,15 @@ def main() -> int:
         model.load_state_dict(best_state)
     model.eval().cpu()
 
+    # Collapse the training-only branches before anything is measured or
+    # exported. Everything downstream - parameter count, weights, golden vectors
+    # and the shipped JSON - must see the ordinary deployed network, so the rung
+    # cannot leak into production even by accident.
+    training_parameters = count_parameters(model)
+    rung_branches = list(getattr(model, "branches", ("k3",)))
+    if hasattr(model, "fuse"):
+        model = model.fuse()
+
     # Over verified file hashes: validate_manifest has already confirmed each
     # one against the bytes actually read, so this digest identifies the
     # content trained on rather than the strings describing it. The video-pairs
@@ -599,6 +631,14 @@ def main() -> int:
             "patch": args.patch,
             "seed": args.seed,
             "loss": "L1",
+            # Structural reparameterization is a TRAINING-time property. These
+            # two numbers differ on purpose, and conflating them would describe
+            # a model that was never shipped: `parameters` below is the fused
+            # inference count and is what the runtime loads.
+            "rung": args.rung,
+            "rungBranches": rung_branches,
+            "trainingParameters": training_parameters,
+            "fusedInferenceParameters": count_parameters(model),
             "valPsnrDb": round(best, 3),
             "valSsim": round(best_ssim, 5),
             "bilinearValPsnrDb": round(base_psnr, 3),
