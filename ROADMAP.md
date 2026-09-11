@@ -327,8 +327,20 @@ Answer the question Milestone 7 could not: does `R3`'s advantage survive at the
 production budget? Train `R0` and `R3` at 81,180 updates on the same frozen
 corpus, three seeds each, declared before running and uniformly applied. That
 is the only comparison that can produce a deployable candidate, and it also
-tests whether the +0.0247 dB at a fifth of the schedule was a head start that
-the control catches up on.
+tests whether the +0.0247 dB at a fifth of the schedule was a head start the
+control catches up on.
+
+The literature makes this more pressing rather than less. ESPAN (CVPRW 2025)
+trains identical architectures to 300 k and 500 k iterations and every
+reparameterized variant's advantage shrinks by roughly a third over that
+stretch — RepVGG +0.208 → +0.134 dB, EDBB +0.303 → +0.205. If that decay holds
+here, our measurement at 16,200 updates is an **over**-estimate of what a
+production-length run would show, and the honest expectation for Milestone 8 is
+a smaller gain than Milestone 7 reported, possibly none.
+
+Passing that comparison is necessary but **not sufficient** to ship. A frozen,
+category-complete confirmation corpus and all five pre-registered replacement
+criteria still apply.
 
 Prerequisites already in place: frozen corpus and hashes, a repaired
 creator-disjoint validation split, a registered scoring and reporting
