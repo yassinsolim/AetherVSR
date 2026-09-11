@@ -1,0 +1,49 @@
+{
+ "schema": "aethervsr.m7-diagnosis/1",
+ "createdAt": "2026-09-11T20:56:09.134177+00:00",
+ "question": "Did training-time linear reparameterization reach a better optimum than the ordinary network, and can it ship?",
+ "registeredResult": {
+  "metric": "per-clip mean dB vs frozen production, clip-first",
+  "means": {
+   "R0": -0.162,
+   "R1": -0.1504,
+   "R2": -0.1535,
+   "R3": -0.1373
+  },
+  "seedSd": {
+   "R0": 0.0181,
+   "R1": 0.0055,
+   "R2": 0.0035,
+   "R3": 0.0126
+  },
+  "R3_minus_R0": 0.0247,
+  "registeredTest": "exact 3v3 seed-level permutation",
+  "p": 0.1,
+  "pFloor": 0.1,
+  "interpretation": "The registered test cannot return below 0.100 at three seeds per arm, so it neither establishes nor refutes the effect. R3 won the ladder by the registered rule, which is a selection, not a significance claim."
+ },
+ "postHocSupport": {
+  "status": "NOT REGISTERED; computed after the binding result and reported as description only",
+  "clipLevelPairedSignTest": {
+   "R3 beats R0 on": "14/16 clips",
+   "twoSidedP": 0.0042
+  },
+  "perCrfOrdering": "R3 leads R1, R2 and R0 at CRF 18, 26 and 34 alike",
+  "whatThisDoesAndDoesNotShow": "It shows the advantage is spread across the corpus rather than carried by one or two clips. It does not replace the seed-level test: it conditions on the three seeds actually trained and therefore cannot separate a real parameterization effect from a lucky seed draw. Treating it as the headline would be choosing the test after seeing the data."
+ },
+ "whyNothingShips": {
+  "selectedCandidate": "models/m7-final/R3-seed12.json",
+  "meanVsProduction": -0.1259,
+  "threshold": 0.1,
+  "criterionMet": false,
+  "cause": "Not architecture. Every arm trained 16,200 optimizer updates; the shipped model trained 81,180. The whole ladder sits about 0.14 dB below production for that reason, and the registered replacement criterion compares against production, so no screening-budget model could ever satisfy it.",
+  "preRegistrationFlaw": "This is a defect in my own pre-registration: it held the step budget constant across the ladder, which is right for comparing rungs, and then applied a replacement threshold against a model trained at five times that budget, which no arm could reach. The comparison between rungs remains valid; the replacement gate was unreachable by construction and is recorded as such rather than quietly reinterpreted."
+ },
+ "deployedCost": {
+  "trainingParameters": 9971,
+  "deployedParameters": 6291,
+  "runtime": "results/m7-runtime-parity.json: candidate p50 6.02 and 6.63 ms against production 6.09 and 6.31 ms, difference below run-to-run spread",
+  "note": "The zero-cost property holds: R3 deploys the identical graph at indistinguishable runtime."
+ },
+ "conclusion": "Structural reparameterization did not fail. R3 is the best rung by the registered rule and its advantage is broad across the corpus, but at three seeds the registered test cannot establish it, and the budget asymmetry means no candidate could replace production. The open question is whether R3 still leads at the production budget."
+}
