@@ -30,6 +30,13 @@ import sys
 
 TIE_BAND_DB = 0.01
 SIMPLICITY_ORDER = ["R0", "R1", "R2", "R3", "R4"]
+# Milestone 6 left motion@CRF34 (-0.0907) and texture@CRF34 (-0.0069) negative.
+# Those numbers came from the *confirmation* corpus, and none of its clips
+# appear in the validation corpus screened here, so what follows is the
+# same-named category cell measured on different footage - a weather report for
+# a neighbouring town, not the same reading. It is tracked because a rung that
+# hurts these categories on validation is worth seeing early, but it neither
+# confirms nor refutes the Milestone 6 cells, and only a confirmation run can.
 WEAK_CELLS = [("motion", 34), ("texture", 34)]
 
 
@@ -104,9 +111,10 @@ def main() -> int:
             "sd": st.stdev(vals) if len(vals) > 1 else 0.0,
             "perSeed": vals,
             "byCrf": {k: st.fmean([r["byCrf"][k] for r in runs]) for k in runs[0]["byCrf"]},
-            "weakCells": {
-                f"{cat}@{crf}": st.fmean([r["byCategoryCrf"].get(f"{cat}@{crf}", float("nan"))
-                                          for r in runs])
+            "weakCellsOnValidation": {
+                f"{cat}@{crf}": st.fmean(
+                    [r["byCategoryCrf"].get(f"{cat}@{crf}", float("nan")) for r in runs]
+                )
                 for cat, crf in WEAK_CELLS
             },
         }
