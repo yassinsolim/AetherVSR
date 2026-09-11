@@ -94,5 +94,20 @@
  "timingScope": "GPU timestamp bracket that opens at ingest and closes at our own present/blit. It spans the whole upscale stage - every neural compute pass plus the pipeline ingest and present brackets - on the importExternalTexture path, and excludes video decode and the browser's own compositing. Our code adds no separate upload pass there, but whether the browser copied internally was not observable.",
  "discardedAttempt": "An earlier attempt on the same day was discarded and is not reported as a measurement. It ran while final-seed training held the MPS context: both second passes fell back to the Catmull-Rom scaler, and the sample windows were unequal (n=39 against n=240). Recorded here because why a number was discarded is worth more than the number was.",
  "importPath": "importExternalTexture",
- "samplingScope": "n=240 is the trailing window the stats ring buffer retains, not every frame in the pass. Each 30 s pass rendered about 1,750 frames; the reported percentiles describe the last 240 of them, after a discarded 15 s warm-up."
+ "samplingScope": "n=240 is the trailing window the stats ring buffer retains, not every frame in the pass. Each 30 s pass rendered about 1,750 frames; the reported percentiles describe the last 240 of them, after a discarded 15 s warm-up.",
+ "gpuMemory": {
+  "deviceMeasured": "not measured",
+  "why": "WebGPU exposes no device or process memory query to JavaScript, and the production pipeline carries no memory instrumentation. Reporting a device-level figure would mean inventing one.",
+  "allocationComputedFromSites": {
+   "source": "1280x720 -> 2560x1440, f16 activations",
+   "activationBuffers": 58982400,
+   "weightBuffers": 12896,
+   "outputTexture": 14745600,
+   "uniforms": 64,
+   "timingBuffers": 96,
+   "totalBytes": 73741056,
+   "derivation": "Computed from the allocation sites in src/core/upscale/neural-upscaler.ts:198-262, not read back from the device. Every size there depends only on source dimensions, model features, depth and precision."
+  },
+  "parityArgument": "Structural rather than measured. The candidate and the shipped model have identical features, depth, precision, layer descriptors and tensor lengths, verified in results/m7-deployment-compatibility.json, and no allocation depends on weight values. The computed totals are byte-identical at 73,741,056 bytes, so a memory difference would require a shape difference that the compatibility check already excludes."
+ }
 }

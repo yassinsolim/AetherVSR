@@ -2147,9 +2147,19 @@ claimed — what the data supports is that both models held every gate and the
 between-model differences are the size of the production model's own
 run-to-run variation.
 
-The zero-cost property is established structurally rather than by these
-timings: 9,971 training parameters deploy as 6,291, with tensor names, lengths,
-layer descriptors and normalisation identical to the shipped model.
+**GPU memory: not measured.** WebGPU exposes no device or process memory query
+to JavaScript and the production pipeline carries no memory instrumentation, so
+there is no figure to report and none is invented. What can be stated is
+structural: every allocation in `neural-upscaler.ts` is sized from source
+dimensions, features, depth and precision, never from weight values. Computed
+from those allocation sites at 1280×720 with f16 activations, both models come
+to an identical **73,741,056 bytes** — 59.0 MB of ping/pong activations,
+14.7 MB output texture, 12.9 kB of weights. A memory difference would require a
+shape difference, which the compatibility check already excludes.
+
+The zero-cost property is therefore established structurally rather than by
+these timings: 9,971 training parameters deploy as 6,291, with tensor names,
+lengths, layer descriptors and normalisation identical to the shipped model.
 
 An earlier runtime attempt was discarded, not reported: it ran while training
 held the MPS context, both second passes fell back to Catmull-Rom, and the
