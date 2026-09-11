@@ -191,11 +191,24 @@ confound is the same size as the signal, so it cannot be argued away as small.
 
 ### An honest statement of what this does and does not change
 
-A confound that adds variance makes a true effect *harder* to see, so the null
-is unlikely to be an artefact of it, and the corrected screen will probably
-reach the same verdict. That is a prediction, recorded before the data exists,
-not a reason to keep the result: an experiment that cannot support its own
-stated design is withdrawn whether or not its answer turns out to be right.
+An earlier draft of this amendment argued that because the confound adds
+variance, and added variance makes a true effect harder to see, the null was
+unlikely to be an artefact of it. That reasoning is backwards and is retracted.
+Added variance raises the **false-negative** risk, and the conclusion here *is*
+a null — so the confound is precisely the kind of defect that could have
+produced it. It cannot manufacture a spurious *win*, but a spurious null is
+exactly what it can manufacture.
+
+What can be said is narrower, and it is the whole of it: **the pilot cannot
+establish a null.** Added variance can mask a real effect, so a non-detection
+under the confound is not evidence of absence. That is why the screen is
+withdrawn rather than annotated and kept.
+
+A prediction, recorded before the replacement data exists and labelled as
+nothing more: the corrected screen is expected to reach the same verdict. If it
+does, that verdict will rest on the corrected run alone, never on the pilot
+agreeing with it — two runs sharing a defect-driven answer would not be
+corroboration.
 
 ### What changes
 
