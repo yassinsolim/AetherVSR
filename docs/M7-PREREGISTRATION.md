@@ -148,3 +148,66 @@ explicitly labelled as exposed.
 Milestone 6 left `motion@CRF34` (−0.0907) and `texture@CRF34` (−0.0069)
 negative. These are reported explicitly for every rung. They are not optimized
 for directly, and no rung is selected on them.
+
+---
+
+## Amendment 1 — the first screen was confounded and is withdrawn
+
+*Written after the first nine models were trained and scored, before any
+replacement model exists. The results that prompted it are stated here so the
+amendment can be judged against them rather than around them.*
+
+### What the first screen found
+
+Nine models, R0/R1/R2 × 3 seeds, equal 16,200-step budget, per-clip mean Δ
+against the frozen production model on the Milestone 6 validation corpus:
+
+| rung | mean dB | seed sd |
+|---|---|---|
+| `R0` | −0.1557 | 0.0165 |
+| `R1` | −0.1505 | 0.0302 |
+| `R2` | −0.1677 | 0.0079 |
+
+`R1 − R0 = +0.0052 dB`, exact permutation `p = 0.800`. Under the selection rule
+that is a tie, and a tie selects `R0`: a null result.
+
+### Why it is withdrawn anyway
+
+Independent review found the ladder was not varying one thing. `nn.Conv2d`
+draws its default initialisation from the global generator, so constructing an
+optional branch consumed draws even though the branch is zeroed immediately
+afterwards. Measured at seed 1: `body.1.k3.weight` and `head.weight` differed
+between `R0` and `R1`, and the next three draws were `[0.60637, 0.65406,
+−0.54377]` for `R0` against `[−0.80873, 0.13418, −0.09037]` for `R1`.
+
+So each arm differed by block structure **plus** a different initialisation of
+the layers built after the first block **plus** a different data order. The
+claim in *One asymmetry* above — that `R1` begins numerically identical to `R0`
+— was intended but false, which removes the one arm designated as the clean
+test.
+
+The effect under measurement is ~0.005 dB against a seed sd of ~0.017. The
+confound is the same size as the signal, so it cannot be argued away as small.
+
+### An honest statement of what this does and does not change
+
+A confound that adds variance makes a true effect *harder* to see, so the null
+is unlikely to be an artefact of it, and the corrected screen will probably
+reach the same verdict. That is a prediction, recorded before the data exists,
+not a reason to keep the result: an experiment that cannot support its own
+stated design is withdrawn whether or not its answer turns out to be right.
+
+### What changes
+
+* `RepBody` builds optional branches inside `torch.random.fork_rng(devices=[])`.
+  All shared tensors and the post-construction RNG stream are now bit-identical
+  across `R0`–`R3`, asserted by
+  `test_rung_choice_does_not_disturb_initialisation`.
+* The nine models move to `models/m7-pilot-confounded/` and their scores to
+  `results/pilot-confounded/`. They are preserved as pilot evidence, are
+  excluded from selection, and no claim rests on them.
+* The screen is rerun on fresh models. **`R3` is included**: it was in the
+  ladder from the start, and dropping a registered rung after seeing a null
+  would be the same outcome-dependent editing this amendment exists to correct.
+* Nothing else moves. Same corpus, same split, same budget, same selection rule,
+  same replacement criterion, same tie-break toward simplicity.
