@@ -1,0 +1,100 @@
+{
+ "schema": "aethervsr.m7-equivalence/1",
+ "chain": "multi-branch PyTorch -> fused PyTorch -> exported JSON -> (WebGPU, browser golden)",
+ "tolerance": 1e-05,
+ "worstBoundaryError": 1.2516975402832031e-06,
+ "passed": true,
+ "note": "Each link is measured separately. A single end-to-end number would hide which boundary moved, and two errors that cancel would look like success.",
+ "boundaries": [
+  {
+   "rung": "R1",
+   "seed": 0,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.0728836059570312e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.0728836059570312e-06,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R1",
+   "seed": 1,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 7.748603820800781e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 7.748603820800781e-07,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R1",
+   "seed": 2,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 8.940696716308594e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 8.940696716308594e-07,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R2",
+   "seed": 0,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.0132789611816406e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.0132789611816406e-06,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R2",
+   "seed": 1,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.0728836059570312e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.0728836059570312e-06,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R2",
+   "seed": 2,
+   "trainingParameters": 6835,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 8.940696716308594e-07,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 8.940696716308594e-07,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R3",
+   "seed": 0,
+   "trainingParameters": 9971,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.0728836059570312e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.0728836059570312e-06,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R3",
+   "seed": 1,
+   "trainingParameters": 9971,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.2516975402832031e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.2516975402832031e-06,
+   "tensorNamesMatch": true
+  },
+  {
+   "rung": "R3",
+   "seed": 2,
+   "trainingParameters": 9971,
+   "fusedParameters": 6291,
+   "multiBranchVsFused": 1.1920928955078125e-06,
+   "fusedVsReloaded": 0.0,
+   "multiBranchVsReloaded": 1.1920928955078125e-06,
+   "tensorNamesMatch": true
+  }
+ ]
+}
