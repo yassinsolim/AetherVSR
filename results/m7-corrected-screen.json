@@ -1,0 +1,239 @@
+{
+ "schema": "aethervsr.m7-screen/2",
+ "inputStatus": "corrected",
+ "inputStatusSource": "cli",
+ "auditOnly": false,
+ "metric": "per-clip mean PSNR delta vs the frozen production model, paired on clip x CRF",
+ "statisticalUnit": "clip; frames averaged within a clip first",
+ "baseline": {
+  "key": "aethersr-c16d2",
+  "role": "frozen production model"
+ },
+ "tieBandDb": 0.01,
+ "ranking": [
+  "R3",
+  "R1",
+  "R2",
+  "R0"
+ ],
+ "arms": {
+  "R0": {
+   "seeds": 3,
+   "seedNames": [
+    "seed1",
+    "seed2",
+    "seed3"
+   ],
+   "mean": -0.16199199068877432,
+   "sd": 0.01812596330930082,
+   "perSeed": [
+    -0.18283785631259283,
+    -0.1499448778728644,
+    -0.15319323788086572
+   ],
+   "byCrf": {
+    "18": -0.27640285591284436,
+    "26": -0.15831938634316126,
+    "34": -0.05125372981031736
+   },
+   "perCategoryCrfOnValidation": {
+    "daylight@18": -0.12257277965545654,
+    "daylight@26": -0.09268750747044881,
+    "daylight@34": -0.019931793212890625,
+    "faces@18": -0.21453837553660074,
+    "faces@26": -0.13635332385698953,
+    "faces@34": -0.0342525045077006,
+    "lowlight@18": -0.2797052760918935,
+    "lowlight@26": -0.12249489625295003,
+    "lowlight@34": -0.03029858072598775,
+    "motion@18": -0.25010988116264343,
+    "motion@26": -0.13591845830281576,
+    "motion@34": -0.054671019315719604,
+    "nature@18": -0.18691033124923706,
+    "nature@26": -0.10897229115168254,
+    "nature@34": -0.05117744207382202,
+    "text@18": -0.2662016285790338,
+    "text@26": -0.15083051390118069,
+    "text@34": -0.04147314363055759,
+    "texture@18": -0.40283481280008954,
+    "texture@26": -0.2553071081638336,
+    "texture@34": -0.10555679599444072,
+    "urban@18": -0.41653533776601154,
+    "urban@26": -0.2349194884300232,
+    "urban@34": -0.061897883812586464
+   }
+  },
+  "R1": {
+   "seeds": 3,
+   "seedNames": [
+    "seed1",
+    "seed2",
+    "seed3"
+   ],
+   "mean": -0.15043031631244552,
+   "sd": 0.005468035952316015,
+   "perSeed": [
+    -0.1531044952571392,
+    -0.1540466087559859,
+    -0.1441398449242115
+   ],
+   "byCrf": {
+    "18": -0.2584218233823776,
+    "26": -0.14639277011156082,
+    "34": -0.046476355443398155
+   },
+   "perCategoryCrfOnValidation": {
+    "daylight@18": -0.08750557899475098,
+    "daylight@26": -0.06296614805857341,
+    "daylight@34": -0.010898411273956299,
+    "faces@18": -0.20036915938059488,
+    "faces@26": -0.12469301621119182,
+    "faces@34": -0.028583357731501263,
+    "lowlight@18": -0.2691394587357839,
+    "lowlight@26": -0.1183385153611501,
+    "lowlight@34": -0.028901795546213787,
+    "motion@18": -0.21821031967798868,
+    "motion@26": -0.12181873122851054,
+    "motion@34": -0.04896263281504313,
+    "nature@18": -0.16804287830988565,
+    "nature@26": -0.09865457812945048,
+    "nature@34": -0.046262641747792564,
+    "text@18": -0.23452897866566977,
+    "text@26": -0.13221687740749782,
+    "text@34": -0.03510461913214789,
+    "texture@18": -0.4281260073184967,
+    "texture@26": -0.2625075976053874,
+    "texture@34": -0.10667184988657634,
+    "urban@18": -0.38794050614039105,
+    "urban@26": -0.21532133221626282,
+    "urban@34": -0.05432243148485819
+   }
+  },
+  "R2": {
+   "seeds": 3,
+   "seedNames": [
+    "seed1",
+    "seed2",
+    "seed3"
+   ],
+   "mean": -0.15349268499347898,
+   "sd": 0.003518225035313128,
+   "perSeed": [
+    -0.1517882446448008,
+    -0.157538503408432,
+    -0.15115130692720413
+   ],
+   "byCrf": {
+    "18": -0.26177416866024333,
+    "26": -0.1492795596520106,
+    "34": -0.049424326668183007
+   },
+   "perCategoryCrfOnValidation": {
+    "daylight@18": -0.07394562164942424,
+    "daylight@26": -0.06935179233551025,
+    "daylight@34": -0.0022580226262410483,
+    "faces@18": -0.2408382793267568,
+    "faces@26": -0.14916479587554932,
+    "faces@34": -0.04138335585594177,
+    "lowlight@18": -0.2410211662451426,
+    "lowlight@26": -0.10509272416432698,
+    "lowlight@34": -0.03256107370058695,
+    "motion@18": -0.2075373629728953,
+    "motion@26": -0.11517614126205444,
+    "motion@34": -0.046826700369517006,
+    "nature@18": -0.14897982279459634,
+    "nature@26": -0.08465881148974101,
+    "nature@34": -0.03915573159853617,
+    "text@18": -0.27468522389729816,
+    "text@26": -0.15323400497436523,
+    "text@34": -0.04453288184271919,
+    "texture@18": -0.42299990852673847,
+    "texture@26": -0.25220925609270733,
+    "texture@34": -0.09819651643435161,
+    "urban@18": -0.3838161627451579,
+    "urban@26": -0.22340784470240274,
+    "urban@34": -0.06934290130933125
+   }
+  },
+  "R3": {
+   "seeds": 3,
+   "seedNames": [
+    "seed1",
+    "seed2",
+    "seed3"
+   ],
+   "mean": -0.13726531010535029,
+   "sd": 0.012596904081606129,
+   "perSeed": [
+    -0.14749581615130106,
+    -0.12319547434647879,
+    -0.141104639818271
+   ],
+   "byCrf": {
+    "18": -0.23896278192599615,
+    "26": -0.1332179456949234,
+    "34": -0.0396152026951313
+   },
+   "perCategoryCrfOnValidation": {
+    "daylight@18": -0.10821312665939331,
+    "daylight@26": -0.0705002744992574,
+    "daylight@34": 0.00011990467707316081,
+    "faces@18": -0.23285155495007834,
+    "faces@26": -0.141534556945165,
+    "faces@34": -0.03388941287994385,
+    "lowlight@18": -0.2495931088924408,
+    "lowlight@26": -0.11639729142189026,
+    "lowlight@34": -0.03189588586489359,
+    "motion@18": -0.1620181401570638,
+    "motion@26": -0.09386325875918071,
+    "motion@34": -0.038147568702697754,
+    "nature@18": -0.1186030109723409,
+    "nature@26": -0.06933242082595825,
+    "nature@34": -0.03264913956324259,
+    "text@18": -0.22712330023447672,
+    "text@26": -0.12018279896842109,
+    "text@34": -0.027207169267866343,
+    "texture@18": -0.41736255089441937,
+    "texture@26": -0.24125834306081137,
+    "texture@34": -0.09201725323994954,
+    "urban@18": -0.33648237586021423,
+    "urban@26": -0.1878333588441213,
+    "urban@34": -0.04757155974706014
+   }
+  }
+ },
+ "significance": {
+  "R3_vs_R0": {
+   "deltaDb": 0.024726680583424032,
+   "p": 0.1,
+   "attainableFloor": 0.1
+  },
+  "R1_vs_R0": {
+   "deltaDb": 0.011561674376328795,
+   "p": 0.5,
+   "attainableFloor": 0.1
+  },
+  "R2_vs_R0": {
+   "deltaDb": 0.008499305695295334,
+   "p": 0.7,
+   "attainableFloor": 0.1
+  }
+ },
+ "historicalConfirmationCells": {
+  "valuesDb": {
+   "motion@34": -0.0907,
+   "texture@34": -0.0069
+  },
+  "note": "These are historical Milestone 6 confirmation-corpus values, not validation cells from this screen. Validation category\u00d7CRF values are reported only under arms.*.perCategoryCrfOnValidation."
+ },
+ "provenanceEligibilityPrerequisite": "This report validates declared status and scored-cell coverage only. A corrected ranking remains conditional on separately verified corrected corpus and validation provenance, frozen-production-baseline identity, and each model's registered 16,200 optimizer-update training record.",
+ "budgetCaveat": "Screening runs the pre-registered 16,200-step budget, which is about a fifth of the 81,180 steps the shipped model was trained for. A reparameterization benefit that only appears late in a schedule would not be visible here. Raising the budget would be a different experiment and must be declared before it is run.",
+ "argmax": "R3",
+ "tiedWithArgmax": [
+  "R3"
+ ],
+ "winner": "R3",
+ "winnerRationale": "R3 wins outright, no rung within 0.01 dB.",
+ "nullResult": false,
+ "whatANullDoesNotMean": "With 3 seeds per arm the exact unpaired permutation test cannot return below 0.100, so it can never reach p<0.05 no matter how large the effect. Selecting R0 therefore means 'no gain was detected at this budget under this rule'. It is not evidence that the rungs are optimization-equivalent, and it does not bound how large an undetected effect could be."
+}

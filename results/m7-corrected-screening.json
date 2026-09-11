@@ -1,0 +1,5995 @@
+{
+ "schema": "aethervsr.m6-validation/1",
+ "manifest": "data/captured-val-m7/manifest.json",
+ "crfs": [
+  18,
+  26,
+  34
+ ],
+ "frames": 8,
+ "clips": [
+  "daylight-lala-lake-romania-4k-aerial",
+  "faces-charles-iii-accession-proclamation-st-ives",
+  "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+  "lowlight-bay-city-fireworks-2016-grand-finale",
+  "lowlight-charlotte-by-night-4k-drone-footage",
+  "motion-aerial-drone-chase-of-rally-cars",
+  "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+  "nature-clip",
+  "nature-pikktiib-sooritsika-conocephalus-fuscus",
+  "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+  "text-front-banner-of-the-fridaysforfuture-demonstrati",
+  "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+  "texture-aerial-views-of-a-forest-in-belarus",
+  "texture-walking-china-amazing-noodle-making-skills-chine",
+  "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+  "urban-one-step-closer-giant-s-despair-music-video-wilk"
+ ],
+ "categories": {
+  "daylight": 3,
+  "faces": 6,
+  "lowlight": 6,
+  "motion": 6,
+  "nature": 6,
+  "text": 9,
+  "texture": 6,
+  "urban": 6
+ },
+ "statisticalUnit": "clip; frames averaged within a clip first",
+ "models": {
+  "R0-seed1": {
+   "meanDelta": 0.5806334006289641,
+   "clipMeanDelta": 0.5806334006289641,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.0490453988313675,
+    "26": 0.5430623143911362,
+    "34": 0.14979248866438866
+   },
+   "byCategory": {
+    "daylight": 0.5565558870633444,
+    "faces": 0.7408112287521362,
+    "lowlight": 0.49397528171539307,
+    "motion": 0.23999532063802084,
+    "nature": 0.19839341441790262,
+    "text": 0.7150891092088487,
+    "texture": 0.7030389209588369,
+    "urban": 0.9179414312044779
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.19839341441790262,
+   "meanDeltaSsim": 0.004066924719760816,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.52988165616989,
+     "ssim": 0.9437432065606117,
+     "delta": 0.9952884912490845,
+     "deltaSsim": 0.0034275874495506287
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.072684943675995,
+     "ssim": 0.897976852953434,
+     "delta": 0.5392691493034363,
+     "deltaSsim": 0.001275382936000824
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.555268466472626,
+     "ssim": 0.8403194546699524,
+     "delta": 0.1351100206375122,
+     "deltaSsim": -0.000921107828617096
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.797340869903564,
+     "ssim": 0.917289100587368,
+     "delta": 1.8151280283927917,
+     "deltaSsim": 0.01924833655357361
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.85766178369522,
+     "ssim": 0.8709358051419258,
+     "delta": 1.1566606163978577,
+     "deltaSsim": 0.01600012183189392
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.637178421020508,
+     "ssim": 0.7685234770178795,
+     "delta": 0.3913593292236328,
+     "deltaSsim": 0.008324392139911652
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.93734860420227,
+     "ssim": 0.9823915585875511,
+     "delta": 0.7891976833343506,
+     "deltaSsim": 0.0007581189274787903
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.3444539308548,
+     "ssim": 0.9651650637388229,
+     "delta": 0.274108350276947,
+     "deltaSsim": -2.034008502960205e-05
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.3585786819458,
+     "ssim": 0.931584969162941,
+     "delta": 0.01841336488723755,
+     "deltaSsim": -0.0009179487824440002
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.44320338964462,
+     "ssim": 0.9637005105614662,
+     "delta": 0.9513503313064575,
+     "deltaSsim": 0.00193776935338974
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.45819389820099,
+     "ssim": 0.9277191609144211,
+     "delta": 0.17928719520568848,
+     "deltaSsim": 7.528066635131836e-05
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.345842361450195,
+     "ssim": 0.8760312348604202,
+     "delta": -0.09537577629089355,
+     "deltaSsim": -0.0012980401515960693
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.23164755105972,
+     "ssim": 0.9704694002866745,
+     "delta": 1.0558992624282837,
+     "deltaSsim": 0.0034801214933395386
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.691650390625,
+     "ssim": 0.9536331966519356,
+     "delta": 0.6790456175804138,
+     "deltaSsim": 0.0027831345796585083
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.185389816761017,
+     "ssim": 0.9199511781334877,
+     "delta": 0.19364506006240845,
+     "deltaSsim": 0.001413695514202118
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 39.95756268501282,
+     "ssim": 0.9668372645974159,
+     "delta": 0.5878302454948425,
+     "deltaSsim": 0.0003921687602996826
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.68158441781998,
+     "ssim": 0.9437061846256256,
+     "delta": 0.2233445644378662,
+     "deltaSsim": 0.0001507401466369629
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.300370275974274,
+     "ssim": 0.9168599471449852,
+     "delta": 0.052308738231658936,
+     "deltaSsim": -0.0001353621482849121
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.110061168670654,
+     "ssim": 0.9871448948979378,
+     "delta": 0.2986311912536621,
+     "deltaSsim": -0.00010433793067932129
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 43.95034909248352,
+     "ssim": 0.9866337180137634,
+     "delta": 0.1919013261795044,
+     "deltaSsim": -8.724629878997803e-05
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.22552752494812,
+     "ssim": 0.9853626415133476,
+     "delta": 0.08595585823059082,
+     "deltaSsim": -0.00010666996240615845
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.319191098213196,
+     "ssim": 0.9814738184213638,
+     "delta": 0.5114990472793579,
+     "deltaSsim": 0.0002389773726463318
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.78259742259979,
+     "ssim": 0.9752619564533234,
+     "delta": 0.22894173860549927,
+     "deltaSsim": -4.7169625759124756e-05
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.33441358804703,
+     "ssim": 0.9638851508498192,
+     "delta": 0.07398486137390137,
+     "deltaSsim": -0.00027048587799072266
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 43.99320304393768,
+     "ssim": 0.9793476536870003,
+     "delta": 0.1961839199066162,
+     "deltaSsim": -0.00012045353651046753
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.661526799201965,
+     "ssim": 0.9764860048890114,
+     "delta": 0.1040881872177124,
+     "deltaSsim": -0.0001301020383834839
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.686196088790894,
+     "ssim": 0.9753948003053665,
+     "delta": 0.07566273212432861,
+     "deltaSsim": -0.00010960549116134644
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.02514034509659,
+     "ssim": 0.9579095840454102,
+     "delta": 1.623321771621704,
+     "deltaSsim": 0.007755853235721588
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.892811357975006,
+     "ssim": 0.9270709082484245,
+     "delta": 0.7538583874702454,
+     "deltaSsim": 0.006033055484294891
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.27365607023239,
+     "ssim": 0.8752981275320053,
+     "delta": 0.1810896396636963,
+     "deltaSsim": 0.0029761269688606262
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.412345826625824,
+     "ssim": 0.937023863196373,
+     "delta": 1.041065752506256,
+     "deltaSsim": 0.0052880048751831055
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.31181651353836,
+     "ssim": 0.8931836560368538,
+     "delta": 0.44410020112991333,
+     "deltaSsim": 0.003439098596572876
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.707700073719025,
+     "ssim": 0.8236132562160492,
+     "delta": 0.09506702423095703,
+     "deltaSsim": 0.0008362084627151489
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.515960454940796,
+     "ssim": 0.9073404520750046,
+     "delta": 1.3461130857467651,
+     "deltaSsim": 0.01702187955379486
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.44082236289978,
+     "ssim": 0.8529379963874817,
+     "delta": 0.7501611113548279,
+     "deltaSsim": 0.012960217893123627
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.483155250549316,
+     "ssim": 0.7521776258945465,
+     "delta": 0.20102500915527344,
+     "deltaSsim": 0.0057127103209495544
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.711683332920074,
+     "ssim": 0.9340093061327934,
+     "delta": 0.5709365010261536,
+     "deltaSsim": 0.0030662789940834045
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.253925800323486,
+     "ssim": 0.8672082498669624,
+     "delta": 0.1939678192138672,
+     "deltaSsim": -0.00010520964860916138
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.891558051109314,
+     "ssim": 0.7575163543224335,
+     "delta": 0.06152898073196411,
+     "deltaSsim": -0.0009746402502059937
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.62072306871414,
+     "ssim": 0.9668778330087662,
+     "delta": 1.8434861302375793,
+     "deltaSsim": 0.006770536303520203
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.445938527584076,
+     "ssim": 0.9448440447449684,
+     "delta": 1.1280319094657898,
+     "deltaSsim": 0.005873329937458038
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.172479152679443,
+     "ssim": 0.9016465246677399,
+     "delta": 0.42028218507766724,
+     "deltaSsim": 0.003957375884056091
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.581337928771973,
+     "ssim": 0.912828654050827,
+     "delta": 1.1782631278038025,
+     "deltaSsim": 0.02149459719657898
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.18177556991577,
+     "ssim": 0.876936174929142,
+     "delta": 0.7641705870628357,
+     "deltaSsim": 0.017936229705810547
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.807946979999542,
+     "ssim": 0.7956093847751617,
+     "delta": 0.23158788681030273,
+     "deltaSsim": 0.009165741503238678
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.80583310127258,
+     "ssim": 0.9728606194257736,
+     "delta": 1.9805318117141724,
+     "deltaSsim": 0.005886971950531006
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.13135838508606,
+     "ssim": 0.9479066133499146,
+     "delta": 1.078060269355774,
+     "deltaSsim": 0.004045523703098297
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.20925384759903,
+     "ssim": 0.8882947787642479,
+     "delta": 0.27503490447998047,
+     "deltaSsim": 0.0008355379104614258
+    }
+   ]
+  },
+  "R0-seed2": {
+   "meanDelta": 0.6135263790686926,
+   "clipMeanDelta": 0.6135263790686926,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.1106250248849392,
+    "26": 0.5731720104813576,
+    "34": 0.1567821018397808
+   },
+   "byCategory": {
+    "daylight": 0.5935230851173401,
+    "faces": 0.7612457374731699,
+    "lowlight": 0.5377235015233358,
+    "motion": 0.2586376667022705,
+    "nature": 0.20773972074190775,
+    "text": 0.7347282105022006,
+    "texture": 0.774223804473877,
+    "urban": 0.9697867433230082
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.20773972074190775,
+   "meanDeltaSsim": 0.00456971845900019,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.5907296538353,
+     "ssim": 0.9437481388449669,
+     "delta": 1.0561364889144897,
+     "deltaSsim": 0.0034325197339057922
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.09730941057205,
+     "ssim": 0.8982901722192764,
+     "delta": 0.5638936161994934,
+     "deltaSsim": 0.0015887022018432617
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.58069759607315,
+     "ssim": 0.8413960337638855,
+     "delta": 0.1605391502380371,
+     "deltaSsim": 0.00015547126531600952
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.874874591827393,
+     "ssim": 0.9187567830085754,
+     "delta": 1.8926617503166199,
+     "deltaSsim": 0.020716018974781036
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.897213339805603,
+     "ssim": 0.8724557086825371,
+     "delta": 1.1962121725082397,
+     "deltaSsim": 0.017520025372505188
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.637438595294952,
+     "ssim": 0.769327849149704,
+     "delta": 0.3916195034980774,
+     "deltaSsim": 0.009128764271736145
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.938496589660645,
+     "ssim": 0.9826687797904015,
+     "delta": 0.7903456687927246,
+     "deltaSsim": 0.001035340130329132
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.34625726938248,
+     "ssim": 0.9654371440410614,
+     "delta": 0.27591168880462646,
+     "deltaSsim": 0.0002517402172088623
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.360888957977295,
+     "ssim": 0.9318285956978798,
+     "delta": 0.02072364091873169,
+     "deltaSsim": -0.000674322247505188
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.49852305650711,
+     "ssim": 0.9639159739017487,
+     "delta": 1.0066699981689453,
+     "deltaSsim": 0.00215323269367218
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.483927607536316,
+     "ssim": 0.927978865802288,
+     "delta": 0.20502090454101562,
+     "deltaSsim": 0.00033498555421829224
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.348786532878876,
+     "ssim": 0.8764097988605499,
+     "delta": -0.09243160486221313,
+     "deltaSsim": -0.0009194761514663696
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.34504568576813,
+     "ssim": 0.970814622938633,
+     "delta": 1.1692973971366882,
+     "deltaSsim": 0.003825344145298004
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.74333596229553,
+     "ssim": 0.9539658725261688,
+     "delta": 0.730731189250946,
+     "deltaSsim": 0.003115810453891754
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.19879788160324,
+     "ssim": 0.9200766161084175,
+     "delta": 0.20705312490463257,
+     "deltaSsim": 0.0015391334891319275
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 39.976903796195984,
+     "ssim": 0.9671684503555298,
+     "delta": 0.607171356678009,
+     "deltaSsim": 0.0007233545184135437
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.68776273727417,
+     "ssim": 0.9440464973449707,
+     "delta": 0.22952288389205933,
+     "deltaSsim": 0.0004910528659820557
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.29869091510773,
+     "ssim": 0.91719900816679,
+     "delta": 0.050629377365112305,
+     "deltaSsim": 0.00020369887351989746
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.165573954582214,
+     "ssim": 0.9873868897557259,
+     "delta": 0.35414397716522217,
+     "deltaSsim": 0.00013765692710876465
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 43.9806604385376,
+     "ssim": 0.9867995604872704,
+     "delta": 0.22221267223358154,
+     "deltaSsim": 7.859617471694946e-05
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.22771739959717,
+     "ssim": 0.9854888543486595,
+     "delta": 0.08814573287963867,
+     "deltaSsim": 1.95428729057312e-05
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.33384132385254,
+     "ssim": 0.9816906824707985,
+     "delta": 0.5261492729187012,
+     "deltaSsim": 0.00045584142208099365
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.78985697031021,
+     "ssim": 0.9754633381962776,
+     "delta": 0.23620128631591797,
+     "deltaSsim": 0.0001542121171951294
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.334102749824524,
+     "ssim": 0.9640394970774651,
+     "delta": 0.0736740231513977,
+     "deltaSsim": -0.00011613965034484863
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.01388645172119,
+     "ssim": 0.9795567244291306,
+     "delta": 0.2168673276901245,
+     "deltaSsim": 8.861720561981201e-05
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.674304842948914,
+     "ssim": 0.9766097515821457,
+     "delta": 0.11686623096466064,
+     "deltaSsim": -6.355345249176025e-06
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.68721354007721,
+     "ssim": 0.9754656553268433,
+     "delta": 0.07668018341064453,
+     "deltaSsim": -3.875046968460083e-05
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.08759021759033,
+     "ssim": 0.9584519118070602,
+     "delta": 1.685771644115448,
+     "deltaSsim": 0.008298180997371674
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.909258663654327,
+     "ssim": 0.9276707395911217,
+     "delta": 0.7703056931495667,
+     "deltaSsim": 0.006632886826992035
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.27083706855774,
+     "ssim": 0.8757024630904198,
+     "delta": 0.1782706379890442,
+     "deltaSsim": 0.0033804625272750854
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.41511356830597,
+     "ssim": 0.9369206726551056,
+     "delta": 1.0438334941864014,
+     "deltaSsim": 0.0051848143339157104
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.31151878833771,
+     "ssim": 0.8933589905500412,
+     "delta": 0.44380247592926025,
+     "deltaSsim": 0.0036144331097602844
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.706652522087097,
+     "ssim": 0.8240194022655487,
+     "delta": 0.09401947259902954,
+     "deltaSsim": 0.0012423545122146606
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.579304695129395,
+     "ssim": 0.9083631336688995,
+     "delta": 1.4094573259353638,
+     "deltaSsim": 0.01804456114768982
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.474221229553223,
+     "ssim": 0.854111798107624,
+     "delta": 0.7835599780082703,
+     "deltaSsim": 0.014134019613265991
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.485663414001465,
+     "ssim": 0.7528260126709938,
+     "delta": 0.20353317260742188,
+     "deltaSsim": 0.006361097097396851
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.67029446363449,
+     "ssim": 0.9332124218344688,
+     "delta": 0.5295476317405701,
+     "deltaSsim": 0.0022693946957588196
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.24534749984741,
+     "ssim": 0.8671205267310143,
+     "delta": 0.18538951873779297,
+     "deltaSsim": -0.00019293278455734253
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.89043003320694,
+     "ssim": 0.7577650398015976,
+     "delta": 0.060400962829589844,
+     "deltaSsim": -0.0007259547710418701
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.90303272008896,
+     "ssim": 0.9681887477636337,
+     "delta": 2.1257957816123962,
+     "deltaSsim": 0.008081451058387756
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.59256565570831,
+     "ssim": 0.9460611343383789,
+     "delta": 1.2746590375900269,
+     "deltaSsim": 0.00709041953086853
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.221746861934662,
+     "ssim": 0.9025736227631569,
+     "delta": 0.46954989433288574,
+     "deltaSsim": 0.004884473979473114
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.645969331264496,
+     "ssim": 0.9144022092223167,
+     "delta": 1.2428945302963257,
+     "deltaSsim": 0.023068152368068695
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.21891552209854,
+     "ssim": 0.8782906755805016,
+     "delta": 0.8013105392456055,
+     "deltaSsim": 0.019290730357170105
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.813741743564606,
+     "ssim": 0.7962466701865196,
+     "delta": 0.2373826503753662,
+     "deltaSsim": 0.009803026914596558
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.93855804204941,
+     "ssim": 0.9737920388579369,
+     "delta": 2.1132567524909973,
+     "deltaSsim": 0.006818391382694244
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.188450396060944,
+     "ssim": 0.9489093497395515,
+     "delta": 1.135152280330658,
+     "deltaSsim": 0.0050482600927352905
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.222942650318146,
+     "ssim": 0.8890828862786293,
+     "delta": 0.2887237071990967,
+     "deltaSsim": 0.0016236454248428345
+    }
+   ]
+  },
+  "R0-seed3": {
+   "meanDelta": 0.6102780190606912,
+   "clipMeanDelta": 0.6102780190606912,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.0975564643740654,
+    "26": 0.5733273923397064,
+    "34": 0.15995020046830177
+   },
+   "byCategory": {
+    "daylight": 0.5335529645284017,
+    "faces": 0.7471362253030142,
+    "lowlight": 0.5232852200667063,
+    "motion": 0.27143513162930805,
+    "nature": 0.21990880370140076,
+    "text": 0.7352852490213182,
+    "texture": 0.7718769212563833,
+    "urban": 0.9788774947325388
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.21990880370140076,
+   "meanDeltaSsim": 0.00469687379275759,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.47658586502075,
+     "ssim": 0.9434625878930092,
+     "delta": 0.9419927000999451,
+     "deltaSsim": 0.0031469687819480896
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.040174186229706,
+     "ssim": 0.8983669504523277,
+     "delta": 0.5067583918571472,
+     "deltaSsim": 0.0016654804348945618
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.572066247463226,
+     "ssim": 0.8413780480623245,
+     "delta": 0.1519078016281128,
+     "deltaSsim": 0.0001374855637550354
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.815630853176117,
+     "ssim": 0.918056420981884,
+     "delta": 1.8334180116653442,
+     "deltaSsim": 0.0200156569480896
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.8654363155365,
+     "ssim": 0.8722034767270088,
+     "delta": 1.1644351482391357,
+     "deltaSsim": 0.01726779341697693
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.62648057937622,
+     "ssim": 0.769444577395916,
+     "delta": 0.3806614875793457,
+     "deltaSsim": 0.00924549251794815
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.9352308511734,
+     "ssim": 0.9827374815940857,
+     "delta": 0.787079930305481,
+     "deltaSsim": 0.0011040419340133667
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.358837723731995,
+     "ssim": 0.9656948074698448,
+     "delta": 0.2884921431541443,
+     "deltaSsim": 0.000509403645992279
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.3688959479332,
+     "ssim": 0.932210236787796,
+     "delta": 0.02873063087463379,
+     "deltaSsim": -0.00029268115758895874
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.50895714759827,
+     "ssim": 0.964377760887146,
+     "delta": 1.0171040892601013,
+     "deltaSsim": 0.002615019679069519
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.48723417520523,
+     "ssim": 0.92842797935009,
+     "delta": 0.20832747220993042,
+     "deltaSsim": 0.0007840991020202637
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.350173234939575,
+     "ssim": 0.8767575100064278,
+     "delta": -0.09104490280151367,
+     "deltaSsim": -0.0005717650055885315
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.28919583559036,
+     "ssim": 0.970617763698101,
+     "delta": 1.1134475469589233,
+     "deltaSsim": 0.0036284849047660828
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.715612947940826,
+     "ssim": 0.9539017230272293,
+     "delta": 0.7030081748962402,
+     "deltaSsim": 0.00305166095495224
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.180613696575165,
+     "ssim": 0.9200590625405312,
+     "delta": 0.1888689398765564,
+     "deltaSsim": 0.001521579921245575
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 39.97559875249863,
+     "ssim": 0.967488519847393,
+     "delta": 0.6058663129806519,
+     "deltaSsim": 0.0010434240102767944
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.69106811285019,
+     "ssim": 0.9443140774965286,
+     "delta": 0.2328282594680786,
+     "deltaSsim": 0.000758633017539978
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.30256789922714,
+     "ssim": 0.9174609556794167,
+     "delta": 0.05450636148452759,
+     "deltaSsim": 0.0004656463861465454
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.19231140613556,
+     "ssim": 0.9875340387225151,
+     "delta": 0.3808814287185669,
+     "deltaSsim": 0.00028480589389801025
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.00085270404816,
+     "ssim": 0.9869067147374153,
+     "delta": 0.24240493774414062,
+     "deltaSsim": 0.00018575042486190796
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.25169515609741,
+     "ssim": 0.9855879172682762,
+     "delta": 0.11212348937988281,
+     "deltaSsim": 0.00011860579252243042
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.34478175640106,
+     "ssim": 0.981852576136589,
+     "delta": 0.5370897054672241,
+     "deltaSsim": 0.0006177350878715515
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.805216789245605,
+     "ssim": 0.9756895750761032,
+     "delta": 0.25156110525131226,
+     "deltaSsim": 0.00038044899702072144
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.348436772823334,
+     "ssim": 0.9643339812755585,
+     "delta": 0.08800804615020752,
+     "deltaSsim": 0.00017834454774856567
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.02462184429169,
+     "ssim": 0.979660339653492,
+     "delta": 0.22760272026062012,
+     "deltaSsim": 0.0001922324299812317
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.68526017665863,
+     "ssim": 0.9767089486122131,
+     "delta": 0.12782156467437744,
+     "deltaSsim": 9.284168481826782e-05
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.69790303707123,
+     "ssim": 0.9755444154143333,
+     "delta": 0.08736968040466309,
+     "deltaSsim": 4.000961780548096e-05
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.06188362836838,
+     "ssim": 0.958549939095974,
+     "delta": 1.6600650548934937,
+     "deltaSsim": 0.0083962082862854
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.91012680530548,
+     "ssim": 0.9280926063656807,
+     "delta": 0.7711738348007202,
+     "deltaSsim": 0.007054753601551056
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.273315131664276,
+     "ssim": 0.8762058466672897,
+     "delta": 0.18074870109558105,
+     "deltaSsim": 0.00388384610414505
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.4389813542366,
+     "ssim": 0.9373039975762367,
+     "delta": 1.067701280117035,
+     "deltaSsim": 0.0055681392550468445
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.329315543174744,
+     "ssim": 0.8938830569386482,
+     "delta": 0.4615992307662964,
+     "deltaSsim": 0.00413849949836731
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.712420761585236,
+     "ssim": 0.824446901679039,
+     "delta": 0.09978771209716797,
+     "deltaSsim": 0.001669853925704956
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.565575659275055,
+     "ssim": 0.9079689830541611,
+     "delta": 1.3957282900810242,
+     "deltaSsim": 0.017650410532951355
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.46748173236847,
+     "ssim": 0.8541116490960121,
+     "delta": 0.7768204808235168,
+     "deltaSsim": 0.014133870601654053
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.486072897911072,
+     "ssim": 0.7531222924590111,
+     "delta": 0.2039426565170288,
+     "deltaSsim": 0.0066573768854141235
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.61864674091339,
+     "ssim": 0.9324338212609291,
+     "delta": 0.4778999090194702,
+     "deltaSsim": 0.0014907941222190857
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.24134534597397,
+     "ssim": 0.8670095354318619,
+     "delta": 0.18138736486434937,
+     "deltaSsim": -0.0003039240837097168
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.893722593784332,
+     "ssim": 0.7579762041568756,
+     "delta": 0.06369352340698242,
+     "deltaSsim": -0.000514790415763855
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.90893596410751,
+     "ssim": 0.9682719185948372,
+     "delta": 2.131699025630951,
+     "deltaSsim": 0.008164621889591217
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.61445099115372,
+     "ssim": 0.9463315606117249,
+     "delta": 1.296544373035431,
+     "deltaSsim": 0.0073608458042144775
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.232234299182892,
+     "ssim": 0.9029278084635735,
+     "delta": 0.4800373315811157,
+     "deltaSsim": 0.005238659679889679
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.64738404750824,
+     "ssim": 0.9144198372960091,
+     "delta": 1.2443092465400696,
+     "deltaSsim": 0.023085780441761017
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.217542827129364,
+     "ssim": 0.8783034160733223,
+     "delta": 0.7999378442764282,
+     "deltaSsim": 0.019303470849990845
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.815524220466614,
+     "ssim": 0.7964214459061623,
+     "delta": 0.23916512727737427,
+     "deltaSsim": 0.009977802634239197
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.964319467544556,
+     "ssim": 0.9738928154110909,
+     "delta": 2.139018177986145,
+     "deltaSsim": 0.006919167935848236
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.21343606710434,
+     "ssim": 0.9492708891630173,
+     "delta": 1.160137951374054,
+     "deltaSsim": 0.005409799516201019
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.22491556406021,
+     "ssim": 0.8894367963075638,
+     "delta": 0.2906966209411621,
+     "deltaSsim": 0.0019775554537773132
+    }
+   ]
+  },
+  "R1-seed1": {
+   "meanDelta": 0.6103667616844177,
+   "clipMeanDelta": 0.6103667616844177,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.09743008390069,
+    "26": 0.5732040666043758,
+    "34": 0.16046613454818726
+   },
+   "byCategory": {
+    "daylight": 0.588737428188324,
+    "faces": 0.7640806833902994,
+    "lowlight": 0.5216960608959198,
+    "motion": 0.27226438124974567,
+    "nature": 0.2236303687095642,
+    "text": 0.7427548368771871,
+    "texture": 0.7342663407325745,
+    "urban": 0.9584952890872955
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.2236303687095642,
+   "meanDeltaSsim": 0.004542037223776181,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.580287516117096,
+     "ssim": 0.9430916607379913,
+     "delta": 1.045694351196289,
+     "deltaSsim": 0.002776041626930237
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.09956246614456,
+     "ssim": 0.8978516384959221,
+     "delta": 0.5661466717720032,
+     "deltaSsim": 0.0011501684784889221
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.574529707431793,
+     "ssim": 0.8406049981713295,
+     "delta": 0.1543712615966797,
+     "deltaSsim": -0.0006355643272399902
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.847465097904205,
+     "ssim": 0.9180228859186172,
+     "delta": 1.8652522563934326,
+     "deltaSsim": 0.019982121884822845
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.888829052448273,
+     "ssim": 0.8720507770776749,
+     "delta": 1.1878278851509094,
+     "deltaSsim": 0.017115093767642975
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.645323991775513,
+     "ssim": 0.769384928047657,
+     "delta": 0.3995048999786377,
+     "deltaSsim": 0.009185843169689178
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.95965087413788,
+     "ssim": 0.9827505648136139,
+     "delta": 0.8114999532699585,
+     "deltaSsim": 0.001117125153541565
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.36249089241028,
+     "ssim": 0.9656232297420502,
+     "delta": 0.292145311832428,
+     "deltaSsim": 0.00043782591819763184
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.368419110774994,
+     "ssim": 0.9321144297719002,
+     "delta": 0.028253793716430664,
+     "deltaSsim": -0.00038848817348480225
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.485379338264465,
+     "ssim": 0.964544266462326,
+     "delta": 0.9935262799263,
+     "deltaSsim": 0.0027815252542495728
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.474848330020905,
+     "ssim": 0.9284310415387154,
+     "delta": 0.19594162702560425,
+     "deltaSsim": 0.0007871612906455994
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.346886038780212,
+     "ssim": 0.8765329197049141,
+     "delta": -0.09433209896087646,
+     "deltaSsim": -0.0007963553071022034
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.29091393947601,
+     "ssim": 0.9707896113395691,
+     "delta": 1.115165650844574,
+     "deltaSsim": 0.003800332546234131
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.73005872964859,
+     "ssim": 0.9540407583117485,
+     "delta": 0.7174539566040039,
+     "deltaSsim": 0.0031906962394714355
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.19416570663452,
+     "ssim": 0.9202384874224663,
+     "delta": 0.20242094993591309,
+     "deltaSsim": 0.0017010048031806946
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 40.00334143638611,
+     "ssim": 0.9673805311322212,
+     "delta": 0.6336089968681335,
+     "deltaSsim": 0.0009354352951049805
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.70547932386398,
+     "ssim": 0.9441938921809196,
+     "delta": 0.24723947048187256,
+     "deltaSsim": 0.0006384477019309998
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.31080585718155,
+     "ssim": 0.9173105284571648,
+     "delta": 0.06274431943893433,
+     "deltaSsim": 0.0003152191638946533
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.181440114974976,
+     "ssim": 0.9874268397688866,
+     "delta": 0.3700101375579834,
+     "deltaSsim": 0.00017760694026947021
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 43.98740231990814,
+     "ssim": 0.9868114218115807,
+     "delta": 0.22895455360412598,
+     "deltaSsim": 9.04574990272522e-05
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.230600476264954,
+     "ssim": 0.9854960441589355,
+     "delta": 0.09102880954742432,
+     "deltaSsim": 2.6732683181762695e-05
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.35881865024567,
+     "ssim": 0.9817905128002167,
+     "delta": 0.5511265993118286,
+     "deltaSsim": 0.000555671751499176
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.80982303619385,
+     "ssim": 0.9756087213754654,
+     "delta": 0.25616735219955444,
+     "deltaSsim": 0.00029959529638290405
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.34755849838257,
+     "ssim": 0.9642578437924385,
+     "delta": 0.08712977170944214,
+     "deltaSsim": 0.00010220706462860107
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.03351008892059,
+     "ssim": 0.9796213731169701,
+     "delta": 0.23649096488952637,
+     "deltaSsim": 0.00015326589345932007
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.684683203697205,
+     "ssim": 0.976642020046711,
+     "delta": 0.12724459171295166,
+     "deltaSsim": 2.5913119316101074e-05
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.69415628910065,
+     "ssim": 0.9754868522286415,
+     "delta": 0.08362293243408203,
+     "deltaSsim": -1.755356788635254e-05
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.09870022535324,
+     "ssim": 0.9586797133088112,
+     "delta": 1.696881651878357,
+     "deltaSsim": 0.00852598249912262
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.926734447479248,
+     "ssim": 0.9279891401529312,
+     "delta": 0.7877814769744873,
+     "deltaSsim": 0.006951287388801575
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.282176554203033,
+     "ssim": 0.8761160373687744,
+     "delta": 0.18961012363433838,
+     "deltaSsim": 0.0037940368056297302
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.42359262704849,
+     "ssim": 0.9371368139982224,
+     "delta": 1.0523125529289246,
+     "deltaSsim": 0.005400955677032471
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.326302230358124,
+     "ssim": 0.8936342969536781,
+     "delta": 0.4585859179496765,
+     "deltaSsim": 0.003889739513397217
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.714866936206818,
+     "ssim": 0.8242432177066803,
+     "delta": 0.10223388671875,
+     "deltaSsim": 0.0014661699533462524
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.57396948337555,
+     "ssim": 0.908080480992794,
+     "delta": 1.4041221141815186,
+     "deltaSsim": 0.01776190847158432
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.473731875419617,
+     "ssim": 0.8539627864956856,
+     "delta": 0.7830706238746643,
+     "deltaSsim": 0.013985008001327515
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.49232542514801,
+     "ssim": 0.752960667014122,
+     "delta": 0.21019518375396729,
+     "deltaSsim": 0.006495751440525055
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.669685900211334,
+     "ssim": 0.9327839910984039,
+     "delta": 0.5289390683174133,
+     "deltaSsim": 0.0018409639596939087
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.25774884223938,
+     "ssim": 0.8670444712042809,
+     "delta": 0.19779086112976074,
+     "deltaSsim": -0.00026898831129074097
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.8979834318161,
+     "ssim": 0.7578751817345619,
+     "delta": 0.06795436143875122,
+     "deltaSsim": -0.0006158128380775452
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.74103802442551,
+     "ssim": 0.9676338508725166,
+     "delta": 1.963801085948944,
+     "deltaSsim": 0.00752655416727066
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.51636379957199,
+     "ssim": 0.9456696584820747,
+     "delta": 1.1984571814537048,
+     "deltaSsim": 0.006698943674564362
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.20085245370865,
+     "ssim": 0.9024088382720947,
+     "delta": 0.44865548610687256,
+     "deltaSsim": 0.00471968948841095
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.62040251493454,
+     "ssim": 0.9138776957988739,
+     "delta": 1.2173277139663696,
+     "deltaSsim": 0.022543638944625854
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.201426327228546,
+     "ssim": 0.8778441473841667,
+     "delta": 0.7838213443756104,
+     "deltaSsim": 0.018844202160835266
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.810647070407867,
+     "ssim": 0.7960681915283203,
+     "delta": 0.23428797721862793,
+     "deltaSsim": 0.009624548256397247
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.8984232544899,
+     "ssim": 0.9735562950372696,
+     "delta": 2.073121964931488,
+     "deltaSsim": 0.0065826475620269775
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.19593435525894,
+     "ssim": 0.9488849118351936,
+     "delta": 1.142636239528656,
+     "deltaSsim": 0.00502382218837738
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.23399543762207,
+     "ssim": 0.8891784474253654,
+     "delta": 0.29977649450302124,
+     "deltaSsim": 0.0017192065715789795
+    }
+   ]
+  },
+  "R1-seed2": {
+   "meanDelta": 0.6094246481855711,
+   "clipMeanDelta": 0.6094246481855711,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.0994475707411766,
+    "26": 0.5701255239546299,
+    "34": 0.1587008498609066
+   },
+   "byCategory": {
+    "daylight": 0.5677023530006409,
+    "faces": 0.7660744587580363,
+    "lowlight": 0.5307363967100779,
+    "motion": 0.2656581997871399,
+    "nature": 0.2112280329068502,
+    "text": 0.7420102092954848,
+    "texture": 0.7291175921758016,
+    "urban": 0.9757160147031149
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.2112280329068502,
+   "meanDeltaSsim": 0.004645547363907099,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.541769206523895,
+     "ssim": 0.9431490674614906,
+     "delta": 1.0071760416030884,
+     "deltaSsim": 0.002833448350429535
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.08064275979996,
+     "ssim": 0.8981859609484673,
+     "delta": 0.5472269654273987,
+     "deltaSsim": 0.0014844909310340881
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.56886249780655,
+     "ssim": 0.8413798362016678,
+     "delta": 0.14870405197143555,
+     "deltaSsim": 0.00013927370309829712
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.85686832666397,
+     "ssim": 0.918333426117897,
+     "delta": 1.8746554851531982,
+     "deltaSsim": 0.02029266208410263
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.892043232917786,
+     "ssim": 0.8723307996988297,
+     "delta": 1.1910420656204224,
+     "deltaSsim": 0.01739511638879776
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.642748773097992,
+     "ssim": 0.7695458829402924,
+     "delta": 0.39692968130111694,
+     "deltaSsim": 0.009346798062324524
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.96044719219208,
+     "ssim": 0.9827845171093941,
+     "delta": 0.8122962713241577,
+     "deltaSsim": 0.0011510774493217468
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.36302614212036,
+     "ssim": 0.9656019434332848,
+     "delta": 0.292680561542511,
+     "deltaSsim": 0.00041653960943222046
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.369008004665375,
+     "ssim": 0.9320189207792282,
+     "delta": 0.028842687606811523,
+     "deltaSsim": -0.0004839971661567688
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.49880796670914,
+     "ssim": 0.9642815738916397,
+     "delta": 1.0069549083709717,
+     "deltaSsim": 0.0025188326835632324
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.48520016670227,
+     "ssim": 0.9282211437821388,
+     "delta": 0.20629346370697021,
+     "deltaSsim": 0.0005772635340690613
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.352522253990173,
+     "ssim": 0.8765502199530602,
+     "delta": -0.08869588375091553,
+     "deltaSsim": -0.0007790550589561462
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.311016499996185,
+     "ssim": 0.9707044064998627,
+     "delta": 1.135268211364746,
+     "deltaSsim": 0.00371512770652771
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.73080348968506,
+     "ssim": 0.9540383666753769,
+     "delta": 0.7181987166404724,
+     "deltaSsim": 0.003188304603099823
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.19814372062683,
+     "ssim": 0.9202526435256004,
+     "delta": 0.20639896392822266,
+     "deltaSsim": 0.0017151609063148499
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 39.985821545124054,
+     "ssim": 0.9674350246787071,
+     "delta": 0.6160891056060791,
+     "deltaSsim": 0.0009899288415908813
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.69397979974747,
+     "ssim": 0.9442291036248207,
+     "delta": 0.23573994636535645,
+     "deltaSsim": 0.0006736591458320618
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.30450415611267,
+     "ssim": 0.9172996655106544,
+     "delta": 0.05644261837005615,
+     "deltaSsim": 0.0003043562173843384
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.173466205596924,
+     "ssim": 0.9874377623200417,
+     "delta": 0.36203622817993164,
+     "deltaSsim": 0.00018852949142456055
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 43.98311674594879,
+     "ssim": 0.9868243411183357,
+     "delta": 0.2246689796447754,
+     "deltaSsim": 0.00010337680578231812
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.23854398727417,
+     "ssim": 0.9855017364025116,
+     "delta": 0.09897232055664062,
+     "deltaSsim": 3.24249267578125e-05
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.33908295631409,
+     "ssim": 0.981780007481575,
+     "delta": 0.531390905380249,
+     "deltaSsim": 0.0005451664328575134
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.79573041200638,
+     "ssim": 0.9755548611283302,
+     "delta": 0.24207472801208496,
+     "deltaSsim": 0.0002457350492477417
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.34043186903,
+     "ssim": 0.9641377851366997,
+     "delta": 0.08000314235687256,
+     "deltaSsim": -1.7851591110229492e-05
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.01818513870239,
+     "ssim": 0.9796005561947823,
+     "delta": 0.22116601467132568,
+     "deltaSsim": 0.0001324489712715149
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.67249643802643,
+     "ssim": 0.976616844534874,
+     "delta": 0.11505782604217529,
+     "deltaSsim": 7.37607479095459e-07
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.68820893764496,
+     "ssim": 0.9754638224840164,
+     "delta": 0.07767558097839355,
+     "deltaSsim": -4.058331251144409e-05
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.09229093790054,
+     "ssim": 0.9586499333381653,
+     "delta": 1.6904723644256592,
+     "deltaSsim": 0.008496202528476715
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.91340923309326,
+     "ssim": 0.9279363825917244,
+     "delta": 0.774456262588501,
+     "deltaSsim": 0.006898529827594757
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.275023996829987,
+     "ssim": 0.8759746327996254,
+     "delta": 0.1824575662612915,
+     "deltaSsim": 0.003652632236480713
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.421361327171326,
+     "ssim": 0.9371009394526482,
+     "delta": 1.0500812530517578,
+     "deltaSsim": 0.0053650811314582825
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.31856316328049,
+     "ssim": 0.8935879915952682,
+     "delta": 0.4508468508720398,
+     "deltaSsim": 0.003843434154987335
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.71113896369934,
+     "ssim": 0.8241816684603691,
+     "delta": 0.0985059142112732,
+     "deltaSsim": 0.0014046207070350647
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.595122575759888,
+     "ssim": 0.9083797931671143,
+     "delta": 1.425275206565857,
+     "deltaSsim": 0.01806122064590454
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.485007286071777,
+     "ssim": 0.854371041059494,
+     "delta": 0.794346034526825,
+     "deltaSsim": 0.014393262565135956
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.4937806725502,
+     "ssim": 0.7531768977642059,
+     "delta": 0.21165043115615845,
+     "deltaSsim": 0.006711982190608978
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.676739513874054,
+     "ssim": 0.9332212433218956,
+     "delta": 0.5359926819801331,
+     "deltaSsim": 0.0022782161831855774
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.25550651550293,
+     "ssim": 0.8674739524722099,
+     "delta": 0.19554853439331055,
+     "deltaSsim": 0.00016049295663833618
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.894200325012207,
+     "ssim": 0.7580453082919121,
+     "delta": 0.06417125463485718,
+     "deltaSsim": -0.0004456862807273865
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.73777973651886,
+     "ssim": 0.9678988754749298,
+     "delta": 1.9605427980422974,
+     "deltaSsim": 0.007791578769683838
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.50084334611893,
+     "ssim": 0.94586031883955,
+     "delta": 1.1829367280006409,
+     "deltaSsim": 0.006889604032039642
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.187710523605347,
+     "ssim": 0.9024669378995895,
+     "delta": 0.43551355600357056,
+     "deltaSsim": 0.004777789115905762
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.65516871213913,
+     "ssim": 0.9144336506724358,
+     "delta": 1.2520939111709595,
+     "deltaSsim": 0.023099593818187714
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.222165167331696,
+     "ssim": 0.8782594203948975,
+     "delta": 0.8045601844787598,
+     "deltaSsim": 0.01925947517156601
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.81616050004959,
+     "ssim": 0.7962627187371254,
+     "delta": 0.23980140686035156,
+     "deltaSsim": 0.009819075465202332
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.934971034526825,
+     "ssim": 0.9737209901213646,
+     "delta": 2.1096697449684143,
+     "deltaSsim": 0.006747342646121979
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.19962865114212,
+     "ssim": 0.9490512609481812,
+     "delta": 1.1463305354118347,
+     "deltaSsim": 0.005190171301364899
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.236059248447418,
+     "ssim": 0.8893819227814674,
+     "delta": 0.30184030532836914,
+     "deltaSsim": 0.0019226819276809692
+    }
+   ]
+  },
+  "R1-seed3": {
+   "meanDelta": 0.6193314120173454,
+   "clipMeanDelta": 0.6193314120173454,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.1142923310399055,
+    "26": 0.5820119753479958,
+    "34": 0.16168992966413498
+   },
+   "byCategory": {
+    "daylight": 0.6010140975316366,
+    "faces": 0.7505367199579874,
+    "lowlight": 0.518670529127121,
+    "motion": 0.2838532129923503,
+    "nature": 0.22528350353240967,
+    "text": 0.7569923334651523,
+    "texture": 0.7521489759286245,
+    "urban": 0.9881628056367239
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.22528350353240967,
+   "meanDeltaSsim": 0.004945225547999144,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.580342054367065,
+     "ssim": 0.9425504729151726,
+     "delta": 1.0457488894462585,
+     "deltaSsim": 0.0022348538041114807
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.11912739276886,
+     "ssim": 0.8981460928916931,
+     "delta": 0.5857115983963013,
+     "deltaSsim": 0.0014446228742599487
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.591740250587463,
+     "ssim": 0.841396689414978,
+     "delta": 0.17158180475234985,
+     "deltaSsim": 0.00015612691640853882
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.843081772327423,
+     "ssim": 0.918511189520359,
+     "delta": 1.8608689308166504,
+     "deltaSsim": 0.020470425486564636
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.884586989879608,
+     "ssim": 0.8729729205369949,
+     "delta": 1.1835858225822449,
+     "deltaSsim": 0.018037237226963043
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.633063316345215,
+     "ssim": 0.7701173648238182,
+     "delta": 0.38724422454833984,
+     "deltaSsim": 0.009918279945850372
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.91642439365387,
+     "ssim": 0.9828599095344543,
+     "delta": 0.7682734727859497,
+     "deltaSsim": 0.001226469874382019
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.34884589910507,
+     "ssim": 0.9659550040960312,
+     "delta": 0.2785003185272217,
+     "deltaSsim": 0.0007696002721786499
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.36491286754608,
+     "ssim": 0.9325963333249092,
+     "delta": 0.02474755048751831,
+     "deltaSsim": 9.341537952423096e-05
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.50235652923584,
+     "ssim": 0.9648641645908356,
+     "delta": 1.0105034708976746,
+     "deltaSsim": 0.0031014233827590942
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.469249963760376,
+     "ssim": 0.9286501854658127,
+     "delta": 0.19034326076507568,
+     "deltaSsim": 0.00100630521774292
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.343189358711243,
+     "ssim": 0.8769107609987259,
+     "delta": -0.09802877902984619,
+     "deltaSsim": -0.0004185140132904053
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.29149329662323,
+     "ssim": 0.9707603752613068,
+     "delta": 1.1157450079917908,
+     "deltaSsim": 0.0037710964679718018
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.714732587337494,
+     "ssim": 0.9541683048009872,
+     "delta": 0.7021278142929077,
+     "deltaSsim": 0.0033182427287101746
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.18307715654373,
+     "ssim": 0.9203374087810516,
+     "delta": 0.1913323998451233,
+     "deltaSsim": 0.0017999261617660522
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 40.00930815935135,
+     "ssim": 0.9678473845124245,
+     "delta": 0.639575719833374,
+     "deltaSsim": 0.0014022886753082275
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.69862121343613,
+     "ssim": 0.9445730149745941,
+     "delta": 0.2403813600540161,
+     "deltaSsim": 0.0010175704956054688
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.30235004425049,
+     "ssim": 0.9176284000277519,
+     "delta": 0.054288506507873535,
+     "deltaSsim": 0.0006330907344818115
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.21603167057037,
+     "ssim": 0.9876620247960091,
+     "delta": 0.40460169315338135,
+     "deltaSsim": 0.0004127919673919678
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.00827646255493,
+     "ssim": 0.9869790598750114,
+     "delta": 0.24982869625091553,
+     "deltaSsim": 0.00025809556245803833
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.25401496887207,
+     "ssim": 0.9856423288583755,
+     "delta": 0.11444330215454102,
+     "deltaSsim": 0.00017301738262176514
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.351330518722534,
+     "ssim": 0.9820280745625496,
+     "delta": 0.5436384677886963,
+     "deltaSsim": 0.0007932335138320923
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.80862766504288,
+     "ssim": 0.9759183451533318,
+     "delta": 0.254971981048584,
+     "deltaSsim": 0.0006092190742492676
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.349813640117645,
+     "ssim": 0.9646141901612282,
+     "delta": 0.08938491344451904,
+     "deltaSsim": 0.0004585534334182739
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.04180288314819,
+     "ssim": 0.9798067659139633,
+     "delta": 0.24478375911712646,
+     "deltaSsim": 0.0003386586904525757
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.689308524131775,
+     "ssim": 0.9767713099718094,
+     "delta": 0.13186991214752197,
+     "deltaSsim": 0.00015520304441452026
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.697585344314575,
+     "ssim": 0.9755831137299538,
+     "delta": 0.08705198764801025,
+     "deltaSsim": 7.870793342590332e-05
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.14662176370621,
+     "ssim": 0.9591483995318413,
+     "delta": 1.7448031902313232,
+     "deltaSsim": 0.00899466872215271
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.95484310388565,
+     "ssim": 0.9288179576396942,
+     "delta": 0.8158901333808899,
+     "deltaSsim": 0.007780104875564575
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.282925486564636,
+     "ssim": 0.8768443763256073,
+     "delta": 0.19035905599594116,
+     "deltaSsim": 0.004522375762462616
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.421743988990784,
+     "ssim": 0.9372380301356316,
+     "delta": 1.0504639148712158,
+     "deltaSsim": 0.005502171814441681
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.32389837503433,
+     "ssim": 0.8939734026789665,
+     "delta": 0.456182062625885,
+     "deltaSsim": 0.004228845238685608
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.71311128139496,
+     "ssim": 0.8247211202979088,
+     "delta": 0.10047823190689087,
+     "deltaSsim": 0.0019440725445747375
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.613546669483185,
+     "ssim": 0.908584900200367,
+     "delta": 1.443699300289154,
+     "deltaSsim": 0.018266327679157257
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.492406010627747,
+     "ssim": 0.8548998832702637,
+     "delta": 0.8017447590827942,
+     "deltaSsim": 0.014922104775905609
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.49144059419632,
+     "ssim": 0.7537076622247696,
+     "delta": 0.2093103528022766,
+     "deltaSsim": 0.007242746651172638
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.60858994722366,
+     "ssim": 0.9318889230489731,
+     "delta": 0.46784311532974243,
+     "deltaSsim": 0.0009458959102630615
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.24256098270416,
+     "ssim": 0.8670739382505417,
+     "delta": 0.18260300159454346,
+     "deltaSsim": -0.00023952126502990723
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.8945072889328,
+     "ssim": 0.7582499012351036,
+     "delta": 0.06447821855545044,
+     "deltaSsim": -0.00024109333753585815
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.84773600101471,
+     "ssim": 0.9684218913316727,
+     "delta": 2.070499062538147,
+     "deltaSsim": 0.008314594626426697
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.57734739780426,
+     "ssim": 0.946545198559761,
+     "delta": 1.2594407796859741,
+     "deltaSsim": 0.007574483752250671
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.220226645469666,
+     "ssim": 0.9031942784786224,
+     "delta": 0.4680296778678894,
+     "deltaSsim": 0.00550512969493866
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.688411712646484,
+     "ssim": 0.9150871187448502,
+     "delta": 1.2853369116783142,
+     "deltaSsim": 0.023753061890602112
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.244282364845276,
+     "ssim": 0.8789874464273453,
+     "delta": 0.8266773819923401,
+     "deltaSsim": 0.019987501204013824
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.824325740337372,
+     "ssim": 0.7968527004122734,
+     "delta": 0.24796664714813232,
+     "deltaSsim": 0.010409057140350342
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.9575936794281,
+     "ssim": 0.9738830626010895,
+     "delta": 2.13229238986969,
+     "deltaSsim": 0.006909415125846863
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.205630838871,
+     "ssim": 0.9494385421276093,
+     "delta": 1.1523327231407166,
+     "deltaSsim": 0.005577452480792999
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.2185897231102,
+     "ssim": 0.889670729637146,
+     "delta": 0.2843707799911499,
+     "deltaSsim": 0.0022114887833595276
+    }
+   ]
+  },
+  "R2-seed1": {
+   "meanDelta": 0.6116830122967561,
+   "clipMeanDelta": 0.6116830122967561,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.0967570915818214,
+    "26": 0.5758528597652912,
+    "34": 0.16243908554315567
+   },
+   "byCategory": {
+    "daylight": 0.5643115441004435,
+    "faces": 0.7297177116076151,
+    "lowlight": 0.5273362497488657,
+    "motion": 0.2894944945971171,
+    "nature": 0.23849010467529297,
+    "text": 0.7240314284960429,
+    "texture": 0.766000896692276,
+    "urban": 0.9742217262585958
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.23849010467529297,
+   "meanDeltaSsim": 0.0049454947002232075,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.535173654556274,
+     "ssim": 0.9430719614028931,
+     "delta": 1.0005804896354675,
+     "deltaSsim": 0.00275634229183197
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.07123655080795,
+     "ssim": 0.8982944115996361,
+     "delta": 0.5378207564353943,
+     "deltaSsim": 0.0015929415822029114
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.574691832065582,
+     "ssim": 0.8416577205061913,
+     "delta": 0.15453338623046875,
+     "deltaSsim": 0.00041715800762176514
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.759171545505524,
+     "ssim": 0.918337494134903,
+     "delta": 1.776958703994751,
+     "deltaSsim": 0.02029673010110855
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.834684193134308,
+     "ssim": 0.8727220520377159,
+     "delta": 1.1336830258369446,
+     "deltaSsim": 0.01778636872768402
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.61390072107315,
+     "ssim": 0.7700150981545448,
+     "delta": 0.36808162927627563,
+     "deltaSsim": 0.009816013276576996
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.925124287605286,
+     "ssim": 0.9827906563878059,
+     "delta": 0.7769733667373657,
+     "deltaSsim": 0.001157216727733612
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.35806614160538,
+     "ssim": 0.9658926874399185,
+     "delta": 0.28772056102752686,
+     "deltaSsim": 0.000707283616065979
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.37505429983139,
+     "ssim": 0.9326639175415039,
+     "delta": 0.03488898277282715,
+     "deltaSsim": 0.000160999596118927
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.46319657564163,
+     "ssim": 0.964979812502861,
+     "delta": 0.9713435173034668,
+     "deltaSsim": 0.003217071294784546
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.46356874704361,
+     "ssim": 0.9288634285330772,
+     "delta": 0.18466204404830933,
+     "deltaSsim": 0.0012195482850074768
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.33722233772278,
+     "ssim": 0.8769629001617432,
+     "delta": -0.10399580001831055,
+     "deltaSsim": -0.0003663748502731323
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.33997839689255,
+     "ssim": 0.9712074622511864,
+     "delta": 1.1642301082611084,
+     "deltaSsim": 0.00421818345785141
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.75715619325638,
+     "ssim": 0.9544965997338295,
+     "delta": 0.744551420211792,
+     "deltaSsim": 0.003646537661552429
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.194970965385437,
+     "ssim": 0.9205442145466805,
+     "delta": 0.2032262086868286,
+     "deltaSsim": 0.002006731927394867
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 39.99579757452011,
+     "ssim": 0.9676985740661621,
+     "delta": 0.6260651350021362,
+     "deltaSsim": 0.001253478229045868
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.70176088809967,
+     "ssim": 0.9446337223052979,
+     "delta": 0.24352103471755981,
+     "deltaSsim": 0.001078277826309204
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.31030398607254,
+     "ssim": 0.9178413674235344,
+     "delta": 0.06224244832992554,
+     "deltaSsim": 0.0008460581302642822
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.233667492866516,
+     "ssim": 0.9877768829464912,
+     "delta": 0.4222375154495239,
+     "deltaSsim": 0.0005276501178741455
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.01921272277832,
+     "ssim": 0.9870785549283028,
+     "delta": 0.2607649564743042,
+     "deltaSsim": 0.00035759061574935913
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.26170754432678,
+     "ssim": 0.9857358932495117,
+     "delta": 0.12213587760925293,
+     "deltaSsim": 0.00026658177375793457
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.371580600738525,
+     "ssim": 0.9820620715618134,
+     "delta": 0.5638885498046875,
+     "deltaSsim": 0.0008272305130958557
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.82218950986862,
+     "ssim": 0.9759550541639328,
+     "delta": 0.2685338258743286,
+     "deltaSsim": 0.0006459280848503113
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.35795444250107,
+     "ssim": 0.9646739587187767,
+     "delta": 0.0975257158279419,
+     "deltaSsim": 0.0005183219909667969
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.062984585762024,
+     "ssim": 0.9799280911684036,
+     "delta": 0.26596546173095703,
+     "deltaSsim": 0.0004599839448928833
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.70183205604553,
+     "ssim": 0.976856529712677,
+     "delta": 0.1443934440612793,
+     "deltaSsim": 0.000240422785282135
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.70116698741913,
+     "ssim": 0.9756409376859665,
+     "delta": 0.09063363075256348,
+     "deltaSsim": 0.00013653188943862915
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.0186812877655,
+     "ssim": 0.958521232008934,
+     "delta": 1.616862714290619,
+     "deltaSsim": 0.008367501199245453
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.889998018741608,
+     "ssim": 0.9284402430057526,
+     "delta": 0.7510450482368469,
+     "deltaSsim": 0.007402390241622925
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.274016082286835,
+     "ssim": 0.8769349977374077,
+     "delta": 0.18144965171813965,
+     "deltaSsim": 0.0046129971742630005
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.42601078748703,
+     "ssim": 0.9371078535914421,
+     "delta": 1.0547307133674622,
+     "deltaSsim": 0.005371995270252228
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.32901245355606,
+     "ssim": 0.894087515771389,
+     "delta": 0.4612961411476135,
+     "deltaSsim": 0.004342958331108093
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.715773820877075,
+     "ssim": 0.8249454945325851,
+     "delta": 0.10314077138900757,
+     "deltaSsim": 0.0021684467792510986
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.542709231376648,
+     "ssim": 0.9078319445252419,
+     "delta": 1.3728618621826172,
+     "deltaSsim": 0.017513372004032135
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.465077579021454,
+     "ssim": 0.8543985188007355,
+     "delta": 0.7744163274765015,
+     "deltaSsim": 0.014420740306377411
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.48260986804962,
+     "ssim": 0.7535505667328835,
+     "delta": 0.2004796266555786,
+     "deltaSsim": 0.007085651159286499
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.575123727321625,
+     "ssim": 0.9312103092670441,
+     "delta": 0.43437689542770386,
+     "deltaSsim": 0.0002672821283340454
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.22797751426697,
+     "ssim": 0.8665827512741089,
+     "delta": 0.16801953315734863,
+     "deltaSsim": -0.0007307082414627075
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.89297127723694,
+     "ssim": 0.7582244500517845,
+     "delta": 0.06294220685958862,
+     "deltaSsim": -0.00026654452085494995
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.91587245464325,
+     "ssim": 0.9686655774712563,
+     "delta": 2.138635516166687,
+     "deltaSsim": 0.008558280766010284
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.61662000417709,
+     "ssim": 0.946792870759964,
+     "delta": 1.2987133860588074,
+     "deltaSsim": 0.007822155952453613
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.245514810085297,
+     "ssim": 0.9035110995173454,
+     "delta": 0.4933178424835205,
+     "deltaSsim": 0.005821950733661652
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.64076256752014,
+     "ssim": 0.914538100361824,
+     "delta": 1.2376877665519714,
+     "deltaSsim": 0.02320404350757599
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.219519317150116,
+     "ssim": 0.8787064403295517,
+     "delta": 0.8019143342971802,
+     "deltaSsim": 0.019706495106220245
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.81376439332962,
+     "ssim": 0.7967409491539001,
+     "delta": 0.23740530014038086,
+     "deltaSsim": 0.010297305881977081
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.95001643896103,
+     "ssim": 0.9741868302226067,
+     "delta": 2.1247151494026184,
+     "deltaSsim": 0.007213182747364044
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.20588803291321,
+     "ssim": 0.9497053176164627,
+     "delta": 1.1525899171829224,
+     "deltaSsim": 0.005844227969646454
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.22523683309555,
+     "ssim": 0.8900284543633461,
+     "delta": 0.29101788997650146,
+     "deltaSsim": 0.0025692135095596313
+    }
+   ]
+  },
+  "R2-seed2": {
+   "meanDelta": 0.6059327535331249,
+   "clipMeanDelta": 0.6059327535331249,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.0979532450437546,
+    "26": 0.5659500323235989,
+    "34": 0.15389498323202133
+   },
+   "byCategory": {
+    "daylight": 0.6140287717183431,
+    "faces": 0.7400016983350118,
+    "lowlight": 0.5290078123410543,
+    "motion": 0.2753131091594696,
+    "nature": 0.22539754708607992,
+    "text": 0.7287672824329801,
+    "texture": 0.7233392198880514,
+    "urban": 0.9542373319466909
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.22539754708607992,
+   "meanDeltaSsim": 0.004739262318859498,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.636103093624115,
+     "ssim": 0.9437460824847221,
+     "delta": 1.101509928703308,
+     "deltaSsim": 0.0034304633736610413
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.10977303981781,
+     "ssim": 0.8984955251216888,
+     "delta": 0.5763572454452515,
+     "deltaSsim": 0.0017940551042556763
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.584377586841583,
+     "ssim": 0.8417157232761383,
+     "delta": 0.16421914100646973,
+     "deltaSsim": 0.00047516077756881714
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.818724930286407,
+     "ssim": 0.9183612987399101,
+     "delta": 1.8365120887756348,
+     "deltaSsim": 0.020320534706115723
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.856997191905975,
+     "ssim": 0.8723030462861061,
+     "delta": 1.155996024608612,
+     "deltaSsim": 0.01736736297607422
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.620571076869965,
+     "ssim": 0.7694366350769997,
+     "delta": 0.3747519850730896,
+     "deltaSsim": 0.00923755019903183
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.91944634914398,
+     "ssim": 0.9827478528022766,
+     "delta": 0.771295428276062,
+     "deltaSsim": 0.0011144131422042847
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.345581352710724,
+     "ssim": 0.9657757207751274,
+     "delta": 0.27523577213287354,
+     "deltaSsim": 0.0005903169512748718
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.36638420820236,
+     "ssim": 0.9324198439717293,
+     "delta": 0.026218891143798828,
+     "deltaSsim": -8.307397365570068e-05
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.53068393468857,
+     "ssim": 0.9645257890224457,
+     "delta": 1.0388308763504028,
+     "deltaSsim": 0.0027630478143692017
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.48604118824005,
+     "ssim": 0.9285242706537247,
+     "delta": 0.20713448524475098,
+     "deltaSsim": 0.0008803904056549072
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.349035680294037,
+     "ssim": 0.8768300041556358,
+     "delta": -0.092182457447052,
+     "deltaSsim": -0.0004992708563804626
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.29708153009415,
+     "ssim": 0.9708416014909744,
+     "delta": 1.1213332414627075,
+     "deltaSsim": 0.0038523226976394653
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.720148265361786,
+     "ssim": 0.954054981470108,
+     "delta": 0.7075434923171997,
+     "deltaSsim": 0.003204919397830963
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.183131992816925,
+     "ssim": 0.9201777577400208,
+     "delta": 0.19138723611831665,
+     "deltaSsim": 0.0016402751207351685
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 39.99876081943512,
+     "ssim": 0.9676531255245209,
+     "delta": 0.6290283799171448,
+     "deltaSsim": 0.0012080296874046326
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.691378355026245,
+     "ssim": 0.9443899393081665,
+     "delta": 0.23313850164413452,
+     "deltaSsim": 0.0008344948291778564
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.3004966378212,
+     "ssim": 0.917461022734642,
+     "delta": 0.052435100078582764,
+     "deltaSsim": 0.0004657134413719177
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.202566385269165,
+     "ssim": 0.9875528141856194,
+     "delta": 0.39113640785217285,
+     "deltaSsim": 0.0003035813570022583
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.00258123874664,
+     "ssim": 0.9869055598974228,
+     "delta": 0.24413347244262695,
+     "deltaSsim": 0.00018459558486938477
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.241578459739685,
+     "ssim": 0.9855815470218658,
+     "delta": 0.10200679302215576,
+     "deltaSsim": 0.00011223554611206055
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.36294746398926,
+     "ssim": 0.981898583471775,
+     "delta": 0.5552554130554199,
+     "deltaSsim": 0.0006637424230575562
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.81352299451828,
+     "ssim": 0.9757566601037979,
+     "delta": 0.2598673105239868,
+     "deltaSsim": 0.0004475340247154236
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.35041385889053,
+     "ssim": 0.9644279703497887,
+     "delta": 0.08998513221740723,
+     "deltaSsim": 0.00027233362197875977
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.03168022632599,
+     "ssim": 0.9797278419137001,
+     "delta": 0.23466110229492188,
+     "deltaSsim": 0.00025973469018936157
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.68612086772919,
+     "ssim": 0.9767274186015129,
+     "delta": 0.12868225574493408,
+     "deltaSsim": 0.00011131167411804199
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.694467425346375,
+     "ssim": 0.9755466803908348,
+     "delta": 0.08393406867980957,
+     "deltaSsim": 4.22745943069458e-05
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.095182955265045,
+     "ssim": 0.9587647169828415,
+     "delta": 1.6933643817901611,
+     "deltaSsim": 0.008610986173152924
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.908079087734222,
+     "ssim": 0.92816561460495,
+     "delta": 0.7691261172294617,
+     "deltaSsim": 0.0071277618408203125
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.267787098884583,
+     "ssim": 0.8762323260307312,
+     "delta": 0.17522066831588745,
+     "deltaSsim": 0.003910325467586517
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.39173483848572,
+     "ssim": 0.9369114562869072,
+     "delta": 1.02045476436615,
+     "deltaSsim": 0.005175597965717316
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.301799952983856,
+     "ssim": 0.8935413882136345,
+     "delta": 0.43408364057540894,
+     "deltaSsim": 0.0037968307733535767
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.70447427034378,
+     "ssim": 0.8243536129593849,
+     "delta": 0.09184122085571289,
+     "deltaSsim": 0.0015765652060508728
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.56733936071396,
+     "ssim": 0.9080496355891228,
+     "delta": 1.397491991519928,
+     "deltaSsim": 0.017731063067913055
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.467479646205902,
+     "ssim": 0.854219526052475,
+     "delta": 0.7768183946609497,
+     "deltaSsim": 0.014241747558116913
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.482634603977203,
+     "ssim": 0.7532080262899399,
+     "delta": 0.2005043625831604,
+     "deltaSsim": 0.006743110716342926
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.60753017663956,
+     "ssim": 0.9324085563421249,
+     "delta": 0.466783344745636,
+     "deltaSsim": 0.001465529203414917
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.23145455121994,
+     "ssim": 0.8672043904662132,
+     "delta": 0.17149657011032104,
+     "deltaSsim": -0.00010906904935836792
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.888875246047974,
+     "ssim": 0.7581261247396469,
+     "delta": 0.05884617567062378,
+     "deltaSsim": -0.0003648698329925537
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.768039524555206,
+     "ssim": 0.9680990278720856,
+     "delta": 1.9908025860786438,
+     "deltaSsim": 0.0079917311668396
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.52493315935135,
+     "ssim": 0.9461000934243202,
+     "delta": 1.2070265412330627,
+     "deltaSsim": 0.007129378616809845
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.197277069091797,
+     "ssim": 0.9027154073119164,
+     "delta": 0.44508010149002075,
+     "deltaSsim": 0.0050262585282325745
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.64505708217621,
+     "ssim": 0.9143230617046356,
+     "delta": 1.2419822812080383,
+     "deltaSsim": 0.022989004850387573
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.218653857707977,
+     "ssim": 0.8783341646194458,
+     "delta": 0.8010488748550415,
+     "deltaSsim": 0.01933421939611435
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.810583293437958,
+     "ssim": 0.7963629588484764,
+     "delta": 0.23422420024871826,
+     "deltaSsim": 0.009919315576553345
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.90211099386215,
+     "ssim": 0.9739180579781532,
+     "delta": 2.0768097043037415,
+     "deltaSsim": 0.006944410502910614
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.16080993413925,
+     "ssim": 0.949170395731926,
+     "delta": 1.107511818408966,
+     "deltaSsim": 0.005309306085109711
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.19806605577469,
+     "ssim": 0.8894005790352821,
+     "delta": 0.26384711265563965,
+     "deltaSsim": 0.0019413381814956665
+    }
+   ]
+  },
+  "R2-seed3": {
+   "meanDelta": 0.6123199500143528,
+   "clipMeanDelta": 0.6123199500143528,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.106402613222599,
+    "26": 0.5748783051967621,
+    "34": 0.15567893162369728
+   },
+   "byCategory": {
+    "daylight": 0.5949282646179199,
+    "faces": 0.7332315544287363,
+    "lowlight": 0.5524637301762899,
+    "motion": 0.27641966938972473,
+    "nature": 0.23641998569170633,
+    "text": 0.7183570331997342,
+    "texture": 0.7500925660133362,
+    "urban": 0.9749324123064677
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.23641998569170633,
+   "meanDeltaSsim": 0.004845975277324517,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.57180190086365,
+     "ssim": 0.9423674717545509,
+     "delta": 1.0372087359428406,
+     "deltaSsim": 0.0020518526434898376
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.099166095256805,
+     "ssim": 0.8978448510169983,
+     "delta": 0.5657503008842468,
+     "deltaSsim": 0.0011433809995651245
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.601984202861786,
+     "ssim": 0.8413684368133545,
+     "delta": 0.18182575702667236,
+     "deltaSsim": 0.00012787431478500366
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.800068378448486,
+     "ssim": 0.9179632291197777,
+     "delta": 1.8178555369377136,
+     "deltaSsim": 0.019922465085983276
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.850354850292206,
+     "ssim": 0.8725889101624489,
+     "delta": 1.1493536829948425,
+     "deltaSsim": 0.017653226852416992
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.60470700263977,
+     "ssim": 0.7700199708342552,
+     "delta": 0.3588879108428955,
+     "deltaSsim": 0.009820885956287384
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.91858744621277,
+     "ssim": 0.9828100875020027,
+     "delta": 0.7704365253448486,
+     "deltaSsim": 0.0011766478419303894
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.34730780124664,
+     "ssim": 0.96592066437006,
+     "delta": 0.2769622206687927,
+     "deltaSsim": 0.000735260546207428
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.36605876684189,
+     "ssim": 0.9326669946312904,
+     "delta": 0.025893449783325195,
+     "deltaSsim": 0.00016407668590545654
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.53830736875534,
+     "ssim": 0.9649897664785385,
+     "delta": 1.0464543104171753,
+     "deltaSsim": 0.003227025270462036
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.47994393110275,
+     "ssim": 0.928877055644989,
+     "delta": 0.2010372281074524,
+     "deltaSsim": 0.0012331753969192505
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.331143856048584,
+     "ssim": 0.8769366294145584,
+     "delta": -0.11007428169250488,
+     "deltaSsim": -0.00039264559745788574
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.37942951917648,
+     "ssim": 0.9709715321660042,
+     "delta": 1.203681230545044,
+     "deltaSsim": 0.00398225337266922
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.777509689331055,
+     "ssim": 0.9543846622109413,
+     "delta": 0.7649049162864685,
+     "deltaSsim": 0.0035346001386642456
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.200523734092712,
+     "ssim": 0.9204420149326324,
+     "delta": 0.208778977394104,
+     "deltaSsim": 0.0019045323133468628
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 39.98688757419586,
+     "ssim": 0.9676337167620659,
+     "delta": 0.617155134677887,
+     "deltaSsim": 0.001188620924949646
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.691128611564636,
+     "ssim": 0.9445891231298447,
+     "delta": 0.23288875818252563,
+     "deltaSsim": 0.001033678650856018
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.294802606105804,
+     "ssim": 0.9177495390176773,
+     "delta": 0.0467410683631897,
+     "deltaSsim": 0.000754229724407196
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.21576702594757,
+     "ssim": 0.9877726212143898,
+     "delta": 0.4043370485305786,
+     "deltaSsim": 0.0005233883857727051
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.010669589042664,
+     "ssim": 0.9870752841234207,
+     "delta": 0.25222182273864746,
+     "deltaSsim": 0.00035431981086730957
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.24474585056305,
+     "ssim": 0.9857382401823997,
+     "delta": 0.10517418384552002,
+     "deltaSsim": 0.0002689287066459656
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.369728684425354,
+     "ssim": 0.982033908367157,
+     "delta": 0.5620366334915161,
+     "deltaSsim": 0.0007990673184394836
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.81871724128723,
+     "ssim": 0.975936770439148,
+     "delta": 0.26506155729293823,
+     "deltaSsim": 0.0006276443600654602
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.35620802640915,
+     "ssim": 0.9646533727645874,
+     "delta": 0.09577929973602295,
+     "deltaSsim": 0.0004977360367774963
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.05818700790405,
+     "ssim": 0.979899175465107,
+     "delta": 0.26116788387298584,
+     "deltaSsim": 0.0004310682415962219
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.702261209487915,
+     "ssim": 0.9768436104059219,
+     "delta": 0.1448225975036621,
+     "deltaSsim": 0.0002275034785270691
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.70018529891968,
+     "ssim": 0.9756327345967293,
+     "delta": 0.08965194225311279,
+     "deltaSsim": 0.00012832880020141602
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.06757318973541,
+     "ssim": 0.9587250426411629,
+     "delta": 1.6657546162605286,
+     "deltaSsim": 0.008571311831474304
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.911348700523376,
+     "ssim": 0.9286542236804962,
+     "delta": 0.7723957300186157,
+     "deltaSsim": 0.007616370916366577
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.275141716003418,
+     "ssim": 0.8770126700401306,
+     "delta": 0.1825752854347229,
+     "deltaSsim": 0.004690669476985931
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.39215326309204,
+     "ssim": 0.9366027489304543,
+     "delta": 1.0208731889724731,
+     "deltaSsim": 0.004866890609264374
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.30526924133301,
+     "ssim": 0.8936521932482719,
+     "delta": 0.43755292892456055,
+     "deltaSsim": 0.003907635807991028
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.702859580516815,
+     "ssim": 0.8246490210294724,
+     "delta": 0.09022653102874756,
+     "deltaSsim": 0.0018719732761383057
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.524158477783203,
+     "ssim": 0.9074506759643555,
+     "delta": 1.3543111085891724,
+     "deltaSsim": 0.017132103443145752
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.44767689704895,
+     "ssim": 0.8542260453104973,
+     "delta": 0.7570156455039978,
+     "deltaSsim": 0.014248266816139221
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.466638505458832,
+     "ssim": 0.7534218057990074,
+     "delta": 0.18450826406478882,
+     "deltaSsim": 0.006956890225410461
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.58212459087372,
+     "ssim": 0.9312588721513748,
+     "delta": 0.44137775897979736,
+     "deltaSsim": 0.0003158450126647949
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.23124474287033,
+     "ssim": 0.8666911646723747,
+     "delta": 0.17128676176071167,
+     "deltaSsim": -0.0006222948431968689
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.89469265937805,
+     "ssim": 0.7583180516958237,
+     "delta": 0.0646635890007019,
+     "deltaSsim": -0.0001729428768157959
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.86363524198532,
+     "ssim": 0.9684318006038666,
+     "delta": 2.0863983035087585,
+     "deltaSsim": 0.008324503898620605
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.57993096113205,
+     "ssim": 0.9465990513563156,
+     "delta": 1.2620243430137634,
+     "deltaSsim": 0.007628336548805237
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.22700160741806,
+     "ssim": 0.903378427028656,
+     "delta": 0.4748046398162842,
+     "deltaSsim": 0.005689278244972229
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.641282618045807,
+     "ssim": 0.9145595580339432,
+     "delta": 1.2382078170776367,
+     "deltaSsim": 0.02322550117969513
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.221173346042633,
+     "ssim": 0.8788167908787727,
+     "delta": 0.8035683631896973,
+     "deltaSsim": 0.019816845655441284
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.807248413562775,
+     "ssim": 0.7968549653887749,
+     "delta": 0.23088932037353516,
+     "deltaSsim": 0.010411322116851807
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 35.00048726797104,
+     "ssim": 0.9740368500351906,
+     "delta": 2.175185978412628,
+     "deltaSsim": 0.0070632025599479675
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.194504141807556,
+     "ssim": 0.9495132192969322,
+     "delta": 1.1412060260772705,
+     "deltaSsim": 0.005652129650115967
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.194755911827087,
+     "ssim": 0.8897530883550644,
+     "delta": 0.26053696870803833,
+     "deltaSsim": 0.0022938475012779236
+    }
+   ]
+  },
+  "R3-seed1": {
+   "meanDelta": 0.6159754407902559,
+   "clipMeanDelta": 0.6159754407902559,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.103467158973217,
+    "26": 0.5780187994241714,
+    "34": 0.16644036397337914
+   },
+   "byCategory": {
+    "daylight": 0.5418224136034647,
+    "faces": 0.7277361551920573,
+    "lowlight": 0.5101091663042704,
+    "motion": 0.3084131081899007,
+    "nature": 0.2594800293445587,
+    "text": 0.7450124952528212,
+    "texture": 0.7389168938000997,
+    "urban": 0.9947182238101959
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.2594800293445587,
+   "meanDeltaSsim": 0.005077899433672428,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.47915333509445,
+     "ssim": 0.942158505320549,
+     "delta": 0.944560170173645,
+     "deltaSsim": 0.001842886209487915
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.0599799156189,
+     "ssim": 0.8979366943240166,
+     "delta": 0.5265641212463379,
+     "deltaSsim": 0.0012352243065834045
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.574501395225525,
+     "ssim": 0.8414079546928406,
+     "delta": 0.15434294939041138,
+     "deltaSsim": 0.00016739219427108765
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.737562775611877,
+     "ssim": 0.9183087795972824,
+     "delta": 1.7553499341011047,
+     "deltaSsim": 0.020268015563488007
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.80695939064026,
+     "ssim": 0.872610792517662,
+     "delta": 1.1059582233428955,
+     "deltaSsim": 0.017675109207630157
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.60603767633438,
+     "ssim": 0.7699453309178352,
+     "delta": 0.3602185845375061,
+     "deltaSsim": 0.009746246039867401
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.946478843688965,
+     "ssim": 0.9829377084970474,
+     "delta": 0.7983279228210449,
+     "deltaSsim": 0.0013042688369750977
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.37472593784332,
+     "ssim": 0.9660953059792519,
+     "delta": 0.3043803572654724,
+     "deltaSsim": 0.0009099021553993225
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.38234722614288,
+     "ssim": 0.9329175874590874,
+     "delta": 0.04218190908432007,
+     "deltaSsim": 0.0004146695137023926
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.471410393714905,
+     "ssim": 0.965635284781456,
+     "delta": 0.9795573353767395,
+     "deltaSsim": 0.0038725435733795166
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.45278298854828,
+     "ssim": 0.9291905462741852,
+     "delta": 0.17387628555297852,
+     "deltaSsim": 0.0015466660261154175
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.33960920572281,
+     "ssim": 0.8772013932466507,
+     "delta": -0.10160893201828003,
+     "deltaSsim": -0.00012788176536560059
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.28927689790726,
+     "ssim": 0.9712506234645844,
+     "delta": 1.1135286092758179,
+     "deltaSsim": 0.00426134467124939
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.710620164871216,
+     "ssim": 0.9546746835112572,
+     "delta": 0.6980153918266296,
+     "deltaSsim": 0.0038246214389801025
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.189031064510345,
+     "ssim": 0.9209440276026726,
+     "delta": 0.19728630781173706,
+     "deltaSsim": 0.0024065449833869934
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 40.03248393535614,
+     "ssim": 0.9679331034421921,
+     "delta": 0.6627514958381653,
+     "deltaSsim": 0.0014880076050758362
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.715670228004456,
+     "ssim": 0.9447948411107063,
+     "delta": 0.25743037462234497,
+     "deltaSsim": 0.0012393966317176819
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.31802308559418,
+     "ssim": 0.9180275127291679,
+     "delta": 0.0699615478515625,
+     "deltaSsim": 0.0010322034358978271
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.2678644657135,
+     "ssim": 0.987885594367981,
+     "delta": 0.4564344882965088,
+     "deltaSsim": 0.0006363615393638611
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.0353786945343,
+     "ssim": 0.9871333688497543,
+     "delta": 0.27693092823028564,
+     "deltaSsim": 0.00041240453720092773
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.266541481018066,
+     "ssim": 0.9857742637395859,
+     "delta": 0.1269698143005371,
+     "deltaSsim": 0.0003049522638320923
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.413676381111145,
+     "ssim": 0.9822409152984619,
+     "delta": 0.6059843301773071,
+     "deltaSsim": 0.0010060742497444153
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.843094646930695,
+     "ssim": 0.9761251583695412,
+     "delta": 0.28943896293640137,
+     "deltaSsim": 0.0008160322904586792
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.36513710021973,
+     "ssim": 0.9648639112710953,
+     "delta": 0.10470837354660034,
+     "deltaSsim": 0.0007082745432853699
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.09182250499725,
+     "ssim": 0.9800246581435204,
+     "delta": 0.2948033809661865,
+     "deltaSsim": 0.000556550920009613
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.719770669937134,
+     "ssim": 0.9768988192081451,
+     "delta": 0.16233205795288086,
+     "deltaSsim": 0.00028271228075027466
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.71014642715454,
+     "ssim": 0.975658729672432,
+     "delta": 0.09961307048797607,
+     "deltaSsim": 0.00015432387590408325
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.0759756565094,
+     "ssim": 0.9587243944406509,
+     "delta": 1.6741570830345154,
+     "deltaSsim": 0.008570663630962372
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.93095237016678,
+     "ssim": 0.9287337437272072,
+     "delta": 0.7919993996620178,
+     "deltaSsim": 0.007695890963077545
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.29635977745056,
+     "ssim": 0.8774052485823631,
+     "delta": 0.20379334688186646,
+     "deltaSsim": 0.005083248019218445
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.42302966117859,
+     "ssim": 0.9369677677750587,
+     "delta": 1.051749587059021,
+     "deltaSsim": 0.005231909453868866
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.32945293188095,
+     "ssim": 0.8939963206648827,
+     "delta": 0.46173661947250366,
+     "deltaSsim": 0.004251763224601746
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.718159794807434,
+     "ssim": 0.8249466493725777,
+     "delta": 0.10552674531936646,
+     "deltaSsim": 0.002169601619243622
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.58412879705429,
+     "ssim": 0.9083844497799873,
+     "delta": 1.41428142786026,
+     "deltaSsim": 0.01806587725877762
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.482539653778076,
+     "ssim": 0.8548589944839478,
+     "delta": 0.7918784022331238,
+     "deltaSsim": 0.014881215989589691
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.49212008714676,
+     "ssim": 0.7539243325591087,
+     "delta": 0.20998984575271606,
+     "deltaSsim": 0.00745941698551178
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.5881130695343,
+     "ssim": 0.9309704080224037,
+     "delta": 0.44736623764038086,
+     "deltaSsim": 2.738088369369507e-05
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.24090933799744,
+     "ssim": 0.8664907664060593,
+     "delta": 0.18095135688781738,
+     "deltaSsim": -0.0008226931095123291
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.89936536550522,
+     "ssim": 0.7582346275448799,
+     "delta": 0.06933629512786865,
+     "deltaSsim": -0.000256367027759552
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.80654263496399,
+     "ssim": 0.9685704037547112,
+     "delta": 2.0293056964874268,
+     "deltaSsim": 0.00846310704946518
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.553079664707184,
+     "ssim": 0.9467368423938751,
+     "delta": 1.2351730465888977,
+     "deltaSsim": 0.007766127586364746
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.223565697669983,
+     "ssim": 0.9035506844520569,
+     "delta": 0.4713687300682068,
+     "deltaSsim": 0.005861535668373108
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.659382462501526,
+     "ssim": 0.9152843952178955,
+     "delta": 1.2563076615333557,
+     "deltaSsim": 0.02395033836364746
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.221176624298096,
+     "ssim": 0.8791222795844078,
+     "delta": 0.8035716414451599,
+     "deltaSsim": 0.020122334361076355
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.8116397857666,
+     "ssim": 0.79685889929533,
+     "delta": 0.23528069257736206,
+     "deltaSsim": 0.010415256023406982
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 34.9963104724884,
+     "ssim": 0.9745504930615425,
+     "delta": 2.1710091829299927,
+     "deltaSsim": 0.007576845586299896
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.24136173725128,
+     "ssim": 0.9501158073544502,
+     "delta": 1.188063621520996,
+     "deltaSsim": 0.006254717707633972
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.248295485973358,
+     "ssim": 0.8904453963041306,
+     "delta": 0.3140765428543091,
+     "deltaSsim": 0.0029861554503440857
+    }
+   ]
+  },
+  "R3-seed2": {
+   "meanDelta": 0.6402757825950781,
+   "clipMeanDelta": 0.6402757825950781,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.1434194259345531,
+    "26": 0.603494793176651,
+    "34": 0.1739131286740303
+   },
+   "byCategory": {
+    "daylight": 0.6090529759724935,
+    "faces": 0.7539991041024526,
+    "lowlight": 0.5403815706570944,
+    "motion": 0.31253089507420856,
+    "nature": 0.24859567483266196,
+    "text": 0.7792472839355469,
+    "texture": 0.7695537308851877,
+    "urban": 1.023747871319453
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.24859567483266196,
+   "meanDeltaSsim": 0.005475341497610013,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.59096717834473,
+     "ssim": 0.9422293603420258,
+     "delta": 1.0563740134239197,
+     "deltaSsim": 0.0019137412309646606
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.112136363983154,
+     "ssim": 0.898224376142025,
+     "delta": 0.5787205696105957,
+     "deltaSsim": 0.0015229061245918274
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.61222279071808,
+     "ssim": 0.8421318158507347,
+     "delta": 0.1920643448829651,
+     "deltaSsim": 0.0008912533521652222
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.85974872112274,
+     "ssim": 0.9194320812821388,
+     "delta": 1.877535879611969,
+     "deltaSsim": 0.02139131724834442
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.887876570224762,
+     "ssim": 0.874134473502636,
+     "delta": 1.1868754029273987,
+     "deltaSsim": 0.019198790192604065
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.632491409778595,
+     "ssim": 0.77108084410429,
+     "delta": 0.38667231798171997,
+     "deltaSsim": 0.010881759226322174
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.902376770973206,
+     "ssim": 0.9830296859145164,
+     "delta": 0.7542258501052856,
+     "deltaSsim": 0.0013962462544441223
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.35570967197418,
+     "ssim": 0.9663259088993073,
+     "delta": 0.2853640913963318,
+     "deltaSsim": 0.001140505075454712
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.373486399650574,
+     "ssim": 0.9331635534763336,
+     "delta": 0.0333210825920105,
+     "deltaSsim": 0.0006606355309486389
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.52865022420883,
+     "ssim": 0.9657268971204758,
+     "delta": 1.0367971658706665,
+     "deltaSsim": 0.003964155912399292
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.47327119112015,
+     "ssim": 0.9292904660105705,
+     "delta": 0.1943644881248474,
+     "deltaSsim": 0.001646585762500763
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.342805802822113,
+     "ssim": 0.8773266896605492,
+     "delta": -0.09841233491897583,
+     "deltaSsim": -2.5853514671325684e-06
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.342100620269775,
+     "ssim": 0.9711915478110313,
+     "delta": 1.1663523316383362,
+     "deltaSsim": 0.004202269017696381
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.751668095588684,
+     "ssim": 0.9546356722712517,
+     "delta": 0.7390633225440979,
+     "deltaSsim": 0.0037856101989746094
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.195869207382202,
+     "ssim": 0.9207504615187645,
+     "delta": 0.20412445068359375,
+     "deltaSsim": 0.0022129788994789124
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 40.050477385520935,
+     "ssim": 0.968283124268055,
+     "delta": 0.6807449460029602,
+     "deltaSsim": 0.0018380284309387207
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.72289580106735,
+     "ssim": 0.9450128525495529,
+     "delta": 0.2646559476852417,
+     "deltaSsim": 0.00145740807056427
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.31613093614578,
+     "ssim": 0.918061152100563,
+     "delta": 0.06806939840316772,
+     "deltaSsim": 0.0010658428072929382
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.275622606277466,
+     "ssim": 0.9879182800650597,
+     "delta": 0.46419262886047363,
+     "deltaSsim": 0.0006690472364425659
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.03664588928223,
+     "ssim": 0.9871502667665482,
+     "delta": 0.27819812297821045,
+     "deltaSsim": 0.000429302453994751
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.25889599323273,
+     "ssim": 0.9857806414365768,
+     "delta": 0.11932432651519775,
+     "deltaSsim": 0.0003113299608230591
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.40059733390808,
+     "ssim": 0.982328936457634,
+     "delta": 0.5929052829742432,
+     "deltaSsim": 0.0010940954089164734
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.83637064695358,
+     "ssim": 0.9762663468718529,
+     "delta": 0.28271496295928955,
+     "deltaSsim": 0.0009572207927703857
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.3639035820961,
+     "ssim": 0.9650131836533546,
+     "delta": 0.10347485542297363,
+     "deltaSsim": 0.0008575469255447388
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.07279074192047,
+     "ssim": 0.9800384566187859,
+     "delta": 0.2757716178894043,
+     "deltaSsim": 0.000570349395275116
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.70465850830078,
+     "ssim": 0.9769155234098434,
+     "delta": 0.14721989631652832,
+     "deltaSsim": 0.0002994164824485779
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.7000207901001,
+     "ssim": 0.975675456225872,
+     "delta": 0.08948743343353271,
+     "deltaSsim": 0.00017105042934417725
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.16220569610596,
+     "ssim": 0.9596346914768219,
+     "delta": 1.760387122631073,
+     "deltaSsim": 0.009480960667133331
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.982673704624176,
+     "ssim": 0.9296765550971031,
+     "delta": 0.8437207341194153,
+     "deltaSsim": 0.00863870233297348
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.30480992794037,
+     "ssim": 0.8779317066073418,
+     "delta": 0.21224349737167358,
+     "deltaSsim": 0.0056097060441970825
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.43578714132309,
+     "ssim": 0.9373616948723793,
+     "delta": 1.0645070672035217,
+     "deltaSsim": 0.005625836551189423
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.34426349401474,
+     "ssim": 0.894415833055973,
+     "delta": 0.4765471816062927,
+     "deltaSsim": 0.004671275615692139
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.724228739738464,
+     "ssim": 0.8253198713064194,
+     "delta": 0.11159569025039673,
+     "deltaSsim": 0.002542823553085327
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.654612481594086,
+     "ssim": 0.9092898964881897,
+     "delta": 1.484765112400055,
+     "deltaSsim": 0.01897132396697998
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.525037467479706,
+     "ssim": 0.8560234233736992,
+     "delta": 0.8343762159347534,
+     "deltaSsim": 0.016045644879341125
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.507213175296783,
+     "ssim": 0.754786916077137,
+     "delta": 0.22508293390274048,
+     "deltaSsim": 0.008322000503540039
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.58443456888199,
+     "ssim": 0.930943064391613,
+     "delta": 0.4436877369880676,
+     "deltaSsim": 3.725290298461914e-08
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.2442564368248,
+     "ssim": 0.8670722842216492,
+     "delta": 0.18429845571517944,
+     "deltaSsim": -0.00024117529392242432
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.89793574810028,
+     "ssim": 0.7586341947317123,
+     "delta": 0.06790667772293091,
+     "deltaSsim": 0.00014320015907287598
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.90575695037842,
+     "ssim": 0.9691044166684151,
+     "delta": 2.1285200119018555,
+     "deltaSsim": 0.008997119963169098
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.619705736637115,
+     "ssim": 0.9473090469837189,
+     "delta": 1.3017991185188293,
+     "deltaSsim": 0.008338332176208496
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.24330735206604,
+     "ssim": 0.9039700031280518,
+     "delta": 0.4911103844642639,
+     "deltaSsim": 0.006280854344367981
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.726695477962494,
+     "ssim": 0.9165105521678925,
+     "delta": 1.3236206769943237,
+     "deltaSsim": 0.02517649531364441
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.269768118858337,
+     "ssim": 0.8802918046712875,
+     "delta": 0.8521631360054016,
+     "deltaSsim": 0.021291859447956085
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.829705953598022,
+     "ssim": 0.7976284995675087,
+     "delta": 0.25334686040878296,
+     "deltaSsim": 0.011184856295585632
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 35.009624660015106,
+     "ssim": 0.9744670540094376,
+     "delta": 2.1843233704566956,
+     "deltaSsim": 0.007493406534194946
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.25913316011429,
+     "ssim": 0.9503145515918732,
+     "delta": 1.2058350443840027,
+     "deltaSsim": 0.006453461945056915
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.25741708278656,
+     "ssim": 0.8907221034169197,
+     "delta": 0.323198139667511,
+     "deltaSsim": 0.0032628625631332397
+    }
+   ]
+  },
+  "R3-seed3": {
+   "meanDelta": 0.6223666171232859,
+   "clipMeanDelta": 0.6223666171232859,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.1226605251431465,
+    "26": 0.5833524465560913,
+    "34": 0.16108687967061996
+   },
+   "byCategory": {
+    "daylight": 0.5893551309903463,
+    "faces": 0.7443266113599142,
+    "lowlight": 0.5391057332356771,
+    "motion": 0.2957945068677266,
+    "nature": 0.24444172779719034,
+    "text": 0.7448348071840074,
+    "texture": 0.7537295917669932,
+    "urban": 0.9896049896876017
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.24444172779719034,
+   "meanDeltaSsim": 0.005037540414681037,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.57015562057495,
+     "ssim": 0.9426708295941353,
+     "delta": 1.0355624556541443,
+     "deltaSsim": 0.0023552104830741882
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.104613959789276,
+     "ssim": 0.8982028663158417,
+     "delta": 0.5711981654167175,
+     "deltaSsim": 0.0015013962984085083
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.58146321773529,
+     "ssim": 0.8414428010582924,
+     "delta": 0.161304771900177,
+     "deltaSsim": 0.0002022385597229004
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 30.796087384223938,
+     "ssim": 0.9183188378810883,
+     "delta": 1.8138745427131653,
+     "deltaSsim": 0.020278073847293854
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 28.847827911376953,
+     "ssim": 0.872809499502182,
+     "delta": 1.1468267440795898,
+     "deltaSsim": 0.017873816192150116
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.620068907737732,
+     "ssim": 0.7701174318790436,
+     "delta": 0.37424981594085693,
+     "deltaSsim": 0.009918347001075745
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 40.9467887878418,
+     "ssim": 0.9829825013875961,
+     "delta": 0.798637866973877,
+     "deltaSsim": 0.0013490617275238037
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.36567348241806,
+     "ssim": 0.966093510389328,
+     "delta": 0.29532790184020996,
+     "deltaSsim": 0.0009081065654754639
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.37720811367035,
+     "ssim": 0.9328167587518692,
+     "delta": 0.03704279661178589,
+     "deltaSsim": 0.0003138408064842224
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.51406407356262,
+     "ssim": 0.9651913344860077,
+     "delta": 1.0222110152244568,
+     "deltaSsim": 0.0034285932779312134
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.46912211179733,
+     "ssim": 0.9288882166147232,
+     "delta": 0.19021540880203247,
+     "deltaSsim": 0.0012443363666534424
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.340815901756287,
+     "ssim": 0.8770129308104515,
+     "delta": -0.10040223598480225,
+     "deltaSsim": -0.0003163442015647888
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.35174345970154,
+     "ssim": 0.9710519760847092,
+     "delta": 1.1759951710700989,
+     "deltaSsim": 0.0040626972913742065
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.75907605886459,
+     "ssim": 0.9544223770499229,
+     "delta": 0.7464712858200073,
+     "deltaSsim": 0.003572314977645874
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.191888511180878,
+     "ssim": 0.9204215183854103,
+     "delta": 0.2001437544822693,
+     "deltaSsim": 0.0018840357661247253
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 40.01540422439575,
+     "ssim": 0.9678874462842941,
+     "delta": 0.6456717848777771,
+     "deltaSsim": 0.001442350447177887
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.70396089553833,
+     "ssim": 0.9447022750973701,
+     "delta": 0.24572104215621948,
+     "deltaSsim": 0.0011468306183815002
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.306002616882324,
+     "ssim": 0.9178005158901215,
+     "delta": 0.05794107913970947,
+     "deltaSsim": 0.0008052065968513489
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.26470959186554,
+     "ssim": 0.9878173992037773,
+     "delta": 0.45327961444854736,
+     "deltaSsim": 0.0005681663751602173
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.030057191848755,
+     "ssim": 0.9870738089084625,
+     "delta": 0.27160942554473877,
+     "deltaSsim": 0.00035284459590911865
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.2401157617569,
+     "ssim": 0.9857100173830986,
+     "delta": 0.10054409503936768,
+     "deltaSsim": 0.00024070590734481812
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.388463616371155,
+     "ssim": 0.9821468144655228,
+     "delta": 0.5807715654373169,
+     "deltaSsim": 0.0009119734168052673
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.827939569950104,
+     "ssim": 0.9760246425867081,
+     "delta": 0.27428388595581055,
+     "deltaSsim": 0.0007155165076255798
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.359427869319916,
+     "ssim": 0.9647230356931686,
+     "delta": 0.09899914264678955,
+     "deltaSsim": 0.0005673989653587341
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.07201886177063,
+     "ssim": 0.9799482226371765,
+     "delta": 0.274999737739563,
+     "deltaSsim": 0.0004801154136657715
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.70476818084717,
+     "ssim": 0.9768422096967697,
+     "delta": 0.14732956886291504,
+     "deltaSsim": 0.0002261027693748474
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.70079982280731,
+     "ssim": 0.9756126329302788,
+     "delta": 0.09026646614074707,
+     "deltaSsim": 0.00010822713375091553
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.112969279289246,
+     "ssim": 0.9590751975774765,
+     "delta": 1.7111507058143616,
+     "deltaSsim": 0.008921466767787933
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 31.92778378725052,
+     "ssim": 0.9288270324468613,
+     "delta": 0.7888308167457581,
+     "deltaSsim": 0.007789179682731628
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.28424572944641,
+     "ssim": 0.877155490219593,
+     "delta": 0.19167929887771606,
+     "deltaSsim": 0.004833489656448364
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.42066007852554,
+     "ssim": 0.9370669424533844,
+     "delta": 1.0493800044059753,
+     "deltaSsim": 0.005331084132194519
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.32666373252869,
+     "ssim": 0.8940239921212196,
+     "delta": 0.45894742012023926,
+     "deltaSsim": 0.004279434680938721
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.7174391746521,
+     "ssim": 0.8250170052051544,
+     "delta": 0.10480612516403198,
+     "deltaSsim": 0.0022399574518203735
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.584231913089752,
+     "ssim": 0.9084139838814735,
+     "delta": 1.4143845438957214,
+     "deltaSsim": 0.018095411360263824
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.473835289478302,
+     "ssim": 0.854847215116024,
+     "delta": 0.7831740379333496,
+     "deltaSsim": 0.014869436621665955
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.483290553092957,
+     "ssim": 0.7537821382284164,
+     "delta": 0.20116031169891357,
+     "deltaSsim": 0.0073172226548194885
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.59218466281891,
+     "ssim": 0.9313172027468681,
+     "delta": 0.4514378309249878,
+     "deltaSsim": 0.00037417560815811157
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.23693907260895,
+     "ssim": 0.8667956963181496,
+     "delta": 0.1769810914993286,
+     "deltaSsim": -0.0005177631974220276
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.895803093910217,
+     "ssim": 0.7582890167832375,
+     "delta": 0.06577402353286743,
+     "deltaSsim": -0.00020197778940200806
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.869117975234985,
+     "ssim": 0.9686375185847282,
+     "delta": 2.091881036758423,
+     "deltaSsim": 0.00853022187948227
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 33.582976162433624,
+     "ssim": 0.9467616528272629,
+     "delta": 1.2650695443153381,
+     "deltaSsim": 0.0077909380197525024
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.22343099117279,
+     "ssim": 0.9034548252820969,
+     "delta": 0.4712340235710144,
+     "deltaSsim": 0.005765676498413086
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.667867183685303,
+     "ssim": 0.9152747392654419,
+     "delta": 1.2647923827171326,
+     "deltaSsim": 0.023940682411193848
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.224665880203247,
+     "ssim": 0.879106730222702,
+     "delta": 0.8070608973503113,
+     "deltaSsim": 0.020106784999370575
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.810268580913544,
+     "ssim": 0.7967846766114235,
+     "delta": 0.2339094877243042,
+     "deltaSsim": 0.010341033339500427
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 35.00383943319321,
+     "ssim": 0.9742900282144547,
+     "delta": 2.178538143634796,
+     "deltaSsim": 0.007316380739212036
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.21789002418518,
+     "ssim": 0.949808306992054,
+     "delta": 1.164591908454895,
+     "deltaSsim": 0.005947217345237732
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.22295606136322,
+     "ssim": 0.8900499641895294,
+     "delta": 0.28873711824417114,
+     "deltaSsim": 0.0025907233357429504
+    }
+   ]
+  },
+  "aethersr-c16d2": {
+   "meanDelta": 0.7634712569415569,
+   "clipMeanDelta": 0.7634712569415569,
+   "clipWins": 16,
+   "clips": 16,
+   "byCrf": {
+    "18": 1.3621451519429684,
+    "26": 0.7215066254138947,
+    "34": 0.20676199346780777
+   },
+   "byCategory": {
+    "daylight": 0.6396080056826273,
+    "faces": 0.8781124651432037,
+    "lowlight": 0.6624942521254221,
+    "motion": 0.4035891592502594,
+    "nature": 0.32436733444531757,
+    "text": 0.8812026182810465,
+    "texture": 1.0042794545491536,
+    "urban": 1.1933194597562153
+   },
+   "worstCategory": "nature",
+   "worstCategoryDelta": 0.32436733444531757,
+   "meanDeltaSsim": 0.006827809692670901,
+   "perCell": [
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 18,
+     "psnr": 36.65497183799744,
+     "ssim": 0.9419512003660202,
+     "delta": 1.1203786730766296,
+     "deltaSsim": 0.0016355812549591064
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 26,
+     "psnr": 34.1627436876297,
+     "ssim": 0.8985583856701851,
+     "delta": 0.6293278932571411,
+     "deltaSsim": 0.0018569156527519226
+    },
+    {
+     "clip": "daylight-lala-lake-romania-4k-aerial",
+     "category": "daylight",
+     "crf": 34,
+     "psnr": 31.589275896549225,
+     "ssim": 0.8419056013226509,
+     "delta": 0.16911745071411133,
+     "deltaSsim": 0.0006650388240814209
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 31.160060465335846,
+     "ssim": 0.9234496802091599,
+     "delta": 2.1778476238250732,
+     "deltaSsim": 0.025408916175365448
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 29.06876504421234,
+     "ssim": 0.8781972527503967,
+     "delta": 1.367763876914978,
+     "deltaSsim": 0.023261569440364838
+    },
+    {
+     "clip": "faces-charles-iii-accession-proclamation-st-ives",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 25.673656463623047,
+     "ssim": 0.7732521295547485,
+     "delta": 0.4278373718261719,
+     "deltaSsim": 0.0130530446767807
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 18,
+     "psnr": 41.03532373905182,
+     "ssim": 0.9837479144334793,
+     "delta": 0.8871728181838989,
+     "deltaSsim": 0.0021144747734069824
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 26,
+     "psnr": 37.4272283911705,
+     "ssim": 0.9672417938709259,
+     "delta": 0.35688281059265137,
+     "deltaSsim": 0.0020563900470733643
+    },
+    {
+     "clip": "faces-governor-healey-unveils-her-fiscal-year-2025-bud",
+     "category": "faces",
+     "crf": 34,
+     "psnr": 33.39133560657501,
+     "ssim": 0.9341458231210709,
+     "delta": 0.051170289516448975,
+     "deltaSsim": 0.0016429051756858826
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 36.70362561941147,
+     "ssim": 0.9673446118831635,
+     "delta": 1.2117725610733032,
+     "deltaSsim": 0.005581870675086975
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.513918578624725,
+     "ssim": 0.9302532076835632,
+     "delta": 0.23501187562942505,
+     "deltaSsim": 0.0026093274354934692
+    },
+    {
+     "clip": "lowlight-bay-city-fireworks-2016-grand-finale",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 28.341136276721954,
+     "ssim": 0.8779285177588463,
+     "delta": -0.10008186101913452,
+     "deltaSsim": 0.0005992427468299866
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 18,
+     "psnr": 34.627975821495056,
+     "ssim": 0.972210705280304,
+     "delta": 1.452227532863617,
+     "deltaSsim": 0.005221426486968994
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 26,
+     "psnr": 32.92438954114914,
+     "ssim": 0.9557347446680069,
+     "delta": 0.9117847681045532,
+     "deltaSsim": 0.004884682595729828
+    },
+    {
+     "clip": "lowlight-charlotte-by-night-4k-drone-footage",
+     "category": "lowlight",
+     "crf": 34,
+     "psnr": 30.255995392799377,
+     "ssim": 0.9215032905340195,
+     "delta": 0.26425063610076904,
+     "deltaSsim": 0.0029658079147338867
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 40.12304484844208,
+     "ssim": 0.9687453657388687,
+     "delta": 0.7533124089241028,
+     "deltaSsim": 0.002300269901752472
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 36.7735230922699,
+     "ssim": 0.9459784179925919,
+     "delta": 0.31528323888778687,
+     "deltaSsim": 0.0024229735136032104
+    },
+    {
+     "clip": "motion-aerial-drone-chase-of-rally-cars",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 33.33583265542984,
+     "ssim": 0.9191890507936478,
+     "delta": 0.08777111768722534,
+     "deltaSsim": 0.002193741500377655
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 18,
+     "psnr": 45.50317883491516,
+     "ssim": 0.9887291938066483,
+     "delta": 0.691748857498169,
+     "deltaSsim": 0.0014799609780311584
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 26,
+     "psnr": 44.16240632534027,
+     "ssim": 0.9877289310097694,
+     "delta": 0.4039585590362549,
+     "deltaSsim": 0.001007966697216034
+    },
+    {
+     "clip": "motion-charlieville-savannah-trinidad-kite-flying-1-mpg",
+     "category": "motion",
+     "crf": 34,
+     "psnr": 41.30903244018555,
+     "ssim": 0.9862689822912216,
+     "delta": 0.16946077346801758,
+     "deltaSsim": 0.0007996708154678345
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 42.53493905067444,
+     "ssim": 0.983180359005928,
+     "delta": 0.7272469997406006,
+     "deltaSsim": 0.0019455179572105408
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 39.92136090993881,
+     "ssim": 0.9771963357925415,
+     "delta": 0.36770522594451904,
+     "deltaSsim": 0.001887209713459015
+    },
+    {
+     "clip": "nature-pikktiib-sooritsika-conocephalus-fuscus",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 36.401652693748474,
+     "ssim": 0.965965174138546,
+     "delta": 0.1412239670753479,
+     "deltaSsim": 0.001809537410736084
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 18,
+     "psnr": 44.18205678462982,
+     "ssim": 0.9806907251477242,
+     "delta": 0.3850376605987549,
+     "deltaSsim": 0.0012226179242134094
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 26,
+     "psnr": 42.76283800601959,
+     "ssim": 0.9773698598146439,
+     "delta": 0.20539939403533936,
+     "deltaSsim": 0.0007537528872489929
+    },
+    {
+     "clip": "nature-clip",
+     "category": "nature",
+     "crf": 34,
+     "psnr": 40.73012411594391,
+     "ssim": 0.97599196434021,
+     "delta": 0.11959075927734375,
+     "deltaSsim": 0.0004875585436820984
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.408607721328735,
+     "ssim": 0.961079865694046,
+     "delta": 2.0067891478538513,
+     "deltaSsim": 0.010926134884357452
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.0975536108017,
+     "ssim": 0.9315425083041191,
+     "delta": 0.958600640296936,
+     "deltaSsim": 0.010504655539989471
+    },
+    {
+     "clip": "text-front-banner-of-the-wir-haben-es-satt-demonstrat",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.330968022346497,
+     "ssim": 0.8794122561812401,
+     "delta": 0.2384015917778015,
+     "deltaSsim": 0.007090255618095398
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 18,
+     "psnr": 35.542998909950256,
+     "ssim": 0.9381864294409752,
+     "delta": 1.1717188358306885,
+     "deltaSsim": 0.006450571119785309
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 26,
+     "psnr": 32.399655878543854,
+     "ssim": 0.8959338739514351,
+     "delta": 0.5319395661354065,
+     "deltaSsim": 0.006189316511154175
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonstrati",
+     "category": "text",
+     "crf": 34,
+     "psnr": 28.733085691928864,
+     "ssim": 0.8265226855874062,
+     "delta": 0.1204526424407959,
+     "deltaSsim": 0.003745637834072113
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 18,
+     "psnr": 30.880963504314423,
+     "ssim": 0.9123219028115273,
+     "delta": 1.7111161351203918,
+     "deltaSsim": 0.022003330290317535
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 26,
+     "psnr": 28.637739717960358,
+     "ssim": 0.8591339737176895,
+     "delta": 0.9470784664154053,
+     "deltaSsim": 0.01915619522333145
+    },
+    {
+     "clip": "text-front-banner-of-the-fridaysforfuture-demonst-bc08bf",
+     "category": "text",
+     "crf": 34,
+     "psnr": 25.526856780052185,
+     "ssim": 0.7564023658633232,
+     "delta": 0.2447265386581421,
+     "deltaSsim": 0.009937450289726257
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 35.63211292028427,
+     "ssim": 0.9295450747013092,
+     "delta": 0.49136608839035034,
+     "deltaSsim": -0.0013979524374008179
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 32.284823060035706,
+     "ssim": 0.8667039051651955,
+     "delta": 0.22486507892608643,
+     "deltaSsim": -0.0006095543503761292
+    },
+    {
+     "clip": "texture-aerial-views-of-a-forest-in-belarus",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 28.92593801021576,
+     "ssim": 0.7592984810471535,
+     "delta": 0.09590893983840942,
+     "deltaSsim": 0.0008074864745140076
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 18,
+     "psnr": 36.651328802108765,
+     "ssim": 0.9720847234129906,
+     "delta": 2.874091863632202,
+     "deltaSsim": 0.011977426707744598
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 26,
+     "psnr": 34.02364909648895,
+     "ssim": 0.9503582939505577,
+     "delta": 1.7057424783706665,
+     "deltaSsim": 0.011387579143047333
+    },
+    {
+     "clip": "texture-walking-china-amazing-noodle-making-skills-chine",
+     "category": "texture",
+     "crf": 34,
+     "psnr": 30.385899245738983,
+     "ssim": 0.90650674700737,
+     "delta": 0.633702278137207,
+     "deltaSsim": 0.008817598223686218
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 28.882327675819397,
+     "ssim": 0.9197361767292023,
+     "delta": 1.4792528748512268,
+     "deltaSsim": 0.028402119874954224
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 27.359513342380524,
+     "ssim": 0.8833512142300606,
+     "delta": 0.9419083595275879,
+     "deltaSsim": 0.024351269006729126
+    },
+    {
+     "clip": "urban-campanas-sonando-de-la-catedral-de-la-ciudad-de-",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 24.8465433716774,
+     "ssim": 0.799248993396759,
+     "delta": 0.2701842784881592,
+     "deltaSsim": 0.012805350124835968
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 18,
+     "psnr": 35.478543639183044,
+     "ssim": 0.9768459647893906,
+     "delta": 2.653242349624634,
+     "deltaSsim": 0.00987231731414795
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 26,
+     "psnr": 32.49415189027786,
+     "ssim": 0.9526764526963234,
+     "delta": 1.440853774547577,
+     "deltaSsim": 0.008815363049507141
+    },
+    {
+     "clip": "urban-one-step-closer-giant-s-despair-music-video-wilk",
+     "category": "urban",
+     "crf": 34,
+     "psnr": 28.308694064617157,
+     "ssim": 0.8920935839414597,
+     "delta": 0.3744751214981079,
+     "deltaSsim": 0.004634343087673187
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,138 @@
+{
+ "schema": "aethervsr.m7-corrected-models/1",
+ "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+ "models": {
+  "models/m7-corrected/R0-seed1.json": {
+   "fileSha256": "6961f21038e7dfb06d8092e2f76494c680426183997ef6d27de02f367787e21f",
+   "modelSha256": "93a5ea44e5806bb0322aa55aa8ddc848c894fd30c5a59acfede8419ab911a200",
+   "rung": "R0",
+   "seed": 1,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6291,
+   "parameters": 6291,
+   "valPsnrDb": 30.969
+  },
+  "models/m7-corrected/R0-seed2.json": {
+   "fileSha256": "d492113e4fb63a3ddc56adc308b2428d990a6a72e9a0962ea08ed72ad799c974",
+   "modelSha256": "18c4ec2c991bdf89ce0284ade99d8092260c43e80cdc518b78033d4821b028da",
+   "rung": "R0",
+   "seed": 2,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6291,
+   "parameters": 6291,
+   "valPsnrDb": 30.999
+  },
+  "models/m7-corrected/R0-seed3.json": {
+   "fileSha256": "49a52e911ef29d826f4627b4416d4a022df8eafaa258cb532ec78b7142001d45",
+   "modelSha256": "0e621f17789ee90fdaffff377c76f3ec26125b270bdd746908e7c229f82078bf",
+   "rung": "R0",
+   "seed": 3,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6291,
+   "parameters": 6291,
+   "valPsnrDb": 30.996
+  },
+  "models/m7-corrected/R1-seed1.json": {
+   "fileSha256": "36732fd7bffb71af06d200d614c9b7c4725126b442198c7224da55708a87fb2a",
+   "modelSha256": "2badd39ea5ca8d8d29ca9c6e02c1661257753e5c9428045c06b38607d7ba7e10",
+   "rung": "R1",
+   "seed": 1,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6835,
+   "parameters": 6291,
+   "valPsnrDb": 30.99
+  },
+  "models/m7-corrected/R1-seed2.json": {
+   "fileSha256": "c9c5e04709c17051e1f99c0dea0b3bf11c806dab3bea053a1fcc56a2c0a29222",
+   "modelSha256": "dd3d36d34f9bb4659600e8bfb4770ea84cf82cbcbebc8590895b5a8c72df4171",
+   "rung": "R1",
+   "seed": 2,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6835,
+   "parameters": 6291,
+   "valPsnrDb": 30.997
+  },
+  "models/m7-corrected/R1-seed3.json": {
+   "fileSha256": "e90e8350eb005f0374167cfdb77066467411b225981097716af4bb2514d0a600",
+   "modelSha256": "2b163e03536d9489eb77b714a63530aeb3f879268aafa4e779c98d8dbacb2c52",
+   "rung": "R1",
+   "seed": 3,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6835,
+   "parameters": 6291,
+   "valPsnrDb": 31.006
+  },
+  "models/m7-corrected/R2-seed1.json": {
+   "fileSha256": "a2df0894c3298b587d9cc3196b29c0412e092dd305ca7149a57be7786570d999",
+   "modelSha256": "b85a2f7848d0bd6258458ae0bc2e21c817aab1a0632c34e52f0cf4df4ebbf5c4",
+   "rung": "R2",
+   "seed": 1,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6835,
+   "parameters": 6291,
+   "valPsnrDb": 31.0
+  },
+  "models/m7-corrected/R2-seed2.json": {
+   "fileSha256": "97ca1620af3fb8c821df125d9ca014e1187adfec08f5c9050ac9e287525ff9a8",
+   "modelSha256": "0c1a5defa4cfa0fac323d3b7fe3cb330778c43944139fde7426e49c7617f681e",
+   "rung": "R2",
+   "seed": 2,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6835,
+   "parameters": 6291,
+   "valPsnrDb": 30.993
+  },
+  "models/m7-corrected/R2-seed3.json": {
+   "fileSha256": "93296c54031bc849ec41126256ee8d86035d47d35dd00ba750a0a6e410081234",
+   "modelSha256": "53687a30d32f9ecc8636a5c8770775b136d17b72f0dc44a82d03593eede8fd48",
+   "rung": "R2",
+   "seed": 3,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 6835,
+   "parameters": 6291,
+   "valPsnrDb": 30.995
+  },
+  "models/m7-corrected/R3-seed1.json": {
+   "fileSha256": "a0f683cd81c05220eb633ffb08802bed6265e6f60d4fd93879c967a2638ccebc",
+   "modelSha256": "5cc50e0e916c0e2bdbef9a7dabf830cab69a097f24b028e8ce0385ce628ff05b",
+   "rung": "R3",
+   "seed": 1,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 31.001
+  },
+  "models/m7-corrected/R3-seed2.json": {
+   "fileSha256": "bf9b490e80b95955ab229454477d7aff7d9b6b79b732752d358cbc2cbf2a3d46",
+   "modelSha256": "e1cc0632df75221b06d060562b5c663c61b35c1f6532817f8e0414229be8878a",
+   "rung": "R3",
+   "seed": 2,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 31.029
+  },
+  "models/m7-corrected/R3-seed3.json": {
+   "fileSha256": "5adf138bb3f1d93fc825498eb31e2bb49b627c37a1f1cea359f73fdd3c4b0ff5",
+   "modelSha256": "85075671f304427f0fcfc64d8622faa62644f9199ab73f8e328a1b88cb7a6651",
+   "rung": "R3",
+   "seed": 3,
+   "optimizerSteps": 16200,
+   "corpusDigest": "3f73af7f48ffee2b8efe5e7505dd370944e5614efb9ae4d3c5bff64d3fc563e6",
+   "trainingParameters": 9971,
+   "parameters": 6291,
+   "valPsnrDb": 31.005
+  }
+ }
+}
