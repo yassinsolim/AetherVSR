@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import subprocess
 import sys
@@ -211,7 +212,12 @@ def main() -> int:
         clip["pinnedAt"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
         gen = rng_for("seq", args.seed, cid)
-        dur = float(clip.get("duration") or 0) or 60.0
+        dur = clip.get("duration")
+        if not isinstance(dur, (int, float)) or isinstance(dur, bool) or not math.isfinite(dur) or dur <= 0:
+            reason = "missing or invalid duration; verify source-relative timing before preparation"
+            failures.append({"clip": cid, "url": url, "reason": reason})
+            print(f"  [{n}/{len(clips)}] {cid}: {reason}", file=sys.stderr)
+            continue
         usable = max(1.0, dur - (args.frames / args.fps) - 1.0)
         starts = sorted(float(x) for x in gen.uniform(0.5, min(0.5 + usable, dur - 2), args.sequences))
 

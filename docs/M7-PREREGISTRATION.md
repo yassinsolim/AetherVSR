@@ -308,3 +308,21 @@ The historical validation manifest is retained for historical evidence and is
 not silently rewritten into the new split. No neural score was consulted in
 choosing the replacement. This new validation source is also excluded from
 the future architecture-confirmation corpus.
+
+### Verified relative timing for the squirrels source
+
+Recovery found one training source with missing duration metadata:
+`nature-squirrels-at-point-pleasant-park`. The previous 60-second fallback
+requested a window outside the clip and yielded only two of three sequences.
+The pinned 29,063,069-byte file was downloaded and its Commons SHA1 matched.
+`ffprobe -count_frames` found 2,274 video frames, nominally 60 fps, with format
+start 84,721.155 and reported end/duration 84,759.415. Those absolute timestamps
+give a usable relative duration of 38.26 seconds, not 84,759 seconds.
+
+`results/m7-squirrels-timing.json` records the probe, full-file hash and explicit
+duration correction used by the new whole-clip request. The failed request is
+preserved separately. Source identity and membership, seed 20260906, three
+24-frame sequences, 24-fps preparation and crop settings remain unchanged.
+This is a declared timing-metadata repair before corrected training, not a
+silent resampling or padding of the failed output. The preparation tool now
+rejects missing, zero or non-finite durations instead of inventing 60 seconds.

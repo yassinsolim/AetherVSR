@@ -20,6 +20,7 @@ def pinned_input(tmp_path, monkeypatch):
         "source_url": "https://example.invalid/pinned.webm", "category": "nature",
         "commonsSha1": "expected-sha1", "byteLength": 100,
         "prefixSha256": "expected-prefix", "prefixBytes": 100, "pinnedAt": "original",
+        "duration": 4.0,
     }
     source = tmp_path / "manifest.json"
     source.write_text(json.dumps({"clips": [clip]}))
@@ -87,3 +88,17 @@ def test_only_complete_preparation_emits_training_tensors(pinned_input, monkeypa
         assert failure["expectedSequences"] == 3
         assert failure["actualSequences"] == successful_sequences
         assert not (destination / "all.pt").exists()
+
+
+@pytest.mark.parametrize("duration", [None, 0, float("nan"), float("inf")])
+def test_unverified_duration_never_reaches_the_decoder(pinned_input, monkeypatch, duration):
+    clip, source, destination = pinned_input
+    clip["duration"] = duration
+    source.write_text(json.dumps({"clips": [clip]}))
+    def forbidden_decode(*args, **kwargs):
+        pytest.fail("unverified timing reached the decoder")
+    monkeypatch.setattr(prepare, "extract_hr", forbidden_decode)
+    assert prepare.main() == 1
+    metadata = json.loads((destination / "pairs.json").read_text())
+    assert "duration" in metadata["clipsFailed"][0]["reason"]
+    assert not (destination / "all.pt").exists()

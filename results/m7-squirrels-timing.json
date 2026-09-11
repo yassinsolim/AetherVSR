@@ -1,0 +1,38 @@
+{
+ "schema": "aethervsr.source-timing-correction/1",
+ "clip": "nature-squirrels-at-point-pleasant-park",
+ "sourceURL": "https://upload.wikimedia.org/wikipedia/commons/4/45/Squirrels_at_Point_Pleasant_Park.webm",
+ "commonsSha1": "d7cb08e2c5350d8c2a79d2e8e1cefa34e2b0ed38",
+ "sourceSha256": "028cc7968f791718b29709be8e922a36189dc4ae736ef7ab8903b50f0a5f48f3",
+ "byteLength": 29063069,
+ "originalManifestDuration": null,
+ "oldFallbackSeconds": 60,
+ "containerStartTime": 84721.155,
+ "containerReportedDuration": 84759.415,
+ "effectiveDurationSeconds": 38.26,
+ "videoStartTime": 84721.183,
+ "videoFramesDecoded": 2274,
+ "nominalFrameRate": "60/1",
+ "reportedAverageFrameRate": "1000/1",
+ "probeCommand": [
+  "ffprobe",
+  "-v",
+  "error",
+  "-count_frames",
+  "-show_entries",
+  "format=start_time,duration,size:stream=index,codec_type,codec_name,start_time,duration,r_frame_rate,avg_frame_rate,time_base,nb_read_frames",
+  "-of",
+  "json",
+  "/Users/ysoli/Projects/AetherVSR/data/captured-train-v2/sources/m7-recovery/squirrels-source.webm"
+ ],
+ "reason": "Container duration is an absolute end timestamp. Subtract the format start timestamp to bound relative seeks. The source bytes are unchanged.",
+ "preparationUnchanged": {
+  "seed": 20260906,
+  "fps": 24,
+  "framesPerSequence": 24,
+  "sequences": 3,
+  "patch": 128,
+  "patchesPerFrame": 4
+ },
+ "scope": "Explicit timing-metadata correction before any corrected training; no padding, frame duplication, or changes to clip membership."
+}
