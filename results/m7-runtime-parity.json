@@ -108,6 +108,6 @@
    "totalBytes": 73741056,
    "derivation": "Computed from the allocation sites in src/core/upscale/neural-upscaler.ts:198-262, not read back from the device. Every size there depends only on source dimensions, model features, depth and precision."
   },
-  "parityArgument": "Structural rather than measured. The candidate and the shipped model have identical features, depth, precision, layer descriptors and tensor lengths, verified in results/m7-deployment-compatibility.json, and no allocation depends on weight values. The computed totals are byte-identical at 73,741,056 bytes, so a memory difference would require a shape difference that the compatibility check already excludes."
+  "parityArgument": "Structural and limited to requested resources. The candidate and the shipped model have identical features, depth, precision, layer descriptors and tensor lengths, verified in results/m7-deployment-compatibility.json, and no allocation depends on weight values, so the computed request totals are byte-identical at 73,741,056 bytes. That is parity of what the application asks for. Actual device memory is unmeasured: identical requests do not exclude differences in driver or allocator behaviour, and no claim is made that the two models consume the same device memory."
  }
 }

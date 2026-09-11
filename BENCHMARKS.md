@@ -2154,8 +2154,10 @@ structural: every allocation in `neural-upscaler.ts` is sized from source
 dimensions, features, depth and precision, never from weight values. Computed
 from those allocation sites at 1280×720 with f16 activations, both models come
 to an identical **73,741,056 bytes** — 59.0 MB of ping/pong activations,
-14.7 MB output texture, 12.9 kB of weights. A memory difference would require a
-shape difference, which the compatibility check already excludes.
+14.7 MB output texture, 12.9 kB of weights. That establishes parity of the
+*requested* resources only. Actual device memory is unmeasured, and identical
+requests do not exclude a difference in driver or allocator behaviour, so no
+claim is made that the two models consume the same device memory.
 
 The zero-cost property is therefore established structurally rather than by
 these timings: 9,971 training parameters deploy as 6,291, with tensor names,
