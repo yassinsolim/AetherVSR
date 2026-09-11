@@ -112,12 +112,18 @@ def load_video_pairs(
     with open(os.path.join(pairs_dir, "pairs.json"), encoding="utf-8") as fh:
         meta = json.load(fh)
 
-    # Hash the bytes actually read, not the metadata describing them. Matching
+    # Hash what the optimizer consumes, not the metadata describing it. Matching
     # split counts and CRF histograms cannot prove two runs saw identical
     # patches: corpus-prepare.py conditions its CRF draws on extraction
     # succeeding, so two rebuilds from the same manifest and the same seed can
     # legitimately differ wherever the network behaved differently. Without this
     # digest an architecture comparison could silently be a data comparison.
+    #
+    # Two different treatments, deliberately. The patch tensors are hashed as
+    # raw file bytes, because those bytes are exactly what is loaded. The index
+    # is hashed as a canonical re-serialisation rather than as raw pairs.json,
+    # so that reformatting or key reordering does not read as a corpus change
+    # while a genuine change of clip, CRF or patch count still does.
     digest = hashlib.sha256()
     digest.update(json.dumps(meta.get("index", []), sort_keys=True).encode())
 
