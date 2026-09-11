@@ -2184,7 +2184,7 @@ its own data, never an AetherVSR result.
 | RepVGG, CVPR 2021 ([2101.03697](https://arxiv.org/abs/2101.03697)) | 3×3 + 1×1 + identity | 14.33 M (B0) | ImageNet top-1 | plain 72.39 → 75.14 (**+2.75 pp**) | yes, 120 epochs, same settings |
 | DBB, CVPR 2021 ([2103.13425](https://arxiv.org/abs/2103.13425)) | K×K + 1×1 + avg-pool + branches | 11.68 M | ImageNet top-1 | ResNet-18 69.54 → 70.99 (**+1.45 pp**) | yes, plus duplicate-branch controls |
 | RepSR, 2022 ([2205.05671](https://arxiv.org/abs/2205.05671)) | Rep block, frozen BN | **3.70 K** – 602.9 K | ×4 SR, five sets, Y-PSNR | at 3.70 K, median **+0.01 dB** across five sets (Set5 −0.02, B100 0.00, U100 +0.01, DIV2K +0.03, Set14 +0.12); at 11.90 K, median **+0.03 dB** | no — vs ECBSR, not a plain control |
-| ECBSR, ACM MM 2021 | ECB vs RepVGG/DBB | 2.80 K – 596 K | ×2/×4 SR | DBB **< 0.05 dB**, ECB **≈ 0.1 dB** | yes, same setting ablation |
+| ECBSR, ACM MM 2021 | full ECB vs **plain** baseline | **10.20 K** (M4C16) | **×2** SR, five sets, Y-PSNR | +0.09, +0.08, +0.06, **+0.16**, +0.10 dB — median **+0.09 dB**, every set positive | **yes — a true plain control, same settings** |
 | PlainUSR, 2024 ([2409.13435](https://arxiv.org/abs/2409.13435)) | RepMBConv | 333 K | ×4 SR, DIV2K-valid | **+0.08 dB** at identical 26.8 ms | yes, same config |
 | SPAN, CVPRW 2024 | rep vs no-rep | 48-channel | ×4 SR | **+0.02 – +0.08 dB** | same 1e6 iterations |
 | ESPAN, CVPRW 2025 | RepVGG/EDBB/RRRB/GRep | ~192 K | ×4 SR, NTIRE'25 LD-valid | see below | yes, same settings |
@@ -2208,18 +2208,47 @@ training rather than from the blocks. NTIRE 2022 reports "slight gain, 0.02 dB"
 for small models and SPAN +0.02–0.08 dB. Only the ImageNet classification work
 (RepVGG +2.75 pp, DBB +1.45 pp) is in a different regime entirely.
 
-None of this rescues our result. The effect remains unestablished at p = 0.100
-and untested at the production budget; what changes is that its *size* is
-unremarkable for this architecture class rather than disappointing, and the
-honest problem is the schedule confound, not the magnitude.
+None of this rescues our result, and it does not settle the magnitude either.
+The effect remains unestablished at p = 0.100 and untested at the production
+budget. The literature is **mixed** at our scale: RepSR and CLB sit at roughly
++0.01 to +0.03 dB, while ECBSR's matched plain ablation reports +0.09 dB. So
+the honest position is that the expected size of this effect is *unresolved*,
+with schedule, task and data all still confounded — not that schedule alone is
+the problem, nor that our magnitude is comfortably normal.
+
+**The least favourable comparison, and the one closest to us in design.**
+ECBSR's Table 3 (×2, M4C16, **10.20 K** deployed parameters, Y-channel
+PSNR/SSIM) is a *matched ablation*: full ECB against a **plain** baseline,
+rather than against a rival reparameterization as in RepSR. It reports +0.09,
++0.08, +0.06, +0.16 and +0.10 dB across Set5, Set14, B100, Urban100 and DIV2K
+— median **+0.09 dB with no set negative**, and here the paper's pooled
+"about 0.1 dB" summary is fair rather than cherry-picked.
+
+It is the closest match we have on *upscaling factor, deployed size and control
+design* — but not on task or data: ECBSR is still-image SR, we upscale
+compressed captured video, and PlainUSR is also a same-config control at a much
+larger 333 K. So this is not an apples-to-apples result, and we should not
+treat +0.09 dB as the number we ought to have hit. We also should not comfort
+ourselves with the CLB and RepSR medians alone while the closest-matched
+ablation reports several times what we measured, consistently across its sets.
+
+That is *consistent with* the schedule hypothesis without proving it: we
+trained to a fifth of our own production schedule, while ECBSR reports its
+result under its own documented training setting, whose iteration count we have
+not verified and do not assert. Task and data differ too, so schedule is one
+candidate explanation among several. It is exactly the comparison Milestone 8
+has to make.
 
 **Scale — our size is covered, and that is the surprise.** RepSR reports
 M4C8 at **3.70 K** and M4C16 at **11.90 K** deployed parameters, bracketing our
-6,291, with gains of +0.10 to +0.13 dB on Set14. So the literature does reach
-our scale, and reports roughly 4–5× more than we measured. Two caveats keep this
-from being a clean contradiction: RepSR's comparison is against ECBSR at equal
-deployed size, not against a plain matched-budget control, and its task is ×4 SR
-on DIV2K stills, not ×2 on compressed captured video.
+6,291. At those sizes the per-set deltas against ECBSR are, for **M4C8**,
+median **+0.01 dB** (range −0.02 to +0.12) and for **M4C16**, median
+**+0.03 dB** (range −0.02 to +0.10); in both, **Set14 is the outlier** driving
+the paper's headline and **Set5 is negative**. So the literature does reach our
+scale, and at that scale its typical set-level gain is the same order as ours.
+Two caveats keep that from being reassuring: RepSR's comparison is against
+ECBSR at equal deployed size, not against a plain control, and its task is ×4
+SR on DIV2K stills, not ×2 on compressed captured video.
 
 **Training length — the finding that most threatens our result.** ESPAN's
 Table 7 trains identical architectures to 300 k and 500 k iterations. Every
@@ -2230,6 +2259,17 @@ updates against production's 81,180, so if that pattern holds here, our
 +0.0247 dB is more likely an **over**-estimate of what survives at full
 schedule than an under-estimate. This is the opposite of a convenient reading
 and it is why Milestone 8 is a budget-matched rerun rather than a victory lap.
+
+Two further sources get cited for this and neither carries it. **SPAN**'s
+multi-stage table shows the *absolute* score saturating (Set5
+32.18 → 32.20 → 32.20, Urban100 26.10 → 26.13 → 26.13, the third stage adding
+exactly nothing on all four sets) — that is score saturation, not the
+rep-versus-plain gap narrowing, and its repeats are weight-loaded continuations
+rather than independent budgets or seeds. **RepVGG**'s 120- against 200-epoch
+rows (B2g4, 78.50 → 79.38 pp) change augmentation and regularisation at the
+same time, so they are not a budget effect at all. ESPAN is therefore the
+**only** well-controlled horizon curve we found, and a single source is a thin
+basis for the expectation we are carrying into Milestone 8.
 
 **Branch vocabulary — agrees with us.** RepVGG's own ablation climbs
 monotonically (plain 72.39, +1×1 73.15, +identity 74.79, full 75.14), DBB shows
