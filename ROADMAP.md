@@ -299,9 +299,11 @@ fresh seeds for the winner.
 **Verdict: `R3` wins the ladder, production is retained.** `R3` (3×3 + 1×1 +
 identity + 1×3 + 3×1) scored −0.1373 dB against the frozen production model
 versus the `R0` control's −0.1620 — **+0.0247 dB**, outside the 0.01 dB tie
-band, leading at every compression tier and on 14 of 16 clips. The registered
-seed-level test returned p = 0.100, which is its floor at three seeds, so the
-effect is selected but not established.
+band. The registered seed-level test returned p = 0.100, which is its floor at
+three seeds, so the effect is **selected under a pre-committed rule, not
+established**. Post-hoc and descriptive only: `R3` leads at every compression
+tier and beats `R0` on 14 of 16 clips, but is best of all four rungs in only
+15 of 24 category×CRF cells, and all of those re-pool the same clips and seeds.
 
 No candidate shipped. The best final seed reached −0.1259 dB against
 production, missing the pre-registered +0.10 dB replacement threshold by

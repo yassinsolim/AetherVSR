@@ -1283,10 +1283,12 @@ weight space. Any statement that this adds inference capacity would be false.
 
 Measured at an equal 16,200-update budget on one frozen corpus, `R3` reached
 −0.1373 dB against the frozen production model where the `R0` control reached
-−0.1620, a **+0.0247 dB** advantage that holds at every compression tier and on
-14 of 16 clips. The registered three-seed permutation test returned p = 0.100,
-its attainable floor, so the rung was *selected* under a pre-committed rule and
-the effect was not *established*.
+−0.1620, a **+0.0247 dB** advantage. The registered three-seed permutation test
+returned p = 0.100, its attainable floor, so the rung was *selected* under a
+pre-committed rule and the effect was not *established*. Post-hoc and
+descriptive only: the advantage holds at every compression tier and on 14 of 16
+clips, though `R3` is best of all four rungs in just 15 of 24 category×CRF
+cells; these re-pool the same clips and seeds and add no replication.
 
 **The production model is retained.** The best final seed missed the
 pre-registered +0.10 dB replacement threshold by 0.23 dB. Every arm trained at
@@ -1296,8 +1298,9 @@ asymmetry is a confound large enough to explain the gap, not a measured cause.
 `tools/reparam.py` therefore stays in the tree as a training-time option behind
 `--rung`, defaulting to `R0`. It changes no deployed artifact: the exported
 model carries identical tensor names, lengths, layer descriptors, normalisation
-and parameter count, verified against the shipped model, and 71 fusion tests
-plus a browser parity script guard that equivalence in CI.
+and parameter count, verified against the shipped model. 71 fusion tests run in
+CI; the browser parity check is a separate on-device measurement, not a CI job,
+because CI has no GPU.
 
 Rejected alternative: shipping `R3-seed12` because it beat its control. It is
 0.126 dB *worse* than what users run today, and "better than a weaker sibling"
