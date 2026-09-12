@@ -321,7 +321,7 @@ a creator overlap between training and validation was repaired into a versioned
 split; and one source's absolute container timestamps were corrected against a
 verified relative duration.
 
-## Milestone 8 — Budget-matched architecture confirmation [NEXT]
+## Milestone 8 — Budget-matched architecture confirmation [CURRENT]
 
 Answer the question Milestone 7 could not: does `R3`'s advantage survive at the
 production budget? Train `R0` and `R3` at 81,180 updates on the same frozen
@@ -330,13 +330,13 @@ is the only comparison that can produce a deployable candidate, and it also
 tests whether the +0.0247 dB at a fifth of the schedule was a head start the
 control catches up on.
 
-The literature makes this more pressing rather than less. ESPAN (CVPRW 2025)
-trains identical architectures to 300 k and 500 k iterations and every
-reparameterized variant's advantage shrinks by roughly a third over that
-stretch — RepVGG +0.208 → +0.134 dB, EDBB +0.303 → +0.205. If that decay holds
-here, our measurement at 16,200 updates is an **over**-estimate of what a
-production-length run would show, and the honest expectation for Milestone 8 is
-a smaller gain than Milestone 7 reported, possibly none.
+The literature motivates this measurement but does not predict its direction.
+Published comparisons differ in architecture, task, data, degradation, metric,
+control and verified training schedule. Their horizon behavior cannot establish
+whether the small AetherVSR advantage will increase, persist, decrease or change
+sign. The matched experiment and its initialization controls are registered in
+`docs/M8-PREREGISTRATION.md`; the Milestone 7 literature discussion remains
+historical context, not a substitute for an 81,180-update measurement.
 
 Passing that comparison is necessary but **not sufficient** to ship. A frozen,
 category-complete confirmation corpus and all five pre-registered replacement
@@ -356,7 +356,7 @@ candidate scores against it.
 
 ---
 
-## Milestone 8 — Dynamic quality selection
+## Milestone 9 — Dynamic quality selection
 
 Measure the per-frame budget continuously and choose the most expensive model
 that fits, degrading to the baseline under pressure. Milestone 1's metrics are
@@ -364,7 +364,7 @@ the input; the control loop must be damped enough not to oscillate.
 
 ---
 
-## Milestone 9 — Chrome/Chromium extension
+## Milestone 10 — Chrome/Chromium extension
 
 Package the pipeline as an MV3 extension that attaches to video elements on
 third-party pages: injection, lifecycle, per-site controls, and the security
@@ -372,7 +372,7 @@ and performance implications of running on pages we do not control.
 
 ---
 
-## Milestone 10 — Cross-vendor validation
+## Milestone 11 — Cross-vendor validation
 
 Verify on NVIDIA, AMD and Intel GPUs across Windows and Linux. Everything
 measured so far is one Apple Silicon machine; nothing here should be assumed to
