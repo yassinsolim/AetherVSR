@@ -94,7 +94,10 @@ class RepBody(nn.Module):
     caller, after the sum, never inside a branch.
     """
 
-    def __init__(self, channels: int, branches: tuple[str, ...] = LADDERS["R2"]) -> None:
+    def __init__(
+        self, channels: int, branches: tuple[str, ...] = LADDERS["R2"],
+        *, matched_init: bool = False,
+    ) -> None:
         super().__init__()
         unknown = set(branches) - {"k3", "k1", "id", "k1x3", "k3x1"}
         if unknown:
@@ -134,6 +137,9 @@ class RepBody(nn.Module):
             if extra is not None:
                 nn.init.zeros_(extra.weight)
                 nn.init.zeros_(extra.bias)
+        if matched_init and self.use_identity:
+            with torch.no_grad():
+                self.k3.weight.sub_(identity_delta(channels, self.k3.weight))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y = self.k3(x)
@@ -199,6 +205,7 @@ class RepAetherSR(nn.Module):
         depth: int = 2,
         scale: int = 2,
         branches: tuple[str, ...] = LADDERS["R2"],
+        *, matched_init: bool = False,
     ) -> None:
         super().__init__()
         if scale != 2:
@@ -209,7 +216,9 @@ class RepAetherSR(nn.Module):
         self.branches = tuple(branches)
 
         self.stem = nn.Conv2d(3, channels, kernel_size=5, padding=2)
-        self.body = nn.ModuleList([RepBody(channels, branches) for _ in range(depth)])
+        self.body = nn.ModuleList([
+            RepBody(channels, branches, matched_init=matched_init) for _ in range(depth)
+        ])
         self.head = nn.Conv2d(channels, 3, kernel_size=3, padding=1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

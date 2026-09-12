@@ -296,3 +296,45 @@ def test_rung_choice_does_not_disturb_initialisation(rung: str) -> None:
     assert extra, f"{rung} added no branch tensors"
     for name in extra:
         assert torch.count_nonzero(other[name]) == 0, f"{name} did not start at zero"
+
+
+@pytest.mark.parametrize("seed", (8099, 8101, 8102, 8103))
+def test_m8_paired_effective_initialization(seed: int) -> None:
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(seed)
+        plain = AetherSR(16, 2).eval()
+        plain_next_rng = torch.get_rng_state().clone()
+        torch.manual_seed(seed)
+        reparameterized = RepAetherSR(
+            16, 2, branches=LADDERS["R3"], matched_init=True,
+        ).eval()
+        assert torch.equal(torch.get_rng_state(), plain_next_rng)
+
+    for name in ("stem", "head"):
+        for parameter in ("weight", "bias"):
+            assert torch.equal(
+                getattr(getattr(plain, name), parameter),
+                getattr(getattr(reparameterized, name), parameter),
+            )
+
+    generator = torch.Generator().manual_seed(20260911)
+    for plain_block, rep_block in zip(plain.body, reparameterized.body):
+        fused_weight, fused_bias = rep_block.fused_parameters()
+        torch.testing.assert_close(fused_weight, plain_block.weight, atol=TOL, rtol=0)
+        torch.testing.assert_close(fused_bias, plain_block.bias, atol=TOL, rtol=0)
+        for shape in SHAPES:
+            input_tensor = torch.randn(shape, generator=generator)
+            with torch.no_grad():
+                plain_output = plain_block(input_tensor)
+                rep_output = rep_block(input_tensor)
+            torch.testing.assert_close(rep_output, plain_output, atol=TOL, rtol=0)
+            torch.testing.assert_close(
+                rep_output.tanh(), plain_output.tanh(), atol=TOL, rtol=0,
+            )
+
+    for height, width in ((1, 1), (9, 13), (24, 32), (64, 64)):
+        input_tensor = torch.rand((2, 3, height, width), generator=generator)
+        with torch.no_grad():
+            torch.testing.assert_close(
+                reparameterized(input_tensor), plain(input_tensor), atol=TOL, rtol=0,
+            )

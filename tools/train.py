@@ -26,6 +26,7 @@ import os
 import random
 import sys
 import time
+from pathlib import Path
 
 import torch
 import torch.nn.functional as F
@@ -100,7 +101,7 @@ def validate_manifest(corpus: str, minimum: int) -> dict:
 
 
 def load_video_pairs(
-    pairs_dir: str,
+    pairs_dir: str, *, keep_uint8: bool = False,
 ) -> tuple[dict, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Load pre-degraded (LR, HR) patch pairs produced by tools/video-degrade.py.
 
@@ -141,7 +142,7 @@ def load_video_pairs(
             raise SystemExit(f"{split}: {lr.shape[0]} lr patches vs {hr.shape[0]} hr patches")
         if hr.shape[-1] != lr.shape[-1] * 2 or hr.shape[-2] != lr.shape[-2] * 2:
             raise SystemExit(f"{split}: hr {tuple(hr.shape)} is not 2x lr {tuple(lr.shape)}")
-        out += [lr.float().div_(255.0), hr.float().div_(255.0)]
+        out += [lr, hr] if keep_uint8 else [lr.float().div_(255.0), hr.float().div_(255.0)]
 
     meta = dict(meta)
     meta["corpusDigest"] = digest.hexdigest()
@@ -241,6 +242,80 @@ def psnr(a: torch.Tensor, b: torch.Tensor) -> float:
     return 10.0 * torch.log10(torch.tensor(1.0 / mse)).item()
 
 
+def update_lr(initial_lr: float, update: int, budget: int) -> float:
+    if budget <= 0 or update < 0:
+        raise ValueError("positive budget and nonnegative update required")
+    return initial_lr * 0.5 * (1.0 + math.cos(math.pi * min(1.0, update / budget)))
+
+
+def validation_updates(budget: int, every: int) -> list[int]:
+    if budget <= 0 or every <= 0:
+        raise ValueError("positive budget and validation interval required")
+    return sorted(set(range(every, budget + 1, every)) | {budget})
+
+
+def build_model(rung: str, channels: int, depth: int, seed: int) -> torch.nn.Module:
+    with torch.random.fork_rng(devices=[]):
+        torch.random.default_generator.manual_seed(seed)
+        if rung == "R0":
+            return AetherSR(channels=channels, depth=depth)
+        if rung != "R3":
+            raise ValueError("matched initialization permits only R0 and R3")
+        return RepAetherSR(
+            channels=channels, depth=depth, branches=LADDERS[rung], matched_init=True,
+        )
+
+
+class PairedStream:
+    def __init__(self, seed: int) -> None:
+        self.shuffle = torch.Generator().manual_seed(seed)
+        self.augmentation = random.Random(seed)
+
+    def permutation(self, count: int) -> torch.Tensor:
+        return torch.randperm(count, generator=self.shuffle)
+
+    def transforms(self) -> tuple[bool, bool, bool]:
+        return tuple(self.augmentation.random() < 0.5 for _ in range(3))
+
+
+def patch_batch(patches: torch.Tensor, selection, device: str) -> torch.Tensor:
+    batch = patches[selection].to(device)
+    return batch.float().div_(255.0) if batch.dtype == torch.uint8 else batch
+
+
+@torch.no_grad()
+def validate_patches(
+    model: torch.nn.Module | None, inputs: torch.Tensor, targets: torch.Tensor,
+    device: str, batch: int = 32, *, include_ssim: bool = False,
+) -> tuple[float, float | None]:
+    squared_errors = []
+    structural_scores = []
+    for offset in range(0, len(targets), batch):
+        selection = slice(offset, offset + batch)
+        batch_lr = patch_batch(inputs, selection, device)
+        batch_hr = patch_batch(targets, selection, device)
+        output = (
+            model(batch_lr) if model is not None
+            else F.interpolate(batch_lr, scale_factor=2, mode="bilinear", align_corners=False)
+        ).clamp(0, 1)
+        squared_errors.append(F.mse_loss(output, batch_hr).item() * batch_hr.numel())
+        if include_ssim:
+            structural_scores.append(ssim(output, batch_hr) * len(batch_hr))
+    mse = math.fsum(squared_errors) / targets.numel()
+    score = 99.0 if mse <= 0 else 10.0 * torch.log10(torch.tensor(1.0 / mse)).item()
+    return score, math.fsum(structural_scores) / len(targets) if include_ssim else None
+
+
+def write_model(path: str, payload: dict) -> str:
+    payload = {key: value for key, value in payload.items() if key != "sha256"}
+    body = json.dumps(payload, separators=(",", ":"), sort_keys=True)
+    payload["sha256"] = hashlib.sha256(body.encode()).hexdigest()
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, separators=(",", ":"), sort_keys=True, allow_nan=False)
+    return _sha256_file(path)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--corpus", default="data/corpus")
@@ -295,7 +370,22 @@ def main() -> int:
     ap.add_argument("--device", default=None, choices=["cpu", "mps"],
                     help="override device selection; cpu is slower but reproducible "
                          "and does not deadlock when runs are queued")
+    ap.add_argument("--m8-audit", default=None, help="write matched-initialization M8 run evidence")
+    ap.add_argument("--m8-registration", default=None)
+    ap.add_argument("--m8-smoke", action="store_true")
     args = ap.parse_args()
+
+    audit_mode = args.m8_audit is not None
+    if audit_mode:
+        if not args.pairs or args.pairs_hr_only or args.rung not in ("R0", "R3"):
+            ap.error("M8 requires frozen video pairs and R0/R3 only")
+        if not args.m8_registration or args.max_steps <= 0:
+            ap.error("M8 requires a committed registration and exact positive update budget")
+        if not args.m8_smoke and (args.max_steps, args.batch, args.lr, args.channels, args.depth) != (81180, 32, 0.002, 16, 2):
+            ap.error("M8 binding training configuration does not match registration")
+        if Path(args.out).exists() or Path(args.m8_audit).exists():
+            ap.error("M8 run outputs already exist; refusing to overwrite")
+    process_start = time.perf_counter()
 
     torch.manual_seed(args.seed)
     random.seed(args.seed)
@@ -312,7 +402,9 @@ def main() -> int:
         # degradation, so none of the still-corpus machinery applies. What must
         # still hold is the thing that machinery existed to guarantee: no source
         # video on both sides.
-        pairs_meta, train_lr, train_hr, val_lr, val_hr = load_video_pairs(args.pairs)
+        pairs_meta, train_lr, train_hr, val_lr, val_hr = load_video_pairs(
+            args.pairs, keep_uint8=audit_mode,
+        )
         split_digest = hashlib.sha256(
             json.dumps(
                 {"train": pairs_meta["trainClips"], "val": pairs_meta["valClips"]},
@@ -363,7 +455,9 @@ def main() -> int:
     # deployed convolution before anything is exported. The training loop below
     # is deliberately untouched, so a rung comparison varies the block and
     # nothing else.
-    if args.rung == "R0":
+    if audit_mode:
+        model = build_model(args.rung, args.channels, args.depth, args.seed).to(device)
+    elif args.rung == "R0":
         model = AetherSR(channels=args.channels, depth=args.depth).to(device)
     else:
         model = RepAetherSR(
@@ -377,10 +471,15 @@ def main() -> int:
         f"rung {args.rung}: {count_parameters(model)} training parameters, "
         f"{fused_params} fused inference parameters"
     )
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr)
+    opt = torch.optim.Adam(
+        model.parameters(), lr=args.lr, betas=(0.9, 0.999), eps=1e-8,
+        weight_decay=0, amsgrad=False,
+    )
 
-    val_hr_d = val_hr.to(device)
-    if args.pairs and not args.pairs_hr_only:
+    val_hr_d = val_hr if audit_mode else val_hr.to(device)
+    if audit_mode:
+        val_lr_d = val_lr
+    elif args.pairs and not args.pairs_hr_only:
         # Already degraded, by a real encoder, once. Nothing to re-draw.
         val_lr_d = val_lr.to(device)
     else:
@@ -392,8 +491,11 @@ def main() -> int:
     # Bilinear on the same split, so "did it learn anything" has an answer that
     # does not depend on the browser harness.
     with torch.no_grad():
-        bilinear = F.interpolate(val_lr_d, scale_factor=2, mode="bilinear", align_corners=False)
-        base_psnr = psnr(bilinear.clamp(0, 1), val_hr_d)
+        if audit_mode:
+            base_psnr, _ = validate_patches(None, val_lr_d, val_hr_d, device)
+        else:
+            bilinear = F.interpolate(val_lr_d, scale_factor=2, mode="bilinear", align_corners=False)
+            base_psnr = psnr(bilinear.clamp(0, 1), val_hr_d)
     print(f"bilinear baseline on val: {base_psnr:.2f} dB")
 
     # Steps, not just epochs. A larger corpus at a fixed epoch count silently
@@ -420,26 +522,45 @@ def main() -> int:
     VAL_EVERY = max(1, step_budget // 60)
 
     def lr_at(step: int) -> float:
-        return args.lr * 0.5 * (1.0 + math.cos(math.pi * min(1.0, step / step_budget)))
+        return update_lr(args.lr, step, step_budget)
 
     best = -1.0
     best_ssim = float("nan")
     best_state = None
-    start = time.time()
+    best_update = None
+    final_state = None
+    history = []
+    stream = PairedStream(args.seed) if audit_mode else None
+    stream_digest = hashlib.sha256()
+    prefix = []
+    snapshot_updates = {5412, 10824, 16200, 29766, 50061, 64944, step_budget} if audit_mode else set()
+    snapshots = {}
+    initial_state = {
+        name: tensor.detach().cpu().clone() for name, tensor in model.state_dict().items()
+    } if audit_mode else None
+    start = time.perf_counter()
     for epoch in range(args.epochs):
         model.train()
-        idx = torch.randperm(len(train_hr))
+        idx = stream.permutation(len(train_hr)) if stream else torch.randperm(len(train_hr))
         total = 0.0
         batches = 0
         for i in range(0, len(train_hr) - args.batch + 1, args.batch):
             sel = idx[i : i + args.batch]
-            batch_hr = train_hr[sel].to(device)
+            batch_hr = patch_batch(train_hr, sel, device)
             # Flips and quarter turns only: they are exact and do not resample,
             # so they cannot contaminate the degradation the model is learning
             # to invert.
-            flip_w = random.random() < 0.5
-            flip_h = random.random() < 0.5
-            rot = random.random() < 0.5
+            if stream:
+                flip_w, flip_h, rot = stream.transforms()
+                stream_record = {"update": total_steps, "samples": sel.tolist(),
+                                 "flipW": flip_w, "flipH": flip_h, "rotate90": rot}
+                stream_digest.update(json.dumps(stream_record, sort_keys=True).encode())
+                if len(prefix) < 8:
+                    prefix.append(stream_record)
+            else:
+                flip_w = random.random() < 0.5
+                flip_h = random.random() < 0.5
+                rot = random.random() < 0.5
             if flip_w:
                 batch_hr = torch.flip(batch_hr, dims=[3])
             if flip_h:
@@ -452,7 +573,7 @@ def main() -> int:
                 # the same geometric transform. Re-drawing per tensor would pair
                 # a flipped target with an unflipped input and teach the model a
                 # transform it will never see.
-                batch_lr = train_lr[sel].to(device)
+                batch_lr = patch_batch(train_lr, sel, device)
                 if flip_w:
                     batch_lr = torch.flip(batch_lr, dims=[3])
                 if flip_h:
@@ -471,6 +592,8 @@ def main() -> int:
                 group["lr"] = lr_at(total_steps)
             out = model(batch_lr)
             loss = F.l1_loss(out, batch_hr)
+            if audit_mode and not torch.isfinite(loss).item():
+                raise RuntimeError(f"nonfinite loss before update {total_steps + 1}")
             opt.zero_grad(set_to_none=True)
             loss.backward()
             opt.step()
@@ -481,18 +604,33 @@ def main() -> int:
             if total_steps % VAL_EVERY == 0 or total_steps >= step_budget:
                 model.eval()
                 with torch.no_grad():
-                    pred = model(val_lr_d).clamp(0, 1)
-                    v = psnr(pred, val_hr_d)
+                    if audit_mode:
+                        v, _ = validate_patches(model, val_lr_d, val_hr_d, device)
+                    else:
+                        pred = model(val_lr_d).clamp(0, 1)
+                        v = psnr(pred, val_hr_d)
+                if audit_mode:
+                    if not math.isfinite(v):
+                        raise RuntimeError(f"nonfinite validation at update {total_steps}")
+                    history.append({"update": total_steps, "psnr": v,
+                                    "lr": lr_at(total_steps - 1), "loss": loss.item()})
+                    print(f"  validation update {total_steps}: {v:.6f} dB", flush=True)
                 if v > best:
                     best = v
+                    best_update = total_steps
                     # The SSIM *of the selected checkpoint*, not the best SSIM
                     # seen at any point: reporting each metric's own maximum
                     # describes a model that was never saved.
-                    with torch.no_grad():
-                        best_ssim = ssim(pred, val_hr_d)
+                    if not audit_mode:
+                        with torch.no_grad():
+                            best_ssim = ssim(pred, val_hr_d)
                     best_state = {k: t.detach().cpu().clone()
                                   for k, t in model.state_dict().items()}
                 model.train()
+            if total_steps in snapshot_updates:
+                snapshots[total_steps] = {
+                    name: tensor.detach().cpu().clone() for name, tensor in model.state_dict().items()
+                }
             if args.max_steps > 0 and total_steps >= args.max_steps:
                 break
 
@@ -503,14 +641,22 @@ def main() -> int:
             print(f"  step budget {step_budget} reached during epoch {epoch}", file=sys.stderr)
             break
 
+    duration = time.perf_counter() - start
+    if audit_mode:
+        if total_steps != step_budget:
+            raise RuntimeError(f"incomplete budget: {total_steps} != {step_budget}")
+        if [record["update"] for record in history] != validation_updates(step_budget, VAL_EVERY):
+            raise RuntimeError("actual validation draws differ from registered schedule")
+        final_state = {name: tensor.detach().cpu().clone() for name, tensor in model.state_dict().items()}
     print(
-        f"trained in {time.time() - start:.0f}s; best val PSNR {best:.2f} dB "
+        f"trained in {duration:.0f}s; best val PSNR {best:.2f} dB "
         f"(bilinear {base_psnr:.2f} dB)"
     )
 
-    if best_state is not None:
+    if best_state is not None and not audit_mode:
         model.load_state_dict(best_state)
     model.eval().cpu()
+    training_model = model
 
     # Collapse the training-only branches before anything is measured or
     # exported. Everything downstream - parameter count, weights, golden vectors
@@ -647,7 +793,7 @@ def main() -> int:
             "stepsPerEpoch": steps_per_epoch,
             "lrSchedule": "cosine over optimizer updates (T_max = step budget)",
             "validationEverySteps": VAL_EVERY,
-            "validationOpportunities": step_budget // VAL_EVERY,
+            "validationOpportunities": len(history) if audit_mode else step_budget // VAL_EVERY,
             "epochsCompleted": epoch + 1,
             "trainPatches": int(len(train_hr)),
             "patchesSeen": int(total_steps * args.batch),
@@ -675,15 +821,86 @@ def main() -> int:
         "parameters": count_parameters(model),
         "weights": export_weights(model),
     }
-    body = json.dumps(payload, separators=(",", ":"), sort_keys=True)
-    payload["sha256"] = hashlib.sha256(body.encode()).hexdigest()
-
-    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
-    with open(args.out, "w") as fh:
-        json.dump(payload, fh, separators=(",", ":"), sort_keys=True)
+    if audit_mode:
+        final_path = str(Path(args.out).with_suffix("")) + f"-update{step_budget}.json"
+        final_payload = {**payload, "training": {**payload["training"],
+            "registrationCommit": args.m8_registration, "matchedEffectiveInitialization": True,
+            "checkpointUpdate": step_budget, "checkpointKind": "fixed-final",
+            "smokeOnly": args.m8_smoke,
+        }}
+        final_payload["training"].pop("valPsnrDb", None)
+        final_payload["training"].pop("valSsim", None)
+        final_file_sha = write_model(final_path, final_payload)
+        state_path = str(Path(args.out).with_suffix("")) + "-states.pt"
+        torch.save({"initial": initial_state, "fixedFinal": final_state, "best": best_state,
+                    "snapshots": snapshots, "optimizer": opt.state_dict()}, state_path)
+        final_persisted_seconds = time.perf_counter() - process_start
+        training_model.load_state_dict(best_state)
+        training_model.to(device).eval()
+        _, best_ssim = validate_patches(training_model, val_lr_d, val_hr_d, device, include_ssim=True)
+        training_model.cpu()
+        model = training_model.fuse() if hasattr(training_model, "fuse") else training_model
+        payload["weights"] = export_weights(model)
+        payload["training"].update({
+            "registrationCommit": args.m8_registration, "matchedEffectiveInitialization": True,
+            "checkpointUpdate": best_update, "checkpointKind": "best-validation",
+            "smokeOnly": args.m8_smoke, "valSsim": round(best_ssim, 5),
+        })
+    best_file_sha = write_model(args.out, payload)
+    if audit_mode:
+        export_paths = {"bestValidation": args.out}
+        export_hashes = {"bestValidation": best_file_sha}
+        snapshot_paths = {}
+        fusion_errors = {}
+        generator = torch.Generator().manual_seed(20260911)
+        diagnostic_input = torch.rand((2, 3, 16, 24), generator=generator)
+        for update, state in snapshots.items():
+            training_model.load_state_dict(state)
+            fused_model = training_model.fuse() if hasattr(training_model, "fuse") else training_model
+            with torch.no_grad():
+                error = (training_model(diagnostic_input) - fused_model(diagnostic_input)).abs().max().item()
+            if error > 1e-5:
+                raise RuntimeError(f"fusion failed at update {update}: {error}")
+            snapshot_payload = {**payload, "weights": export_weights(fused_model),
+                                "training": {**payload["training"], "checkpointUpdate": update,
+                                             "checkpointKind": "fixed-final" if update == step_budget else "snapshot"}}
+            snapshot_payload["training"].pop("valPsnrDb", None)
+            snapshot_payload["training"].pop("valSsim", None)
+            path = str(Path(args.out).with_suffix("")) + f"-update{update}.json"
+            file_sha = final_file_sha if update == step_budget else write_model(path, snapshot_payload)
+            snapshot_paths[str(update)] = path
+            fusion_errors[str(update)] = error
+            if update == step_budget:
+                export_paths["fixedFinal"] = path
+                export_hashes["fixedFinal"] = file_sha
+        report = {
+            "schema": "aethervsr.m8-training-run/1", "rung": args.rung, "seed": args.seed,
+            "smokeOnly": args.m8_smoke, "registrationCommit": args.m8_registration,
+            "optimizerSteps": total_steps, "stepBudget": step_budget,
+            "validationUpdates": [record["update"] for record in history],
+            "validationPsnr": [record["psnr"] for record in history],
+            "bestUpdate": best_update, "history": history,
+            "corpusDigest": pairs_meta["corpusDigest"], "streamSha256": stream_digest.hexdigest(),
+            "diagnosticPrefix": prefix, "modelPaths": export_paths, "modelSha256": export_hashes,
+            "modelKeys": {key: Path(path).stem for key, path in export_paths.items()},
+            "snapshotPaths": snapshot_paths,
+            "snapshotKeys": {key: Path(path).stem for key, path in snapshot_paths.items()},
+            "snapshotSha256": {key: _sha256_file(path) for key, path in snapshot_paths.items()},
+            "statePath": state_path, "fusionMaxAbs": fusion_errors,
+            "fixedFinalPersistedBeforeBestRestore": True,
+            "fixedFinalPersistedProcessSeconds": final_persisted_seconds,
+            "trainingSecondsIncludingValidationAndSnapshots": duration,
+            "updatesPerSecondIncludingValidationAndSnapshots": total_steps / duration,
+            "processSecondsThroughExport": time.perf_counter() - process_start,
+            "lrAtIndices": {str(update): lr_at(update) for update in (0, step_budget // 4, step_budget // 2, 3 * step_budget // 4, step_budget)},
+            "device": device, "torchVersion": str(torch.__version__),
+        }
+        Path(args.m8_audit).parent.mkdir(parents=True, exist_ok=True)
+        with open(args.m8_audit, "w", encoding="utf-8") as handle:
+            json.dump(report, handle, indent=2, allow_nan=False)
     print(
         f"wrote {args.out} ({os.path.getsize(args.out) / 1024:.1f} kB), "
-        f"sha256 {payload['sha256'][:16]}…"
+        f"file sha256 {best_file_sha[:16]}…"
     )
     return 0
 
