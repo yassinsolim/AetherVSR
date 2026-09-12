@@ -13,7 +13,7 @@ Completed rows require a committed artifact; local progress alone is not done.
 | RNG, patch/crop identity and augmentation proof | Complete | results/m8-smoke.json; identical eight-batch/256-sample prefix and patch-byte hashes; source crop coordinates unavailable |
 | LR, exact budget and checkpoint fairness tests | Complete | f806f0c; permanent tests cover 81,180 updates, 60 eligible draws and 16,200 snapshot exclusion |
 | Paired integration smoke and fusion/export | Complete in this evidence commit | results/m8-smoke.json and results/m8-scoring-parity.json; real serialized MPS smoke passes |
-| Six serialized paired training runs | Not started | Seeds 8101-8103, R0/R3, fixed order |
+| Six serialized paired training runs | Complete in the run-evidence commit | results/m8-runs.json; all six complete 81,180 updates, 60 draws, full paired stream equality |
 | Fixed-final and best-validation scoring | Not started | Complete frozen 48-cell validation only |
 | Per-seed statistics and all category/tier cells | Not started | Registered paired test; no favorable test switching |
 | Horizon curves and historical M7 comparison | Not started | Distinguish partial long schedule from M7 short schedule |
@@ -57,6 +57,56 @@ stem/head work and actual-memory measurement are not silently added to M8.
 	six registered serial runs after this evidence commit. This is not approval
 	to open confirmation or replace production. Full local gates at apparatus
 	commit: 298 Python, 168 Vitest, typecheck/lint/build passed.
+5. Recovery reviewer approved retaining the independently verified completed
+	R0-8101 and restarting only the interrupted R3-8101 at step zero, with the
+	same seed and unchanged source. The incomplete attempt is excluded, not an
+	additional checkpoint draw or a best-of-restarts option.
+6. First post-training reviewer observed R3 deterioration but incorrectly
+	called it a proven P0 code defect without identifying a violated invariant.
+	Its identity-gradient explanation, assertion of historical gradient
+	finiteness from finite loss, and suggestions to tune LR or add clipping/BN
+	were rejected. Poor outcomes alone do not invalidate the registered test.
+7. A second independent, read-only review verified all 78 run artifacts, 520
+	frozen input files, unchanged source/registration, saved Adam counters and
+	settings, all 60 validation draws, and complete replay of 2,597,760 patch
+	presentations per run. Paired stream hashes match for every seed. CPU export
+	checks and independent forward/input/parameter-gradient checks of the
+	analytically embedded branches passed. No validity-changing defect was found.
+	This review permits frozen captured scoring after the run evidence commit;
+	it does not approve confirmation or deployment. R3's deterioration is
+	measured; its mechanism remains unresolved and no run is removed for it.
+
+## Power-loss recovery and completed training
+
+Training executed at e60b11303f4adf337692877eea32ec0307acfd39. All six runs are
+complete, with 81,180 optimizer updates, 60 eligible validation draws and all
+seven diagnostic snapshots. Production, registration and training code did not
+change. Detailed commands, hashes, toolchains, curves and paired streams are in
+`results/m8-runs.json`.
+
+The user reported battery exhaustion after R0-8101 completed. R3-8101's last
+durable log was validation update 79,827; actual interrupted update count and
+duration are not measured. No resumable model/Adam/RNG/selection state existed.
+Its three files are preserved byte-for-byte under
+`models/m8-interrupted/power-loss-01`, pinned by `results/m8-recovery.json`.
+The recovery record was written before restarting, but was kept untracked to
+preserve the frozen execution HEAD; no pre-restart Git commit is claimed.
+R0 was independently reverified and retained. R3 restarted from zero with
+seed 8101, and the remaining four runs followed in registered serial order.
+All incomplete-attempt scores are excluded from selection and statistics.
+
+The Mac was on AC power for recovery. Wrapping the trainer in `caffeinate`
+caused a pre-launch concurrency-guard refusal because macOS leaves a child
+whose arguments repeat the training command. No optimizer update occurred in
+that refused launch. A separate `caffeinate -is` process prevented sleep
+without changing the concurrency guard or training code.
+
+All completed runs used Apple M5, 24 GiB, macOS 26.6.2 and PyTorch 2.14.0/MPS.
+Measured subprocess wall seconds (Popen through wait and log drain, excluding
+runner verification): R0-8101 1704.4349; R3-8101 2252.1507; R3-8102 2179.7717;
+R0-8102 1450.9740; R0-8103 1454.7601; R3-8103 2150.4861. Per-run training-loop
+durations and updates/second in the JSON include scheduled validation and
+snapshot work; none of these are optimizer-kernel timings or inference results.
 
 ## Measured apparatus evidence
 

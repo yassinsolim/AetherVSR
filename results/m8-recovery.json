@@ -1,0 +1,77 @@
+{
+  "schema": "aethervsr.m8-recovery/1",
+  "observedAt": "2026-09-12T04:27:59.761Z",
+  "verifiedAt": "2026-09-12T04:29:51.449883+00:00",
+  "reason": "User reported battery exhaustion during serial training; no training process survived.",
+  "registrationCommit": "c95574336246ea5114afbec4d2a48e538afd3f7f",
+  "executionCommit": "e60b11303f4adf337692877eea32ec0307acfd39",
+  "inputDigest": "2adc9e424ed5ea251c2f7635d9171b2fedb48fcd10312445edb830cd6ffb6f0e",
+  "powerAtRecovery": "AC Power; battery 60 percent and charging",
+  "retained": {
+    "runIndex": 0,
+    "seed": 8101,
+    "rung": "R0",
+    "optimizerUpdates": 81180,
+    "executionRecord": "models/m8/R0-seed8101-execution.json",
+    "verifiedArtifactCount": 13,
+    "frozenFilesReverified": 520,
+    "integrityChecksPassed": true
+  },
+  "interrupted": {
+    "runIndex": 1,
+    "seed": 8101,
+    "rung": "R3",
+    "startedAt": "2026-09-12T01:53:55.335058+00:00",
+    "status": "invalid-interrupted-excluded",
+    "lastLoggedValidationUpdate": 79827,
+    "actualCompletedOptimizerUpdates": null,
+    "actualCompletedOptimizerUpdatesStatus": "not measured; the last log is only a lower bound",
+    "wallTimeSeconds": null,
+    "wallTimeStatus": "not measured; no durable completion timestamp",
+    "resumable": false,
+    "reason": "No saved model, Adam, RNG, step or checkpoint-selection state exists. Partial logs are not a resumable checkpoint or an eligible result.",
+    "archiveDirectory": "models/m8-interrupted/power-loss-01",
+    "files": [
+      {
+        "originalPath": "models/m8/R3-seed8101-start.json",
+        "archivePath": "models/m8-interrupted/power-loss-01/R3-seed8101-start.json",
+        "bytes": 3369,
+        "sha256": "1651a9e7c0f2040c50d6ddc6ffc13c1795053fdc1cc22c48a633897696888c50"
+      },
+      {
+        "originalPath": "models/m8/R3-seed8101-stdout.log",
+        "archivePath": "models/m8-interrupted/power-loss-01/R3-seed8101-stdout.log",
+        "bytes": 3339,
+        "sha256": "9b9f1a170b217df35b038f7c6b6050c52e4db31f6186fa7ff995164f82c6f9e7"
+      },
+      {
+        "originalPath": "models/m8/R3-seed8101-stderr.log",
+        "archivePath": "models/m8-interrupted/power-loss-01/R3-seed8101-stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "recoveryPolicy": {
+    "restartUpdate": 0,
+    "restartSeed": 8101,
+    "restartRung": "R3",
+    "optimizerUpdatesRequired": 81180,
+    "eligibleValidationDraws": 60,
+    "remainingRunIndices": [1, 2, 3, 4, 5],
+    "trainingAndScoringSourceChanges": false,
+    "registrationChanges": false,
+    "partialScoreSelection": false,
+    "reuseInterruptedOptimizerOrWeights": false,
+    "concurrentTrainingProcessesObserved": 0,
+    "staleLock": "Only the verified empty models/.m8-experiment.lock may be removed with rmdir.",
+    "sleepPrevention": "Separate caffeinate -is assertion process on AC power, stopped when serial training finishes. Do not wrap the trainer command.",
+    "preLaunchRefusal": "The first recovery launch was rejected before any new start record or optimizer update: macOS caffeinate creates a child whose argv repeats the wrapped trainer command, which matches the unchanged concurrency guard. A process-tree diagnostic reproduced this wrapper behavior. Running caffeinate separately avoids that false match without relaxing the guard.",
+    "recordChronology": "Written before the restart; kept untracked until training completes to preserve the frozen execution HEAD and ownership guard. Commit with resulting execution evidence. No pre-restart Git commit is claimed."
+  },
+  "independentReview": {
+    "role": "read-only recovery reviewer",
+    "verdict": "No P0/P1 blocker to retaining independently verified R0 and restarting only the interrupted same-seed R3 under the unchanged registered controls.",
+    "qualification": "Deterministic input streams do not by themselves assert bit-identical repeated MPS optimization. The first complete eligible restarted run is binding; there is no best-of-restarts selection."
+  }
+}
