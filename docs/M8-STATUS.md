@@ -1,7 +1,8 @@
 # Milestone 8 status
 
-M8 is in progress. Production remains unchanged. No matched-budget result,
-candidate qualification, confirmation score or deployment result is claimed.
+M8's measured decision is NO SELECTED ADVANTAGE; RETAIN PRODUCTION. Final
+publication gates remain pending below. No candidate qualification,
+confirmation score or deployment improvement is claimed.
 Completed rows require a committed artifact; local progress alone is not done.
 
 | Work | State | Evidence or gate |
@@ -14,18 +15,18 @@ Completed rows require a committed artifact; local progress alone is not done.
 | LR, exact budget and checkpoint fairness tests | Complete | f806f0c; permanent tests cover 81,180 updates, 60 eligible draws and 16,200 snapshot exclusion |
 | Paired integration smoke and fusion/export | Complete in this evidence commit | results/m8-smoke.json and results/m8-scoring-parity.json; real serialized MPS smoke passes |
 | Six serialized paired training runs | Complete in the run-evidence commit | results/m8-runs.json; all six complete 81,180 updates, 60 draws, full paired stream equality |
-| Fixed-final and best-validation scoring | MPS pass withdrawn; CPU parity passed, full regeneration pending | Forward/reverse CPU parity artifacts match exactly across 11 cells; all 49 models still require rescoring |
-| Per-seed statistics and all category/tier cells | Not started | Registered paired test; no favorable test switching |
-| Horizon curves and historical M7 comparison | Not started | Distinguish partial long schedule from M7 short schedule |
-| Matched-budget continuation decision | Not started | Primary fixed-final rule only |
+| Fixed-final and best-validation scoring | Complete | CPU scores committed at 89e20b4; all 49 models, 48 cells, eight frames; MPS pass withdrawn |
+| Per-seed statistics and all category/tier cells | Complete in result commit | results/m8-report.json; independent frame and arithmetic audit passed |
+| Horizon curves and historical M7 comparison | Complete in result commit | All seven snapshots; BENCHMARKS.md distinguishes partial long schedule and historical M7 |
+| Matched-budget continuation decision | Complete in result commit | NO SELECTED ADVANTAGE: fixed-final mean -15.789624 dB, all paired gaps negative |
 | Confirmation source and category audit | Blocked, not frozen | Independent source review below; camera-native/interval evidence and qualifying text additions unresolved |
 | Confirmation disjointness and committed freeze | Blocked, not run | No unconditional alias/shoot signoff or category-complete native-source proof; no confirmation scores |
-| Five fresh R3 production seeds | Conditional, not run | Only after committed PERSISTENT ADVANTAGE decision |
-| Validation +0.10 dB production gate | Conditional, not run | Candidate selected on validation only |
-| One-time confirmation, weak cells and bootstrap | Conditional, not run | Committed freeze and candidate SHA first |
-| Temporal and runtime/resource parity | Conditional, not run | Actual memory is not measured by WebGPU |
-| Independent evidence and literature review | In progress | First configuration review received; unsupported predictions rejected |
-| Production decision and recommendation | Not started | No automatic promotion; no next-milestone implementation |
+| Five fresh R3 production seeds | Not reached, not run | Primary rule prohibits continuation; no rescue seeds |
+| Validation +0.10 dB production gate | Not reached, not run | No fresh deployment candidate |
+| One-time confirmation, weak cells and bootstrap | Not reached, not run | No candidate; confirmation remains unopened |
+| Temporal and runtime/resource parity | Runtime/temporal not reached; structural check complete | results/m8-structural-parity.json; actual memory not measured |
+| Independent evidence and literature review | Complete in result commit | Final reviewer approved evidence/decision; publication gates remain separate |
+| Production decision and recommendation | Complete in result commit | RETAIN PRODUCTION; no next-milestone implementation |
 | Final tests, hygiene, fresh clone, push and CI | Not started | Clean HEAD == origin/main and completed/success CI |
 
 M7 remains closed at 42/46 done, zero open, four blocked. Its blocked
@@ -87,6 +88,34 @@ stem/head work and actual-memory measurement are not silently added to M8.
 	repeated/reversed multi-frame parity, duplicate-weight output/metric checks,
 	frame-level evidence and guarded publication. Saved MPS best-checkpoint
 	choices remain frozen and secondary; no CPU-based reselection is authorized.
+10. Independent CPU publication-control review found no blocking defect at
+	4e94a0f, conditional on full scoring, raw-artifact audit, committed scores
+	and guarded report publication. It did not certify absent results.
+11. Independent full CPU audit checked all 50 entries, 2,400 cells, 19,200
+	frame metric pairs, 4,800 exact frame means, 735 stored summaries, 512 PNGs,
+	all remaining frozen inputs, 49 model files/392 loaded float32 tensors,
+	three duplicate groups/1,152 exact frame comparisons, source provenance,
+	92 training/smoke artifact hashes and 360 original selection draws. It
+	approved committing the scores, SHA256
+	`3b1ce2f4ed9b320148c4733968caad286b6bd464ec4c021c53eb3bfed662e6f0`.
+	Independent arithmetic agreed with NO SELECTED ADVANTAGE. No inference or
+	full training-stream replay was performed in this review.
+12. Final independent reviewer reran the actual-report audit (25,340 numerical
+	comparisons, maximum residual 3.55e-15) and its deliberate-corruption
+	self-test; checked all 112 printed table values and eight evidence links;
+	reaggregated M7 and verified exact production/Catmull baseline equality;
+	checked ancestry, registration, production/recovery/withdrawal hashes and
+	requested-resource arithmetic. RepSR HTML and the ECBSR author repository
+	were revisited; unavailable primary-table checks remain disclosed. No
+	blocking finding was found in the result, conditional-gate decision or
+	literature wording. Approval was conditional on local gates, fresh clone,
+	push and exact-commit CI, not permission to deploy or open confirmation.
+
+The subsequent standalone standard-library audit of the actual guarded report
+reconstructed 25,340 numerical fields with maximum residual 3.55e-15 (bound
+1e-12), including all primary/secondary/horizon/production contrasts and the
+exact sign-flip test. The supplemental audit script is local/ignored, identified
+by its hash in results/m8-audit.json; it is not a fresh-clone test dependency.
 
 The withdrawn MPS scores and report remain byte-for-byte in commit
 `7c430c9fe94a5758b99020dc4a4c7532b989ee49`, at their original paths under
@@ -100,7 +129,8 @@ Both metric digests match exactly. Each process independently evaluated three
 identical-weight pairs over 264 frame comparisons: maximum output, PSNR and SSIM
 differences were all zero. All eight model/baseline comparisons with the original
 CPU evaluator also had zero metric difference. This validates the replacement
-apparatus on that subset, not the pending full-corpus scores.
+apparatus on that subset. The subsequent full-corpus CPU pass separately passed
+all frame, input/source/model and duplicate-weight checks.
 
 ## Power-loss recovery and completed training
 
@@ -150,10 +180,12 @@ Training-loop durations including eight full patch-validation passes and final
 snapshot copying were R0 4.8863 s, R3 7.1771 s. These short-run timings are not
 optimizer-only throughput and are not extrapolated into long-run measurements.
 
-Scoring parity on one frozen full-resolution production frame and seeded odd-
+Historical, insufficient MPS scoring parity on one frozen full-resolution production frame and seeded odd-
 shaped synthetic data: maximum pixel error 3.5763e-7, maximum PSNR difference
 5.9605e-7 dB, maximum SSIM difference 1.5497e-6, all below 1e-5. No M8 candidate
-was scored. Exact measurements and scope are in the parity JSON.
+was scored at that pre-training check. Exact measurements and scope are in the
+original parity JSON. It did not predict the later repeated-MPS scoring defect
+and is not eligible as replacement CPU parity evidence.
 
 ## Confirmation audit limitations
 

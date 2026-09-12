@@ -323,36 +323,39 @@ verified relative duration.
 
 ## Milestone 8 — Budget-matched architecture confirmation [CURRENT]
 
-Answer the question Milestone 7 could not: does `R3`'s advantage survive at the
-production budget? Train `R0` and `R3` at 81,180 updates on the same frozen
-corpus, three seeds each, declared before running and uniformly applied. That
-is the only comparison that can produce a deployable candidate, and it also
-tests whether the +0.0247 dB at a fifth of the schedule was a head start the
-control catches up on.
+**Measured verdict: NO SELECTED ADVANTAGE; RETAIN PRODUCTION.** Final publication
+gates remain pending in `docs/M8-STATUS.md`. Six paired runs completed exactly
+81,180 updates, matched initial effective functions and streams, and 60 eligible
+checkpoint draws. CPU captured validation gives fixed-final R3-R0 **-15.789624 dB**
+across seeds 8101/8102/8103: -0.333521, -25.072357, -21.962996. Original best
+checkpoints are secondary and also negative, mean -0.216718 dB. Exact paired
+sign-flip p=0.25 is the three-pair minimum, not conventional significance.
 
-The literature motivates this measurement but does not predict its direction.
-Published comparisons differ in architecture, task, data, degradation, metric,
-control and verified training schedule. Their horizon behavior cannot establish
-whether the small AetherVSR advantage will increase, persist, decrease or change
-sign. The matched experiment and its initialization controls are registered in
-`docs/M8-PREREGISTRATION.md`; the Milestone 7 literature discussion remains
-historical context, not a substitute for an 81,180-update measurement.
+The early mean lead at update 5,412 (+0.023539 dB) was not retained. Two R3 seeds
+deteriorated severely; independent training review found no violated invariant,
+and the mechanism remains unresolved. No tuning, dropped seed or rescue run was
+used. An interrupted R3-8101 was archived and restarted with its original seed
+because no resumable state survived the battery failure.
 
-Passing that comparison is necessary but **not sufficient** to ship. A frozen,
-category-complete confirmation corpus and all five pre-registered replacement
-criteria still apply.
+The initial captured MPS scoring pass was wholly withdrawn after identical
+weights produced unequal scores. The original CPU reference was restored,
+repeated forward/reverse parity committed, and every model/cell rescored. The
+full CPU duplicate checks and independent frame/statistical audits passed.
+All tables and horizons in `BENCHMARKS.md` use CPU scores, not withdrawn values.
+Registration and original training source remain immutable.
 
-Prerequisites already in place: frozen corpus and hashes, a repaired
-creator-disjoint validation split, a registered scoring and reporting
-invocation, and 106 corpus/report/fusion tests in CI.
+M7's historical +0.0247 dB remains separate: its seeds, identity initialization
+and fully annealed short schedule differ. M8's 16,200 snapshot is a partial long
+schedule. Neither comparison establishes convergence or a universal result about
+reparameterization; the literature does not explain the deterioration.
 
-Still outstanding: `data/captured-confirm-m7/proposal.json` is a 16-clip
-**proposal**, not frozen. Its schema, creator/shoot/source disjointness against
-all seven existing manifests, licences, resolutions and pin coverage were
-verified here; its poster-frame observations and reviewer-trust claims were
-not. It also covers only seven of eight categories — there are no `text`
-clips — so it must be completed, independently verified and frozen before any
-candidate scores against it.
+Fresh R3 seeds 8201-8205 and all candidate confirmation/temporal/runtime gates
+were **not reached**, not passed. Confirmation is still an unfrozen 16-clip,
+seven-category proposal: native-source/interval proof, alias/shared-shoot
+clearance and qualifying text remain unresolved. No confirmation scoring took
+place. Graph/resource structure is verified; actual device memory and new
+runtime performance are not measured. Production weights and runtime are unchanged.
+M9 remains separate work and does not depend on replacing the production model.
 
 ---
 

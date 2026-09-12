@@ -2299,6 +2299,197 @@ order differed between arms — a confound the size of the signal. It read
 R1 − R0 = +0.0052 dB, the opposite direction from this corrected screen, which
 is exactly why it was withdrawn rather than published.
 
+## Milestone 8: matched-budget R0/R3 result
+
+**NO SELECTED ADVANTAGE; RETAIN PRODUCTION.** All six registered runs completed
+81,180 updates with matched effective initialization, paired data streams and
+60 eligible checkpoint draws. The fixed-final R3 minus R0 mean is
+**-15.789624 dB**; all three paired gaps are negative. Original best-validation
+exports are a separate secondary comparison, also negative. No fresh R3 seeds
+or deployment candidate are authorized by this result.
+
+### Environment and apparatus
+
+Measured on Apple M5, 24 GiB, macOS 26.6.2 build 25G83; Python 3.12.13,
+PyTorch 2.14.0, NumPy 2.5.3, Pillow 12.3.0. Training used MPS; captured scoring
+used CPU float32, four intra-op threads and deterministic algorithms. Browser,
+display refresh and window state do not apply to this offline quality test.
+No new browser/runtime performance result is claimed.
+
+The N151 recovered training cache was shared byte-for-byte between arms; it is
+not claimed identical to the lost M6 cache. Captured validation used the frozen
+16-clip repaired manifest, H.264 GOP CRFs 18/26/34, 24 fps, eight paired frames
+per cell, 1280x720 input and 2560x1440 reference. The 512 frozen PNGs comprise
+128 shared reference frames and 384 compressed inputs. RGB PSNR is averaged
+over frames, then equally over three tiers per clip and 16 clips per seed;
+SSIM is supplementary. The 49 model exports and Catmull-Rom use the same cells.
+
+Registration `c955743`, original training execution `e60b113`, recovery/run
+evidence `d1e50c6`, CPU repair `7c430c9`, repeated parity `4e94a0f`, and committed
+CPU scores `89e20b4` establish chronology. The guarded report was generated at
+`89e20b4`. [Raw frame metrics](results/m8-scores.json),
+[all paired statistics](results/m8-report.json), and
+[training curves and artifacts](results/m8-runs.json) retain full precision.
+JSON whitespace was compacted with parsed-value equality checked; the published
+hashes refer to those compact bytes.
+
+The initial MPS captured pass was invalid: identical inference weights produced
+different metrics. **All of that pass and its derived analyses are withdrawn.**
+Original bytes remain in immutable commit `7c430c9`, with a current
+[withdrawal index](results/m8-withdrawn-mps/withdrawal.json). They are not used
+in any M8 table here. The [repair](docs/M8-SCORING-REPAIR.md) restored the original
+CPU reference without changing training, checkpoints, seeds or selection rules.
+Two separate parity processes, including reversed model order, matched exactly
+on 11 cells. The full CPU pass independently evaluated duplicate weights on
+1,152 paired frames, with zero maximum output/PSNR/SSIM discrepancy. Independent
+audit reconstructed all 4,800 frame means and 25,340 numerical comparisons;
+maximum report residual was 3.55e-15. This is not an independent inference replay.
+
+Full CPU scoring took **13,547.4864 s**, one whole-run wall-clock interval covering
+verification, model loading, frame decoding, all inference/metrics and aggregate
+construction, before output serialization. It is not inference latency or a
+GPU timing. Serialized training subprocess wall times (Popen through wait/log
+drain, excluding runner verification) were:
+
+| Seed | R0 seconds | R3 seconds | Best R0 update | Best R3 update |
+|---|---:|---:|---:|---:|
+| 8101 | 1704.4349 | 2252.1507 | 81180 | 10824 |
+| 8102 | 1450.9740 | 2179.7717 | 81180 | 8118 |
+| 8103 | 1454.7601 | 2150.4861 | 75768 | 9471 |
+
+R3-8101 was restarted from zero after battery exhaustion, using the same seed
+and unchanged source because no resumable state survived. Its incomplete logs
+remain archived; interrupted duration and exact last optimizer update are
+**not measured**. No incomplete attempt or best-of-restarts enters this table.
+
+### Paired results
+
+All values below are captured-validation RGB PSNR differences in dB, R3 minus R0.
+
+| Statistic | Fixed final (primary) | Original best (secondary) |
+|---|---:|---:|
+| Seed 8101 | -0.333521 | -0.211530 |
+| Seed 8102 | -25.072357 | -0.243481 |
+| Seed 8103 | -21.962996 | -0.195144 |
+| Mean | **-15.789624** | **-0.216718** |
+| Median | -21.962996 | -0.211530 |
+| Minimum | -25.072357 | -0.243481 |
+| Maximum | -0.333521 | -0.195144 |
+| Range | 24.738836 | 0.048338 |
+| Sample SD (ddof=1) | 13.475362 | 0.024583 |
+
+The registered exact paired two-sided sign-flip test enumerates eight sign
+assignments; two are at least as extreme, **p=0.25**. This is the minimum possible
+with three pairs, so it cannot establish significance at alpha=0.05. Calibration
+requires sign exchangeability/symmetry under the null. The finite-seed selection
+rule, not a significance claim, stops continuation when the primary mean is
+nonpositive. Secondary checkpoint results cannot override it; historical MPS
+patch-based selections were retained, not reselected on CPU.
+
+| CRF | Fixed-final gap | Original-best gap |
+|---|---:|---:|
+| 18 | -17.749164 | -0.338939 |
+| 26 | -15.928153 | -0.211939 |
+| 34 | -13.691557 | -0.099276 |
+
+Every category-by-CRF cell is shown, including all negative cells. These are
+descriptive comparisons, not additional rejection opportunities.
+
+| Category | Final 18 | Final 26 | Final 34 | Best 18 | Best 26 | Best 34 |
+|---|---:|---:|---:|---:|---:|---:|
+| daylight | -17.787290 | -16.119690 | -14.438264 | -0.026864 | -0.041495 | -0.059626 |
+| faces | -17.150187 | -15.159734 | -12.629879 | -0.349107 | -0.222653 | -0.090530 |
+| lowlight | -11.872242 | -9.863744 | -7.637628 | -0.331052 | -0.172628 | -0.069814 |
+| motion | -22.477696 | -20.850790 | -18.722647 | -0.304742 | -0.194156 | -0.119456 |
+| nature | -21.226468 | -19.812459 | -17.926944 | -0.281173 | -0.163342 | -0.086424 |
+| text | -16.650993 | -14.635993 | -12.246447 | -0.331136 | -0.212786 | -0.088938 |
+| texture | -18.588722 | -16.531743 | -14.159509 | -0.530005 | -0.332886 | -0.145139 |
+| urban | -16.807861 | -15.192916 | -12.867046 | -0.405298 | -0.269925 | -0.119626 |
+
+Full 16-clip tables, all three seed gaps per clip, and all 48 individual cells
+are in `fixedFinal.perClip/perCell` and `bestValidation.perClip/perCell` of the
+[report](results/m8-report.json). Seed-averaged R3 loses on all 16 clips in both
+comparisons. Categories have one to three clips; they are not equally weighted
+in the overall metric.
+
+### Observed horizons, not convergence
+
+| Update | Seed 8101 | Seed 8102 | Seed 8103 | Mean R3-R0 |
+|---|---:|---:|---:|---:|
+| 5412 | +0.003336 | +0.024993 | +0.042289 | +0.023539 |
+| 10824 | -0.029132 | -26.691128 | +0.014948 | -8.901770 |
+| 16200 | -2.540686 | -26.742595 | -21.836362 | -17.039881 |
+| 29766 | -1.404463 | -24.960129 | -21.863677 | -16.076090 |
+| 50061 | -1.192791 | -25.029868 | -21.910633 | -16.044431 |
+| 64944 | -0.344346 | -25.056300 | -21.954562 | -15.785069 |
+| 81180 | -0.333521 | -25.072357 | -21.962996 | -15.789624 |
+
+The early positive gap was not retained. The aggregate and seeds 8101/8102
+cross from positive to negative between observed updates 5,412 and 10,824;
+seed 8103 crosses between 10,824 and 16,200. These bracket observations, not an
+identified optimizer step. Final minus 16,200 gap is +1.250257 dB overall;
+per seed +2.207165, +1.670238, -0.126633. All endpoint signs remain negative.
+The aggregate gap increased (became less negative), but this does not describe
+a monotone trajectory or establish convergence or infinite-horizon behavior.
+
+R3 fixed-final absolute PSNR is 33.727819, 9.004522 and 12.095512 dB versus R0's
+34.061340, 34.076878 and 34.058508. Two R3 seeds deteriorated severely; seed
+8101 partly recovered after an earlier decline. The independent training audit
+found no violated training invariant; a poor outcome is not itself a code bug.
+The mechanism remains unresolved. Finite logged losses do not certify every
+historical gradient; no seed was removed or optimizer setting tuned post hoc.
+
+M7 remains a separate historical experiment: R0 mean 33.923474, R3 33.948200,
+gap **+0.024727 dB** at its fully annealed 16,200-update budget. Its original
+[screening scores](results/m7-corrected-screening.json), SHA256
+`0d9755d9cc84786ff0ff20cb1fb7b1fe2ac6de77af177850f62c18ee6d7efc67`, were reaggregated.
+M8's 16,200 snapshot is part of an 81,180-update cosine, with different seeds
+and compensated identity initialization. It is not a replication of M7's short
+schedule and does not isolate training length alone. CPU production and
+Catmull-Rom scores match M7 exactly in all 48 cells: mean PSNR 34.085466 and
+33.321994, respectively. M8 fixed-final R0/R3 versus production are -0.019890 /
+-15.809515 dB; original-best contrasts are -0.020282 / -0.237000 dB.
+
+### Literature and decision limits
+
+The M7 literature text above is historical, including its predictive language;
+it is not the interpretation of M8. Evidence reviewed here is heterogeneous in
+effect size and control design. RepSR's cited M4C8/M4C16 comparisons use ECBSR,
+not a plain control, with negative Set5 cells; its x4 DIV2K MATLAB-bicubic
+still-image/Y-metric setup differs from compressed-video x2 RGB scoring.
+ECBSR's small x2 plain-control ablation is closer in scale/control but remains
+still-image Y-metric SR; its exact ablation iteration count was not independently
+verified. ESPAN reports same-architecture plain-control comparisons at 300k and
+500k updates, on a different x4 task and data. Two points cannot establish
+convergence or monotonic gap evolution. None predicts an AetherVSR effect size
+or explains the observed deterioration. RepSR HTML and the ECBSR author repo
+were checked during M8; ECBSR Table 3 and ESPAN Table 7 PDF extraction was
+unavailable, so those details retain the earlier recorded evidence rather than
+a claim of fresh primary-table verification.
+
+The registered primary rule prohibits fresh seeds 8201-8205. Candidate validation,
+one-time confirmation, bootstrap, temporal and alternating runtime gates are
+**not reached, not passed**. Confirmation remains an unfrozen proposal: source
+native-resolution/usable-interval evidence, alias/shared-shoot clearance and
+qualifying text coverage remain unresolved. No confirmation frames were scored.
+
+[Structural checks](results/m8-structural-parity.json) verified all 48 M8 exports
+retain the deployed 6,291-parameter graph. At 720p input/1440p output, f16,
+RGBA8 ingest/output, calculated requested buffers and texture payloads total
+77,427,856 bytes (optional stage timestamp buffers add 96). This includes
+13,392 weight bytes, two 29,491,200-byte activations, ingest 3,686,400, output
+14,745,600 and uniforms 64; it excludes implementation/driver overhead, query
+sets, pipelines, bind groups, browser decode/composite/swapchain and pipeline
+timers. **Actual device memory and new runtime performance: not measured.**
+No inference speedup or actual-memory equality is inferred from graph equality.
+
+Production SHA256 remains
+`d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
+No runtime, shader, acquisition or presentation change was made. The recommendation
+is to retain production and stop this registered R3 path, not to claim that
+structural reparameterization never works. Any future diagnosis is a separate
+experiment; M9 has not been implemented and does not require a replacement model.
+
 ## Reproducing
 
 ```bash

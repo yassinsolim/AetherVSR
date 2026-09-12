@@ -8,17 +8,20 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine �
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 7 complete — structural reparameterization.** A
+**Status: Milestone 8 measured; final publication checks pending.** A
 6,291-parameter neural upscaler runs in the production pipeline at **5.7 ms
 p50, ~35% of a 60 Hz frame budget**, 2560×1440 output from a 1280×720 source,
 with automatic fallback to a conventional scaler when it cannot hold the budget.
 
-Milestone 7 tested whether a training-time block of linear branches — one that
-fuses exactly back into the deployed convolution, changing nothing at inference
-— learns better weights. The richest rung won its ladder by +0.0247 dB over a
-matched control, but no candidate beat the shipped model, so **the production
-model is unchanged**. See `BENCHMARKS.md` for the numbers and what they do not
-establish.
+Milestone 8 tested R0/R3 at 81,180 updates with matched effective initialization
+and paired training streams. Fixed-final R3 minus R0 averaged -15.7896 dB across
+three seeds; original-best checkpoints also lost (-0.2167 dB). The registered
+decision is **NO SELECTED ADVANTAGE; production is unchanged**. Exact paired
+sign-flip p=0.25 cannot establish conventional significance with three pairs.
+The initial MPS scoring pass was withdrawn and all captured scores regenerated
+with the verified CPU reference. No candidate or confirmation scoring followed.
+See [BENCHMARKS.md](BENCHMARKS.md) for the CPU evidence, unresolved deterioration
+and the separate historical M7 result; the runtime figure above predates M8.
 
 ## What the evidence supports
 
