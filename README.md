@@ -8,7 +8,7 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine �
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 8 measured; final publication checks pending.** A
+**Status: Milestone 8 complete; production retained.** A
 6,291-parameter neural upscaler runs in the production pipeline at **5.7 ms
 p50, ~35% of a 60 Hz frame budget**, 2560×1440 output from a 1280×720 source,
 with automatic fallback to a conventional scaler when it cannot hold the budget.

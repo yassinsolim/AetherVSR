@@ -321,10 +321,11 @@ a creator overlap between training and validation was repaired into a versioned
 split; and one source's absolute container timestamps were corrected against a
 verified relative duration.
 
-## Milestone 8 — Budget-matched architecture confirmation [CURRENT]
+## Milestone 8 — Budget-matched architecture confirmation [DONE]
 
-**Measured verdict: NO SELECTED ADVANTAGE; RETAIN PRODUCTION.** Final publication
-gates remain pending in `docs/M8-STATUS.md`. Six paired runs completed exactly
+**Verdict: NO SELECTED ADVANTAGE; RETAIN PRODUCTION.** Result-commit local gates,
+fresh-clone validation and CI passed; evidence is in `docs/M8-STATUS.md`.
+Six paired runs completed exactly
 81,180 updates, matched initial effective functions and streams, and 60 eligible
 checkpoint draws. CPU captured validation gives fixed-final R3-R0 **-15.789624 dB**
 across seeds 8101/8102/8103: -0.333521, -25.072357, -21.962996. Original best

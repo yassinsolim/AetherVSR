@@ -1,7 +1,8 @@
 # Milestone 8 status
 
-M8's measured decision is NO SELECTED ADVANTAGE; RETAIN PRODUCTION. Final
-publication gates remain pending below. No candidate qualification,
+M8 is closed with NO SELECTED ADVANTAGE; RETAIN PRODUCTION. The registered
+stopping rule was reached. Confirmation source/freeze work remains blocked,
+and candidate-only gates were not reached, not passed. No candidate qualification,
 confirmation score or deployment improvement is claimed.
 Completed rows require a committed artifact; local progress alone is not done.
 
@@ -27,10 +28,36 @@ Completed rows require a committed artifact; local progress alone is not done.
 | Temporal and runtime/resource parity | Runtime/temporal not reached; structural check complete | results/m8-structural-parity.json; actual memory not measured |
 | Independent evidence and literature review | Complete in result commit | Final reviewer approved evidence/decision; publication gates remain separate |
 | Production decision and recommendation | Complete in result commit | RETAIN PRODUCTION; no next-milestone implementation |
-| Final tests, hygiene, fresh clone, push and CI | Not started | Clean HEAD == origin/main and completed/success CI |
+| Final tests, hygiene, fresh clone, push and CI | Result-commit gates passed | 5363fe2; 308 Python, 168 Vitest, typecheck/lint/build, fresh clone, pushed exact-SHA CI success; closing metadata requires the same publication gate |
 
 M7 remains closed at 42/46 done, zero open, four blocked. Its blocked
 stem/head work and actual-memory measurement are not silently added to M8.
+
+## Closure verification
+
+The independently reviewed result commit is
+`5363fe26efc78123c3516d4bc0a9fb2d9365c63c`. Local typecheck, lint, 168 Vitest tests,
+308 Python tests, build and whitespace checks passed. A fresh `git clone
+--no-hardlinks` of that commit, with a fresh `npm ci` and no ignored training
+assets, passed the same checks and was clean. Python reused the installed
+3.12.13 environment; it did not depend on the working tree's generated models.
+This validates the software gates, not an independent repeat of training or
+captured inference. npm reported the same two moderate advisories observed at
+registration; no dependency upgrade belongs to this experiment.
+
+The committed tree at that result is 41,872,526 bytes, below the unchanged
+41,943,040-byte limit. Registration is byte-identical to c955743; training,
+shared metrics, reporting arithmetic, runtime/shaders and production weights
+are unchanged from their frozen execution versions. Production SHA256 remains
+`d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
+
+Result commit 5363fe2 was pushed to main. GitHub Actions run
+[34694261255](https://github.com/yassinsolim/AetherVSR/actions/runs/34694261255)
+completed successfully for that exact SHA (both `gate` and `fusion`). Every
+publication, including closing metadata, requires a clean main equal to
+origin/main and completed/success CI for its own HEAD; this recorded result
+run is not a claim about unverified descendants. The final exact-HEAD check
+is reported with the published closing commit rather than self-pinned here.
 
 ## Independent review ledger
 
