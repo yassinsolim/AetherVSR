@@ -1,0 +1,17 @@
+{
+  "schema": "aethervsr.m8-scoring-withdrawal/1",
+  "status": "withdrawn-do-not-use-for-selection-or-current-results",
+  "reason": "Identical float32 inference weights produced different captured scores under repeated MPS evaluation, violating the 1e-5 parity contract.",
+  "scoringExecutionCommit": "d1e50c674a9d0301daba1d72a33aa5a206f78889",
+  "trainingExecutionCommit": "e60b11303f4adf337692877eea32ec0307acfd39",
+  "registrationCommit": "c95574336246ea5114afbec4d2a48e538afd3f7f",
+  "repair": "docs/M8-SCORING-REPAIR.md",
+  "files": {
+    "results/m8-withdrawn-mps/scores.json": "500c28baf22ec60bcba34311c4ee046f961f68470deb287ccf561cb602159560",
+    "results/m8-withdrawn-mps/report.json": "1395b87f6a6908f89f88a617b0c186af2b9cc66e3acf726baba2e9bbcc0dd337",
+    "results/m8-scoring-parity.json": "d510c0c876b0c5184566afb6f0bfcfe89452430e7bd50f4af011ebe79f346949"
+  },
+  "trainingInvalidated": false,
+  "requiredRegeneration": "All captured validation scores and dependent reports, on the unchanged CPU reference; no selective cell or seed replacement.",
+  "confirmationExposed": false
+}

@@ -14,7 +14,7 @@ Completed rows require a committed artifact; local progress alone is not done.
 | LR, exact budget and checkpoint fairness tests | Complete | f806f0c; permanent tests cover 81,180 updates, 60 eligible draws and 16,200 snapshot exclusion |
 | Paired integration smoke and fusion/export | Complete in this evidence commit | results/m8-smoke.json and results/m8-scoring-parity.json; real serialized MPS smoke passes |
 | Six serialized paired training runs | Complete in the run-evidence commit | results/m8-runs.json; all six complete 81,180 updates, 60 draws, full paired stream equality |
-| Fixed-final and best-validation scoring | Not started | Complete frozen 48-cell validation only |
+| Fixed-final and best-validation scoring | MPS pass withdrawn; CPU regeneration pending | docs/M8-SCORING-REPAIR.md; repeated CPU parity required before all 49 models are rescored |
 | Per-seed statistics and all category/tier cells | Not started | Registered paired test; no favorable test switching |
 | Horizon curves and historical M7 comparison | Not started | Distinguish partial long schedule from M7 short schedule |
 | Matched-budget continuation decision | Not started | Primary fixed-final rule only |
@@ -75,6 +75,18 @@ stem/head work and actual-memory measurement are not silently added to M8.
 	This review permits frozen captured scoring after the run evidence commit;
 	it does not approve confirmation or deployment. R3's deterioration is
 	measured; its mechanism remains unresolved and no run is removed for it.
+8. Independent arithmetic review found no numerical aggregation mismatch, but
+	identified a real P1 scoring inconsistency: metadata-different exports with
+	identical weights differed by up to 0.5634 dB in the same captured cell. All
+	MPS captured scores and derived reports were withdrawn, not selectively
+	patched. The one-frame MPS parity artifact was inadequate. The repository's
+	original evaluator already documented unreliable MPS scoring; root missed
+	that warning. The CPU-only repair is recorded separately before regeneration.
+9. Independent repair-design review approved restoring the original CPU
+	reference without retraining, conditional on unchanged training hashes,
+	repeated/reversed multi-frame parity, duplicate-weight output/metric checks,
+	frame-level evidence and guarded publication. Saved MPS best-checkpoint
+	choices remain frozen and secondary; no CPU-based reselection is authorized.
 
 ## Power-loss recovery and completed training
 
