@@ -1,0 +1,56 @@
+{
+  "schema": "aethervsr.m8-structural-parity/1",
+  "sourceCommit": "7c430c9fe94a5758b99020dc4a4c7532b989ee49",
+  "trainingRuns": "results/m8-runs.json",
+  "productionModel": "public/models/aethersr-c16d2.json",
+  "productionSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "exportsChecked": 48,
+  "allGraphMetadataAndTensorLengthsMatchProduction": true,
+  "deployedParameters": 6291,
+  "tensorLengths": {
+    "body.0.bias": 16,
+    "body.0.weight": 2304,
+    "body.1.bias": 16,
+    "body.1.weight": 2304,
+    "head.bias": 3,
+    "head.weight": 432,
+    "stem.bias": 16,
+    "stem.weight": 1200
+  },
+  "requestedResources": {
+    "scope": "Calculated buffer descriptor sizes and uncompressed texture payloads from allocation sites, not actual device/driver memory.",
+    "sources": [
+      "src/core/neural/model.ts#packModel",
+      "src/core/upscale/neural-upscaler.ts#configure",
+      "src/core/ingest/external-texture-ingest.ts#configure"
+    ],
+    "input": [1280, 720],
+    "output": [2560, 1440],
+    "activationPrecision": "f16",
+    "ingestFormat": "rgba8unorm",
+    "outputFormat": "rgba8unorm",
+    "packedWeightElementCounts": [1600, 16, 2304, 2304, 16, 16, 432, 3],
+    "alignedWeightBufferBytes": [3200, 32, 4608, 4608, 32, 32, 864, 16],
+    "weightBytes": 13392,
+    "activationPingBytes": 29491200,
+    "activationPongBytes": 29491200,
+    "ingestTexturePayloadBytes": 3686400,
+    "outputTexturePayloadBytes": 14745600,
+    "uniformBytes": 64,
+    "knownRequestedBytesExcludingOptionalTimers": 77427856,
+    "optionalStageTimestampBufferBytes": 96,
+    "exclusions": [
+      "query-set implementation memory",
+      "pipeline, sampler and bind-group object memory",
+      "driver texture allocation overhead",
+      "browser decode, composite and swapchain resources",
+      "pipeline-level timestamp resources"
+    ],
+    "method": "Executed existing packModel through Vite SSR; applied each upload allocation max(16, ceil(elements*2/16)*16), two aligned activation buffers, configured texture formats and explicit uniform sizes. Structural check covers every fixed-final, best and horizon export, not only one selected model."
+  },
+  "actualDeviceMemory": "not measured",
+  "actualDeviceMemoryEqualityClaim": false,
+  "newRuntimeBenchmark": "not measured; no deployment candidate has qualified",
+  "productionWeightsChanged": false,
+  "runtimeOrShaderCodeChanged": false
+}

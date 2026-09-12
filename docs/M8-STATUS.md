@@ -14,7 +14,7 @@ Completed rows require a committed artifact; local progress alone is not done.
 | LR, exact budget and checkpoint fairness tests | Complete | f806f0c; permanent tests cover 81,180 updates, 60 eligible draws and 16,200 snapshot exclusion |
 | Paired integration smoke and fusion/export | Complete in this evidence commit | results/m8-smoke.json and results/m8-scoring-parity.json; real serialized MPS smoke passes |
 | Six serialized paired training runs | Complete in the run-evidence commit | results/m8-runs.json; all six complete 81,180 updates, 60 draws, full paired stream equality |
-| Fixed-final and best-validation scoring | MPS pass withdrawn; CPU regeneration pending | docs/M8-SCORING-REPAIR.md; repeated CPU parity required before all 49 models are rescored |
+| Fixed-final and best-validation scoring | MPS pass withdrawn; CPU parity passed, full regeneration pending | Forward/reverse CPU parity artifacts match exactly across 11 cells; all 49 models still require rescoring |
 | Per-seed statistics and all category/tier cells | Not started | Registered paired test; no favorable test switching |
 | Horizon curves and historical M7 comparison | Not started | Distinguish partial long schedule from M7 short schedule |
 | Matched-budget continuation decision | Not started | Primary fixed-final rule only |
@@ -87,6 +87,20 @@ stem/head work and actual-memory measurement are not silently added to M8.
 	repeated/reversed multi-frame parity, duplicate-weight output/metric checks,
 	frame-level evidence and guarded publication. Saved MPS best-checkpoint
 	choices remain frozen and secondary; no CPU-based reselection is authorized.
+
+The withdrawn MPS scores and report remain byte-for-byte in commit
+`7c430c9fe94a5758b99020dc4a4c7532b989ee49`, at their original paths under
+`results/m8-withdrawn-mps/`. The current withdrawal index records those hashes
+and retrieval instructions. Their removal from the current tree keeps the
+unchanged 40 MiB repository limit; it does not erase or rehabilitate the evidence.
+
+Independent CPU processes at that repair commit evaluated forward and reversed
+model order on 11 captured cells, including every text cell and motion at CRF34.
+Both metric digests match exactly. Each process independently evaluated three
+identical-weight pairs over 264 frame comparisons: maximum output, PSNR and SSIM
+differences were all zero. All eight model/baseline comparisons with the original
+CPU evaluator also had zero metric difference. This validates the replacement
+apparatus on that subset, not the pending full-corpus scores.
 
 ## Power-loss recovery and completed training
 
