@@ -1,6 +1,13 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig(({ mode }) => ({
+  plugins: mode === 'benchmark' ? [{
+    name: 'benchmark-without-hmr-client',
+    transformIndexHtml: {
+      order: 'post',
+      handler: (html) => html.replace('<script type="module" src="/@vite/client"></script>', ''),
+    },
+  }] : [],
   server: {
     port: 5173,
     strictPort: true,
