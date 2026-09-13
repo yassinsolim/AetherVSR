@@ -14,7 +14,7 @@ import { execFileSync } from 'node:child_process';
  */
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
-const MAX_TRACKED_BYTES = 40 * 1024 * 1024;
+const MAX_TRACKED_BYTES = 48 * 1024 * 1024;
 
 /**
  * Deliberate exceptions, each with a reason. Anything not listed here and over
@@ -70,7 +70,7 @@ describe('repository size discipline', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('keeps the whole tracked tree under 40 MB', () => {
+  it('keeps the whole tracked tree under 48 MiB', () => {
     const total = files.reduce((n, f) => n + f.bytes, 0);
     const worst = [...files].sort((a, b) => b.bytes - a.bytes).slice(0, 5);
     const detail = worst.map((f) => `${f.path}=${(f.bytes / 1e6).toFixed(1)}MB`).join(' ');
@@ -89,7 +89,9 @@ describe('repository size discipline', () => {
         /^data\/video\/.+\.(png|mp4|webm)$/.test(f.path) ||
         /^data\/eval-independent\/.+\.(jpe?g|png)$/.test(f.path) ||
         /^data\/corpus\/.+\.(jpe?g|png)$/.test(f.path) ||
-        /^data\/captured\/.+\.(png|mp4|webm|mkv|mov|y4m)$/.test(f.path),
+        /^data\/captured\/.+\.(png|mp4|webm|mkv|mov|y4m)$/.test(f.path) ||
+        /^public\/media\/m9\/.+\.(png|mp4|webm)$/.test(f.path) ||
+        f.path.startsWith('.cache/'),
     );
     expect(regenerable.map((f) => f.path)).toEqual([]);
   });

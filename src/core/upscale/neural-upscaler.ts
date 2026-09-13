@@ -71,12 +71,11 @@ export interface NeuralMemoryReport {
  *
  * ## Allocation
  *
- * Every buffer, texture, pipeline, sampler and bind group is created in
- * {@link configure}. {@link encode} allocates nothing: it records passes into
- * the caller's encoder using resources that already exist. The one thing that
- * changes per frame is the external texture, whose bind group WebGPU requires
- * be rebuilt because the handle expires each task — that rebuild happens inside
- * `ExternalTextureIngest`, which already documented the constraint.
+ * Reusable resources for the external path are created in {@link configure}.
+ * Copy-import stem/head groups remain lazy because the source view is supplied
+ * only to {@link encode}. The external texture's bind group must be rebuilt
+ * each frame because the handle expires each task; that happens inside
+ * `ExternalTextureIngest`.
  *
  * ## No readback
  *
@@ -118,6 +117,7 @@ export class NeuralUpscaler implements Upscaler {
   private blitGroup: GPUBindGroup | null = null;
 
   private outputTexture: GPUTexture | null = null;
+  private outputView: GPUTextureView | null = null;
   private sampler: GPUSampler | null = null;
   private lastIngestView: GPUTextureView | null = null;
   private stemTimedThisFrame = true;
@@ -128,6 +128,7 @@ export class NeuralUpscaler implements Upscaler {
   private querySet: GPUQuerySet | null = null;
   private resolveBuf: GPUBuffer | null = null;
   private stagingBuf: GPUBuffer | null = null;
+  private resourceGeneration = 0;
   private reading = false;
   private pendingRead = false;
   private stemDispatch: [number, number] = [0, 0];
@@ -266,6 +267,7 @@ export class NeuralUpscaler implements Upscaler {
       format: 'rgba8unorm',
       usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
     });
+    this.outputView = this.outputTexture.createView();
 
     // --- pipelines ------------------------------------------------------
     const stemModule = device.createShaderModule({
@@ -344,8 +346,9 @@ export class NeuralUpscaler implements Upscaler {
     this.sampler = device.createSampler({ magFilter: 'nearest', minFilter: 'nearest' });
 
     // --- bind groups ----------------------------------------------------
-    // All but the stem's, which needs the ingest view and is built on the first
-    // frame and then reused; the view is stable for a given configuration.
+    // External ingest owns a stable view already; copy-import supplies its
+    // source view only when encoding the first frame.
+    if (config.sourceKind === 'external') this.bindSource(this.ingest.view);
     for (let i = 0; i < this.model.depth; i++) {
       const src = i % 2 === 0 ? this.ping : this.pong;
       const dst = i % 2 === 0 ? this.pong : this.ping;
@@ -371,7 +374,7 @@ export class NeuralUpscaler implements Upscaler {
       layout: this.blitPipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: this.sampler },
-        { binding: 1, resource: this.outputTexture.createView() },
+        { binding: 1, resource: this.outputView },
       ],
     });
 
@@ -409,7 +412,6 @@ export class NeuralUpscaler implements Upscaler {
         outputBytes +
         64,
     };
-    this.lastIngestView = null;
   }
 
   encode(ctx: EncodeContext): void {
@@ -434,32 +436,7 @@ export class NeuralUpscaler implements Upscaler {
         : null,
     );
     if (view !== this.lastIngestView) {
-      this.stemGroup = device.createBindGroup({
-        label: 'aethervsr:nn:stem',
-        layout: this.stemPipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: view },
-          { binding: 1, resource: { buffer: this.stemWeights as GPUBuffer } },
-          { binding: 2, resource: { buffer: this.stemBias as GPUBuffer } },
-          { binding: 3, resource: { buffer: this.ping as GPUBuffer } },
-          { binding: 4, resource: { buffer: this.stemParams as GPUBuffer } },
-        ],
-      });
-      // The head reads the same view for its global residual, so both groups
-      // are rebuilt together and only when the view actually changes.
-      this.headGroup = device.createBindGroup({
-        label: 'aethervsr:nn:head',
-        layout: this.headPipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: { buffer: this.finalBuffer() } },
-          { binding: 1, resource: { buffer: this.headWeights as GPUBuffer } },
-          { binding: 2, resource: { buffer: this.headBias as GPUBuffer } },
-          { binding: 3, resource: (this.outputTexture as GPUTexture).createView() },
-          { binding: 4, resource: { buffer: this.headParams as GPUBuffer } },
-          { binding: 5, resource: view },
-        ],
-      });
-      this.lastIngestView = view;
+      this.bindSource(view);
     }
 
     const stemGroup = this.stemGroup;
@@ -588,10 +565,12 @@ export class NeuralUpscaler implements Upscaler {
   private startTimestampRead(): void {
     const staging = this.stagingBuf;
     if (!staging || !this.pendingRead || this.reading) return;
+    const generation = this.resourceGeneration;
+    const stemTimed = this.stemTimedThisFrame;
     this.reading = true;
     void staging.mapAsync(GPUMapMode.READ).then(() => {
+      if (generation !== this.resourceGeneration) return;
       const t = new BigInt64Array(staging.getMappedRange().slice(0));
-      staging.unmap();
       const ms = (a: number, b: number): number => {
         const begin = t[a];
         const end = t[b];
@@ -602,9 +581,12 @@ export class NeuralUpscaler implements Upscaler {
       const push = (w: SampleWindow, v: number): void => {
         if (Number.isFinite(v) && v > 0) w.push(v);
       };
-      if (this.stemTimedThisFrame) push(this.stemWindow, ms(0, 1));
+      if (stemTimed) push(this.stemWindow, ms(0, 1));
       push(this.bodyWindow, ms(2, 3));
       push(this.headWindow, ms(4, 5));
+    }).catch(() => {}).finally(() => {
+      if (generation !== this.resourceGeneration) return;
+      staging.unmap();
       this.reading = false;
       this.pendingRead = false;
     });
@@ -615,6 +597,34 @@ export class NeuralUpscaler implements Upscaler {
     this.ingest.destroy();
   }
 
+  private bindSource(view: GPUTextureView): void {
+    const device = this.device as GPUDevice;
+    this.stemGroup = device.createBindGroup({
+      label: 'aethervsr:nn:stem',
+      layout: (this.stemPipeline as GPUComputePipeline).getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: view },
+        { binding: 1, resource: { buffer: this.stemWeights as GPUBuffer } },
+        { binding: 2, resource: { buffer: this.stemBias as GPUBuffer } },
+        { binding: 3, resource: { buffer: this.ping as GPUBuffer } },
+        { binding: 4, resource: { buffer: this.stemParams as GPUBuffer } },
+      ],
+    });
+    this.headGroup = device.createBindGroup({
+      label: 'aethervsr:nn:head',
+      layout: (this.headPipeline as GPUComputePipeline).getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: { buffer: this.finalBuffer() } },
+        { binding: 1, resource: { buffer: this.headWeights as GPUBuffer } },
+        { binding: 2, resource: { buffer: this.headBias as GPUBuffer } },
+        { binding: 3, resource: this.outputView as GPUTextureView },
+        { binding: 4, resource: { buffer: this.headParams as GPUBuffer } },
+        { binding: 5, resource: view },
+      ],
+    });
+    this.lastIngestView = view;
+  }
+
   /** Where the trunk leaves its result: ping for even depth, pong for odd. */
   private finalBuffer(): GPUBuffer {
     const buf = this.model.depth % 2 === 0 ? this.ping : this.pong;
@@ -623,6 +633,7 @@ export class NeuralUpscaler implements Upscaler {
   }
 
   private destroyResources(): void {
+    this.resourceGeneration++;
     for (const b of [
       this.ping,
       this.pong,
@@ -661,6 +672,7 @@ export class NeuralUpscaler implements Upscaler {
     this.bodyBias = [];
     this.bodyGroups = [];
     this.outputTexture = null;
+    this.outputView = null;
     this.stemGroup = null;
     this.headGroup = null;
     this.blitGroup = null;

@@ -2,7 +2,7 @@ import type { PassTiming } from '../types.js';
 
 const NS_PER_MS = 1_000_000;
 
-interface Slot {
+interface Slot<Context> {
   readonly resolve: GPUBuffer;
   readonly staging: GPUBuffer;
   readonly beginIndex: number;
@@ -10,6 +10,7 @@ interface Slot {
   busy: boolean;
   /** Measurement epoch this slot was claimed in; see {@link GpuTimer.newEpoch}. */
   epoch: number;
+  context: Context | undefined;
 }
 
 /**
@@ -30,16 +31,17 @@ interface Slot {
  * fingerprinting resistance, so individual samples are coarse. Aggregate over
  * many frames, and see BENCHMARKS.md for the flag that disables quantisation.
  */
-export class GpuTimer {
+export class GpuTimer<Context = undefined> {
   private readonly querySet: GPUQuerySet;
-  private readonly slots: Slot[] = [];
-  private active: Slot | null = null;
+  private readonly slots: Slot<Context>[] = [];
+  private readonly pendingReadbacks = new Set<Promise<void>>();
+  private active: Slot<Context> | null = null;
   private lastMs = Number.NaN;
   private epoch = 0;
 
   constructor(
     device: GPUDevice,
-    private readonly onSample: (ms: number) => void,
+    private readonly onSample: (ms: number, context: Context | undefined) => void,
     poolSize = 4,
   ) {
     this.querySet = device.createQuerySet({
@@ -63,6 +65,7 @@ export class GpuTimer {
         endIndex: i * 2 + 1,
         busy: false,
         epoch: 0,
+        context: undefined,
       });
     }
   }
@@ -88,12 +91,14 @@ export class GpuTimer {
   /**
    * Claims a slot for the frame about to be encoded. Returns `null` when every
    * slot is still awaiting readback, in which case the frame is not measured.
+    * Retains context as supplied; callers must snapshot mutable provenance here.
    */
-  begin(): PassTiming | null {
+    begin(context?: Context): PassTiming | null {
     const slot = this.slots.find((s) => !s.busy);
     if (!slot) return null;
     slot.busy = true;
     slot.epoch = this.epoch;
+    slot.context = context;
     this.active = slot;
     return { querySet: this.querySet, beginIndex: slot.beginIndex, endIndex: slot.endIndex };
   }
@@ -117,6 +122,7 @@ export class GpuTimer {
     const slot = this.active;
     if (!slot) return;
     this.active = null;
+    slot.context = undefined;
     slot.busy = false;
   }
 
@@ -125,7 +131,7 @@ export class GpuTimer {
     const slot = this.active;
     if (!slot) return;
     this.active = null;
-    void slot.staging
+    const pending = slot.staging
       .mapAsync(GPUMapMode.READ)
       .then(() => {
         const [begin, end] = new BigInt64Array(slot.staging.getMappedRange());
@@ -137,18 +143,27 @@ export class GpuTimer {
         const deltaNs = Number(end - begin);
         if (deltaNs >= 0) {
           this.lastMs = deltaNs / NS_PER_MS;
-          this.onSample(this.lastMs);
+          this.onSample(this.lastMs, slot.context);
         }
       })
       .catch(() => {
         // Device lost or buffer destroyed mid-flight; drop the sample.
       })
       .finally(() => {
+        slot.context = undefined;
         slot.busy = false;
+        this.pendingReadbacks.delete(pending);
       });
+    this.pendingReadbacks.add(pending);
+  }
+
+  /** Waits for current readbacks to publish or be discarded; excludes future submissions. */
+  async drain(): Promise<void> {
+    await Promise.all(this.pendingReadbacks);
   }
 
   destroy(): void {
+    this.newEpoch();
     this.active = null;
     for (const slot of this.slots) {
       slot.resolve.destroy();

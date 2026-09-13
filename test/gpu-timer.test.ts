@@ -33,7 +33,7 @@ interface FakeBuffer {
 
 function makeDevice(options: { readonly deltaNs?: bigint; readonly reject?: boolean } = {}): {
   device: GPUDevice;
-  settle: () => Promise<void>;
+  settle: (count?: number) => Promise<void>;
 } {
   const pending: (() => void)[] = [];
 
@@ -63,8 +63,8 @@ function makeDevice(options: { readonly deltaNs?: bigint; readonly reject?: bool
 
   return {
     device,
-    settle: async () => {
-      while (pending.length > 0) {
+    settle: async (count = pending.length) => {
+      for (let index = 0; index < count; index++) {
         const next = pending.shift();
         next?.();
         // Let the .then/.catch/.finally chain run to completion.
@@ -82,6 +82,146 @@ const encoder = {
 } as unknown as GPUCommandEncoder;
 
 describe('GpuTimer slot pool', () => {
+  it('keeps drain pending until all four readbacks publish their contexts', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 2_000_000n });
+    const onSample = vi.fn();
+    const timer = new GpuTimer<{ readonly sequence: number }>(device, onSample);
+    for (const sequence of [1, 2, 3, 4]) {
+      expect(timer.begin({ sequence })).not.toBeNull();
+      timer.end(encoder);
+      timer.afterSubmit();
+    }
+    expect(timer.begin({ sequence: 5 })).toBeNull();
+
+    const drained = vi.fn();
+    const draining = timer.drain().then(drained);
+    await Promise.resolve();
+    expect(drained).not.toHaveBeenCalled();
+    expect(onSample).not.toHaveBeenCalled();
+
+    await settle(1);
+    expect(onSample).toHaveBeenCalledExactlyOnceWith(2, { sequence: 1 });
+    expect(drained).not.toHaveBeenCalled();
+
+    await settle();
+    await draining;
+    expect(drained).toHaveBeenCalledExactlyOnceWith(undefined);
+    expect(onSample.mock.calls).toEqual([
+      [2, { sequence: 1 }], [2, { sequence: 2 }], [2, { sequence: 3 }], [2, { sequence: 4 }],
+    ]);
+    expect(timer.begin({ sequence: 5 })).not.toBeNull();
+    timer.abort();
+    timer.destroy();
+  });
+
+  it('resolves drain cleanly when pending readbacks reject', async () => {
+    const { device, settle } = makeDevice({ reject: true });
+    const onSample = vi.fn();
+    const timer = new GpuTimer(device, onSample, 1);
+    timer.begin();
+    timer.end(encoder);
+    timer.afterSubmit();
+    const draining = timer.drain();
+    await settle();
+    await expect(draining).resolves.toBeUndefined();
+    expect(onSample).not.toHaveBeenCalled();
+    expect(timer.last).toBeNaN();
+    expect(timer.begin()).not.toBeNull();
+    timer.abort();
+    timer.destroy();
+  });
+
+  it('resolves an empty drain without waiting for a readback', async () => {
+    const { device } = makeDevice();
+    const timer = new GpuTimer(device, vi.fn());
+    await expect(timer.drain()).resolves.toBeUndefined();
+    timer.destroy();
+  });
+
+  it('does not wait for readbacks submitted after drain was called', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 1_000_000n });
+    const onSample = vi.fn();
+    const timer = new GpuTimer<number>(device, onSample, 2);
+    timer.begin(1);
+    timer.end(encoder);
+    timer.afterSubmit();
+    const draining = timer.drain();
+    timer.begin(2);
+    timer.end(encoder);
+    timer.afterSubmit();
+
+    await settle(1);
+    await expect(draining).resolves.toBeUndefined();
+    expect(onSample).toHaveBeenCalledExactlyOnceWith(1, 1);
+    await settle();
+    await timer.drain();
+    expect(onSample).toHaveBeenLastCalledWith(1, 2);
+    timer.destroy();
+  });
+
+  it('preserves each begin context while multiple readbacks are pending', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 2_000_000n });
+    const onSample = vi.fn();
+    const timer = new GpuTimer<{ readonly sequence: number }>(device, onSample, 2);
+
+    for (const sequence of [1, 2]) {
+      timer.begin({ sequence });
+      timer.end(encoder);
+      timer.afterSubmit();
+    }
+    expect(onSample).not.toHaveBeenCalled();
+    await settle();
+
+    expect(onSample.mock.calls).toEqual([[2, { sequence: 1 }], [2, { sequence: 2 }]]);
+    timer.begin({ sequence: 3 });
+    timer.abort();
+    timer.begin({ sequence: 4 });
+    timer.end(encoder);
+    timer.afterSubmit();
+    await settle();
+    expect(onSample).toHaveBeenLastCalledWith(2, { sequence: 4 });
+  });
+
+  it('defaults an omitted context to undefined', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 1_000_000n });
+    const onSample = vi.fn();
+    const timer = new GpuTimer(device, onSample, 1);
+    timer.begin();
+    timer.end(encoder);
+    timer.afterSubmit();
+    await settle();
+    expect(onSample).toHaveBeenCalledExactlyOnceWith(1, undefined);
+  });
+
+  it('publishes only the current epoch context when old and new readbacks settle', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 3_000_000n });
+    const onSample = vi.fn();
+    const timer = new GpuTimer<number>(device, onSample, 2);
+    timer.begin(1);
+    timer.end(encoder);
+    timer.afterSubmit();
+    timer.newEpoch();
+    timer.begin(2);
+    timer.end(encoder);
+    timer.afterSubmit();
+    await settle();
+    expect(onSample).toHaveBeenCalledExactlyOnceWith(3, 2);
+  });
+
+  it('does not publish a pending readback after destruction even if mapping succeeds', async () => {
+    const { device, settle } = makeDevice({ deltaNs: 4_000_000n });
+    const onSample = vi.fn();
+    const timer = new GpuTimer<string>(device, onSample, 1);
+    timer.begin('pending');
+    timer.end(encoder);
+    timer.afterSubmit();
+    timer.destroy();
+    await settle();
+    expect(onSample).not.toHaveBeenCalled();
+    expect(timer.last).toBeNaN();
+    expect(timer.begin('destroyed')).toBeNull();
+  });
+
   it('hands out distinct query indices per pooled slot', () => {
     const { device } = makeDevice();
     const timer = new GpuTimer(device, () => {}, 3);

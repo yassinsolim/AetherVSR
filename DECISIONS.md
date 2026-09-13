@@ -1349,3 +1349,34 @@ silently revive it through a model override. This extends ADR-0038's no-shipping
 decision without changing its historical evidence. M9 has only production
 neural and Catmull-Rom tiers and uses runtime evidence, never scene-quality
 predictions, to choose between them.
+
+## ADR-0041 - Runtime observations carry submission provenance
+
+**Status:** accepted (M9 measurement apparatus).
+
+The optional raw GPU observation hook now carries encode-start timestamp,
+arrival timestamp, sequence, timing generation, source size and actual stage
+identity. Source reconfiguration invalidates timestamp epochs before allocating
+new resources; stage swaps retain their existing epoch reset. The legacy raw
+millisecond callback and stage-local benchmark reset meanings are unchanged.
+Optional successful-frame and configuration callbacks permit session observers
+without owning acquisition or GPU execution. The policy uses no baseline
+sample as neural evidence. Timing contexts are small per-frame JavaScript
+objects, not additional GPU resources; no hot-path await or pixel readback is
+introduced. Development-only calibration records configuration separately and
+can append a fixed diagnostic compute workload inside the neural timestamp span.
+Normal production cannot activate that workload.
+
+## ADR-0042 - Bounded M9 trace storage allowance
+
+**Status:** accepted by the project owner during M9.
+
+The completed M8 tree left approximately 53 KB under the 40 MiB tracked-tree
+limit after M9 registration and the initial guard fixes. Pending M9 code/tests
+alone exceeded that limit by 27,463 bytes. The owner explicitly approved raising
+the total cap to 48 MiB for controller code, tests and compressed timing traces,
+preserving all prior published evidence. The 8 MiB individual-file restriction
+and existing approved bundled clips are unchanged. Regenerable M9 media and
+local browser/tool caches are explicitly forbidden in the tracked tree.
+Raw traces are compressed, never replaced by fabricated samples. No large
+training corpus or pixel data is authorized by this allowance.

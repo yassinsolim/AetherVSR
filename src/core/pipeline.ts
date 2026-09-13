@@ -12,6 +12,31 @@ import type { FrameTextureKind, FrameTick, Size, Upscaler } from './types.js';
 const RATE_WINDOW_MS = 1000;
 const SAMPLE_CAPACITY = 240;
 
+/** Raw whole-stage GPU timing with provenance captured before encode. */
+export interface PipelineGpuSample {
+  readonly ms: number;
+  readonly generation: number;
+  /** One-based successful-submission sequence; never reset by measurement resets. */
+  readonly sequence: number;
+  /** performance.now() after import and immediately before timer begin/encode setup, not GPU start. */
+  readonly submittedAt: number;
+  /** performance.now() when the timestamp readback callback runs, not GPU completion. */
+  readonly resolvedAt: number;
+  readonly neural: boolean;
+  readonly upscalerId: string;
+  readonly source: Size;
+}
+
+export interface PipelineConfiguration {
+  readonly generation: number;
+  readonly source: Size;
+  readonly target: Size;
+  /** Synchronous wall time from target-size calculation through target and stage configure. */
+  readonly configureMs: number;
+  /** True initially or when actual source dimensions change; false for a stage-only swap. */
+  readonly sourceChanged: boolean;
+}
+
 /** Immutable snapshot for the diagnostic overlay and benchmark exports. */
 export interface PipelineStats {
   readonly running: boolean;
@@ -115,7 +140,7 @@ export class VideoPipeline {
   private readonly source: VideoFrameSource;
   private readonly importer: FrameImporter;
   private readonly target: CanvasTarget;
-  private readonly timer: GpuTimer | null;
+  private readonly timer: GpuTimer<Omit<PipelineGpuSample, 'ms' | 'resolvedAt'>> | null;
 
   private readonly sourceRate = new RateMeter(RATE_WINDOW_MS);
   private readonly renderRate = new RateMeter(RATE_WINDOW_MS);
@@ -123,11 +148,18 @@ export class VideoPipeline {
   private readonly gpuPass = new SampleWindow(SAMPLE_CAPACITY);
   /** Receives every resolved whole-stage GPU sample, in milliseconds. */
   onGpuPassSample: ((ms: number) => void) | null = null;
+  onGpuSample: ((sample: PipelineGpuSample) => void) | null = null;
+  /** Called once after a successfully submitted frame, even when GPU timing is unavailable. */
+  onFrame: ((tick: FrameTick) => void) | null = null;
+  onConfiguration: ((configuration: PipelineConfiguration) => void) | null = null;
   private readonly callbackLatency = new SampleWindow(SAMPLE_CAPACITY);
   private readonly decode = new SampleWindow(SAMPLE_CAPACITY);
 
   private upscaler: Upscaler;
   private configuredSource: Size = { width: 0, height: 0 };
+  private sourceSize: Size = { width: 0, height: 0 };
+  private measurementGeneration = 0;
+  private submissionSequence = 0;
   private framesRendered = 0;
   private framesSkipped = 0;
   /**
@@ -180,11 +212,13 @@ export class VideoPipeline {
     );
     this.target = new CanvasTarget(canvas);
     this.timer = gpu.capabilities.timestampQuery
-      ? new GpuTimer(gpu.device, (ms) => {
+      ? new GpuTimer<Omit<PipelineGpuSample, 'ms' | 'resolvedAt'>>(gpu.device, (ms, context) => {
+          const resolvedAt = performance.now();
           this.gpuPass.push(ms);
           // Raw per-frame evidence, not the trailing aggregate. A controller
           // that medians an already-medianed window reacts seconds late.
           this.onGpuPassSample?.(ms);
+          if (context !== undefined) this.onGpuSample?.({ ...context, ms, resolvedAt });
         })
       : null;
   }
@@ -207,6 +241,11 @@ export class VideoPipeline {
     this.source.stop();
   }
 
+  /** Drains current outer-timer readbacks; stop acquisition first for a final snapshot. */
+  drainTimings(): Promise<void> {
+    return this.timer?.drain() ?? Promise.resolve();
+  }
+
   /**
    * Swaps the processing stage without touching acquisition or presentation.
    * This is the seam a neural backend will arrive through; exercising it at
@@ -223,6 +262,16 @@ export class VideoPipeline {
 
   get currentUpscaler(): Upscaler {
     return this.upscaler;
+  }
+
+  get timingGeneration(): number {
+    return this.measurementGeneration;
+  }
+
+  /** Discards pending GPU timestamps without clearing stage-local legacy aggregates or counters. */
+  invalidateTiming(): void {
+    this.measurementGeneration++;
+    this.timer?.newEpoch();
   }
 
   resetMeasurements(): void {
@@ -245,7 +294,7 @@ export class VideoPipeline {
     this.qualityGeneration = this.source.loadGeneration;
     this.windowStart = null;
     // Discard readbacks still in flight from the window being replaced.
-    this.timer?.newEpoch();
+    this.invalidateTiming();
   }
 
   /**
@@ -307,13 +356,21 @@ export class VideoPipeline {
       // command recording, and submission. Not "command recording only".
       const frameStart = performance.now();
       const frame = this.importer.acquire(tick.size);
-      const timing = this.timer?.begin() ?? null;
+      const timing = this.timer?.begin({
+        generation: this.timingGeneration,
+        sequence: this.submissionSequence + 1,
+        submittedAt: performance.now(),
+        neural: this.upscaler.neural,
+        upscalerId: this.upscaler.id,
+        source: { width: tick.size.width, height: tick.size.height },
+      }) ?? null;
       const encoder = this.gpu.device.createCommandEncoder({ label: 'aethervsr:frame' });
 
       this.upscaler.encode({ encoder, frame, target: this.target.currentView(), timing });
 
       this.timer?.end(encoder);
       this.gpu.device.queue.submit([encoder.finish()]);
+      this.submissionSequence++;
       this.timer?.afterSubmit();
 
       this.cpuFrame.push(performance.now() - frameStart);
@@ -329,6 +386,7 @@ export class VideoPipeline {
         this.openingPresented = tick.presentedDelta;
       }
       this.lastError = null;
+      this.onFrame?.(tick);
     } catch (err) {
       // A slot claimed by `begin()` is still marked busy if the frame threw
       // before `afterSubmit()`; releasing it keeps the pool from draining.
@@ -345,6 +403,9 @@ export class VideoPipeline {
     if (this.configuredSource.width === source.width && this.configuredSource.height === source.height) {
       return;
     }
+    const sourceChanged = this.sourceSize.width !== source.width || this.sourceSize.height !== source.height;
+    if (sourceChanged) this.invalidateTiming();
+    const configureStart = performance.now();
     const scale = this.upscaler.scaleFactor;
     const target: Size = { width: source.width * scale, height: source.height * scale };
     const format = this.gpu.capabilities.preferredCanvasFormat;
@@ -357,7 +418,16 @@ export class VideoPipeline {
       targetFormat: format,
       sourceKind: this.importer.kind,
     });
-    this.configuredSource = source;
+    const configureMs = performance.now() - configureStart;
+    this.configuredSource = { width: source.width, height: source.height };
+    this.sourceSize = this.configuredSource;
+    this.onConfiguration?.({
+      generation: this.timingGeneration,
+      source: { ...this.sourceSize },
+      target: { ...target },
+      configureMs,
+      sourceChanged,
+    });
   }
 
   stats(nowMs: number): PipelineStats {
