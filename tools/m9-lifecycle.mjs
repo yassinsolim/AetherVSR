@@ -447,7 +447,7 @@ async function fatalDevice(page, quietMs) {
 function fingerprint() {
   const files = git('ls-files', '-z', '--cached', '--others', '--exclude-standard', '--',
     'src', 'index.html', 'package.json', 'package-lock.json', 'vite.config.ts', 'tsconfig.json',
-    'tools/m9-lifecycle.mjs', 'test/runtime-controller.test.ts', 'test/runtime-driver.test.ts').split('\0').filter(Boolean);
+    'tools/m9-lifecycle.mjs', 'tools/m9-browser.mjs', 'test/runtime-controller.test.ts', 'test/runtime-driver.test.ts').split('\0').filter(Boolean);
   return { head: git('rev-parse', 'HEAD'),
     source: Object.fromEntries([...new Set(files)].sort().map(file => [file, digest(resolve(root, file))])),
     productionModel: { file: modelPath, sha256: digest(resolve(root, `public${modelPath}`)) },
@@ -556,6 +556,7 @@ async function run() {
       playwright: JSON.parse(readFileSync(resolve(root, '.cache/m9/node_modules/playwright/package.json'), 'utf8')).version,
       profile: 'New temporary Playwright profile; no personal Chrome connection' };
     report.gating.checks.push(idleCalibration());
+    console.log('START native Chrome');
     const { openNativeChrome } = await import('./m9-browser.mjs');
     native = await openNativeChrome(launchArgs);
     browser = native.browser;
@@ -563,6 +564,7 @@ async function run() {
     report.environment.browser = browser.version();
 
     const freshPage = async () => {
+      console.log('START lifecycle page');
       if (page && !page.isClosed()) await page.close();
       context = native.context;
       page = await context.newPage();
@@ -582,6 +584,7 @@ async function run() {
     const navigate = async (params, waitModel = true) => {
       const target = new URL(base);
       target.search = new URLSearchParams({ clip: clip720, ...params }).toString();
+      console.log(`NAVIGATE ${target.href}`);
       let model;
       const responsePromise = waitModel ? page.waitForResponse(new URL(modelPath, base).href)
         .then(async response => {

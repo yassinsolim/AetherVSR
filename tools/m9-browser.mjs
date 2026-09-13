@@ -9,8 +9,18 @@ export async function openNativeChrome(args = []) {
   const profile = mkdtempSync(join(tmpdir(), 'aethervsr-m9-'));
   const executable = process.env.M9_CHROME_EXECUTABLE_PATH ?? chromium.executablePath();
   const child = spawn(executable, ['--remote-debugging-port=0', `--user-data-dir=${profile}`,
-    '--no-first-run', '--no-default-browser-check', '--disable-background-networking',
+    '--no-first-run', '--no-default-browser-check', '--use-mock-keychain', '--disable-background-networking',
     '--disable-component-update', '--disable-sync', ...args, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
+  const exited = new Promise(resolveExit => {
+    child.once('exit', resolveExit);
+    child.once('error', resolveExit);
+  });
+  const terminate = async () => {
+    if (child.exitCode !== null || child.signalCode !== null) return;
+    const timer = setTimeout(() => child.kill('SIGKILL'), 3000);
+    child.kill('SIGTERM');
+    try { await exited; } finally { clearTimeout(timer); }
+  };
   let browser;
   try {
     const endpoint = await new Promise((resolveEndpoint, reject) => {
@@ -24,24 +34,20 @@ export async function openNativeChrome(args = []) {
       });
       child.on('exit', code => { clearTimeout(timer); reject(new Error(`Native Chrome exited: ${code}`)); });
     });
-    browser = await chromium.connectOverCDP(endpoint, { noDefaults: true });
+    browser = await chromium.connectOverCDP(endpoint, { noDefaults: true, timeout: 15000 });
   } catch (error) {
-    child.kill('SIGTERM');
+    await terminate();
     rmSync(profile, { recursive: true, force: true });
     throw error;
   }
   return { browser, context: browser.contexts()[0], executable,
     async close() {
-      const timer = setTimeout(() => child.kill('SIGKILL'), 5000);
+      let timer;
       try {
-        await browser.close();
-        if (child.exitCode === null) {
-          const exited = new Promise(resolveExit => child.once('exit', resolveExit));
-          child.kill('SIGTERM');
-          await exited;
-        }
+        await Promise.race([browser.close(), new Promise(resolveTimeout => { timer = setTimeout(resolveTimeout, 2000); })]);
       } finally {
         clearTimeout(timer);
+        await terminate();
         rmSync(profile, { recursive: true, force: true });
       }
     } };

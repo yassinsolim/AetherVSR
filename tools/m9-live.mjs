@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { basename, dirname, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { openNativeChrome } from './m9-browser.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -125,8 +125,8 @@ export function makePlan(casesFile, prefix) {
   }) };
 }
 
-function installCapture() {
-  const raw = { samples: [], frames: [], configurations: [], transitions: [], events: [], errors: [], refresh: [], actions: [] };
+export function installCapture() {
+  const raw = { samples: [], frames: [], configurations: [], transitions: [], controller: [], events: [], errors: [], refresh: [], actions: [] };
   const data = { installedAt: performance.now(), timeOrigin: performance.timeOrigin, attachedAt: null,
     phase: 'startup', raw, transitionGaps: [], firstConfigurationExcluded: null };
   const error = (kind, value) => raw.errors.push({ at: performance.now(), phase: data.phase, kind, message: String(value?.message ?? value) });
@@ -158,18 +158,26 @@ function installCapture() {
       precision: neural?.resolvedPrecision ?? null, memory: clone(neural?.memoryReport ?? null) };
   };
   const collectTransitions = controller => {
-    const first = controller.transitionCount - controller.transitions.length + 1;
+    const { transitions, ...fields } = controller;
+    const first = controller.transitionCount - transitions.length + 1;
     if (first > transitionCursor + 1) data.transitionGaps.push({ from: transitionCursor + 1, to: first - 1, at: performance.now() });
-    controller.transitions.forEach((transition, index) => {
+    transitions.forEach((transition, index) => {
       const id = first + index;
       if (id > transitionCursor) raw.transitions.push({ id, ...transition });
     });
     transitionCursor = controller.transitionCount;
+    const at = performance.now();
+    const previous = raw.controller.at(-1);
+    const keys = ['state', 'tier', 'generation', 'backoffMs', 'reason', 'failMs', 'recoverMs', 'mode'];
+    if (!previous || at - previous.at >= 1000 || keys.some(key => fields[key] !== previous[key])) {
+      raw.controller.push({ at, ...clone(fields) });
+    }
   };
   const checkpoint = () => {
     const runtime = api.snapshot();
     collectTransitions(runtime.controller);
     return { at: performance.now(), runtime: clone(runtime), environment: state(), decoderQuality: quality(),
+      decoderLoadGeneration: loadGeneration,
       memory: memory(), pipeline: clone(api.pipeline.stats(performance.now())),
       status: { text: document.getElementById('status')?.textContent, level: document.getElementById('status')?.dataset.level } };
   };
@@ -327,47 +335,150 @@ async function measure(settings) {
   return { ...data, boundary, drained, returnedAt: performance.now() };
 }
 
+function decoderWindow(result, startedAt, endedAt) {
+  const point = (checkpoint, source) => ({ at: checkpoint.at, source,
+    generation: checkpoint.decoderLoadGeneration ?? checkpoint.runtime.session.loadGeneration,
+    quality: checkpoint.decoderQuality });
+  const initial = point(result.initial, 'initial');
+  const boundary = point(result.boundary, 'boundary');
+  const points = [initial, ...result.raw.frames
+    .filter(frame => frame[12] >= initial.at && frame[12] <= boundary.at)
+    .map(frame => ({ at: frame[12], source: 'frame', generation: frame[9], quality: frame.slice(6, 9) })), boundary]
+    .sort((left, right) => left.at - right.at);
+  const start = startedAt === result.startedAt ? initial : points.filter(value => value.at <= startedAt).at(-1);
+  const end = endedAt === boundary.at ? boundary : points.find(value => value.at >= endedAt);
+  const gaps = [];
+  const names = ['frames', 'drops', 'corrupted'];
+  const missing = Object.fromEntries(names.map(name => [name, null]));
+  if (!start || !end) return { counts: missing, observed: { ...missing }, runs: [], exact: false,
+    boundsExact: false, bounds: { start: start ?? null, end: end ?? null },
+    gaps: [{ reason: 'No quality observations bracketing the requested window' }] };
+  const selected = points.slice(points.indexOf(start), points.indexOf(end) + 1);
+  const runs = [];
+  for (const value of selected) {
+    let run = runs.at(-1);
+    if (!integer(value.generation, 0)) gaps.push({ at: value.at, reason: 'Missing load generation' });
+    if (!run || run.generation !== value.generation) {
+      if (run) {
+        gaps.push({ from: run.points.at(-1).at, to: value.at, generation: run.generation,
+          reason: 'Prior-load tail is unobserved before the next load' });
+        if (value.generation !== run.generation + 1) gaps.push({ fromGeneration: run.generation,
+          toGeneration: value.generation, reason: 'Skipped or regressing load generations' });
+      }
+      run = { generation: value.generation, points: [] };
+      runs.push(run);
+    }
+    run.points.push(value);
+  }
+  const observed = { ...missing };
+  const coverage = { frames: true, drops: true, corrupted: true };
+  const loadRuns = runs.map((run, runIndex) => {
+    const counts = {};
+    const endpoints = {};
+    for (const [column, name] of names.entries()) {
+      const valid = run.points.filter(value => integer(value.quality?.[column], 0));
+      const first = valid[0];
+      const last = valid.at(-1);
+      const resetKnown = runIndex > 0 && integer(run.generation, 0) &&
+        run.generation > runs[runIndex - 1].generation;
+      const base = resetKnown ? 0 : first?.quality[column];
+      const available = last && base !== undefined && (resetKnown || valid.length > 1);
+      const difference = available ? last.quality[column] - base : null;
+      counts[name] = difference !== null && difference >= 0 ? difference : null;
+      endpoints[name] = { initial: resetKnown ? null : first ?? null, final: last ?? null,
+        baseline: resetKnown ? 'New load resets its cumulative counter to zero' : 'First valid observation' };
+      if (counts[name] !== null) observed[name] = (observed[name] ?? 0) + counts[name];
+      if ((!resetKnown && first !== run.points[0]) || last !== run.points.at(-1) || counts[name] === null) {
+        coverage[name] = false;
+        gaps.push({ generation: run.generation, counter: name, reason: 'Missing or regressing quality endpoint' });
+      }
+    }
+    return { generation: run.generation, from: run.points[0].at, to: run.points.at(-1).at, counts, endpoints };
+  });
+  const loadGap = gaps.some(gap => !gap.counter);
+  const counts = Object.fromEntries(names.map(name => [name, !loadGap && coverage[name] ? observed[name] : null]));
+  const boundsExact = (startedAt === result.startedAt || start.at === startedAt) && end.at === endedAt;
+  return { counts, observed, runs: loadRuns, bounds: { start, end }, boundsExact,
+    exact: boundsExact && names.every(name => counts[name] !== null), gaps,
+    scope: 'Cumulative quality deltas per load generation, including the boundary endpoint. New loads start at zero; missing prior-load tails/generations make totals null, with observed partial deltas retained. Subwindows use outward neighboring observations without interpolation; counts cover those brackets, not an invented exact cut. Full-run endpoints are initial.at and boundary.at.' };
+}
+
+export function windowStats(result, startedAt = result.startedAt, endedAt = result.boundary.at) {
+  if (!Number.isFinite(startedAt) || !Number.isFinite(endedAt) || startedAt < result.startedAt ||
+      endedAt > result.boundary.at || endedAt < startedAt) throw new Error('Window must lie within the captured measurement');
+  const frames = result.raw.frames.filter(frame => frame[12] >= startedAt && frame[12] <= endedAt);
+  const gpuEndedAt = Math.min(endedAt, result.endedAt);
+  const samples = result.raw.samples.filter(sample => sample.submittedAt >= startedAt && sample.submittedAt <= gpuEndedAt);
+  const full = startedAt === result.startedAt && endedAt === result.boundary.at;
+  const delta = key => result.boundary.runtime.session[key] - result.initial.runtime.session[key];
+  const activeMs = full ? delta('activeMs') : null;
+  const elapsedMs = endedAt - startedAt;
+  const rendered = full ? delta('framesRendered') : frames.length;
+  const presented = full ? delta('framesPresented') : frames.reduce((sum, frame) => sum + frame[2], 0);
+  const denominator = full ? activeMs : elapsedMs;
+  const timed = new Set(samples.map(sample => sample.sequence));
+  const sequences = [...timed].sort((left, right) => left - right);
+  const gaps = [];
+  for (let index = 1; index < sequences.length; index++) {
+    if (sequences[index] > sequences[index - 1] + 1) gaps.push([sequences[index - 1] + 1, sequences[index] - 1]);
+  }
+  return { startedAt, endedAt, gpuEndedAt, elapsedMs, activeMs,
+    counts: { rendered, presented, skipped: full ? delta('framesSkipped') : presented - rendered,
+      rawFrames: frames.length, rawGpu: samples.length },
+    rates: { renderedFps: denominator > 0 ? rendered * 1000 / denominator : null,
+      presentedFps: denominator > 0 ? presented * 1000 / denominator : null,
+      scope: full ? 'Initial-to-boundary RuntimeSession count deltas / activeMs delta; drain and inactive time excluded.' :
+        'Raw observedAt-selected callbacks / wall-clock window, including inactive time. presentedDelta is assigned to its observed callback, not interpolated across the cut. Exact subwindow active time is not measured.' },
+    gpu: { all: distribution(samples.map(sample => sample.ms)),
+      neural: distribution(samples.filter(sample => sample.neural).map(sample => sample.ms)),
+      baseline: distribution(samples.filter(sample => !sample.neural).map(sample => sample.ms)),
+      scope: 'Outer GPU timestamps bracket stage execution, including diagnostic load when enabled. submittedAt selects the inclusive window (capped at actual endedAt); delayed readbacks retained. Excludes decode/import/compositor and CPU encode time.' },
+    callbackLatency: distribution(result.boundary.pipeline.clock === 'rvfc' ? frames.map(frame => frame[3]) : []),
+    expectedDisplayDelay: distribution(result.boundary.pipeline.clock === 'rvfc' ? frames.map(frame => frame[4]) : []),
+    decodeLatency: distribution(result.boundary.pipeline.clock === 'rvfc' ? frames.map(frame => frame[13]) : []),
+    decoder: decoderWindow(result, startedAt, endedAt),
+    rawGaps: { missingSequences: frames.filter(frame => !timed.has(frame[11])).map(frame => frame[11]),
+      internalGpuSequenceGaps: gaps, duplicateGpuSequences: samples.length - timed.size,
+      scope: 'Frames select inclusive observedAt bounds, not queued rVFC metadata time. Untimed rendered submissions are retained as gaps, never imputed. Frame timingGeneration is observed after driver processing, not necessarily encode generation.' } };
+}
+
 export function summarize(result) {
   const { startedAt, endedAt, raw, initial, boundary, drained } = result;
   if (!initial || !boundary || !drained) return { measured: false, reason: 'No complete measurement boundary and drain' };
   const samples = raw.samples.filter(sample => sample.submittedAt >= startedAt && sample.submittedAt <= endedAt);
-  const frames = raw.frames.filter(frame => frame[0] >= startedAt && frame[0] <= endedAt);
+  const frames = raw.frames.filter(frame => frame[12] >= startedAt && frame[12] <= boundary.at);
   const configurations = raw.configurations.filter(config => config.at >= startedAt && config.at <= endedAt);
   const before = initial.runtime.controller;
   const after = boundary.runtime.controller;
   const transitions = raw.transitions.filter(transition => transition.id > before.transitionCount && transition.atMs >= startedAt && transition.atMs <= endedAt);
-  const session = drained.runtime.session;
-  const timed = new Set(samples.map(sample => sample.sequence));
-  const missingSequences = frames.filter(frame => !timed.has(frame[11])).map(frame => frame[11]);
-  const gaps = [];
-  const sequences = [...timed].sort((left, right) => left - right);
-  for (let index = 1; index < sequences.length; index++) {
-    if (sequences[index] > sequences[index - 1] + 1) gaps.push([sequences[index - 1] + 1, sequences[index] - 1]);
-  }
+  const session = boundary.runtime.session;
+  const delta = key => session[key] - initial.runtime.session[key];
+  const activeMs = delta('activeMs');
+  const stats = windowStats(result);
   return { measured: true, units: 'ms unless named otherwise', quantiles: 'Exact linear interpolation at (n - 1) * p on raw values; no histogram rounding. Null means not measured.',
     elapsed: { requestedMs: result.plannedEndAt - startedAt, boundaryMs: endedAt - startedAt,
+      startedAt, endedAt, boundaryCapturedAt: boundary.at, capturedBoundaryMs: boundary.at - startedAt,
       boundaryLatenessMs: endedAt - result.plannedEndAt, drainMs: result.endOfDrainAt - endedAt,
-      resetToDrainMs: result.endOfDrainAt - result.resetRequestedAt, sessionActiveMs: session.activeMs,
-      sessionClockBeyondBoundaryMs: session.activeMs - (endedAt - startedAt) },
-    counts: { rendered: session.framesRendered, presented: session.framesPresented, skipped: session.framesSkipped,
-      decoderDrops: session.decoderDrops, decoderFrames: session.decoderFrames, decoderCorrupted: session.decoderCorrupted,
-      qualitySamples: session.qualitySamples, qualityMissingSamples: session.qualityMissingSamples,
-      qualityRejectedSamples: session.qualityRejectedSamples, rawFrames: frames.length, rawGpu: samples.length,
-      sessionGpu: session.gpu.neural.count + session.gpu.baseline.count,
+      resetToDrainMs: result.endOfDrainAt - result.resetRequestedAt, sessionActiveMs: activeMs,
+      sessionClockBeyondBoundaryMs: drained.runtime.session.activeMs - session.activeMs },
+    counts: { rendered: delta('framesRendered'), presented: delta('framesPresented'), skipped: delta('framesSkipped'),
+      decoderDrops: stats.decoder.counts.drops, decoderFrames: stats.decoder.counts.frames,
+      decoderCorrupted: stats.decoder.counts.corrupted,
+      qualitySamples: delta('qualitySamples'), qualityMissingSamples: delta('qualityMissingSamples'),
+      qualityRejectedSamples: delta('qualityRejectedSamples'), rawFrames: frames.length, rawGpu: samples.length,
+      sessionGpu: drained.runtime.session.gpu.neural.count + drained.runtime.session.gpu.baseline.count -
+        initial.runtime.session.gpu.neural.count - initial.runtime.session.gpu.baseline.count,
       gpuReceivedDuringDrain: raw.samples.slice(result.sampleCountAtBoundary).filter(sample => sample.submittedAt >= startedAt && sample.submittedAt <= endedAt).length },
-    rates: { renderedFps: session.meanRenderedFps, presentedFps: session.meanPresentedFps,
-      scope: 'Post-drain RuntimeSession counts / activeMs; includes initial reset/start gap and final drain, not just the requested timer duration.' },
-    gpu: { all: distribution(samples.map(sample => sample.ms)),
-      neural: distribution(samples.filter(sample => sample.neural).map(sample => sample.ms)),
-      baseline: distribution(samples.filter(sample => !sample.neural).map(sample => sample.ms)),
-      scope: 'Outer GPU timestamps bracket stage execution, including diagnostic load when enabled. SubmittedAt selects the window; delayed readbacks retained. Excludes decode/import/compositor and CPU encode time.' },
-    callbackLatency: distribution(boundary.pipeline.clock === 'rvfc' ? frames.map(frame => frame[3]) : []),
-    expectedDisplayDelay: distribution(boundary.pipeline.clock === 'rvfc' ? frames.map(frame => frame[4]) : []),
+    rates: stats.rates, gpu: stats.gpu,
+    callbackLatency: stats.callbackLatency, expectedDisplayDelay: stats.expectedDisplayDelay,
+    decodeLatency: stats.decodeLatency,
     configure: distribution(configurations.map(config => config.configureMs)),
+    decoder: stats.decoder,
     decoderEndpoints: { initial: initial.decoderQuality, firstFrame: frames[0]?.slice(6, 10) ?? null,
       lastFrame: frames.at(-1)?.slice(6, 10) ?? null, boundary: boundary.decoderQuality, drained: drained.decoderQuality },
-    rawGaps: { missingSequences, internalGpuSequenceGaps: gaps, duplicateGpuSequences: samples.length - timed.size,
-      scope: 'Untimed rendered submissions are retained as gaps, never imputed. Frame timingGeneration is observed after driver processing, not necessarily encode generation.' },
+    rawGaps: stats.rawGaps,
+    windows: { first120Seconds: windowStats(result, startedAt, Math.min(boundary.at, startedAt + 120000)),
+      last120Seconds: windowStats(result, Math.max(startedAt, boundary.at - 120000), boundary.at) },
     controller: { initial: before, final: after, finalActualTier: boundary.runtime.actualTier,
       transitionCount: after.transitionCount - before.transitionCount, transitions,
       probeCount: after.probeCount - before.probeCount, failedProbeCount: after.failedProbeCount - before.failedProbeCount,
@@ -451,7 +562,6 @@ async function main(args) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = resolve(root, '.cache/m9/browsers');
   const playwrightFile = resolve(root, '.cache/m9/node_modules/playwright/package.json');
   const playwright = { version: JSON.parse(readFileSync(playwrightFile, 'utf8')).version, packageSha256: digest(playwrightFile) };
-  const { chromium } = await import(pathToFileURL(resolve(root, '.cache/m9/node_modules/playwright/index.mjs')).href);
   const environment = machineEnvironment();
   const native = await openNativeChrome(flags);
   const { browser, context } = native;
@@ -473,7 +583,7 @@ async function main(args) {
         if (message.text().startsWith(progressPrefix)) console.log(message.text());
         else if (message.type() === 'error') recordError('console.error', message.text());
       });
-      let result = { raw: { samples: [], frames: [], configurations: [], transitions: [], events: [], errors: [], actions: [], refresh: [] } };
+      let result = { raw: { samples: [], frames: [], configurations: [], transitions: [], controller: [], events: [], errors: [], actions: [], refresh: [] } };
       console.log(`START ${entry.config.name} ${new Date().toISOString()} ${entry.url}`);
       try {
         await page.addInitScript(installCapture);
@@ -504,10 +614,10 @@ async function main(args) {
         writeFileSync(entry.screenshot, await bounded(page.screenshot({ timeout: 5000 }), 6000, 'Stopped screenshot'), { flag: 'wx' });
         screenshot = entry.screenshot;
       } catch (error) { reasons.push(`Screenshot: ${error.message}`); }
-      const artifact = { schema: 'aethervsr.m9-live/1', phase: 'main-index-live', config: entry.config,
+      const artifact = { schema: 'aethervsr.m9-live/2', phase: 'main-index-live', config: entry.config,
         url: entry.url, diagnosticLoad: entry.diagnosticLoad, diagnostics: entry.diagnostics, valid: !reasons.length,
         invalidReasons: reasons, errors, provenance: { before, after }, measuredAt: new Date().toISOString(),
-        ...environment, browser: browser.version(), executable: chromium.executablePath(), flags, headless: false, playwright,
+        ...environment, browser: browser.version(), executable: native.executable, flags, headless: false, playwright,
         visibilityControl: 'Native Chrome default context; CDP noDefaults=true; no focus/visibility emulation',
         media: mediaMetadata(entry.mediaFile), screenshot,
         scope: { frameColumns: ['time', 'mediaTime', 'presentedDelta', 'callbackLatencyMs', 'expectedDelayMs', 'actualTier',
@@ -515,7 +625,8 @@ async function main(args) {
         timebase: 'All page times except mediaTime are performance.now milliseconds; mediaTime is seconds. Node error times are ISO wall clock.',
         diagnosticsContract: 'DEV hook plus ordinary TypeScript-private fields pipeline.gpu, pipeline.submissionSequence and driver.session.latestConfiguration; capture fails if required provenance is absent.',
         capture: 'Hooks installed by intercepting the DEV API assignment before eligibility. All startup/configure/drain rows retained, no reset truncation. Prior configuration is explicitly marked if capture was late.',
-        measurement: 'Stop acquisition only, drain timestamps, reset, restart. At actual timer boundary snapshot controller, stop acquisition, drain outside frame callbacks, snapshot session. No pixel readbacks during capture.',
+        controllerCapture: 'raw.controller stores delivered snapshots with performance.now at, excluding transitions. Emit on state/tier/generation/backoffMs/reason/failMs/recoverMs/mode changes or after 1000 ms at the next notification/checkpoint. samples, quantiles, activeMs and nextProbeAtMs are recorded but do not trigger rows. nextProbeAtMs can move every suspended tick. No reconstructed pre-transition evidence: use raw.samples alongside the delivered snapshots, including cleared post-transition samples.',
+        measurement: 'Stop acquisition only, drain timestamps, reset, restart. At actual timer endedAt snapshot the boundary, stop acquisition, then drain outside frame callbacks. Rates subtract initial session counts/activeMs from boundary values; drain is excluded. boundary.at can follow endedAt by a few ms. Decoder quality uses initial/boundary endpoints with captured load generation; subwindow brackets and reload gaps are explicit. No pixel readbacks during capture.',
         missing: 'Null means not measured, not zero. Raw startup errors and all blur/hidden events invalidate performance. No automatic performance verdicts or policy tuning.' },
         summary, result };
       mkdirSync(dirname(entry.output), { recursive: true });
