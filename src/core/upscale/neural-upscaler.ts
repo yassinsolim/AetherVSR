@@ -23,11 +23,13 @@ export interface NeuralUpscalerOptions {
   /** Half precision throughout. Falls back to f32 when unsupported. */
   readonly useF16: boolean;
   readonly ingestFormat: IngestFormat;
+  readonly passDiagnostics: boolean;
 }
 
 const DEFAULT_OPTIONS: NeuralUpscalerOptions = {
   useF16: true,
   ingestFormat: 'rgba8unorm',
+  passDiagnostics: true,
 };
 
 /**
@@ -378,7 +380,7 @@ export class NeuralUpscaler implements Upscaler {
       ],
     });
 
-    if (device.features.has('timestamp-query')) {
+    if (this.options.passDiagnostics && device.features.has('timestamp-query')) {
       // Six slots for the three compute stages. Ingest and present are
       // bracketed by the pipeline's own timer, which spans the whole stage.
       this.querySet = device.createQuerySet({ type: 'timestamp', count: 6 });

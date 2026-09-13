@@ -1380,3 +1380,15 @@ and existing approved bundled clips are unchanged. Regenerable M9 media and
 local browser/tool caches are explicitly forbidden in the tracked tree.
 Raw traces are compressed, never replaced by fabricated samples. No large
 training corpus or pixel data is authorized by this allowance.
+
+### M9 load apparatus correction
+
+The initial shader-load calibration suffered device loss and is ineligible;
+its retained artifact explicitly has valid=false. The low-level cause is not
+established. Diagnostic load now repeats the existing neural graph in the same
+command buffer, with a single outer begin/end pair. Inner per-pass diagnostics
+are disabled in that harness to avoid mapping a previous encode before submit;
+the production default remains enabled. No second model or GPU resource set is
+allocated. Normal traces from the original diagnostic configuration stay
+separate from the new paired calibration. This changes measurement apparatus,
+not weights, production timing policy or the registered acceptance targets.

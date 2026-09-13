@@ -19,7 +19,7 @@ export async function startCalibration(clip: string, neural = true) {
   canvas.style.cssText = 'width:100%;height:auto;max-height:95vh;object-fit:contain';
   document.body.replaceChildren(video, canvas);
   const load: RuntimeLoad = { passes: 0, frames: 0 };
-  const stage = new NeuralUpscaler(model);
+  const stage = new NeuralUpscaler(model, { passDiagnostics: false });
   const pipeline = new VideoPipeline(gpu, video, canvas,
     neural ? new LoadedUpscaler(stage, load) : new BaselineScaler('catmull-rom'));
   const samples: PipelineGpuSample[] = [];
