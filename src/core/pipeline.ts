@@ -195,6 +195,7 @@ export class VideoPipeline {
   /** Media-load generation the baseline was taken in. */
   private qualityGeneration = 0;
   private lastError: unknown = null;
+  private disposed = false;
 
   constructor(
     private readonly gpu: GpuContext,
@@ -205,22 +206,38 @@ export class VideoPipeline {
   ) {
     this.upscaler = upscaler;
     this.source = new VideoFrameSource(video);
-    this.importer = new FrameImporter(
-      gpu.device,
-      video,
-      gpu.capabilities.externalTexture && !options.forceCopyImport,
-    );
-    this.target = new CanvasTarget(canvas);
-    this.timer = gpu.capabilities.timestampQuery
-      ? new GpuTimer<Omit<PipelineGpuSample, 'ms' | 'resolvedAt'>>(gpu.device, (ms, context) => {
-          const resolvedAt = performance.now();
-          this.gpuPass.push(ms);
-          // Raw per-frame evidence, not the trailing aggregate. A controller
-          // that medians an already-medianed window reacts seconds late.
-          this.onGpuPassSample?.(ms);
-          if (context !== undefined) this.onGpuSample?.({ ...context, ms, resolvedAt });
-        })
-      : null;
+    let importer: FrameImporter | null = null;
+    let target: CanvasTarget | null = null;
+    try {
+      this.importer = importer = new FrameImporter(
+        gpu.device,
+        video,
+        gpu.capabilities.externalTexture && !options.forceCopyImport,
+      );
+      this.target = target = new CanvasTarget(canvas);
+      this.timer = gpu.capabilities.timestampQuery
+        ? new GpuTimer<Omit<PipelineGpuSample, 'ms' | 'resolvedAt'>>(gpu.device, (ms, context) => {
+            if (this.disposed) return;
+            const resolvedAt = performance.now();
+            this.gpuPass.push(ms);
+            // Raw per-frame evidence, not the trailing aggregate. A controller
+            // that medians an already-medianed window reacts seconds late.
+            this.onGpuPassSample?.(ms);
+            if (context !== undefined) this.onGpuSample?.({ ...context, ms, resolvedAt });
+          })
+        : null;
+    } catch (error) {
+      this.disposed = true;
+      for (const cleanup of [
+        () => this.source.destroy(),
+        () => importer?.destroy(),
+        () => target?.unconfigure(),
+        () => upscaler.destroy(),
+      ]) {
+        try { cleanup(); } catch { continue; }
+      }
+      throw error;
+    }
   }
 
   get running(): boolean {
@@ -233,7 +250,7 @@ export class VideoPipeline {
   }
 
   start(): void {
-    if (this.source.running) return;
+    if (this.disposed || this.source.running) return;
     this.source.start((tick) => this.onTick(tick));
   }
 
@@ -253,7 +270,15 @@ export class VideoPipeline {
    */
   setUpscaler(next: Upscaler): void {
     if (next === this.upscaler) return;
+    if (this.disposed) {
+      next.destroy();
+      return;
+    }
     this.upscaler.destroy();
+    if (this.disposed) {
+      next.destroy();
+      return;
+    }
     this.upscaler = next;
     // Force reconfiguration on the next tick.
     this.configuredSource = { width: 0, height: 0 };
@@ -333,17 +358,31 @@ export class VideoPipeline {
   }
 
   destroy(): void {
-    this.stop();
-    this.upscaler.destroy();
-    this.importer.destroy();
-    this.timer?.destroy();
-    this.target.unconfigure();
+    if (this.disposed) return;
+    this.disposed = true;
+    this.onGpuPassSample = null;
+    this.onGpuSample = null;
+    this.onFrame = null;
+    this.onConfiguration = null;
+    const errors: unknown[] = [];
+    for (const cleanup of [
+      () => this.source.destroy(),
+      () => this.upscaler.destroy(),
+      () => this.importer.destroy(),
+      () => this.timer?.destroy(),
+      () => this.target.unconfigure(),
+    ]) {
+      try { cleanup(); } catch (error) { errors.push(error); }
+    }
+    if (errors.length > 0) throw errors[0];
   }
 
   private onTick(tick: FrameTick): void {
+    if (this.disposed || !this.source.running) return;
     if (tick.size.width === 0 || tick.size.height === 0) return;
     try {
       this.ensureConfigured(tick.size);
+      if (this.disposed) return;
 
       this.sourceRate.mark(tick.now, tick.presentedDelta);
       this.renderRate.mark(tick.now);

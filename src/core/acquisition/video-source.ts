@@ -46,6 +46,8 @@ export class VideoFrameSource {
   private handler: FrameTickHandler | null = null;
   private lastPresentedFrames = -1;
   private generation = 0;
+  private disposed = false;
+  private readonly onLoadStart = (): void => { this.generation++; };
 
   constructor(
     private readonly video: HTMLVideoElement,
@@ -56,7 +58,7 @@ export class VideoFrameSource {
     // that report deltas need a deterministic signal that this happened;
     // inferring it from a counter going backwards misses the case where the
     // new resource overtakes the old total between two polls.
-    video.addEventListener('loadstart', () => this.generation++);
+    video.addEventListener('loadstart', this.onLoadStart);
   }
 
   /**
@@ -72,6 +74,7 @@ export class VideoFrameSource {
   }
 
   start(handler: FrameTickHandler): void {
+    if (this.disposed) return;
     if (this.active) throw new Error('VideoFrameSource is already running');
     this.active = true;
     this.handler = handler;
@@ -88,13 +91,24 @@ export class VideoFrameSource {
     if (!this.active) return;
     this.active = false;
     this.handler = null;
-    if (this.handle === null) return;
-    if (this.clock === 'rvfc') {
-      this.video.cancelVideoFrameCallback(this.handle);
-    } else {
-      cancelAnimationFrame(this.handle);
-    }
+    const handle = this.handle;
     this.handle = null;
+    if (handle === null) return;
+    if (this.clock === 'rvfc') {
+      this.video.cancelVideoFrameCallback(handle);
+    } else {
+      cancelAnimationFrame(handle);
+    }
+  }
+
+  destroy(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    try {
+      this.stop();
+    } finally {
+      this.video.removeEventListener('loadstart', this.onLoadStart);
+    }
   }
 
   quality(): PlaybackQuality {

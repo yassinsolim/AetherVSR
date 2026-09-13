@@ -38,6 +38,12 @@ function createHarness(options: { mode?: RuntimeMode; timestamps?: boolean; visi
   const documentTarget = Object.assign(new EventTarget(), { visibilityState: 'visible' });
   vi.stubGlobal('document', documentTarget);
   const video = new FakeVideo();
+  const listeners = {
+    videoAdd: vi.spyOn(video, 'addEventListener'),
+    videoRemove: vi.spyOn(video, 'removeEventListener'),
+    documentAdd: vi.spyOn(documentTarget, 'addEventListener'),
+    documentRemove: vi.spyOn(documentTarget, 'removeEventListener'),
+  };
   const baseline = createUpscaler(false);
   const factory = vi.fn(() => createUpscaler(true));
   let needsConfiguration = false;
@@ -133,7 +139,7 @@ function createHarness(options: { mode?: RuntimeMode; timestamps?: boolean; visi
     });
   }
 
-  return { driver, pipeline, video, documentTarget, baseline, factory, callbacks,
+  return { driver, pipeline, video, documentTarget, baseline, factory, callbacks, listeners,
     configure, frames, play, startNeural };
 }
 
@@ -152,6 +158,111 @@ afterEach(() => {
 });
 
 describe('RuntimeDriver', () => {
+  it.each([false, true])('releases listeners, factory and observers even when disposal notification throws: %s', (throws) => {
+    const { driver, pipeline, callbacks, listeners, factory, startNeural, frames, video, documentTarget } = createHarness();
+    startNeural();
+    const sample = frames(10, 6)!;
+    const tick = callbacks.frame.mock.lastCall![0];
+    const configuration = callbacks.configure.mock.lastCall![0];
+    const deliverFrame = pipeline.onFrame!;
+    const deliverSample = pipeline.onGpuSample!;
+    const deliverConfiguration = pipeline.onConfiguration!;
+    const staleEvents = [...listeners.videoAdd.mock.calls, ...listeners.documentAdd.mock.calls];
+    const error = new Error('observer failed');
+    const notify = vi.fn(() => {
+      driver.destroy();
+      driver.syncActive();
+      if (throws) throw error;
+    });
+    driver.onChange = notify;
+    if (throws) expect(() => driver.destroy()).toThrow(error);
+    else driver.destroy();
+    expect(() => driver.destroy()).not.toThrow();
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(driver).toHaveProperty('listeners', []);
+    expect(driver).toHaveProperty('factory', null);
+    expect([driver.onChange, driver.onFrame, driver.onSample, driver.onConfigure]).toEqual([null, null, null, null]);
+    expect([pipeline.onFrame, pipeline.onGpuSample, pipeline.onConfiguration]).toEqual([null, null, null]);
+    expect(listeners.videoRemove.mock.calls).toEqual(listeners.videoAdd.mock.calls);
+    expect(listeners.documentRemove.mock.calls).toEqual(listeners.documentAdd.mock.calls);
+    expect(listeners.videoRemove).toHaveBeenCalledTimes(7);
+    expect(listeners.documentRemove).toHaveBeenCalledTimes(1);
+    const stopped = driver.snapshot();
+    for (const operation of [pipeline.start, pipeline.stop, pipeline.setUpscaler, pipeline.invalidateTiming,
+      pipeline.resetMeasurements, ...Object.values(callbacks)]) operation.mockClear();
+    driver.setNeuralFactory(factory);
+    driver.setMode('neural');
+    driver.force(false);
+    driver.resetMeasurements();
+    driver.syncActive();
+    for (const [type, listener] of staleEvents) {
+      expect(typeof listener).toBe('function');
+      (listener as EventListener)(new Event(type));
+      video.dispatchEvent(new Event(type));
+      documentTarget.dispatchEvent(new Event(type));
+    }
+    deliverFrame(tick);
+    deliverSample(sample);
+    deliverConfiguration(configuration);
+    vi.advanceTimersByTime(10000);
+    expect(driver.snapshot()).toEqual(stopped);
+    expect(driver).toHaveProperty('factory', null);
+    for (const operation of [pipeline.start, pipeline.stop, pipeline.setUpscaler, pipeline.invalidateTiming,
+      pipeline.resetMeasurements, ...Object.values(callbacks)]) expect(operation).not.toHaveBeenCalled();
+    expect(pipeline.destroy).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('can detach and reattach to the same video without retained listener entries or clearing the new driver', () => {
+    const { driver, pipeline, video, documentTarget, listeners } = createHarness();
+    let previous = driver;
+    for (let index = 0; index < 3; index++) {
+      previous.destroy();
+      expect(previous).toHaveProperty('listeners', []);
+      expect(listeners.videoRemove.mock.calls).toEqual(listeners.videoAdd.mock.calls);
+      expect(listeners.documentRemove.mock.calls).toEqual(listeners.documentAdd.mock.calls);
+      const next = new RuntimeDriver(pipeline as unknown as VideoPipeline, video as unknown as HTMLVideoElement, true);
+      drivers.push(next);
+      const nextFrame = pipeline.onFrame;
+      previous.destroy();
+      expect(pipeline.onFrame).toBe(nextFrame);
+      video.dispatchEvent(new Event('playing'));
+      documentTarget.dispatchEvent(new Event('visibilitychange'));
+      previous = next;
+    }
+    previous.destroy();
+    expect(listeners.videoRemove).toHaveBeenCalledTimes(28);
+    expect(listeners.documentRemove).toHaveBeenCalledTimes(4);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('cleans up after a previous fatal notification threw without replacing the failure reason', () => {
+    const { driver, pipeline, listeners, startNeural } = createHarness();
+    startNeural();
+    const error = new Error('observer');
+    driver.onChange = () => { throw error; };
+    expect(() => driver.fail('device lost')).toThrow(error);
+    expect(() => driver.destroy()).not.toThrow();
+    expect(driver.snapshot().controller).toMatchObject({ state: 'failed', reason: 'device lost' });
+    expect(driver).toHaveProperty('listeners', []);
+    expect(driver).toHaveProperty('factory', null);
+    expect(driver.onChange).toBeNull();
+    expect(listeners.videoRemove).toHaveBeenCalledTimes(7);
+    expect(listeners.documentRemove).toHaveBeenCalledTimes(1);
+    expect(pipeline.destroy).not.toHaveBeenCalled();
+  });
+
+  it('does not resume after an active-state observer destroys the driver', () => {
+    const { driver, pipeline, video } = createHarness();
+    driver.onChange = () => driver.destroy();
+    video.paused = false;
+    driver.syncActive();
+    expect(driver.snapshot()).toMatchObject({ running: false, controller: { state: 'failed', reason: 'disposed' } });
+    expect(pipeline.start).not.toHaveBeenCalled();
+    expect(pipeline.invalidateTiming).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('allows a read-only frame observer to sample a later clock', () => {
     const { driver, pipeline, configure, play } = createHarness();
     configure();

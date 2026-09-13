@@ -24,6 +24,14 @@ class FakeVideo {
     (this.listeners[type] ??= []).push(handler);
   }
 
+  removeEventListener(type: string, handler: () => void): void {
+    this.listeners[type] = (this.listeners[type] ?? []).filter((listener) => listener !== handler);
+  }
+
+  get loadListeners(): number {
+    return this.listeners['loadstart']?.length ?? 0;
+  }
+
   /** Simulates the media load algorithm starting on a new resource. */
   emitLoadStart(): void {
     for (const handler of this.listeners['loadstart'] ?? []) handler();
@@ -84,6 +92,54 @@ afterEach(() => {
 });
 
 describe('VideoFrameSource (rVFC)', () => {
+  it('detaches repeatedly without retaining listeners or accepting stale callbacks', () => {
+    const fake = new FakeVideo();
+    const request = vi.spyOn(fake, 'requestVideoFrameCallback');
+    for (let index = 0; index < 3; index++) {
+      const source = new VideoFrameSource(asVideo(fake), 'rvfc');
+      const handler = vi.fn();
+      expect(fake.loadListeners).toBe(1);
+      source.start(handler);
+      const stale = request.mock.calls.at(-1)![0];
+      fake.emitLoadStart();
+      source.destroy();
+      source.destroy();
+      source.start(handler);
+      stale(16, {} as VideoFrameCallbackMetadata);
+      fake.emitLoadStart();
+      expect(source.loadGeneration).toBe(1);
+      expect(source.running).toBe(false);
+      expect(fake.loadListeners).toBe(0);
+      expect(fake.registered).toBe(0);
+      expect(handler).not.toHaveBeenCalled();
+    }
+    expect(fake.cancelled).toHaveLength(3);
+  });
+
+  it('does not reschedule when destroyed inside a tick handler', () => {
+    const fake = new FakeVideo();
+    const source = new VideoFrameSource(asVideo(fake), 'rvfc');
+    source.start(() => {
+      source.destroy();
+      source.start(vi.fn());
+    });
+    fake.present(16, 1);
+    expect(source.running).toBe(false);
+    expect(fake.registered).toBe(0);
+    expect(fake.loadListeners).toBe(0);
+  });
+
+  it('removes its listener even if callback cancellation throws', () => {
+    const fake = new FakeVideo();
+    const source = new VideoFrameSource(asVideo(fake), 'rvfc');
+    vi.spyOn(fake, 'cancelVideoFrameCallback').mockImplementation(() => { throw new Error('cancel'); });
+    source.start(vi.fn());
+    expect(() => source.destroy()).toThrow('cancel');
+    expect(() => source.destroy()).not.toThrow();
+    expect(source.running).toBe(false);
+    expect(fake.loadListeners).toBe(0);
+  });
+
   it('re-registers exactly one callback per delivered frame', () => {
     const fake = new FakeVideo();
     const source = new VideoFrameSource(asVideo(fake), 'rvfc');
@@ -251,6 +307,26 @@ describe('VideoFrameSource (rVFC)', () => {
 });
 
 describe('VideoFrameSource (rAF fallback)', () => {
+  it('cancels on destruction and ignores a stale animation callback', () => {
+    const request = vi.fn<(callback: FrameRequestCallback) => number>().mockReturnValue(1);
+    const cancel = vi.fn();
+    vi.stubGlobal('requestAnimationFrame', request);
+    vi.stubGlobal('cancelAnimationFrame', cancel);
+    const fake = new FakeVideo();
+    const source = new VideoFrameSource(asVideo(fake), 'raf');
+    const handler = vi.fn();
+    source.start(handler);
+    source.destroy();
+    source.destroy();
+    source.start(handler);
+    request.mock.calls[0]![0](16);
+    expect(handler).not.toHaveBeenCalled();
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(cancel).toHaveBeenCalledExactlyOnceWith(1);
+    expect(fake.loadListeners).toBe(0);
+    expect(source.running).toBe(false);
+  });
+
   it('derives frame deltas from decoder totals when rVFC is unavailable', () => {
     const callbacks: FrameRequestCallback[] = [];
     vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GpuContext } from '../src/core/gpu/device.js';
 import { GpuTimer } from '../src/core/metrics/gpu-timer.js';
 import { VideoPipeline } from '../src/core/pipeline.js';
-import type { EncodeContext, FrameTexture, FrameTextureKind, FrameTick, Size, UpscalerConfig } from '../src/core/types.js';
+import type { EncodeContext, FrameTexture, FrameTextureKind, FrameTick, Size, Upscaler, UpscalerConfig } from '../src/core/types.js';
 
 const mocks = vi.hoisted(() => ({
   deliver: null as ((tick: FrameTick) => void) | null,
@@ -11,12 +11,21 @@ const mocks = vi.hoisted(() => ({
   configureImporter: vi.fn<(size: Size) => void>(),
   sampledView: null as GPUTextureView | null,
   acquire: vi.fn<() => FrameTexture>(),
+  createImporter: vi.fn(),
+  createTarget: vi.fn(),
+  createTimer: vi.fn(),
+  destroySource: vi.fn(),
+  destroyImporter: vi.fn(),
+  unconfigureTarget: vi.fn(),
+  loadListeners: new Set<() => void>(),
 }));
 
 vi.mock('../src/core/acquisition/video-source.js', () => ({
   VideoFrameSource: class {
     readonly clock = 'rvfc';
     readonly loadGeneration = 0;
+    private readonly listener = () => {};
+    constructor() { mocks.loadListeners.add(this.listener); }
     get running() { return mocks.running; }
     quality() { return { totalVideoFrames: 0, droppedVideoFrames: 0, corruptedVideoFrames: 0 }; }
     start(callback: (tick: FrameTick) => void) {
@@ -24,6 +33,12 @@ vi.mock('../src/core/acquisition/video-source.js', () => ({
       mocks.running = true;
     }
     stop() { mocks.running = false; }
+    destroy() {
+      this.stop();
+      mocks.deliver = null;
+      mocks.loadListeners.delete(this.listener);
+      mocks.destroySource();
+    }
   },
 }));
 
@@ -31,24 +46,26 @@ vi.mock('../src/core/acquisition/frame-importer.js', () => ({
   FrameImporter: class {
     readonly kind: FrameTextureKind;
     constructor(_device: GPUDevice, _video: HTMLVideoElement, external: boolean) {
+      mocks.createImporter();
       this.kind = external ? 'external' : 'sampled';
     }
     readonly configure = mocks.configureImporter;
     get sampledView() { return this.kind === 'sampled' ? mocks.sampledView : null; }
     readonly acquire = mocks.acquire;
-    destroy() {}
+    readonly destroy = mocks.destroyImporter;
   },
 }));
 
 vi.mock('../src/core/present/canvas-target.js', () => ({
   CanvasTarget: class {
     size: Size = { width: 0, height: 0 };
+    constructor() { mocks.createTarget(); }
     configure(_device: GPUDevice, size: Size) {
       mocks.configureTarget();
       this.size = size;
     }
     currentView() { return {}; }
-    unconfigure() {}
+    readonly unconfigure = mocks.unconfigureTarget;
   },
 }));
 
@@ -59,7 +76,11 @@ function makeTick(width = 320, height = 180, now = 100): FrameTick {
   };
 }
 
-function makeHarness(timestampQuery = true, externalTexture = false) {
+function makeHarness(
+  timestampQuery = true,
+  externalTexture = false,
+  beforeConstruct?: (gpu: GpuContext, upscaler: Upscaler) => void,
+) {
   const pending: (() => void)[] = [];
   const clock = { now: 10 };
   vi.spyOn(performance, 'now').mockImplementation(() => clock.now);
@@ -68,7 +89,10 @@ function makeHarness(timestampQuery = true, externalTexture = false) {
     resolveQuerySet: vi.fn(), copyBufferToBuffer: vi.fn(), finish: vi.fn(() => ({})),
   };
   const device = {
-    createQuerySet: vi.fn(() => ({ destroy: vi.fn() })),
+    createQuerySet: vi.fn(() => {
+      mocks.createTimer();
+      return { destroy: vi.fn() };
+    }),
     createBuffer: vi.fn(() => ({
       mapAsync: () => new Promise<void>((resolve) => pending.push(resolve)),
       getMappedRange: () => new BigInt64Array([0n, 2_000_000n]).buffer,
@@ -86,6 +110,7 @@ function makeHarness(timestampQuery = true, externalTexture = false) {
   const gpu = {
     device, capabilities: { timestampQuery, externalTexture, preferredCanvasFormat: 'rgba8unorm' },
   } as unknown as GpuContext;
+  beforeConstruct?.(gpu, upscaler);
   const pipeline = new VideoPipeline(gpu, {} as HTMLVideoElement, {} as HTMLCanvasElement, upscaler);
   pipeline.start();
   return {
@@ -108,6 +133,11 @@ function makeHarness(timestampQuery = true, externalTexture = false) {
 beforeEach(() => {
   mocks.deliver = null;
   mocks.running = false;
+  mocks.loadListeners.clear();
+  for (const mock of [
+    mocks.createImporter, mocks.createTarget, mocks.createTimer,
+    mocks.destroySource, mocks.destroyImporter, mocks.unconfigureTarget,
+  ]) mock.mockReset();
   mocks.configureTarget.mockReset();
   mocks.sampledView = null;
   mocks.configureImporter.mockReset().mockImplementation(() => { mocks.sampledView ??= {} as GPUTextureView; });
@@ -122,6 +152,113 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+});
+
+describe('VideoPipeline teardown', () => {
+  it('is terminal, clears observers, and releases each resource exactly once', async () => {
+    const timerDestroy = vi.spyOn(GpuTimer.prototype, 'destroy');
+    const { pipeline, upscaler, device, emit, settle } = makeHarness();
+    emit();
+    const stale = mocks.deliver!;
+    const observer = vi.fn();
+    pipeline.onGpuPassSample = observer;
+    pipeline.onGpuSample = observer;
+    pipeline.onFrame = observer;
+    pipeline.onConfiguration = observer;
+    expect(mocks.loadListeners.size).toBe(1);
+    pipeline.destroy();
+    pipeline.destroy();
+    pipeline.start();
+    pipeline.setUpscaler(upscaler);
+    const incoming = { ...upscaler, id: 'late', destroy: vi.fn() };
+    pipeline.setUpscaler(incoming);
+    stale(makeTick());
+    await settle();
+    expect(pipeline.running).toBe(false);
+    expect(pipeline.currentUpscaler).toBe(upscaler);
+    expect(mocks.deliver).toBeNull();
+    expect(mocks.loadListeners.size).toBe(0);
+    expect(observer).not.toHaveBeenCalled();
+    expect([pipeline.onGpuPassSample, pipeline.onGpuSample, pipeline.onFrame, pipeline.onConfiguration])
+      .toEqual([null, null, null, null]);
+    for (const cleanup of [
+      mocks.destroySource, upscaler.destroy, mocks.destroyImporter,
+      timerDestroy, mocks.unconfigureTarget, incoming.destroy,
+    ]) expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(device.queue.submit).toHaveBeenCalledTimes(1);
+    for (const allocation of [...device.createQuerySet.mock.results, ...device.createBuffer.mock.results]) {
+      expect(allocation.type).toBe('return');
+      if (allocation.type === 'return') expect(allocation.value.destroy).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it('does not encode or submit after an onConfiguration observer destroys it', () => {
+    const { pipeline, upscaler, device, emit } = makeHarness();
+    const onFrame = vi.fn();
+    pipeline.onFrame = onFrame;
+    pipeline.onConfiguration = () => { pipeline.destroy(); pipeline.start(); };
+    emit();
+    expect(pipeline.running).toBe(false);
+    expect(mocks.acquire).not.toHaveBeenCalled();
+    expect(upscaler.encode).not.toHaveBeenCalled();
+    expect(device.queue.submit).not.toHaveBeenCalled();
+    expect(onFrame).not.toHaveBeenCalled();
+  });
+
+  it('marks disposal before cleanup reenters and attempts every cleanup despite failures', () => {
+    const { pipeline, upscaler } = makeHarness();
+    const error = new Error('source cleanup');
+    const incoming = { ...upscaler, destroy: vi.fn() };
+    mocks.destroySource.mockImplementation(() => {
+      pipeline.destroy();
+      pipeline.start();
+      pipeline.setUpscaler(incoming);
+      throw error;
+    });
+    upscaler.destroy.mockImplementation(() => { throw new Error('stage cleanup'); });
+    mocks.destroyImporter.mockImplementation(() => { throw new Error('importer cleanup'); });
+    const timerDestroy = vi.spyOn(GpuTimer.prototype, 'destroy').mockImplementation(() => { throw new Error('timer cleanup'); });
+    mocks.unconfigureTarget.mockImplementation(() => { throw new Error('target cleanup'); });
+    expect(() => pipeline.destroy()).toThrow(error);
+    expect(() => pipeline.destroy()).not.toThrow();
+    expect(pipeline.running).toBe(false);
+    expect(mocks.loadListeners.size).toBe(0);
+    for (const cleanup of [
+      mocks.destroySource, upscaler.destroy, mocks.destroyImporter,
+      timerDestroy, mocks.unconfigureTarget, incoming.destroy,
+    ]) expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['importer', 'target', 'timer'] as const)('unwinds a %s constructor failure without masking the original error', (failure) => {
+    const error = new DOMException('construction failed', 'OperationError');
+    const stageDestroy = vi.fn();
+    const failingCall = { importer: mocks.createImporter, target: mocks.createTarget, timer: mocks.createTimer }[failure];
+    failingCall.mockImplementation(() => { throw error; });
+    mocks.destroySource.mockImplementation(() => { throw new Error('source cleanup'); });
+    mocks.destroyImporter.mockImplementation(() => { throw new Error('importer cleanup'); });
+    expect(() => makeHarness(true, false, (_gpu, upscaler) => { upscaler.destroy = stageDestroy; })).toThrow(error);
+    expect(mocks.loadListeners.size).toBe(0);
+    expect(mocks.destroySource).toHaveBeenCalledTimes(1);
+    expect(mocks.destroyImporter).toHaveBeenCalledTimes(failure === 'importer' ? 0 : 1);
+    expect(mocks.unconfigureTarget).toHaveBeenCalledTimes(failure === 'timer' ? 1 : 0);
+    expect(stageDestroy).toHaveBeenCalledTimes(1);
+    expect(mocks.running).toBe(false);
+  });
+
+  it('exposes the actual hot-path DOMException without allowing a stopped stale callback to resume', () => {
+    const { pipeline, upscaler, device, emit } = makeHarness(false);
+    const error = new DOMException('import denied', 'SecurityError');
+    const stale = mocks.deliver!;
+    mocks.acquire.mockImplementationOnce(() => { throw error; });
+    expect(() => emit()).toThrow(error);
+    expect(pipeline.error).toBe(error);
+    stale(makeTick());
+    expect(pipeline.error).toBe(error);
+    expect(upscaler.encode).not.toHaveBeenCalled();
+    expect(device.queue.submit).not.toHaveBeenCalled();
+    expect(pipeline.running).toBe(false);
+    pipeline.destroy();
+  });
 });
 
 describe('VideoPipeline timing provenance', () => {

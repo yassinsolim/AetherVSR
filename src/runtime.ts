@@ -14,6 +14,7 @@ export class RuntimeDriver {
   private factory: (() => Upscaler) | null = null;
   private active = false;
   private fatal = false;
+  private disposed = false;
   private loadGeneration = 0;
   private cadenceReady = false;
   private cadenceStarted = 0;
@@ -35,6 +36,7 @@ export class RuntimeDriver {
       if (this.fatal || !this.active) return;
       this.session.recordGpu(sample);
       this.onSample?.(sample);
+      if (this.fatal) return;
       this.apply(this.controller.record(sample, performance.now()));
     };
     pipeline.onConfiguration = config => {
@@ -71,6 +73,7 @@ export class RuntimeDriver {
         this.controller.setAvailable(this.timestamps && this.factory !== null, now);
       }
       this.onFrame?.(tick);
+      if (this.fatal) return;
       this.apply(this.controller.snapshot(performance.now()));
     };
     for (const event of ['playing', 'pause', 'ended', 'seeking', 'seeked']) {
@@ -94,8 +97,11 @@ export class RuntimeDriver {
   }
 
   private listen(target: EventTarget, event: string, handler: EventListener): void {
-    target.addEventListener(event, handler);
-    this.listeners.push([target, event, handler]);
+    const listener: EventListener = event => {
+      if (!this.fatal) handler(event);
+    };
+    target.addEventListener(event, listener);
+    this.listeners.push([target, event, listener]);
   }
 
   private quality() {
@@ -130,12 +136,14 @@ export class RuntimeDriver {
     const now = performance.now();
     this.session.setActive(active, now);
     this.apply(this.controller.setActive(active, now));
+    if (this.fatal) return;
     this.bind();
     if (active) this.pipeline.start();
     else this.pipeline.stop();
   }
 
   private bind(now = performance.now()): void {
+    if (this.fatal) return;
     this.pipeline.invalidateTiming();
     this.controller.bindGeneration(this.pipeline.timingGeneration, now);
   }
@@ -172,6 +180,7 @@ export class RuntimeDriver {
   }
 
   resetMeasurements(): void {
+    if (this.disposed) return;
     const now = performance.now();
     this.pipeline.resetMeasurements();
     this.controller.bindGeneration(this.pipeline.timingGeneration, now);
@@ -197,10 +206,22 @@ export class RuntimeDriver {
   }
 
   destroy(): void {
-    this.fail('disposed');
-    for (const [target, event, listener] of this.listeners) target.removeEventListener(event, listener);
+    if (this.disposed) return;
+    this.disposed = true;
+    const errors: unknown[] = [];
+    try { this.fail('disposed'); } catch (error) { errors.push(error); }
+    clearInterval(this.interval);
+    this.factory = null;
+    this.onChange = null;
+    this.onFrame = null;
+    this.onSample = null;
+    this.onConfigure = null;
     this.pipeline.onGpuSample = null;
     this.pipeline.onFrame = null;
     this.pipeline.onConfiguration = null;
+    for (const [target, event, listener] of this.listeners.splice(0)) {
+      try { target.removeEventListener(event, listener); } catch (error) { errors.push(error); }
+    }
+    if (errors.length > 0) throw errors[0];
   }
 }

@@ -60,26 +60,26 @@ export function watchDeviceFailures(
   device: GPUDevice,
   onFailure: (message: string) => void,
 ): () => void {
-  let live = true;
+  let callback: ((message: string) => void) | null = onFailure;
 
   const onUncaptured = (event: Event): void => {
-    if (!live) return;
+    if (callback === null) return;
     // `GPUUncapturedErrorEvent` is not in every lib.dom; probe for the field.
     const detail =
       'error' in event && event.error instanceof GPUValidationError
         ? `WebGPU validation error: ${event.error.message}`
         : 'WebGPU uncaptured error (see console)';
-    onFailure(detail);
+    callback(detail);
   };
 
   device.addEventListener('uncapturederror', onUncaptured);
   void device.lost.then((info) => {
-    if (!live) return;
-    onFailure(`WebGPU device lost (${info.reason}): ${info.message}`);
+    callback?.(`WebGPU device lost (${info.reason}): ${info.message}`);
   });
 
   return () => {
-    live = false;
+    if (callback === null) return;
+    callback = null;
     device.removeEventListener('uncapturederror', onUncaptured);
   };
 }
