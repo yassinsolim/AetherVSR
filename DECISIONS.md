@@ -1440,3 +1440,35 @@ universal no-stutter claim, content-quality prediction, or new neural model.
 Production weights remain frozen; R3 stays research-only under ADR-0040.
 See docs/M9-REPORT.md for the full matrix, lifecycle/output parity, failures and
 unmeasured resource/energy limits. M10 remains separate extension work.
+
+## ADR-0045 - MV3 isolated adapter, temporary access and shared runtime
+
+**Status:** accepted M10 architecture; final acceptance is separate.
+
+Two consumers share the same inference and runtime controller: the preserved
+standalone harness and an MV3 isolated content adapter. The service worker
+owns validated activation/settings/model-delivery commands, never frame work.
+Actual load-unpacked Chrome 153 research proved ISOLATED WebGPU, temporary
+activeTab top/same-origin access, denial to cross-origin frames, and unchanged
+origin-clean restrictions on both video import routes. M10 still restricts
+ownership to the top document, one runtime per tab, without site-specific code.
+
+The final permission set is activeTab, scripting and storage, with no install
+host access or optional hosts. Optional-grant native approval/revocation was
+not verified and persistent auto-activation is deferred. Only origin-keyed mode
+preferences persist; they never grant injection authority. All commands validate
+extension sender, popup/content role, browser tab, top-frame document and origin.
+
+The exact production model is packaged from its existing source and served by
+a fixed worker message. Direct content fetch needed WAR in the measured probe;
+worker delivery did not, so the model is not web-accessible. No MAIN bridge,
+remote executable code, eval, WASM exception or arbitrary fetch is introduced.
+Browser media-security rejection and protected video are final unsupported
+states; host permission is not permission to read forbidden decoded pixels.
+
+The adapter owns only its canvas and subscriptions, leaving original video
+playback/audio/DOM/styles authoritative. Unsupported controls, geometry,
+subframes, direct-video fullscreen and PiP preserve original presentation.
+Shared source/pipeline/driver disposal becomes terminal/idempotent and releases
+listeners and retained callbacks; controller policy and model weights do not
+change. The M9 prepared sampled-view copy contract is preserved.
