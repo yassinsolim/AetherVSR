@@ -239,4 +239,26 @@ describe('BudgetGuard', () => {
   it('defaults leave a gap between falling back and recovering', () => {
     expect(DEFAULT_BUDGET_GUARD.failMs).toBeGreaterThan(DEFAULT_BUDGET_GUARD.recoverMs);
   });
+
+  it('does not count failure dwell as recovery dwell during a probe', () => {
+    const guard = new BudgetGuard({ window: 1, dwell: 3, probeBackoffMs: 5 });
+    guard.setForced(true, 0);
+    guard.setForced(false, 1);
+    guard.tick(5);
+    guard.record(18, 6);
+    guard.record(12, 7);
+    expect(guard.record(6, 8).probing).toBe(true);
+    expect(guard.record(6, 9).probing).toBe(true);
+    expect(guard.record(6, 10).probing).toBe(false);
+  });
+
+  it('does not advance dwell when samples are rejected', () => {
+    const guard = new BudgetGuard({ window: 1, dwell: 3 });
+    guard.record(12, 0);
+    for (const sample of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(guard.record(sample, 1).state).toBe('neural');
+    }
+    expect(guard.record(12, 2).state).toBe('neural');
+    expect(guard.record(12, 3).state).toBe('fallback');
+  });
 });

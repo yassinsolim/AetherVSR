@@ -88,6 +88,7 @@ export class BudgetGuard {
   private readonly samples: number[] = [];
   private state: BudgetState = 'neural';
   private qualifying = 0;
+  private recovering = 0;
   private forced = false;
   private probing = false;
   private backoffMs: number;
@@ -143,14 +144,14 @@ export class BudgetGuard {
    * this class exists to prevent.
    */
   record(ms: number, nowMs: number): BudgetDecision {
-    if (Number.isFinite(ms) && ms > 0) {
-      this.samples.push(ms);
-      if (this.samples.length > this.options.window) this.samples.shift();
+    if (!Number.isFinite(ms) || ms <= 0) {
+      return this.decide(false, 'invalid timing sample ignored');
     }
-
-    if (this.forced) {
-      return this.decide(false, 'forced over-budget for testing');
+    if (this.forced || this.state === 'fallback') {
+      return this.decide(false, this.forced ? 'forced over-budget for testing' : 'waiting for neural probe');
     }
+    this.samples.push(ms);
+    if (this.samples.length > this.options.window) this.samples.shift();
 
     // Nothing to judge yet. Reporting a partial window as evidence is how a
     // controller trips on startup noise.
@@ -161,6 +162,7 @@ export class BudgetGuard {
     const median = this.median();
 
     if (median > this.options.failMs) {
+      this.recovering = 0;
       this.qualifying++;
       if (this.qualifying >= this.options.dwell) {
         const wasProbing = this.probing;
@@ -179,25 +181,26 @@ export class BudgetGuard {
       return this.decide(false, `over budget, ${this.options.dwell - this.qualifying} more to fall back`);
     }
 
+    this.qualifying = 0;
     if (this.probing) {
       if (median <= this.options.recoverMs) {
-        this.qualifying++;
-        if (this.qualifying >= this.options.dwell) {
+        this.recovering++;
+        if (this.recovering >= this.options.dwell) {
           this.probing = false;
-          this.qualifying = 0;
+          this.recovering = 0;
           this.backoffMs = this.options.probeBackoffMs;
           return this.decide(
             true,
             `neural stage back within budget (median ${median.toFixed(2)} ms held under ${this.options.recoverMs} ms)`,
           );
         }
-        return this.decide(false, `probe qualifying, ${this.options.dwell - this.qualifying} more to confirm`);
+        return this.decide(false, `probe qualifying, ${this.options.dwell - this.recovering} more to confirm`);
       }
 
       // Between the thresholds: not bad enough to fail outright, not good
       // enough to recover. A probe must still end, or the network runs
       // unconfirmed forever - so patience runs out and it goes back.
-      this.qualifying = 0;
+      this.recovering = 0;
       this.probeMisses++;
       if (this.probeMisses >= this.options.probePatience) {
         this.enterFallback();
@@ -231,6 +234,7 @@ export class BudgetGuard {
     this.state = 'neural';
     this.probing = true;
     this.qualifying = 0;
+    this.recovering = 0;
     this.probeMisses = 0;
     this.samples.length = 0;
     return this.decide(true, 'probing whether the neural stage now fits');
@@ -241,6 +245,7 @@ export class BudgetGuard {
     this.samples.length = 0;
     this.state = 'neural';
     this.qualifying = 0;
+    this.recovering = 0;
     this.probing = false;
     this.forced = false;
     this.backoffMs = this.options.probeBackoffMs;
@@ -251,6 +256,7 @@ export class BudgetGuard {
     this.state = 'fallback';
     this.probing = false;
     this.qualifying = 0;
+    this.recovering = 0;
     this.probeMisses = 0;
     this.samples.length = 0;
   }
