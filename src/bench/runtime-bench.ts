@@ -75,11 +75,12 @@ export async function startCalibration(clip: string, neural = true) {
       started = performance.now();
       pipeline.start();
     },
-    load(passes: number, count = Number.POSITIVE_INFINITY) {
+    load(passes: number, count = Number.POSITIVE_INFINITY, every = 1) {
       if (!Number.isInteger(passes) || passes < 0 || passes > 64) throw new Error('Load passes out of range');
       load.passes = passes;
       load.frames = count;
-      events.push({ at: performance.now(), event: `load:${passes}:${count}` });
+      load.every = every;
+      events.push({ at: performance.now(), event: `load:${passes}:${count}:${every}` });
     },
     snapshot() {
       return { started, ended: performance.now(), samples, frames, configurations, refresh, events, errors,

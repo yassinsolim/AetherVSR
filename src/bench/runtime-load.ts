@@ -3,10 +3,12 @@ import type { EncodeContext, Upscaler, UpscalerConfig } from '../core/types.js';
 export interface RuntimeLoad {
   passes: number;
   frames: number;
+  every?: number;
 }
 
 export class LoadedUpscaler implements Upscaler {
   readonly neural = true;
+  private frameIndex = 0;
 
   constructor(private readonly inner: Upscaler, private readonly load: RuntimeLoad) {
     if (!import.meta.env.DEV) throw new Error('Runtime load is development-only');
@@ -21,7 +23,7 @@ export class LoadedUpscaler implements Upscaler {
   }
 
   encode(context: EncodeContext): void {
-    const passes = this.load.frames > 0 ? this.load.passes : 0;
+    const passes = this.load.frames > 0 && this.frameIndex++ % (this.load.every ?? 1) === 0 ? this.load.passes : 0;
     if (passes > 0) this.load.frames--;
     for (let index = 0; index <= passes; index++) {
       this.inner.encode({ ...context, timing: context.timing ? {

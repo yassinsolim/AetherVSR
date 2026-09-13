@@ -50,7 +50,7 @@ try {
       await new Promise(resolve => setTimeout(resolve, settings.warmupMs ?? 3000));
       const startup = structuredClone(await bench.finish());
       await bench.reset();
-      if (settings.passes) bench.load(settings.passes, settings.loadFrames ?? Infinity);
+      if (settings.passes) bench.load(settings.passes, settings.loadFrames ?? Infinity, settings.every ?? 1);
       await new Promise(resolve => setTimeout(resolve, settings.durationMs));
       const measured = structuredClone(await bench.finish());
       bench.stop();
