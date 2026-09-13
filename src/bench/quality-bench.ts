@@ -81,6 +81,7 @@ export async function evaluateAgainstReference(
       target: hr,
       targetFormat: format,
       sourceKind: 'sampled',
+      sampledSourceView: lrView,
     });
     const encoder = device.createCommandEncoder();
     scaler.encode({ encoder, frame: { kind: 'sampled', view: lrView }, target: targetView, timing: null });

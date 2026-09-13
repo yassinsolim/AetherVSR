@@ -7,22 +7,15 @@ import {
 import { VideoPipeline, type PipelineStats } from './core/pipeline.js';
 import { BaselineScaler, UPSCALER_OPTIONAL_FEATURES } from './core/upscale/baseline-scaler.js';
 import { NeuralUpscaler, NEURAL_OPTIONAL_FEATURES } from './core/upscale/neural-upscaler.js';
-import { BudgetGuard, type BudgetDecision } from './core/upscale/budget-guard.js';
-import { loadModel, type PackedModel } from './core/neural/model.js';
-import type { BaselineFilter } from './core/upscale/baseline.wgsl.js';
+import type { RuntimeMode, RuntimeSnapshot } from './core/upscale/runtime-controller.js';
+import { loadModel } from './core/neural/model.js';
+import { RuntimeDriver } from './runtime.js';
+import type { RuntimeLoad } from './bench/runtime-load.js';
 import { DiagnosticOverlay, OVERLAY_INTERVAL_MS } from './ui/overlay.js';
 
 /** Clip shipped with the repo so benchmarks are reproducible. See tools/. */
 const DEFAULT_MODEL = '/models/aethersr-c16d2.json';
 const DEFAULT_CLIP = '/media/aethervsr-testclip-720p30-vp9.webm';
-
-const FILTERS: readonly { readonly id: BaselineFilter; readonly label: string }[] = [
-  { id: 'catmull-rom', label: 'Catmull-Rom bicubic (9-tap)' },
-  { id: 'bilinear', label: 'Bilinear (hardware sampler)' },
-];
-
-/** Filter used unless `?filter=` selects another. */
-const DEFAULT_FILTER: BaselineFilter = 'catmull-rom';
 
 function requireElement<T extends Element>(id: string, ctor: abstract new () => T): T {
   const el = document.getElementById(id);
@@ -36,6 +29,7 @@ const status = requireElement('status', HTMLParagraphElement);
 const stage = requireElement('stage', HTMLElement);
 const fileInput = requireElement('file', HTMLInputElement);
 const upscalerSelect = requireElement('upscaler', HTMLSelectElement);
+const runtimeState = requireElement('runtime-state', HTMLElement);
 const resetButton = requireElement('reset', HTMLButtonElement);
 const exportButton = requireElement('export', HTMLButtonElement);
 
@@ -104,26 +98,34 @@ function main(gpu: GpuContext): void {
   const overlay = new DiagnosticOverlay(gpu);
   stage.append(overlay.element);
 
-  // Query overrides exist so a benchmark run is reproducible from a URL rather
-  // than from a sequence of clicks. See BENCHMARKS.md.
   const params = new URLSearchParams(location.search);
-  const requested = FILTERS.find((f) => f.id === params.get('filter'));
-  const initialFilter: BaselineFilter = requested?.id ?? DEFAULT_FILTER;
+  const requestedMode = params.get('mode');
+  const initialMode: RuntimeMode =
+    requestedMode === 'auto' || requestedMode === 'neural' || requestedMode === 'baseline'
+      ? requestedMode
+      : params.get('upscaler') === 'neural'
+        ? 'neural'
+        : params.get('filter') === 'bilinear'
+          ? 'baseline'
+          : 'auto';
+  upscalerSelect.value = initialMode;
   const forceCopyImport = params.get('import') === 'copy';
 
   // Relative paths only: this is a dev harness, not a URL loader.
   const clipParam = params.get('clip');
   const clip = clipParam !== null && clipParam.startsWith('/') ? clipParam : DEFAULT_CLIP;
 
-  const pipeline = new VideoPipeline(gpu, video, canvas, new BaselineScaler(initialFilter), {
+  const pipeline = new VideoPipeline(gpu, video, canvas, new BaselineScaler('catmull-rom'), {
     forceCopyImport,
   });
+  const driver = new RuntimeDriver(pipeline, video, gpu.capabilities.timestampQuery, initialMode);
 
   // A discarded submission or a lost device never throws in the frame loop, so
   // without this the canvas can freeze while the frame counter keeps climbing.
   watchDeviceFailures(gpu.device, (message) => {
     gpuFatal = true;
-    pipeline.stop();
+    driver.fail(message);
+    upscalerSelect.disabled = true;
     setStatus(`${message} — reload the page to recover`, 'error');
   });
 
@@ -132,126 +134,125 @@ function main(gpu: GpuContext): void {
   let activeClip = clip;
   let activeObjectUrl: string | null = null;
 
-  for (const filter of FILTERS) {
-    const option = document.createElement('option');
-    option.value = filter.id;
-    option.textContent = filter.label;
-    option.selected = filter.id === initialFilter;
-    upscalerSelect.append(option);
-  }
-  // The neural backend is offered only once its weights have loaded, so the
-  // menu never lists a stage that would fail on selection.
-  const NEURAL_VALUE = 'neural';
-  let neuralModel: PackedModel | null = null;
   let neuralInstance: NeuralUpscaler | null = null;
-  const modelParam = params.get('model');
-  const modelUrl = modelParam !== null && modelParam.startsWith('/') ? modelParam : DEFAULT_MODEL;
-  void loadModel(modelUrl)
-    .then((model) => {
-      neuralModel = model;
-      const option = document.createElement('option');
-      option.value = NEURAL_VALUE;
-      option.textContent = `Neural C${model.features}D${model.depth} (2x)`;
-      upscalerSelect.append(option);
-      if (params.get('upscaler') === NEURAL_VALUE) {
-        upscalerSelect.value = NEURAL_VALUE;
-        neuralInstance = new NeuralUpscaler(model);
-        pipeline.setUpscaler(neuralInstance);
-      }
+  const diagnosticLoad: RuntimeLoad = { passes: 0, frames: 0 };
+  const loadEnabled = import.meta.env.DEV && params.get('runtime-bench') === '1';
+  const neural = (): NeuralUpscaler | null =>
+    pipeline.currentUpscaler.neural ? neuralInstance : null;
+  let modelState: 'pending' | 'ready' | 'unavailable' = 'pending';
+  let modelError = '';
+  let lastRuntimeReason = '';
+
+  function updateRuntime(state: RuntimeSnapshot): void {
+    upscalerSelect.value = state.mode;
+    const label = `${state.mode} · ${state.tier} · ${state.state}`;
+    if (runtimeState.textContent !== label) runtimeState.textContent = label;
+    if (gpuFatal) return;
+    if (state.state === 'failed') {
+      gpuFatal = true;
+      upscalerSelect.disabled = true;
+      setStatus(`${state.reason} — reload the page to recover`, 'error');
+      return;
+    }
+    const reason = modelState === 'unavailable'
+      ? `neural model unavailable (${modelError}); using Catmull-Rom baseline`
+      : state.mode !== 'baseline' && modelState === 'pending'
+        ? 'neural model loading; using Catmull-Rom baseline'
+        : state.state === 'unavailable' && gpu.capabilities.timestampQuery
+          ? 'collecting source cadence; using Catmull-Rom baseline'
+          : state.reason;
+    if (reason === lastRuntimeReason) return;
+    lastRuntimeReason = reason;
+    if (!video.error) {
+      setStatus(reason, modelState === 'unavailable' || state.state === 'fallback' ||
+        (state.mode !== 'baseline' && !gpu.capabilities.timestampQuery) ? 'warn' : 'info');
+    }
+  }
+
+  driver.onChange = updateRuntime;
+  updateRuntime(driver.snapshot().controller);
+
+  void loadModel(DEFAULT_MODEL)
+    .then(async (model) => {
+      const wrapper = loadEnabled ? (await import('./bench/runtime-load.js')).LoadedUpscaler : null;
+      modelState = 'ready';
+      driver.setNeuralFactory(() => {
+        neuralInstance = new NeuralUpscaler(model, { passDiagnostics: !loadEnabled });
+        return wrapper ? new wrapper(neuralInstance, diagnosticLoad) : neuralInstance;
+      });
     })
     .catch((err: unknown) => {
-      // A missing model is not a harness failure: the baseline still works and
-      // saying so is more useful than an empty menu entry that throws.
+      modelState = 'unavailable';
+      modelError = describeError(err);
       console.warn('neural model unavailable:', err);
+      updateRuntime(driver.snapshot().controller);
     });
 
   upscalerSelect.addEventListener('change', () => {
-    if (upscalerSelect.value === NEURAL_VALUE) {
-      if (!neuralModel) return;
-      userChoseNeural = true;
-      guard.reset();
-      neuralInstance = new NeuralUpscaler(neuralModel);
-      pipeline.setUpscaler(neuralInstance);
-      return;
+    const mode = upscalerSelect.value;
+    if (mode === 'auto' || mode === 'neural' || mode === 'baseline') {
+      driver.setMode(mode);
     }
-    const chosen = FILTERS.find((f) => f.id === upscalerSelect.value);
-    if (!chosen) return;
-    // Exercises the Milestone 1 seam: the processing stage is reconfigured
-    // while acquisition and presentation keep running untouched.
-    userChoseNeural = false;
-    guard.reset();
-    neuralInstance = null;
-    pipeline.setUpscaler(new BaselineScaler(chosen.id));
   });
 
-  // The neural stage measures itself per pass; expose it so a whole-stage
-  // breakdown never has to be inferred from the pipeline's single span.
-  (window as unknown as Record<string, unknown>)['aethervsrNeuralStage'] = () => ({
-    id: neuralInstance?.id ?? null,
-    timing: neuralInstance?.stageTiming ?? null,
-    memory: neuralInstance?.memoryReport ?? null,
-    budget: {
-      state: guard.current,
-      forced: guard.isForced,
-      probing: guard.isProbing,
-      lastReason: lastBudgetReason,
-      lastMedianMs: lastBudgetMedian,
-    },
-  });
-
-  // --- frame-budget fallback ------------------------------------------------
-  // Watches the measured whole-stage time and drops to the baseline scaler when
-  // the neural stage cannot hold the budget. Deliberately not a quality
-  // controller - that is Milestone 6 - just a switch that cannot oscillate.
-  const guard = new BudgetGuard();
-  let lastBudgetReason = 'warming up';
-  let lastBudgetMedian = Number.NaN;
-  let userChoseNeural = params.get('upscaler') === NEURAL_VALUE;
-
-  function applyBudgetDecision(decision: BudgetDecision): void {
-    lastBudgetReason = decision.reason;
-    lastBudgetMedian = decision.medianMs;
-    if (!decision.changed) return;
-    if (decision.state === 'fallback') {
-      neuralInstance = null;
-      pipeline.setUpscaler(new BaselineScaler(DEFAULT_FILTER));
-      setStatus(`neural stage over budget (${decision.reason}) — using ${DEFAULT_FILTER}`, 'warn');
-    } else {
-      neuralInstance = new NeuralUpscaler(neuralModel!);
-      pipeline.setUpscaler(neuralInstance);
-      setStatus(decision.reason, 'info');
-    }
+  function budgetSnapshot(runtime: ReturnType<RuntimeDriver['snapshot']>) {
+    return {
+      state: runtime.controller.tier === 'neural' ? 'neural' : 'fallback',
+      forced: runtime.controller.forced,
+      probing: runtime.controller.state === 'probing',
+      lastReason: runtime.controller.reason,
+      lastMedianMs: runtime.controller.medianMs,
+    };
   }
 
-  (window as unknown as Record<string, unknown>)['aethervsrForceOverBudget'] = (on: boolean) => {
-    applyBudgetDecision(guard.setForced(on, performance.now()));
-    return { forced: guard.isForced, state: guard.current };
+  const diagnostics = window as unknown as Record<string, unknown>;
+  diagnostics['aethervsrNeuralStage'] = () => {
+    const instance = neural();
+    const runtime = driver.snapshot();
+    return {
+      id: instance?.id ?? null,
+      timing: instance?.stageTiming ?? null,
+      memory: instance?.memoryReport ?? null,
+      runtime,
+      budget: budgetSnapshot(runtime),
+    };
   };
 
-  // Every resolved whole-stage sample, and only ever one measured while the
-  // neural stage was the thing running. Handing the guard the baseline's
-  // cheaper timings is what made an earlier version cycle.
-  pipeline.onGpuPassSample = (ms) => {
-    if (!userChoseNeural || !neuralModel || !neuralInstance) return;
-    applyBudgetDecision(guard.record(ms, performance.now()));
-  };
+  if (import.meta.env.DEV) {
+    diagnostics['aethervsrForceOverBudget'] = (on: boolean) => {
+      driver.force(on);
+      const budget = budgetSnapshot(driver.snapshot());
+      return { forced: budget.forced, state: budget.state };
+    };
+    diagnostics['aethervsrRuntime'] = {
+      snapshot: () => driver.snapshot(),
+      reset: () => driver.resetMeasurements(),
+      setMode: (mode: RuntimeMode) => driver.setMode(mode),
+      force: (on: boolean) => driver.force(on),
+      load: (passes: number, frames = Number.POSITIVE_INFINITY, every = 1) => {
+        if (!loadEnabled || !Number.isInteger(passes) || passes < 0 || passes > 8 ||
+            !Number.isInteger(every) || every < 1) throw new Error('Diagnostic load is unavailable or invalid');
+        diagnosticLoad.passes = passes;
+        diagnosticLoad.frames = frames;
+        diagnosticLoad.every = every;
+      },
+      loseDevice: () => gpu.device.destroy(),
+      pipeline,
+      driver,
+      video,
+      neural,
+    };
+  }
 
-  // While in fallback nothing neural is being measured, so the only thing that
-  // can change the state is the probe timer.
-  setInterval(() => {
-    if (!userChoseNeural || !neuralModel) return;
-    if (guard.current !== 'fallback') return;
-    applyBudgetDecision(guard.tick(performance.now()));
-  }, 250);
-
-  resetButton.addEventListener('click', () => pipeline.resetMeasurements());
+  resetButton.addEventListener('click', () => driver.resetMeasurements());
 
   exportButton.addEventListener('click', () => {
     const payload = benchmarkRecord(
       gpu,
       pipeline.stats(performance.now()),
       activeClip,
-      neuralInstance?.resolvedPrecision ?? null,
+      neural()?.resolvedPrecision ?? null,
+      driver.snapshot(),
     );
     const json = JSON.stringify(payload, null, 2);
     void navigator.clipboard
@@ -300,7 +301,7 @@ function main(gpu: GpuContext): void {
         if (previous) URL.revokeObjectURL(previous);
         activeObjectUrl = null;
         activeClip = `none — last load failed (${file.name})`;
-        setStatus(`could not play ${file.name}: ${describeError(err)}`, 'error');
+        if (!gpuFatal) setStatus(`could not play ${file.name}: ${describeError(err)}`, 'error');
       },
     );
   });
@@ -313,22 +314,16 @@ function main(gpu: GpuContext): void {
     if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
   });
 
-  video.addEventListener('playing', () => {
-    // Never resume onto a lost device: submissions would be silently discarded
-    // while the frame counter kept climbing.
-    if (gpuFatal || pipeline.running) return;
-    pipeline.start();
-  });
   // The global `error` listener would fire for a clip we already reported on,
   // so only the load path reports media errors; this catches later failures.
   video.addEventListener('error', () => {
-    if (video.error) setStatus(`video element error: ${video.error.message}`, 'error');
+    if (!gpuFatal && video.error) setStatus(`video element error: ${video.error.message}`, 'error');
   });
 
   window.setInterval(() => {
     const stats = pipeline.stats(performance.now());
     overlay.update(stats);
-    if (pipeline.error) setStatus(`frame loop stopped: ${describeError(pipeline.error)}`, 'error');
+    if (!gpuFatal && pipeline.error) driver.fail(`frame loop stopped: ${describeError(pipeline.error)}`);
   }, OVERLAY_INTERVAL_MS);
 
   void loadClip(clip).then(
@@ -351,6 +346,7 @@ function benchmarkRecord(
   stats: PipelineStats,
   clip: string,
   neuralPrecision: 'f16' | 'fp32' | null,
+  runtime?: ReturnType<RuntimeDriver['snapshot']>,
 ): unknown {
   return {
     schema: 'aethervsr.benchmark/1',
@@ -431,6 +427,15 @@ function benchmarkRecord(
       // Submit-to-ready latency reported by the UA, not a per-frame cost.
       uaDecodeLatencyMs: stats.decodeLatencyMs,
     },
+    ...(runtime ? {
+      runtime: {
+        ...runtime,
+        gpuTimingScope: 'whole upscale stage only; excludes decode, import/upload, presentation and display latency',
+        legacyFilter: new URLSearchParams(location.search).get('filter') === 'bilinear'
+          ? 'main-page bilinear harness removed; legacy filter maps to Catmull-Rom baseline unless mode or upscaler=neural overrides it; bilinear remains available in bench.html'
+          : null,
+      },
+    } : {}),
   };
 }
 

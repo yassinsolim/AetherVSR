@@ -31,7 +31,7 @@ export interface PipelineConfiguration {
   readonly generation: number;
   readonly source: Size;
   readonly target: Size;
-  /** Synchronous wall time from target-size calculation through target and stage configure. */
+  /** Synchronous wall time from target-size calculation through target, importer and stage configure. */
   readonly configureMs: number;
   /** True initially or when actual source dimensions change; false for a stage-only swap. */
   readonly sourceChanged: boolean;
@@ -411,12 +411,15 @@ export class VideoPipeline {
     const format = this.gpu.capabilities.preferredCanvasFormat;
 
     this.target.configure(this.gpu.device, target, format);
+    this.importer.configure(source);
+    const sampledSourceView = this.importer.sampledView;
     this.upscaler.configure({
       device: this.gpu.device,
       source,
       target,
       targetFormat: format,
       sourceKind: this.importer.kind,
+      ...(sampledSourceView === null ? {} : { sampledSourceView }),
     });
     const configureMs = performance.now() - configureStart;
     this.configuredSource = { width: source.width, height: source.height };

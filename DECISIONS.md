@@ -1392,3 +1392,31 @@ the production default remains enabled. No second model or GPU resource set is
 allocated. Normal traces from the original diagnostic configuration stay
 separate from the new paired calibration. This changes measurement apparatus,
 not weights, production timing policy or the registered acceptance targets.
+
+## ADR-0043 - Bounded runtime policy and separate session observation
+
+**Status:** candidate for measured M9 acceptance; extends ADR-0024.
+
+RuntimeController is pure timestamp-driven policy; RuntimeDriver alone applies
+two real processing tiers, handles user intent and video lifecycle, and binds
+submission generations. Raw neural samples alone certify neural. The measured
+calibration decision in docs/M9-CALIBRATION.md freezes cadence/median thresholds,
+warmup, bounded probes and backoff before final tests. Decoder/visual-quality
+signals never choose a tier. Manual baseline disables probing; Auto and Prefer
+neural retain performance safeguards. Device failure is terminal.
+
+RuntimeSession observes full-session counters and bounded timing histograms
+independently of legacy VideoPipeline statistics, which still reset on stage
+switches. Explicit user Reset resets session totals; loading a new source does
+not. Paused/hidden time is excluded explicitly, while seek/configuration stalls
+remain counted. Late model promises cannot override manual or fatal state.
+A successful probe confirmation changes policy state without replacing its
+already-running resources. Default production weights and graph are unchanged.
+
+Sampled copy-import resources are now configured before acquisition; optional
+sampledSourceView in UpscalerConfig lets neural prebind the prepared source.
+This contains no video/page dependency and preserves stage replaceability.
+Standalone benchmarks pass their already-owned source views explicitly. The
+default neural diagnostics remain enabled and teardown-safe. Development-only
+runtime-bench hooks may disable inner diagnostics and repeat the same graph for
+controlled stress; those hooks cannot be enabled in a production bundle.

@@ -411,6 +411,7 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   private configure(size: Size): void {
     const { device } = this.gpu;
     const c = this.config;
+    this.importer.configure(size);
     this.ingest.configure({ device, size, format: c.format });
 
     for (const b of [this.activations, this.weights, this.biases, this.params]) b?.destroy();

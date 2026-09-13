@@ -211,6 +211,7 @@ export class IngestBench {
     }
     const target: Size = { width: source.width * 2, height: source.height * 2 };
     const format = this.gpu.capabilities.preferredCanvasFormat;
+    this.importer.configure(source);
     this.target.configure(this.gpu.device, target, format);
 
     if (this.config.mode === 'ingest') {

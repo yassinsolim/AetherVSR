@@ -29,7 +29,7 @@ export class FrameImporter {
   readonly kind: FrameTextureKind;
 
   private fallbackTexture: GPUTexture | null = null;
-  private fallbackFrame: FrameTexture | null = null;
+  private fallbackFrame: Extract<FrameTexture, { kind: 'sampled' }> | null = null;
   private fallbackSize: Size = { width: 0, height: 0 };
 
   constructor(
@@ -38,6 +38,32 @@ export class FrameImporter {
     supportsExternalTexture: boolean,
   ) {
     this.kind = supportsExternalTexture ? 'external' : 'sampled';
+  }
+
+  get sampledView(): GPUTextureView | null {
+    return this.fallbackFrame?.view ?? null;
+  }
+
+  configure(size: Size): void {
+    if (this.kind === 'external') return;
+    if (
+      this.fallbackTexture !== null &&
+      this.fallbackFrame !== null &&
+      this.fallbackSize.width === size.width &&
+      this.fallbackSize.height === size.height
+    ) return;
+
+    this.destroy();
+    const texture = this.device.createTexture({
+      label: 'aethervsr:frame-fallback',
+      size: { width: size.width, height: size.height },
+      format: FALLBACK_FORMAT,
+      usage:
+        GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+    this.fallbackTexture = texture;
+    this.fallbackFrame = { kind: 'sampled', view: texture.createView() };
+    this.fallbackSize = { width: size.width, height: size.height };
   }
 
   /**
@@ -57,27 +83,15 @@ export class FrameImporter {
   }
 
   private copyIntoOwnedTexture(size: Size): FrameTexture {
-    let texture = this.fallbackTexture;
-    let frame = this.fallbackFrame;
+    const texture = this.fallbackTexture;
+    const frame = this.fallbackFrame;
     if (
       texture === null ||
       frame === null ||
       this.fallbackSize.width !== size.width ||
       this.fallbackSize.height !== size.height
     ) {
-      texture?.destroy();
-      texture = this.device.createTexture({
-        label: 'aethervsr:frame-fallback',
-        size: { width: size.width, height: size.height },
-        format: FALLBACK_FORMAT,
-        usage:
-          GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-      });
-      // The view is created once and reused; only the texture contents change.
-      frame = { kind: 'sampled', view: texture.createView() };
-      this.fallbackTexture = texture;
-      this.fallbackFrame = frame;
-      this.fallbackSize = size;
+      throw new Error('FrameImporter copy path requires configure() for the current size before acquire()');
     }
 
     this.device.queue.copyExternalImageToTexture(

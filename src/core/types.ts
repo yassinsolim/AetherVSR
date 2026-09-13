@@ -46,6 +46,8 @@ export interface UpscalerConfig {
   readonly targetFormat: GPUTextureFormat;
   /** Which {@link FrameTexture} variant this session will deliver. */
   readonly sourceKind: FrameTextureKind;
+  /** Stable sampled input view. Required by neural sampled configuration; reconfigure if it changes. */
+  readonly sampledSourceView?: GPUTextureView;
 }
 
 /**

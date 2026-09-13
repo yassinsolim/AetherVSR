@@ -68,13 +68,15 @@ function makeHarness(sourceKind: UpscalerConfig['sourceKind'] = 'external') {
     headWeights: weights, headBias: weights,
   } as unknown as PackedModel;
   const upscaler = new NeuralUpscaler(model, { useF16: false });
+  const sampledSourceView = {} as GPUTextureView;
   const config: UpscalerConfig = {
     device: device as unknown as GPUDevice, source: { width: 16, height: 16 },
     target: { width: 32, height: 32 }, targetFormat: 'rgba8unorm', sourceKind,
+    ...(sourceKind === 'sampled' ? { sampledSourceView } : {}),
   };
   const frame: FrameTexture = sourceKind === 'external'
     ? { kind: 'external', texture: {} as GPUExternalTexture }
-    : { kind: 'sampled', view: {} as GPUTextureView };
+    : { kind: 'sampled', view: sampledSourceView };
   const context: EncodeContext = {
     encoder: encoder as unknown as GPUCommandEncoder, frame, target: {} as GPUTextureView,
     timing: { querySet: {} as GPUQuerySet, beginIndex: 0, endIndex: 1 },
@@ -98,9 +100,9 @@ function makeHarness(sourceKind: UpscalerConfig['sourceKind'] = 'external') {
     if (result?.type !== 'return') throw new Error('missing staging buffer');
     return result.value;
   };
-  const startRead = () => {
-    upscaler.encode(context);
-    upscaler.encode(context);
+  const startRead = (input = context) => {
+    upscaler.encode(input);
+    upscaler.encode(input);
     return staging();
   };
   return { upscaler, config, context, device, encoder, createView, allocationCounts, group, startRead };
@@ -134,29 +136,57 @@ describe('NeuralUpscaler resource lifecycle', () => {
     upscaler.destroy();
   });
 
-  it('keeps copy-import bound to its supplied view, creating only the deferred groups', () => {
+  it('preallocates copy-import groups for the supplied view on every configuration', () => {
+    const harness = makeHarness('sampled');
+    const { upscaler, config, context, encoder, group } = harness;
+    for (let generation = 0; generation < 3; generation++) {
+      const view = generation === 0 ? config.sampledSourceView! : {} as GPUTextureView;
+      const source = { width: 16 * (generation + 1), height: 16 };
+      upscaler.configure({ ...config, source, target: { width: source.width * 2, height: 32 }, sampledSourceView: view });
+      expect(group('stem')[0]?.resource).toBe(view);
+      expect(group('head')[5]?.resource).toBe(view);
+      expect(group('head')[3]?.resource).toBe(group('blit')[1]?.resource);
+      const counts = harness.allocationCounts();
+      for (let frameIndex = 0; frameIndex < 3; frameIndex++) {
+        upscaler.encode({ ...context, frame: { kind: 'sampled', view } });
+        expect(harness.allocationCounts()).toEqual(counts);
+      }
+      expect(encoder.beginComputePass.mock.calls.at(-3)?.[0].timestampWrites).toEqual({
+        querySet: context.timing?.querySet, beginningOfPassWriteIndex: 0,
+      });
+      expect(encoder.beginRenderPass.mock.calls).toHaveLength((generation + 1) * 3);
+      expect(encoder.beginRenderPass.mock.calls.at(-1)?.[0].timestampWrites).toEqual({
+        querySet: context.timing?.querySet, endOfPassWriteIndex: 1,
+      });
+    }
+    upscaler.destroy();
+  });
+
+  it('rejects legacy sampled configuration without a prepared source view', () => {
+    const harness = makeHarness();
+    const counts = harness.allocationCounts();
+    expect(() => harness.upscaler.configure({ ...harness.config, sourceKind: 'sampled' }))
+      .toThrow(/requires sampledSourceView/);
+    expect(() => harness.upscaler.encode(harness.context)).toThrow(/before configure/);
+    expect(harness.allocationCounts()).toEqual(counts);
+  });
+
+  it('rejects a changed sampled view instead of lazily allocating groups', () => {
     const harness = makeHarness('sampled');
     const { upscaler, config, context, encoder, group } = harness;
     upscaler.configure(config);
     const counts = harness.allocationCounts();
+    const changed = { ...context, frame: { kind: 'sampled' as const, view: {} as GPUTextureView } };
+    expect(() => upscaler.encode(changed)).toThrow(/source view is not prepared/);
+    expect(harness.allocationCounts()).toEqual(counts);
+    expect(encoder.beginComputePass).not.toHaveBeenCalled();
+    expect(encoder.beginRenderPass).not.toHaveBeenCalled();
+    expect(group('stem')[0]?.resource).toBe(config.sampledSourceView);
     upscaler.encode(context);
-    expect(context.frame.kind).toBe('sampled');
-    if (context.frame.kind !== 'sampled') throw new Error('expected sampled frame');
-    expect(group('stem')[0]?.resource).toBe(context.frame.view);
-    expect(group('head')[5]?.resource).toBe(context.frame.view);
-    expect(group('head')[3]?.resource).toBe(group('blit')[1]?.resource);
-    expect(harness.allocationCounts()).toEqual({ ...counts, createBindGroup: counts.createBindGroup! + 2 });
-    const warmedCounts = harness.allocationCounts();
-    upscaler.encode(context);
-    upscaler.encode(context);
-    expect(harness.allocationCounts()).toEqual(warmedCounts);
-    expect(encoder.beginComputePass.mock.calls[0]?.[0].timestampWrites).toEqual({
-      querySet: context.timing?.querySet, beginningOfPassWriteIndex: 0,
-    });
-    expect(encoder.beginRenderPass.mock.calls).toHaveLength(3);
-    expect(encoder.beginRenderPass.mock.calls.at(-1)?.[0].timestampWrites).toEqual({
-      querySet: context.timing?.querySet, endOfPassWriteIndex: 1,
-    });
+    expect(harness.allocationCounts()).toEqual(counts);
+    upscaler.destroy();
+    expect(() => upscaler.encode(context)).toThrow(/configure\(\)/);
+    expect(harness.allocationCounts()).toEqual(counts);
     upscaler.destroy();
   });
 
@@ -215,15 +245,13 @@ describe('NeuralUpscaler resource lifecycle', () => {
     upscaler.destroy();
   });
 
-  it.each(['external', 'sampled'] as const)('uses the originating %s stem timing flag', async (sourceKind) => {
-    const { upscaler, config, context, startRead } = makeHarness(sourceKind);
+  it.each([false, true])('uses the originating sampled stem timing flag (whole-stage timing=%s)', async (wholeStage) => {
+    const { upscaler, config, context, startRead } = makeHarness('sampled');
     upscaler.configure(config);
-    const staging = startRead();
-    upscaler.encode({ ...context, frame: sourceKind === 'external'
-      ? { kind: 'sampled', view: {} as GPUTextureView }
-      : { kind: 'external', texture: {} as GPUExternalTexture } });
+    const staging = startRead({ ...context, timing: wholeStage ? context.timing : null });
+    upscaler.encode({ ...context, timing: wholeStage ? null : context.timing });
     await staging.settle();
-    expect(upscaler.stageTiming?.stem === null).toBe(sourceKind === 'sampled');
+    expect(upscaler.stageTiming?.stem === null).toBe(wholeStage);
     expect(upscaler.stageTiming?.body.samples).toBe(1);
     upscaler.destroy();
   });

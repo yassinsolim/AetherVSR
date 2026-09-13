@@ -73,9 +73,9 @@ export interface NeuralMemoryReport {
  *
  * ## Allocation
  *
- * Reusable resources for the external path are created in {@link configure}.
- * Copy-import stem/head groups remain lazy because the source view is supplied
- * only to {@link encode}. The external texture's bind group must be rebuilt
+ * Reusable resources for both import paths are created in {@link configure}.
+ * Sampled callers must supply their stable source view as `sampledSourceView`;
+ * a changed view requires reconfiguration. The external texture's bind group must be rebuilt
  * each frame because the handle expires each task; that happens inside
  * `ExternalTextureIngest`.
  *
@@ -187,8 +187,11 @@ export class NeuralUpscaler implements Upscaler {
   }
 
   configure(config: UpscalerConfig): void {
+    const { device, source, sampledSourceView } = config;
+    if (config.sourceKind === 'sampled' && sampledSourceView === undefined) {
+      throw new Error('NeuralUpscaler sampled configure() requires sampledSourceView');
+    }
     this.destroyResources();
-    const { device, source } = config;
     this.device = device;
     // f16 is requested by default but the device decides; a model that silently
     // ran at a different precision than reported would make every numerical
@@ -348,9 +351,7 @@ export class NeuralUpscaler implements Upscaler {
     this.sampler = device.createSampler({ magFilter: 'nearest', minFilter: 'nearest' });
 
     // --- bind groups ----------------------------------------------------
-    // External ingest owns a stable view already; copy-import supplies its
-    // source view only when encoding the first frame.
-    if (config.sourceKind === 'external') this.bindSource(this.ingest.view);
+    this.bindSource(config.sourceKind === 'external' ? this.ingest.view : sampledSourceView as GPUTextureView);
     for (let i = 0; i < this.model.depth; i++) {
       const src = i % 2 === 0 ? this.ping : this.pong;
       const dst = i % 2 === 0 ? this.pong : this.ping;
@@ -438,7 +439,7 @@ export class NeuralUpscaler implements Upscaler {
         : null,
     );
     if (view !== this.lastIngestView) {
-      this.bindSource(view);
+      throw new Error('NeuralUpscaler source view is not prepared; configure() with sampledSourceView before encode()');
     }
 
     const stemGroup = this.stemGroup;

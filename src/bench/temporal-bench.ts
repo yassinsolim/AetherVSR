@@ -254,6 +254,7 @@ export async function runTemporalBench(
       target: outputSize,
       targetFormat: format,
       sourceKind: 'sampled',
+      sampledSourceView: lrView,
     });
 
     for (const sequence of sequences) {

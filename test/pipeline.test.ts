@@ -2,13 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GpuContext } from '../src/core/gpu/device.js';
 import { GpuTimer } from '../src/core/metrics/gpu-timer.js';
 import { VideoPipeline } from '../src/core/pipeline.js';
-import type { EncodeContext, FrameTick, Size, UpscalerConfig } from '../src/core/types.js';
+import type { EncodeContext, FrameTexture, FrameTextureKind, FrameTick, Size, UpscalerConfig } from '../src/core/types.js';
 
 const mocks = vi.hoisted(() => ({
   deliver: null as ((tick: FrameTick) => void) | null,
   running: false,
   configureTarget: vi.fn(),
-  acquire: vi.fn(() => ({ kind: 'sampled', view: {} })),
+  configureImporter: vi.fn<(size: Size) => void>(),
+  sampledView: null as GPUTextureView | null,
+  acquire: vi.fn<() => FrameTexture>(),
 }));
 
 vi.mock('../src/core/acquisition/video-source.js', () => ({
@@ -27,7 +29,12 @@ vi.mock('../src/core/acquisition/video-source.js', () => ({
 
 vi.mock('../src/core/acquisition/frame-importer.js', () => ({
   FrameImporter: class {
-    readonly kind = 'sampled';
+    readonly kind: FrameTextureKind;
+    constructor(_device: GPUDevice, _video: HTMLVideoElement, external: boolean) {
+      this.kind = external ? 'external' : 'sampled';
+    }
+    readonly configure = mocks.configureImporter;
+    get sampledView() { return this.kind === 'sampled' ? mocks.sampledView : null; }
     readonly acquire = mocks.acquire;
     destroy() {}
   },
@@ -52,7 +59,7 @@ function makeTick(width = 320, height = 180, now = 100): FrameTick {
   };
 }
 
-function makeHarness(timestampQuery = true) {
+function makeHarness(timestampQuery = true, externalTexture = false) {
   const pending: (() => void)[] = [];
   const clock = { now: 10 };
   vi.spyOn(performance, 'now').mockImplementation(() => clock.now);
@@ -77,7 +84,7 @@ function makeHarness(timestampQuery = true) {
     destroy: vi.fn(),
   };
   const gpu = {
-    device, capabilities: { timestampQuery, externalTexture: false, preferredCanvasFormat: 'rgba8unorm' },
+    device, capabilities: { timestampQuery, externalTexture, preferredCanvasFormat: 'rgba8unorm' },
   } as unknown as GpuContext;
   const pipeline = new VideoPipeline(gpu, {} as HTMLVideoElement, {} as HTMLCanvasElement, upscaler);
   pipeline.start();
@@ -102,7 +109,12 @@ beforeEach(() => {
   mocks.deliver = null;
   mocks.running = false;
   mocks.configureTarget.mockReset();
-  mocks.acquire.mockReset().mockReturnValue({ kind: 'sampled', view: {} });
+  mocks.sampledView = null;
+  mocks.configureImporter.mockReset().mockImplementation(() => { mocks.sampledView ??= {} as GPUTextureView; });
+  mocks.acquire.mockReset().mockImplementation(() => {
+    if (mocks.sampledView === null) throw new Error('Importer was not configured');
+    return { kind: 'sampled', view: mocks.sampledView };
+  });
   vi.stubGlobal('GPUBufferUsage', { COPY_SRC: 0x0004, COPY_DST: 0x0008, QUERY_RESOLVE: 0x0200, MAP_READ: 0x0001 });
   vi.stubGlobal('GPUMapMode', { READ: 0x0001 });
 });
@@ -113,6 +125,47 @@ afterEach(() => {
 });
 
 describe('VideoPipeline timing provenance', () => {
+  it('prepares the sampled view before stage configuration and forwards the original frame', () => {
+    const { pipeline, upscaler, emit } = makeHarness(false);
+    expect(mocks.sampledView).toBeNull();
+    upscaler.configure.mockImplementation((config) => {
+      expect(config.sourceKind).toBe('sampled');
+      expect(config.sampledSourceView).not.toBeNull();
+      expect(config.sampledSourceView).toBe(mocks.sampledView);
+      expect(mocks.acquire).not.toHaveBeenCalled();
+    });
+    emit();
+    expect(mocks.configureImporter).toHaveBeenCalledExactlyOnceWith({ width: 320, height: 180 });
+    expect(mocks.configureImporter.mock.invocationCallOrder[0]!).toBeLessThan(upscaler.configure.mock.invocationCallOrder[0]!);
+    expect(upscaler.encode.mock.calls[0]?.[0].frame).toBe(mocks.acquire.mock.results[0]?.value);
+    emit();
+    expect(mocks.configureImporter).toHaveBeenCalledTimes(1);
+    expect(upscaler.configure).toHaveBeenCalledTimes(1);
+
+    upscaler.configure.mockReset();
+    const resizedView = {} as GPUTextureView;
+    mocks.configureImporter.mockImplementationOnce(() => { mocks.sampledView = resizedView; });
+    emit(makeTick(640, 360));
+    expect(mocks.configureImporter).toHaveBeenLastCalledWith({ width: 640, height: 360 });
+    expect(upscaler.configure).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      source: { width: 640, height: 360 }, sampledSourceView: resizedView,
+    }));
+    expect(upscaler.encode.mock.calls.at(-1)?.[0].frame).toEqual({ kind: 'sampled', view: resizedView });
+    pipeline.destroy();
+  });
+
+  it('configures external import without supplying a sampled view', () => {
+    const { pipeline, upscaler, emit } = makeHarness(false, true);
+    const frame: FrameTexture = { kind: 'external', texture: {} as GPUExternalTexture };
+    mocks.acquire.mockReturnValue(frame);
+    emit();
+    expect(mocks.configureImporter).toHaveBeenCalledExactlyOnceWith({ width: 320, height: 180 });
+    expect(upscaler.configure.mock.calls[0]?.[0]).toMatchObject({ sourceKind: 'external' });
+    expect(upscaler.configure.mock.calls[0]?.[0]).not.toHaveProperty('sampledSourceView');
+    expect(upscaler.encode.mock.calls[0]?.[0].frame).toBe(frame);
+    pipeline.destroy();
+  });
+
   it('drains the outer timer after stopping without changing epochs or allocating GPU resources', async () => {
     const { pipeline, device, epoch, emit, settle } = makeHarness();
     const onGpuSample = vi.fn<NonNullable<VideoPipeline['onGpuSample']>>();
@@ -156,7 +209,7 @@ describe('VideoPipeline timing provenance', () => {
     pipeline.destroy();
   });
 
-  it('snapshots provenance before encode and reports synchronous target plus stage configuration time', async () => {
+  it('snapshots provenance before encode and reports synchronous target, importer and stage configuration time', async () => {
     const { pipeline, upscaler, device, clock, epoch, emit, settle } = makeHarness();
     const onGpuSample = vi.fn();
     const onGpuPassSample = vi.fn();
@@ -172,10 +225,11 @@ describe('VideoPipeline timing provenance', () => {
       expect(epoch).toHaveBeenCalledTimes(1);
       clock.now += 2;
     });
+    mocks.configureImporter.mockImplementation(() => { clock.now += 4; });
     upscaler.configure.mockImplementation(() => { clock.now += 3; });
     mocks.acquire.mockImplementation(() => {
       clock.now += 1;
-      return { kind: 'sampled', view: {} };
+      return { kind: 'sampled', view: {} as GPUTextureView };
     });
     upscaler.encode.mockImplementation(() => { clock.now += 7; });
     const source = { width: 320, height: 180 };
@@ -189,13 +243,13 @@ describe('VideoPipeline timing provenance', () => {
     clock.now = 40;
     await settle();
     expect(onGpuSample).toHaveBeenCalledExactlyOnceWith({
-      ms: 2, generation: 1, sequence: 1, submittedAt: 16, resolvedAt: 40,
+      ms: 2, generation: 1, sequence: 1, submittedAt: 20, resolvedAt: 40,
       neural: true, upscalerId: 'first', source: { width: 320, height: 180 },
     });
     expect(onGpuPassSample).toHaveBeenCalledExactlyOnceWith(2);
     expect(onConfiguration).toHaveBeenCalledExactlyOnceWith({
       generation: 1, source: { width: 320, height: 180 }, target: { width: 640, height: 360 },
-      configureMs: 5, sourceChanged: true,
+      configureMs: 9, sourceChanged: true,
     });
     expect(pipeline.stats(100).sourceSize).toEqual({ width: 320, height: 180 });
   });
@@ -307,18 +361,18 @@ describe('VideoPipeline timing provenance', () => {
     expect(device.createBuffer).toHaveBeenCalledTimes(timestamps ? 8 : 0);
   });
 
-  it.each(['target', 'stage', 'encode', 'submit'] as const)('does not report a submitted frame after a %s failure', (failure) => {
+  it.each(['target', 'importer', 'stage', 'encode', 'submit'] as const)('does not report a submitted frame after a %s failure', (failure) => {
     const { pipeline, upscaler, device, emit } = makeHarness();
     const error = new Error(failure);
     const onFrame = vi.fn();
     const onConfiguration = vi.fn();
     pipeline.onFrame = onFrame;
     pipeline.onConfiguration = onConfiguration;
-    const failingCall = { target: mocks.configureTarget, stage: upscaler.configure, encode: upscaler.encode, submit: device.queue.submit }[failure];
+    const failingCall = { target: mocks.configureTarget, importer: mocks.configureImporter, stage: upscaler.configure, encode: upscaler.encode, submit: device.queue.submit }[failure];
     failingCall.mockImplementationOnce(() => { throw error; });
     expect(() => emit()).toThrow(error);
     expect(onFrame).not.toHaveBeenCalled();
-    expect(onConfiguration).toHaveBeenCalledTimes(failure === 'target' || failure === 'stage' ? 0 : 1);
+    expect(onConfiguration).toHaveBeenCalledTimes(['target', 'importer', 'stage'].includes(failure) ? 0 : 1);
     expect(pipeline.error).toBe(error);
     expect(pipeline.running).toBe(false);
     expect(pipeline.stats(100).framesRendered).toBe(0);

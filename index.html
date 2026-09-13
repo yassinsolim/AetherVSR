@@ -3,20 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AetherVSR — WebGPU video baseline harness</title>
+    <title>AetherVSR — M9</title>
     <link rel="stylesheet" href="/src/ui/harness.css" />
   </head>
   <body>
     <header class="bar">
       <span class="brand">AetherVSR</span>
-      <span class="milestone">Milestone 1 · WebGPU baseline · no inference</span>
+      <span class="milestone">Milestone 9</span>
+      <span id="runtime-state" class="milestone">auto · baseline · loading</span>
       <label class="control">
         clip
         <input id="file" type="file" accept="video/*" />
       </label>
       <label class="control">
-        upscaler
-        <select id="upscaler"></select>
+        mode
+        <select id="upscaler">
+          <option value="auto" selected>Auto performance</option>
+          <option value="neural">Prefer neural</option>
+          <option value="baseline">Baseline</option>
+        </select>
       </label>
       <button id="reset" type="button">reset stats</button>
       <button id="export" type="button">copy benchmark JSON</button>
