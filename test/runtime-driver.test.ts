@@ -152,6 +152,17 @@ afterEach(() => {
 });
 
 describe('RuntimeDriver', () => {
+  it('accepts a delivered rVFC timestamp preceding the resume event clock', () => {
+    const { driver, pipeline, play, configure } = createHarness();
+    configure();
+    vi.advanceTimersByTime(100);
+    play();
+    expect(() => pipeline.onFrame?.({ now: 95, mediaTime: 1, presentedDelta: 1,
+      size: { width: 1280, height: 720 }, presentationTime: 94, expectedDisplayTime: 110,
+      decodeLatencyMs: null })).not.toThrow();
+    expect(driver.snapshot().session.framesRendered).toBe(1);
+  });
+
   it('keeps manual baseline intent when the neural factory arrives after clean cadence', () => {
     const { driver, pipeline, baseline, factory, configure, frames, play } = createHarness();
     configure();

@@ -184,12 +184,13 @@ export class RuntimeSession {
     loadGeneration: number,
     tier: Tier,
     playbackRate: number,
+    observedAt = tick.now,
   ): number | null {
-    this.checkTime(tick.now);
+    this.checkTime(observedAt);
     if (!Number.isSafeInteger(tick.presentedDelta) || tick.presentedDelta < 0) {
       throw new RangeError('Presented delta must be a nonnegative integer.');
     }
-    this.lastNow = tick.now;
+    this.lastNow = observedAt;
     this.framesRendered++;
     this.framesPresented += tick.presentedDelta;
     this.framesSkipped += Math.max(0, tick.presentedDelta - 1);

@@ -58,7 +58,7 @@ export class RuntimeDriver {
       if (this.mediaTime !== null && tick.mediaTime < this.mediaTime) this.invalidate(now);
       this.mediaTime = tick.mediaTime;
       const fps = this.session.recordFrame(tick, this.quality(), this.loadGeneration,
-        pipeline.currentUpscaler.neural ? 'neural' : 'baseline', video.playbackRate);
+        pipeline.currentUpscaler.neural ? 'neural' : 'baseline', video.playbackRate, now);
       const observed = this.session.snapshot(now);
       if (fps !== null) {
         this.controller.setWorkload(this.width, this.height, fps, now);
