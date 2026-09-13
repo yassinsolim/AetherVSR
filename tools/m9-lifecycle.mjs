@@ -328,12 +328,19 @@ async function background(page) {
     check(quiet.elapsedMs >= 200, 'Frozen interval must span at least 200 real milliseconds');
     suspended(before, after);
     await page.bringToFront();
+    const browserPausedMedia = await page.evaluate(async () => {
+      const video = window.aethervsrRuntime.video;
+      const paused = video.paused;
+      if (paused) await video.play();
+      return paused;
+    });
     await page.waitForFunction(() => document.visibilityState === 'visible' &&
       window.aethervsrRuntime.snapshot().running, null, { timeout });
     await advance(page, 30);
     const resumed = await stable(page);
     intent(before, resumed, 'neural');
-    return { before, quiet, after, resumed, scope: 'Actual hidden tab, CDP frozen/active, then foreground resume' };
+    return { before, quiet, after, resumed, browserPausedMedia,
+      scope: 'Actual hidden tab, CDP frozen/active, then foreground. Explicit play only if Chromium paused media during forced freeze; controller never overrides a paused video.' };
   } finally {
     if (frozen) await cdp.send('Page.setWebLifecycleState', { state: 'active' }).catch(() => {});
     await cdp.detach();
