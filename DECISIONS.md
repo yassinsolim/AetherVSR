@@ -1330,3 +1330,22 @@ alone passes while the experiment is still confounded.
 The general rule: **an experimental switch must not perturb anything except the
 thing it switches.** Where that cannot be guaranteed by construction, it is
 asserted by a test that fails loudly.
+
+## ADR-0040 - R3 remains research-only after M8
+
+**Status:** accepted (Milestone 9 scope closure).
+
+M8 reached NO SELECTED ADVANTAGE at the matched 81,180-update horizon. Two R3
+seeds deteriorated severely; the mechanism remains unresolved and is not an M9
+blocker. The audited CPU result and limitations remain in BENCHMARKS.md and
+docs/M8-STATUS.md; this decision does not reopen training or reinterpret them.
+
+Production remains the M6 C16D2 model, SHA256
+`d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
+R3 is research-only. No production runtime path, controller tier or recovery
+policy may depend on R3 weights. Any future architecture work must explicitly
+reopen the question through a new registered experiment and decision, not
+silently revive it through a model override. This extends ADR-0038's no-shipping
+decision without changing its historical evidence. M9 has only production
+neural and Catmull-Rom tiers and uses runtime evidence, never scene-quality
+predictions, to choose between them.
