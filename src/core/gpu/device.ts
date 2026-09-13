@@ -149,6 +149,7 @@ export interface AcquireGpuOptions {
    * here rather than discovering the gap at shader-validation time.
    */
   readonly optionalFeatures?: readonly GPUFeatureName[];
+  readonly withheldFeatures?: readonly GPUFeatureName[];
   /**
    * Limits to raise above the WebGPU guaranteed minimums *if the adapter
    * allows it*. Each entry is clamped to the adapter's reported maximum, and
@@ -184,7 +185,8 @@ export async function acquireGpu(options: AcquireGpuOptions = {}): Promise<GpuCo
   // Request only what the adapter actually advertises; asking for an
   // unsupported feature makes requestDevice() reject outright.
   const wanted = new Set([...HARNESS_OPTIONAL_FEATURES, ...(options.optionalFeatures ?? [])]);
-  const requiredFeatures = [...wanted].filter((f) => adapter.features.has(f));
+  const requiredFeatures = [...wanted].filter((feature) =>
+    adapter.features.has(feature) && !options.withheldFeatures?.includes(feature));
 
   // Clamping to what the adapter reports should already make this
   // unrejectable, but "should" is not a fallback. A raised limit is a

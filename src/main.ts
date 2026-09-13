@@ -455,6 +455,7 @@ const withheldFeatures = new Set(
 );
 
 acquireGpu({
+  withheldFeatures: withheldFeatures.has('timestamp-query') ? ['timestamp-query'] : [],
   // `?withhold=shader-f16` drops a feature from the request, so the device is
   // created genuinely without it. That exercises the real detection path -
   // `device.features.has('shader-f16')` returning false - rather than
