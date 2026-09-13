@@ -8,10 +8,17 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine �
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 8 complete; production retained.** A
-6,291-parameter neural upscaler runs in the production pipeline at **5.7 ms
-p50, ~35% of a 60 Hz frame budget**, 2560×1440 output from a 1280×720 source,
-with automatic fallback to a conventional scaler when it cannot hold the budget.
+**Status: M9 runtime controller measured; publication gates pending.** The
+production 6,291-parameter C16D2 weights are unchanged. Auto performance selects
+neural or Catmull-Rom from runtime evidence, with hysteresis and real neural
+recovery probes; Baseline mode never probes. This does not predict scene quality.
+
+On the M5, a ten-minute constant-frame-rate 720p60 run retained neural with
+59.61 rendered fps, 0.876% combined callback/decoder loss, and no fallbacks or
+errors. Neural GPU p50/p95 were 6.31/9.89 ms. Some short normal rows exceeded
+the 1% loss reference, including the original irregular-cadence clip; this is
+not a universal stutter-free claim. Exact environment, scopes, failed checks
+and overload/recovery results are in [docs/M9-REPORT.md](docs/M9-REPORT.md).
 
 Milestone 8 tested R0/R3 at 81,180 updates with matched effective initialization
 and paired training streams. Fixed-final R3 minus R0 averaged -15.7896 dB across
@@ -21,7 +28,7 @@ sign-flip p=0.25 cannot establish conventional significance with three pairs.
 The initial MPS scoring pass was withdrawn and all captured scores regenerated
 with the verified CPU reference. No candidate or confirmation scoring followed.
 See [BENCHMARKS.md](BENCHMARKS.md) for the CPU evidence, unresolved deterioration
-and the separate historical M7 result; the runtime figure above predates M8.
+and the separate historical M7 result. M9 performs no new model training.
 
 ## What the evidence supports
 

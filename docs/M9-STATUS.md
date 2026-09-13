@@ -1,6 +1,7 @@
 # M9 status and review ledger
 
-M9 is in progress; no replacement verdict or completed milestone is claimed.
+M9's measured decision is REPLACE BudgetGuard, with explicit performance limits.
+Publication gates remain pending; no all-scenarios pass is claimed.
 Baseline: c65f67a, 168 Vitest/308 Python, typecheck/lint/build/npm ci and exact
 GitHub CI success. Scope/protocol committed at 2683399; calibrated candidate
 at afdc05a. Production model bytes remain unchanged. R3 is research-only.
@@ -71,12 +72,43 @@ HTML excludes the Vite reload client, which otherwise reloads after freeze.
    snapshots retain backoff/threshold/generation transitions. Native cleanup is
    bounded. Media range cancellations are recorded separately from media errors.
    No test is passed merely because a row was captured successfully.
+8. Final independent statistics audit reconstructed all 13 native rows, 63,574
+    callbacks, 63,279 GPU samples, 26 early/late subwindows and 236 evidence-driven
+    decisions. Counts, exact neural percentiles, decoder endpoints, model/media
+    identity and source hashes matched. It recommended REPLACE while explicitly
+    preserving original and short-CFR loss failures, not an all-pass closure.
+9. Final source review found no reproduced P0/P1 in the measured paths. A P2
+    read-only observer could advance the clock before a subsequent old-time
+    snapshot; this was repaired and permanently tested. The actual measurement
+    hooks did not exercise it, so the recorded matrix is not invalidated. API
+    comments now label legacy payload accounting and its excluded padding.
+10. Actual old/new NeuralUpscaler GPU output comparison passed all six cases:
+    fp32/f16, odd sampled sizes and reconfiguration, plus paused 720p external
+    video. Maximum byte difference zero. This verifies binding-lifetime output
+    continuity, not new quality gains or performance. Native lifecycle is rerun
+    on final source separately from those output checks.
+
+## Measured decision
+
+The amended-CFR ten-minute gate passed: 600.0011 active seconds, 59.611557
+rendered and 59.914890 presented fps, 315 combined skips/drops over 35,949
+presented frames (0.876241%), zero errors/fallback/probes/tier changes. There
+were 298 loop rewarm/confirmation state changes, not zero state transitions.
+The short original Auto loss was 2.566964%, original baseline 7.426019%, and
+short CFR Auto 1.057906%; those do not pass the 1% reference and are retained.
+The literal preregistered clean-loss acceptance gate is the ten-minute interval,
+not a claim that every shorter window or source passes it.
+
+CFR sustained load fell back 0.4057 s after injection, had four failed probes
+with 4/8/16/30-s backoff, and confirmed genuine neural recovery 16.3560 s after
+removal. It remained neural for another 33.6440 s with expected loop rewarmups.
+The 48.172890-ms single-frame stimulus caused no fallback. Normal 1080p30/60
+were feasible in the measured short runs; no cross-vendor or universal 4K claim.
+Full scopes, every matrix row and limitations are in M9-REPORT.md.
 
 ## Remaining gates
 
-- Exact-CFR paired source comparison, full clean/transient/load matrix and
-  ten-minute stability, including first/last two-minute windows.
-- Independent final source/trace/statistics/acceptance review and explicit
-  REPLACE / EVOLVE IN PLACE / RETAIN verdict.
-- Final documentation, all software/replay gates, clean pushed main and
-  exact-HEAD GitHub CI. M10 is not implemented.
+- Final native lifecycle verification after the non-measurement-path observer
+   repair; all software/replay gates and a fresh-clone check.
+- Final publication with clean pushed main and exact-HEAD GitHub CI.
+   M10 is the recommended Chrome/Chromium extension, not implemented.

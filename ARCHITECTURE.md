@@ -56,7 +56,7 @@ flowchart TD
 ```
 
 Every path shown is implemented. `U` dispatches to exactly one of `B` or `N` per
-frame; the budget guard decides which. Dotted edges are observation, not data
+frame; the runtime controller decides which. Dotted edges are observation, not data
 flow.
 
 ## Stages
@@ -182,8 +182,9 @@ multi-pass neural graph needs. See DECISIONS.md ADR-0012.
   `timestamp-query`, using a fixed pool of resolve/staging buffers. A frame
   with no free slot is simply left unmeasured; the loop never blocks.
 
-The overlay refreshes on a 250 ms timer, never from the frame callback, so that
-measuring the pipeline cannot perturb the pipeline.
+The timing overlay refreshes on a 250 ms timer, not from the frame callback.
+Instrumentation still has overhead; benchmarks record the apparatus rather
+than assuming observation is free.
 
 ## Orchestration
 
@@ -233,10 +234,24 @@ small passes (see ADR-0025). On the copy-import path there is no ingest pass, so
 the stem opens the whole-stage span and gives up its own per-pass figure rather
 than leaving the span half-written.
 
-**Fallback.** `BudgetGuard` (`src/core/upscale/budget-guard.ts`) watches the
-measured whole-stage time and swaps in the baseline scaler when the network
-cannot hold the budget, recovering only via a probe that measures the network
-itself. See ADR-0024.
+**Runtime control (M9).** RuntimeController is pure timestamp-driven policy;
+RuntimeDriver applies tier changes and lifecycle events. Only production C16D2
+and Catmull-Rom are instantiated as tiers. Auto performance and Prefer neural
+both retain performance fallback; manual Baseline never probes. Only fresh,
+same-generation raw neural timestamps can confirm neural or recovery. The
+calibrated median thresholds are 15/13 ms fail/recover at 60 fps and capped
+24/22 ms at 30 fps. Lower cadence requires clean baseline observations, never
+neural-induced playback slowing. See [docs/M9-CALIBRATION.md](docs/M9-CALIBRATION.md).
+
+Workload changes invalidate old readbacks, pause/hidden state freezes active
+probe clocks, and GPU failure is terminal. Failed probes back off to 30 seconds;
+successful confirmation does not recreate the active stage. Resources are
+destroyed on fallback, not retained speculatively. RuntimeSession keeps bounded
+whole-session timing histograms and counters separate from legacy stage-local
+statistics; tier/source switches do not erase the session. The original
+BudgetGuard remains available for regression and frozen-source trace comparison.
+ADR-0043 records these boundaries. Measurement scopes, failed short-run loss
+checks and hardware limits are in [docs/M9-REPORT.md](docs/M9-REPORT.md).
 
 ## What a further backend would need
 

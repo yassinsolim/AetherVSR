@@ -182,7 +182,7 @@ export async function loadModel(url: string): Promise<PackedModel> {
   return packModel((await response.json()) as ModelFile);
 }
 
-/** Persistent GPU bytes the packed weights will occupy at a given precision. */
+/** Packed weight payload bytes, excluding upload-buffer alignment and allocation overhead. */
 export function weightBytes(model: PackedModel, useF16: boolean): number {
   const bpe = useF16 ? 2 : 4;
   let total = model.stemWeights.length + model.stemBias.length;

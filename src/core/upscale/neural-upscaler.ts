@@ -47,7 +47,7 @@ export interface NeuralStageTiming {
   readonly head: Aggregate;
 }
 
-/** Persistent GPU allocation, reported rather than estimated. */
+/** Legacy payload accounting, not device memory. Excludes buffer padding, timers and driver/browser overhead. */
 export interface NeuralMemoryReport {
   readonly weights: number;
   readonly activationPing: number;

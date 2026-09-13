@@ -360,11 +360,20 @@ M9 remains separate work and does not depend on replacing the production model.
 
 ---
 
-## Milestone 9 — Dynamic quality selection
+## Milestone 9 — Adaptive runtime quality controller [CURRENT]
 
-Measure the per-frame budget continuously and choose the most expensive model
-that fits, degrading to the baseline under pressure. Milestone 1's metrics are
-the input; the control loop must be damped enough not to oscillate.
+Measured recommendation: **REPLACE BudgetGuard** with a pure two-tier runtime
+controller and separate session observation. Only production C16D2 and
+Catmull-Rom are real tiers; no model training or content-quality routing.
+Cadence-aware median budgets, genuine neural probes, bounded backoff and
+explicit manual/lifecycle/fatal states are independently tested.
+
+The amended-CFR ten-minute M5 720p60 gate passed with no tier changes or probes,
+59.61 rendered fps and 0.876% combined loss. Controlled overload fell back in
+0.406 s and recovered through a real probe 16.356 s after removal. Twelve native
+browser lifecycle journeys passed. The original 720p60 and short CFR Auto loss
+failures remain visible; this is bounded feasibility, not a universal guarantee.
+Final publication gates remain in [docs/M9-STATUS.md](docs/M9-STATUS.md).
 
 ---
 

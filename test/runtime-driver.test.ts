@@ -152,6 +152,21 @@ afterEach(() => {
 });
 
 describe('RuntimeDriver', () => {
+  it('allows a read-only frame observer to sample a later clock', () => {
+    const { driver, pipeline, configure, play } = createHarness();
+    configure();
+    play();
+    let now = 100;
+    vi.spyOn(performance, 'now').mockImplementation(() => now++);
+    driver.onFrame = () => { driver.snapshot(); };
+    expect(() => pipeline.onFrame?.({ now: 95, mediaTime: 1, presentedDelta: 1,
+      size: { width: 1280, height: 720 }, presentationTime: 94, expectedDisplayTime: 110,
+      decodeLatencyMs: null })).not.toThrow();
+    driver.onFrame = null;
+    vi.spyOn(performance, 'now').mockImplementation(clock);
+    vi.setSystemTime(1000);
+  });
+
   it('accepts a delivered rVFC timestamp preceding the resume event clock', () => {
     const { driver, pipeline, play, configure } = createHarness();
     configure();

@@ -1420,3 +1420,23 @@ Standalone benchmarks pass their already-owned source views explicitly. The
 default neural diagnostics remain enabled and teardown-safe. Development-only
 runtime-bench hooks may disable inner diagnostics and repeat the same graph for
 controlled stress; those hooks cannot be enabled in a production bundle.
+
+## ADR-0044 - Replace the emergency guard with bounded measured runtime control
+
+**Status:** accepted design/measurement decision; publication gates recorded separately.
+
+Choose REPLACE BudgetGuard, not an in-place rename: main now delegates policy
+to RuntimeController and execution/lifecycle to RuntimeDriver. Exact original
+guard replay rejects the measured normal 1080p workloads (four fallbacks, three
+probes); the new policy retains neural. Counterfactual replay is not a live
+old-versus-new benchmark. Native live overload/recovery and ten-minute CFR
+results establish bounded benefit on the measured M5/browser, not all hardware.
+
+The 600.0011-s CFR run passed the registered long-window rate/loss/no-fallback
+gate. Original irregular-PTS and short CFR loss checks did not all pass and
+remain reported, alongside the post-observation source amendment. No threshold
+was relaxed after final measurements. The evidence does not authorize a
+universal no-stutter claim, content-quality prediction, or new neural model.
+Production weights remain frozen; R3 stays research-only under ADR-0040.
+See docs/M9-REPORT.md for the full matrix, lifecycle/output parity, failures and
+unmeasured resource/energy limits. M10 remains separate extension work.

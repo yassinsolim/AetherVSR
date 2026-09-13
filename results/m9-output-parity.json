@@ -1,0 +1,1486 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-09-13T07:33:13.043Z",
+  "passed": true,
+  "scope": "Offline old/new GPU RGBA8 output parity only, not a quality, performance, sustained playback, or timestamp-lifetime result",
+  "acceptance": {
+    "maxByteDelta": 0,
+    "rule": "Exact equality of every RGBA8 byte; no one-LSB tolerance"
+  },
+  "inputPattern": "Opaque RGBA8: alternating saturated RGB borders; independent deterministic RGB interior formulas in this runner",
+  "readback": "Targets and readback buffers allocated before encode; each import/bind/encode/copy/submit synchronous; map only after both submissions and queue completion",
+  "performance": "not measured",
+  "cases": [
+    {
+      "precision": "fp32",
+      "kind": "sampled",
+      "configuration": 1,
+      "source": {
+        "width": 17,
+        "height": 13
+      },
+      "target": {
+        "width": 34,
+        "height": 26
+      },
+      "sampledInputSha256": "ba5574326b0e740d35a40b2dd5b748b3016de739b7ced2191916c13833427023",
+      "newSampledView": true,
+      "sameStageInstancesReconfigured": false,
+      "encodesPerStageThisConfiguration": 1,
+      "passDiagnostics": "default true (old unconditional when timestamp-query exists)",
+      "timing": null,
+      "rgbaBytesCompared": 3536,
+      "maxByteDelta": 0,
+      "differentBytes": 0,
+      "meanByteDelta": 0,
+      "channelMaxByteDelta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border": {
+        "outputPixelWidth": 2,
+        "maxByteDelta": 0,
+        "differentBytes": 0
+      },
+      "firstDifferences": [],
+      "outputs": {
+        "old": {
+          "sha256": "35d2ecfcf484b53d1c8e51f639c9aef04c10b918821ffe38344504993fb9fb09",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                228,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 0,
+              "rgba": [
+                0,
+                221,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 25,
+              "rgba": [
+                2,
+                226,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 25,
+              "rgba": [
+                3,
+                221,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 17,
+              "row": 13,
+              "rgba": [
+                148,
+                150,
+                103,
+                255
+              ]
+            }
+          ]
+        },
+        "current": {
+          "sha256": "35d2ecfcf484b53d1c8e51f639c9aef04c10b918821ffe38344504993fb9fb09",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                228,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 0,
+              "rgba": [
+                0,
+                221,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 25,
+              "rgba": [
+                2,
+                226,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 25,
+              "rgba": [
+                3,
+                221,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 17,
+              "row": 13,
+              "rgba": [
+                148,
+                150,
+                103,
+                255
+              ]
+            }
+          ]
+        }
+      },
+      "video": {
+        "beforeTime": 3,
+        "afterSubmitTime": 3,
+        "afterReadbackTime": 3,
+        "paused": true,
+        "stable": true
+      },
+      "gpuErrors": [],
+      "passed": true
+    },
+    {
+      "precision": "fp32",
+      "kind": "sampled",
+      "configuration": 2,
+      "source": {
+        "width": 33,
+        "height": 19
+      },
+      "target": {
+        "width": 66,
+        "height": 38
+      },
+      "sampledInputSha256": "70792e1fb8a9ffbc58323224d74bb1cdee2e0db8d153a7e4307ad74ffbcaab9f",
+      "newSampledView": true,
+      "sameStageInstancesReconfigured": true,
+      "encodesPerStageThisConfiguration": 1,
+      "passDiagnostics": "default true (old unconditional when timestamp-query exists)",
+      "timing": null,
+      "rgbaBytesCompared": 10032,
+      "maxByteDelta": 0,
+      "differentBytes": 0,
+      "meanByteDelta": 0,
+      "channelMaxByteDelta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border": {
+        "outputPixelWidth": 2,
+        "maxByteDelta": 0,
+        "differentBytes": 0
+      },
+      "firstDifferences": [],
+      "outputs": {
+        "old": {
+          "sha256": "31dfd199494de7bc78c68a6d0382cb31135097b0f44c5996b6e1b3b66f4c0623",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                238,
+                8,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 0,
+              "rgba": [
+                0,
+                220,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 37,
+              "rgba": [
+                0,
+                216,
+                3,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 37,
+              "rgba": [
+                7,
+                229,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 19,
+              "rgba": [
+                20,
+                159,
+                22,
+                255
+              ]
+            }
+          ]
+        },
+        "current": {
+          "sha256": "31dfd199494de7bc78c68a6d0382cb31135097b0f44c5996b6e1b3b66f4c0623",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                238,
+                8,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 0,
+              "rgba": [
+                0,
+                220,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 37,
+              "rgba": [
+                0,
+                216,
+                3,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 37,
+              "rgba": [
+                7,
+                229,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 19,
+              "rgba": [
+                20,
+                159,
+                22,
+                255
+              ]
+            }
+          ]
+        }
+      },
+      "video": {
+        "beforeTime": 3,
+        "afterSubmitTime": 3,
+        "afterReadbackTime": 3,
+        "paused": true,
+        "stable": true
+      },
+      "gpuErrors": [],
+      "passed": true
+    },
+    {
+      "precision": "fp32",
+      "kind": "external",
+      "configuration": 1,
+      "source": {
+        "width": 1280,
+        "height": 720
+      },
+      "target": {
+        "width": 2560,
+        "height": 1440
+      },
+      "sampledInputSha256": null,
+      "newSampledView": false,
+      "sameStageInstancesReconfigured": false,
+      "encodesPerStageThisConfiguration": 1,
+      "passDiagnostics": "default true (old unconditional when timestamp-query exists)",
+      "timing": null,
+      "rgbaBytesCompared": 14745600,
+      "maxByteDelta": 0,
+      "differentBytes": 0,
+      "meanByteDelta": 0,
+      "channelMaxByteDelta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border": {
+        "outputPixelWidth": 2,
+        "maxByteDelta": 0,
+        "differentBytes": 0
+      },
+      "firstDifferences": [],
+      "outputs": {
+        "old": {
+          "sha256": "755ddb9a5e8c42ab880944edb77b7003467b2bd2ce858e71616957b222884856",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                8,
+                43,
+                76,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 0,
+              "rgba": [
+                220,
+                171,
+                74,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 1439,
+              "rgba": [
+                15,
+                16,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 1439,
+              "rgba": [
+                14,
+                15,
+                20,
+                255
+              ]
+            },
+            {
+              "column": 1280,
+              "row": 720,
+              "rgba": [
+                14,
+                14,
+                20,
+                255
+              ]
+            }
+          ]
+        },
+        "current": {
+          "sha256": "755ddb9a5e8c42ab880944edb77b7003467b2bd2ce858e71616957b222884856",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                8,
+                43,
+                76,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 0,
+              "rgba": [
+                220,
+                171,
+                74,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 1439,
+              "rgba": [
+                15,
+                16,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 1439,
+              "rgba": [
+                14,
+                15,
+                20,
+                255
+              ]
+            },
+            {
+              "column": 1280,
+              "row": 720,
+              "rgba": [
+                14,
+                14,
+                20,
+                255
+              ]
+            }
+          ]
+        }
+      },
+      "video": {
+        "beforeTime": 3,
+        "afterSubmitTime": 3,
+        "afterReadbackTime": 3,
+        "paused": true,
+        "stable": true
+      },
+      "gpuErrors": [],
+      "passed": true
+    },
+    {
+      "precision": "f16",
+      "kind": "sampled",
+      "configuration": 1,
+      "source": {
+        "width": 17,
+        "height": 13
+      },
+      "target": {
+        "width": 34,
+        "height": 26
+      },
+      "sampledInputSha256": "ba5574326b0e740d35a40b2dd5b748b3016de739b7ced2191916c13833427023",
+      "newSampledView": true,
+      "sameStageInstancesReconfigured": false,
+      "encodesPerStageThisConfiguration": 1,
+      "passDiagnostics": "default true (old unconditional when timestamp-query exists)",
+      "timing": null,
+      "rgbaBytesCompared": 3536,
+      "maxByteDelta": 0,
+      "differentBytes": 0,
+      "meanByteDelta": 0,
+      "channelMaxByteDelta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border": {
+        "outputPixelWidth": 2,
+        "maxByteDelta": 0,
+        "differentBytes": 0
+      },
+      "firstDifferences": [],
+      "outputs": {
+        "old": {
+          "sha256": "439acb8fac93b60863c2aae86266851c28ab40086f00dea9a9b36755d5588026",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                228,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 0,
+              "rgba": [
+                0,
+                221,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 25,
+              "rgba": [
+                2,
+                227,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 25,
+              "rgba": [
+                3,
+                222,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 17,
+              "row": 13,
+              "rgba": [
+                148,
+                150,
+                103,
+                255
+              ]
+            }
+          ]
+        },
+        "current": {
+          "sha256": "439acb8fac93b60863c2aae86266851c28ab40086f00dea9a9b36755d5588026",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                228,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 0,
+              "rgba": [
+                0,
+                221,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 25,
+              "rgba": [
+                2,
+                227,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 25,
+              "rgba": [
+                3,
+                222,
+                10,
+                255
+              ]
+            },
+            {
+              "column": 17,
+              "row": 13,
+              "rgba": [
+                148,
+                150,
+                103,
+                255
+              ]
+            }
+          ]
+        }
+      },
+      "video": {
+        "beforeTime": 3,
+        "afterSubmitTime": 3,
+        "afterReadbackTime": 3,
+        "paused": true,
+        "stable": true
+      },
+      "gpuErrors": [],
+      "passed": true
+    },
+    {
+      "precision": "f16",
+      "kind": "sampled",
+      "configuration": 2,
+      "source": {
+        "width": 33,
+        "height": 19
+      },
+      "target": {
+        "width": 66,
+        "height": 38
+      },
+      "sampledInputSha256": "70792e1fb8a9ffbc58323224d74bb1cdee2e0db8d153a7e4307ad74ffbcaab9f",
+      "newSampledView": true,
+      "sameStageInstancesReconfigured": true,
+      "encodesPerStageThisConfiguration": 1,
+      "passDiagnostics": "default true (old unconditional when timestamp-query exists)",
+      "timing": null,
+      "rgbaBytesCompared": 10032,
+      "maxByteDelta": 0,
+      "differentBytes": 0,
+      "meanByteDelta": 0,
+      "channelMaxByteDelta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border": {
+        "outputPixelWidth": 2,
+        "maxByteDelta": 0,
+        "differentBytes": 0
+      },
+      "firstDifferences": [],
+      "outputs": {
+        "old": {
+          "sha256": "4dfc2a2308e7d1f1a2d065cab06d8047c7e42d73b23a0fe0eaf2e3ba2086e39a",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                238,
+                8,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 0,
+              "rgba": [
+                0,
+                220,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 37,
+              "rgba": [
+                0,
+                216,
+                3,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 37,
+              "rgba": [
+                7,
+                229,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 19,
+              "rgba": [
+                20,
+                159,
+                22,
+                255
+              ]
+            }
+          ]
+        },
+        "current": {
+          "sha256": "4dfc2a2308e7d1f1a2d065cab06d8047c7e42d73b23a0fe0eaf2e3ba2086e39a",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                0,
+                238,
+                8,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 0,
+              "rgba": [
+                0,
+                220,
+                0,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 37,
+              "rgba": [
+                0,
+                216,
+                3,
+                255
+              ]
+            },
+            {
+              "column": 65,
+              "row": 37,
+              "rgba": [
+                7,
+                229,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 33,
+              "row": 19,
+              "rgba": [
+                20,
+                159,
+                22,
+                255
+              ]
+            }
+          ]
+        }
+      },
+      "video": {
+        "beforeTime": 3,
+        "afterSubmitTime": 3,
+        "afterReadbackTime": 3,
+        "paused": true,
+        "stable": true
+      },
+      "gpuErrors": [],
+      "passed": true
+    },
+    {
+      "precision": "f16",
+      "kind": "external",
+      "configuration": 1,
+      "source": {
+        "width": 1280,
+        "height": 720
+      },
+      "target": {
+        "width": 2560,
+        "height": 1440
+      },
+      "sampledInputSha256": null,
+      "newSampledView": false,
+      "sameStageInstancesReconfigured": false,
+      "encodesPerStageThisConfiguration": 1,
+      "passDiagnostics": "default true (old unconditional when timestamp-query exists)",
+      "timing": null,
+      "rgbaBytesCompared": 14745600,
+      "maxByteDelta": 0,
+      "differentBytes": 0,
+      "meanByteDelta": 0,
+      "channelMaxByteDelta": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "border": {
+        "outputPixelWidth": 2,
+        "maxByteDelta": 0,
+        "differentBytes": 0
+      },
+      "firstDifferences": [],
+      "outputs": {
+        "old": {
+          "sha256": "626e6ae3300ce52e3979bdbe4f6cded218dfc606df1d53d2b126f7f1dbaca1ba",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                8,
+                43,
+                76,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 0,
+              "rgba": [
+                220,
+                171,
+                74,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 1439,
+              "rgba": [
+                15,
+                16,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 1439,
+              "rgba": [
+                14,
+                15,
+                20,
+                255
+              ]
+            },
+            {
+              "column": 1280,
+              "row": 720,
+              "rgba": [
+                14,
+                14,
+                20,
+                255
+              ]
+            }
+          ]
+        },
+        "current": {
+          "sha256": "626e6ae3300ce52e3979bdbe4f6cded218dfc606df1d53d2b126f7f1dbaca1ba",
+          "minimum": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "maximum": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "nonUniformRgb": true,
+          "opaqueAlpha": true,
+          "samples": [
+            {
+              "column": 0,
+              "row": 0,
+              "rgba": [
+                8,
+                43,
+                76,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 0,
+              "rgba": [
+                220,
+                171,
+                74,
+                255
+              ]
+            },
+            {
+              "column": 0,
+              "row": 1439,
+              "rgba": [
+                15,
+                16,
+                22,
+                255
+              ]
+            },
+            {
+              "column": 2559,
+              "row": 1439,
+              "rgba": [
+                14,
+                15,
+                20,
+                255
+              ]
+            },
+            {
+              "column": 1280,
+              "row": 720,
+              "rgba": [
+                14,
+                14,
+                20,
+                255
+              ]
+            }
+          ]
+        }
+      },
+      "video": {
+        "beforeTime": 3,
+        "afterSubmitTime": 3,
+        "afterReadbackTime": 3,
+        "paused": true,
+        "stable": true
+      },
+      "gpuErrors": [],
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "sourceBefore": {
+    "head": "88ecc36856fc89730127137610d0965386eab0de",
+    "sourceSha256": {
+      "bench.html": "8ae495977ee1eb61b7f82fc79bf3ba822ca28c75940d905f3c2500aac29659ff",
+      "src/bench/bridge-bench.ts": "9a39be9f387de1e6090f5261fa9d531c0281915ffbe05c1322b291b9619ba202",
+      "src/bench/chain-bench.ts": "ee7e7802b9ff5c221e28c8ba9a98fff19473625532a1df3186bf46f442320be5",
+      "src/bench/chain-verify.ts": "656972e3aff64762016efa466f2b146138086e530cc2642f9cb80d767808b523",
+      "src/bench/conv-bench.ts": "1505d5ec30a5c87dcc36076554c080b3e9ca20d6f28362197c60f584fda6c9bb",
+      "src/bench/conv-matrix.wgsl.ts": "e7de8fdb9211991f88d32eee2cadb9f1d4e1a9f9810267ed5f570c63b3e57b2f",
+      "src/bench/conv-packed.wgsl.ts": "36453520af82e7c9ed6143ec7a77ae979cbcb10284641f8acb1e5dc60a441b0c",
+      "src/bench/conv-tiled.wgsl.ts": "470494f3465493af88cd17d6ac469a11aafd7744eb3bfa87e6e098cbe71d5450",
+      "src/bench/conv-verify.ts": "b1ad4daa08599efbbacdec8a3898a99f91a87a604ff6b09b35922aab1dde144b",
+      "src/bench/conv.wgsl.ts": "b7c2539b2df86cdcd797de61274ab8a25c965454d87840ddd75154674c85fa4c",
+      "src/bench/deferred.ts": "227f1ed0ac27a055798f924d1435a02d00928c7d488da4a6096ce60faddd3d17",
+      "src/bench/golden-verify.ts": "b2875272940a05bc87b6527773e7b7522b78a83bac28439adb78920254b62559",
+      "src/bench/head-bench.ts": "f2052d1b3bb62caa55404bff23c05fb57f14ef3e57b215ebbb2ef54683d87d59",
+      "src/bench/ingest-bench.ts": "a61e678ca6759cab156e63bed3b9f8c1f977112cb58c3861c7eb543c9fa5cc3d",
+      "src/bench/main.ts": "5e2665e07c82bbb8b9395c400db0ece025f4907dfe7edf0cf1a0f4376ef66f23",
+      "src/bench/ort-bench.ts": "8946d41d3ca2f0fb66c991925ab38e97414c96e44a51c8b768ed434e97d7e563",
+      "src/bench/pixel-shuffle.wgsl.ts": "af52abc3632bfec583546d1a24b90cbe246acb116be0dc54254fd586a8ab7da5",
+      "src/bench/quality-bench.ts": "dcd88a68a52188a4ec2b689511f68f30fbe3dde5a40da9b79bed00c09f90d4a2",
+      "src/bench/quality.ts": "6d5653ee3c0516bc3493856135f22447e251c9cce0ca44d4c567aee07d691ce6",
+      "src/bench/repack.wgsl.ts": "19aa1ee72d859d7b752b8477e9681e9831e5593c46d1b59ea1a30583e575d2dc",
+      "src/bench/roofline.ts": "6bd1748db38b8c0b64920b07900927e49c799eb6df65b86f1cf5745d1ae3cc45",
+      "src/bench/runtime-bench.ts": "a24c11ccf06e949b529f6420319191eec40488f408708926459db9d8a84c733f",
+      "src/bench/runtime-load.ts": "0c74c81d78e65612f1004c9a158bc455ebfaf2dc5b8e115433af21eb9b67119d",
+      "src/bench/shuffle-verify.ts": "98485914bcceabd5d8e4e3abe1495b41e425a6bca7c12f77782387a57be74ede",
+      "src/bench/stem-bench.ts": "f2788a4608cd216eb144d83d6ae5cdd66ef66ee87e477d037eb4af014b526515",
+      "src/bench/stem-verify.ts": "340798deb700966bb8aad7d2523cbe9562b2414159e14ba8e7e9065ea71c5c27",
+      "src/bench/temporal-bench.ts": "620903e65d13aa6b3b19af0c0ce9071fa116b6af9c27049ac6aa1e6cc0eba082",
+      "src/bench/temporal.ts": "97fa5cfec3b260889766ddc15d6a2b0e8b54d653f482692b78911b3d409b4238",
+      "src/core/acquisition/frame-importer.ts": "5be72798e632e77dd9f357fd05cc828b0991b6b7274dcc48be22a67afc09ec12",
+      "src/core/acquisition/video-source.ts": "f872a6388a06241697ca6c986ba9794a2acc10cc9afbcd27c62385eedb17d2cb",
+      "src/core/gpu/device.ts": "94423dfab9350a26c0afe4d3d8512f4b8d71f925f34af1f7919a583390db9902",
+      "src/core/ingest/external-texture-ingest.ts": "3fce65adcbc38a50e7a872dca6f674ff19f9e603919a97746eb0ff72f484b958",
+      "src/core/ingest/ingest.wgsl.ts": "20002b8f67e7b6443c3ee33c272da50878246a6e92b7ffb6b9ebcc68b15558c1",
+      "src/core/metrics/gpu-timer.ts": "88aaffbd12ad03dccc42e2f2e34b8c8d62fdea21e7b1f92a5b5ea146d6dc8c97",
+      "src/core/metrics/runtime-session.ts": "140e8597e68728e9f425cd1da4381a206809e10556e723e9223abca4f1d3f638",
+      "src/core/metrics/stats.ts": "faff4e30759ae261bed1502aeb6881fe8c7ba153d472e37973cb8db5c90c1ee4",
+      "src/core/neural/activation.ts": "ffb33477abd0a1069df1f76396ef48b8ee3d8766972fa7cec43f83c84475522a",
+      "src/core/neural/blit.wgsl.ts": "d03073a3a671e1043796f04306abfa7554af303d8e3fa6fbb4ba5a5c2b26b738",
+      "src/core/neural/conv.wgsl.ts": "966df7cbd11157bbeb411f0e594f5e969e00001ce31c1b817910754c679ea868",
+      "src/core/neural/model.ts": "423bdb642d7e99e8ea0135548192787bfea2218f8d7a09f2601ee8d132124664",
+      "src/core/neural/rgb-pack.wgsl.ts": "3b8a5950ef07c920f9a7f78717b690b92c3d28b24d93b70267cca0c97af4f2de",
+      "src/core/neural/stem.wgsl.ts": "ca0453519dd9f1f67d32523be704d969014674a88b11c96ae02b071eb10be259",
+      "src/core/neural/upsample-head.wgsl.ts": "d187f4066e0047f5ce49e27ae7d98de5c631d42293ce76f1db7072e551c96df9",
+      "src/core/pipeline.ts": "180859f88ffa6499f3d242fddc1d32245bf275df63eb0c0ccebac49921d48319",
+      "src/core/present/canvas-target.ts": "402976c2190689d8a69c2bd91831d1cdd4ecd69eb412e3092db9203d166408fe",
+      "src/core/types.ts": "9de409f409010bbd00ba22e1942df3db82099ffdbd662907b6c8ce76412db52d",
+      "src/core/upscale/baseline-scaler.ts": "b2fbff58186dcefa0eebe1b0bcdee5f2e367acf8418832353f58e44574e67605",
+      "src/core/upscale/baseline.wgsl.ts": "0f9e227d0a9d5f39edb3d26621a3fc133541d91978df09d8ccdd33ed1805ba0d",
+      "src/core/upscale/budget-guard.ts": "e94bb88209feae163c723b51e428446f8589edb0827fab85e9e38fa0756c514d",
+      "src/core/upscale/neural-upscaler.ts": "e023e1847a51fc617e847ecc87084e7685971efb1bba4d038d586a41068095ab",
+      "src/core/upscale/runtime-controller.ts": "60915ea32c6193e43d19b8e6e3fbf1d5f640e370b83e4fc89102e5df3690479d",
+      "src/main.ts": "4aa8197f7bb961968271db996bbc028ba0408cd7362f59c9afca5f690b6695c3",
+      "src/runtime.ts": "6946e2fcee3e163884b85c7257e7ad658bead9d9a1434e4048f60d94ee7316bc",
+      "src/ui/harness.css": "3565d3f4c05b991de4bc262cc51c0e09b4276f41d3386ad6908054fe59297746",
+      "src/ui/overlay.ts": "935f6b308307f91352a9c654794dbc46611779516d5d675d17d309d9dbbfae00",
+      "tools/m9-browser.mjs": "8f30312001cfc328b22c10c1c2b5049b455fceb856a80e6f7cfb4fcebffcd6dd",
+      "vite.config.ts": "0379dd053e28ba554dde2fdd1d8a351aff16b4f8d5e2fbd9d39b9bf97508d772"
+    },
+    "trackedDiff": "src/runtime.ts\ntest/runtime-driver.test.ts",
+    "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+    "clipSha256": "8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a"
+  },
+  "sources": {
+    "old": {
+      "ref": "c65f67a",
+      "commit": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+      "file": "src/core/upscale/neural-upscaler.ts",
+      "sha256": "6a8156c6040db6e9319d86087455ae99f9a93ca9d5200ddeb48242397bfdbf51"
+    },
+    "current": {
+      "head": "88ecc36856fc89730127137610d0965386eab0de",
+      "file": "src/core/upscale/neural-upscaler.ts",
+      "sha256": "e023e1847a51fc617e847ecc87084e7685971efb1bba4d038d586a41068095ab",
+      "claim": "Direct working-file SHA, not a clean-tree claim; other tracked working changes are recorded separately"
+    },
+    "typescriptVersion": "5.9.3",
+    "transpiledSha256": "28003185d443b0db9172630229a843072c3a58a7962963330cb090970ebc8488",
+    "blobModuleSha256": "5b91dcbc6b88266d56c6fcedcebb791b120d0f7abc1723fe5b6a0ab4620cd1f5",
+    "transform": "TypeScript ES2022/ESNext transpilation; only relative from specifiers remapped to absolute Vite /src/core/*.ts URLs",
+    "sharedDependencies": [
+      {
+        "specifier": "../ingest/external-texture-ingest.js",
+        "url": "http://localhost:5173/src/core/ingest/external-texture-ingest.ts",
+        "file": "src/core/ingest/external-texture-ingest.ts",
+        "currentSha256": "3fce65adcbc38a50e7a872dca6f674ff19f9e603919a97746eb0ff72f484b958",
+        "oldSha256": "3fce65adcbc38a50e7a872dca6f674ff19f9e603919a97746eb0ff72f484b958"
+      },
+      {
+        "specifier": "../neural/stem.wgsl.js",
+        "url": "http://localhost:5173/src/core/neural/stem.wgsl.ts",
+        "file": "src/core/neural/stem.wgsl.ts",
+        "currentSha256": "ca0453519dd9f1f67d32523be704d969014674a88b11c96ae02b071eb10be259",
+        "oldSha256": "ca0453519dd9f1f67d32523be704d969014674a88b11c96ae02b071eb10be259"
+      },
+      {
+        "specifier": "../neural/conv.wgsl.js",
+        "url": "http://localhost:5173/src/core/neural/conv.wgsl.ts",
+        "file": "src/core/neural/conv.wgsl.ts",
+        "currentSha256": "966df7cbd11157bbeb411f0e594f5e969e00001ce31c1b817910754c679ea868",
+        "oldSha256": "966df7cbd11157bbeb411f0e594f5e969e00001ce31c1b817910754c679ea868"
+      },
+      {
+        "specifier": "../neural/upsample-head.wgsl.js",
+        "url": "http://localhost:5173/src/core/neural/upsample-head.wgsl.ts",
+        "file": "src/core/neural/upsample-head.wgsl.ts",
+        "currentSha256": "d187f4066e0047f5ce49e27ae7d98de5c631d42293ce76f1db7072e551c96df9",
+        "oldSha256": "d187f4066e0047f5ce49e27ae7d98de5c631d42293ce76f1db7072e551c96df9"
+      },
+      {
+        "specifier": "../neural/blit.wgsl.js",
+        "url": "http://localhost:5173/src/core/neural/blit.wgsl.ts",
+        "file": "src/core/neural/blit.wgsl.ts",
+        "currentSha256": "d03073a3a671e1043796f04306abfa7554af303d8e3fa6fbb4ba5a5c2b26b738",
+        "oldSha256": "d03073a3a671e1043796f04306abfa7554af303d8e3fa6fbb4ba5a5c2b26b738"
+      },
+      {
+        "specifier": "../neural/model.js",
+        "url": "http://localhost:5173/src/core/neural/model.ts",
+        "file": "src/core/neural/model.ts",
+        "currentSha256": "423bdb642d7e99e8ea0135548192787bfea2218f8d7a09f2601ee8d132124664",
+        "oldSha256": "423bdb642d7e99e8ea0135548192787bfea2218f8d7a09f2601ee8d132124664"
+      },
+      {
+        "specifier": "../metrics/stats.js",
+        "url": "http://localhost:5173/src/core/metrics/stats.ts",
+        "file": "src/core/metrics/stats.ts",
+        "currentSha256": "faff4e30759ae261bed1502aeb6881fe8c7ba153d472e37973cb8db5c90c1ee4",
+        "oldSha256": "faff4e30759ae261bed1502aeb6881fe8c7ba153d472e37973cb8db5c90c1ee4"
+      }
+    ],
+    "runnerSha256": "39ae9b85386d7b24a2335d5d0ee2e7feee9150e2f1ade0aab711dc5a3f3f4b74"
+  },
+  "machine": {
+    "hostname": "MBP-0569.lan",
+    "cpu": "Apple M5",
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+    "kernel": "25.6.0",
+    "hardwareModel": "Mac17,2",
+    "node": "v26.5.0",
+    "displayRefreshRate": "not measured"
+  },
+  "clip": {
+    "file": "public/media/m9/720p60.mp4",
+    "sha256": "8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1280,
+          "height": 720,
+          "r_frame_rate": "60/1",
+          "avg_frame_rate": "60/1",
+          "duration": "4.016667",
+          "nb_frames": "241"
+        }
+      ]
+    }
+  },
+  "server": {
+    "origin": "http://localhost:5173",
+    "mode": "benchmark",
+    "ownership": "reused; left running"
+  },
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/Users/ysoli/Projects/AetherVSR/.cache/m9/browsers/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    "launch": "openNativeChrome: mock keychain, native default context, CDP noDefaults=true"
+  },
+  "initialPage": {
+    "videos": [
+      {
+        "paused": true,
+        "currentTime": 0,
+        "currentSrc": "",
+        "readyState": 0,
+        "autoplay": false
+      }
+    ],
+    "scripts": [
+      "http://localhost:5173/src/bench/main.ts"
+    ],
+    "status": "GPU ready — call window.aethervsrIngestBench() or window.aethervsrConvBench()"
+  },
+  "browserSetup": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+    "adapter": {
+      "vendor": "apple",
+      "architecture": "metal-3",
+      "device": "",
+      "description": ""
+    },
+    "adapterFeatures": [
+      "depth32float-stencil8",
+      "chromium-experimental-subgroup-matrix",
+      "rg11b10ufloat-renderable",
+      "texture-formats-tier1",
+      "bgra8unorm-storage",
+      "texture-compression-bc",
+      "dual-source-blending",
+      "core-features-and-limits",
+      "float32-filterable",
+      "indirect-first-instance",
+      "texture-compression-astc-sliced-3d",
+      "float32-blendable",
+      "subgroup-size-control",
+      "texture-compression-unaligned",
+      "texture-compression-astc",
+      "texture-compression-etc2",
+      "depth-clip-control",
+      "texture-compression-bc-sliced-3d",
+      "shader-f16",
+      "clip-distances",
+      "texture-formats-tier2",
+      "timestamp-query",
+      "primitive-index",
+      "texture-component-swizzle",
+      "subgroups"
+    ],
+    "deviceFeatures": [
+      "core-features-and-limits",
+      "shader-f16",
+      "timestamp-query"
+    ],
+    "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+    "declaredModelSha256": "9154d9490b02d8fdf136edd990217cfb6f0e9956ed928da7179d7781832c8e02",
+    "model": {
+      "architecture": "aethersr-resizeconv",
+      "features": 16,
+      "depth": 2
+    },
+    "servedCoreSources": {
+      "src/core/acquisition/frame-importer.ts": "5be72798e632e77dd9f357fd05cc828b0991b6b7274dcc48be22a67afc09ec12",
+      "src/core/acquisition/video-source.ts": "f872a6388a06241697ca6c986ba9794a2acc10cc9afbcd27c62385eedb17d2cb",
+      "src/core/gpu/device.ts": "94423dfab9350a26c0afe4d3d8512f4b8d71f925f34af1f7919a583390db9902",
+      "src/core/ingest/external-texture-ingest.ts": "3fce65adcbc38a50e7a872dca6f674ff19f9e603919a97746eb0ff72f484b958",
+      "src/core/ingest/ingest.wgsl.ts": "20002b8f67e7b6443c3ee33c272da50878246a6e92b7ffb6b9ebcc68b15558c1",
+      "src/core/metrics/gpu-timer.ts": "88aaffbd12ad03dccc42e2f2e34b8c8d62fdea21e7b1f92a5b5ea146d6dc8c97",
+      "src/core/metrics/runtime-session.ts": "140e8597e68728e9f425cd1da4381a206809e10556e723e9223abca4f1d3f638",
+      "src/core/metrics/stats.ts": "faff4e30759ae261bed1502aeb6881fe8c7ba153d472e37973cb8db5c90c1ee4",
+      "src/core/neural/activation.ts": "ffb33477abd0a1069df1f76396ef48b8ee3d8766972fa7cec43f83c84475522a",
+      "src/core/neural/blit.wgsl.ts": "d03073a3a671e1043796f04306abfa7554af303d8e3fa6fbb4ba5a5c2b26b738",
+      "src/core/neural/conv.wgsl.ts": "966df7cbd11157bbeb411f0e594f5e969e00001ce31c1b817910754c679ea868",
+      "src/core/neural/model.ts": "423bdb642d7e99e8ea0135548192787bfea2218f8d7a09f2601ee8d132124664",
+      "src/core/neural/rgb-pack.wgsl.ts": "3b8a5950ef07c920f9a7f78717b690b92c3d28b24d93b70267cca0c97af4f2de",
+      "src/core/neural/stem.wgsl.ts": "ca0453519dd9f1f67d32523be704d969014674a88b11c96ae02b071eb10be259",
+      "src/core/neural/upsample-head.wgsl.ts": "d187f4066e0047f5ce49e27ae7d98de5c631d42293ce76f1db7072e551c96df9",
+      "src/core/pipeline.ts": "180859f88ffa6499f3d242fddc1d32245bf275df63eb0c0ccebac49921d48319",
+      "src/core/present/canvas-target.ts": "402976c2190689d8a69c2bd91831d1cdd4ecd69eb412e3092db9203d166408fe",
+      "src/core/types.ts": "9de409f409010bbd00ba22e1942df3db82099ffdbd662907b6c8ce76412db52d",
+      "src/core/upscale/baseline-scaler.ts": "b2fbff58186dcefa0eebe1b0bcdee5f2e367acf8418832353f58e44574e67605",
+      "src/core/upscale/baseline.wgsl.ts": "0f9e227d0a9d5f39edb3d26621a3fc133541d91978df09d8ccdd33ed1805ba0d",
+      "src/core/upscale/budget-guard.ts": "e94bb88209feae163c723b51e428446f8589edb0827fab85e9e38fa0756c514d",
+      "src/core/upscale/neural-upscaler.ts": "e023e1847a51fc617e847ecc87084e7685971efb1bba4d038d586a41068095ab",
+      "src/core/upscale/runtime-controller.ts": "60915ea32c6193e43d19b8e6e3fbf1d5f640e370b83e4fc89102e5df3690479d"
+    },
+    "deviceLimits": {
+      "maxBufferSize": 4294967292,
+      "maxStorageBufferBindingSize": 4294967292
+    },
+    "visibility": "visible",
+    "devicePixelRatio": 2,
+    "screen": {
+      "width": 1512,
+      "height": 982
+    }
+  },
+  "video": {
+    "url": "http://localhost:5173/media/m9/720p60.mp4",
+    "requestedTime": 3,
+    "currentTime": 3,
+    "readyState": 4,
+    "paused": true,
+    "width": 1280,
+    "height": 720,
+    "duration": 4.016667,
+    "playbackCalls": 0,
+    "inputScope": "One decoded frame of one paused HTMLVideoElement, shared by old and new; no VideoFrame or canvas conversion"
+  },
+  "skipped": [],
+  "gpuErrors": [],
+  "nonBlockingBrowserErrors": [
+    {
+      "kind": "console",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "url": "http://localhost:5173/favicon.ico",
+      "line": 0,
+      "column": 0,
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  ],
+  "nonBlockingBrowserErrorPolicy": "Only an exact /favicon.ico 404 is non-blocking; retained here, no application resources or GPU errors excluded",
+  "browserErrors": [],
+  "nativeChromeClosed": true,
+  "sourceAfter": {
+    "head": "88ecc36856fc89730127137610d0965386eab0de",
+    "sourceSha256": {
+      "bench.html": "8ae495977ee1eb61b7f82fc79bf3ba822ca28c75940d905f3c2500aac29659ff",
+      "src/bench/bridge-bench.ts": "9a39be9f387de1e6090f5261fa9d531c0281915ffbe05c1322b291b9619ba202",
+      "src/bench/chain-bench.ts": "ee7e7802b9ff5c221e28c8ba9a98fff19473625532a1df3186bf46f442320be5",
+      "src/bench/chain-verify.ts": "656972e3aff64762016efa466f2b146138086e530cc2642f9cb80d767808b523",
+      "src/bench/conv-bench.ts": "1505d5ec30a5c87dcc36076554c080b3e9ca20d6f28362197c60f584fda6c9bb",
+      "src/bench/conv-matrix.wgsl.ts": "e7de8fdb9211991f88d32eee2cadb9f1d4e1a9f9810267ed5f570c63b3e57b2f",
+      "src/bench/conv-packed.wgsl.ts": "36453520af82e7c9ed6143ec7a77ae979cbcb10284641f8acb1e5dc60a441b0c",
+      "src/bench/conv-tiled.wgsl.ts": "470494f3465493af88cd17d6ac469a11aafd7744eb3bfa87e6e098cbe71d5450",
+      "src/bench/conv-verify.ts": "b1ad4daa08599efbbacdec8a3898a99f91a87a604ff6b09b35922aab1dde144b",
+      "src/bench/conv.wgsl.ts": "b7c2539b2df86cdcd797de61274ab8a25c965454d87840ddd75154674c85fa4c",
+      "src/bench/deferred.ts": "227f1ed0ac27a055798f924d1435a02d00928c7d488da4a6096ce60faddd3d17",
+      "src/bench/golden-verify.ts": "b2875272940a05bc87b6527773e7b7522b78a83bac28439adb78920254b62559",
+      "src/bench/head-bench.ts": "f2052d1b3bb62caa55404bff23c05fb57f14ef3e57b215ebbb2ef54683d87d59",
+      "src/bench/ingest-bench.ts": "a61e678ca6759cab156e63bed3b9f8c1f977112cb58c3861c7eb543c9fa5cc3d",
+      "src/bench/main.ts": "5e2665e07c82bbb8b9395c400db0ece025f4907dfe7edf0cf1a0f4376ef66f23",
+      "src/bench/ort-bench.ts": "8946d41d3ca2f0fb66c991925ab38e97414c96e44a51c8b768ed434e97d7e563",
+      "src/bench/pixel-shuffle.wgsl.ts": "af52abc3632bfec583546d1a24b90cbe246acb116be0dc54254fd586a8ab7da5",
+      "src/bench/quality-bench.ts": "dcd88a68a52188a4ec2b689511f68f30fbe3dde5a40da9b79bed00c09f90d4a2",
+      "src/bench/quality.ts": "6d5653ee3c0516bc3493856135f22447e251c9cce0ca44d4c567aee07d691ce6",
+      "src/bench/repack.wgsl.ts": "19aa1ee72d859d7b752b8477e9681e9831e5593c46d1b59ea1a30583e575d2dc",
+      "src/bench/roofline.ts": "6bd1748db38b8c0b64920b07900927e49c799eb6df65b86f1cf5745d1ae3cc45",
+      "src/bench/runtime-bench.ts": "a24c11ccf06e949b529f6420319191eec40488f408708926459db9d8a84c733f",
+      "src/bench/runtime-load.ts": "0c74c81d78e65612f1004c9a158bc455ebfaf2dc5b8e115433af21eb9b67119d",
+      "src/bench/shuffle-verify.ts": "98485914bcceabd5d8e4e3abe1495b41e425a6bca7c12f77782387a57be74ede",
+      "src/bench/stem-bench.ts": "f2788a4608cd216eb144d83d6ae5cdd66ef66ee87e477d037eb4af014b526515",
+      "src/bench/stem-verify.ts": "340798deb700966bb8aad7d2523cbe9562b2414159e14ba8e7e9065ea71c5c27",
+      "src/bench/temporal-bench.ts": "620903e65d13aa6b3b19af0c0ce9071fa116b6af9c27049ac6aa1e6cc0eba082",
+      "src/bench/temporal.ts": "97fa5cfec3b260889766ddc15d6a2b0e8b54d653f482692b78911b3d409b4238",
+      "src/core/acquisition/frame-importer.ts": "5be72798e632e77dd9f357fd05cc828b0991b6b7274dcc48be22a67afc09ec12",
+      "src/core/acquisition/video-source.ts": "f872a6388a06241697ca6c986ba9794a2acc10cc9afbcd27c62385eedb17d2cb",
+      "src/core/gpu/device.ts": "94423dfab9350a26c0afe4d3d8512f4b8d71f925f34af1f7919a583390db9902",
+      "src/core/ingest/external-texture-ingest.ts": "3fce65adcbc38a50e7a872dca6f674ff19f9e603919a97746eb0ff72f484b958",
+      "src/core/ingest/ingest.wgsl.ts": "20002b8f67e7b6443c3ee33c272da50878246a6e92b7ffb6b9ebcc68b15558c1",
+      "src/core/metrics/gpu-timer.ts": "88aaffbd12ad03dccc42e2f2e34b8c8d62fdea21e7b1f92a5b5ea146d6dc8c97",
+      "src/core/metrics/runtime-session.ts": "140e8597e68728e9f425cd1da4381a206809e10556e723e9223abca4f1d3f638",
+      "src/core/metrics/stats.ts": "faff4e30759ae261bed1502aeb6881fe8c7ba153d472e37973cb8db5c90c1ee4",
+      "src/core/neural/activation.ts": "ffb33477abd0a1069df1f76396ef48b8ee3d8766972fa7cec43f83c84475522a",
+      "src/core/neural/blit.wgsl.ts": "d03073a3a671e1043796f04306abfa7554af303d8e3fa6fbb4ba5a5c2b26b738",
+      "src/core/neural/conv.wgsl.ts": "966df7cbd11157bbeb411f0e594f5e969e00001ce31c1b817910754c679ea868",
+      "src/core/neural/model.ts": "423bdb642d7e99e8ea0135548192787bfea2218f8d7a09f2601ee8d132124664",
+      "src/core/neural/rgb-pack.wgsl.ts": "3b8a5950ef07c920f9a7f78717b690b92c3d28b24d93b70267cca0c97af4f2de",
+      "src/core/neural/stem.wgsl.ts": "ca0453519dd9f1f67d32523be704d969014674a88b11c96ae02b071eb10be259",
+      "src/core/neural/upsample-head.wgsl.ts": "d187f4066e0047f5ce49e27ae7d98de5c631d42293ce76f1db7072e551c96df9",
+      "src/core/pipeline.ts": "180859f88ffa6499f3d242fddc1d32245bf275df63eb0c0ccebac49921d48319",
+      "src/core/present/canvas-target.ts": "402976c2190689d8a69c2bd91831d1cdd4ecd69eb412e3092db9203d166408fe",
+      "src/core/types.ts": "9de409f409010bbd00ba22e1942df3db82099ffdbd662907b6c8ce76412db52d",
+      "src/core/upscale/baseline-scaler.ts": "b2fbff58186dcefa0eebe1b0bcdee5f2e367acf8418832353f58e44574e67605",
+      "src/core/upscale/baseline.wgsl.ts": "0f9e227d0a9d5f39edb3d26621a3fc133541d91978df09d8ccdd33ed1805ba0d",
+      "src/core/upscale/budget-guard.ts": "e94bb88209feae163c723b51e428446f8589edb0827fab85e9e38fa0756c514d",
+      "src/core/upscale/neural-upscaler.ts": "e023e1847a51fc617e847ecc87084e7685971efb1bba4d038d586a41068095ab",
+      "src/core/upscale/runtime-controller.ts": "60915ea32c6193e43d19b8e6e3fbf1d5f640e370b83e4fc89102e5df3690479d",
+      "src/main.ts": "4aa8197f7bb961968271db996bbc028ba0408cd7362f59c9afca5f690b6695c3",
+      "src/runtime.ts": "6946e2fcee3e163884b85c7257e7ad658bead9d9a1434e4048f60d94ee7316bc",
+      "src/ui/harness.css": "3565d3f4c05b991de4bc262cc51c0e09b4276f41d3386ad6908054fe59297746",
+      "src/ui/overlay.ts": "935f6b308307f91352a9c654794dbc46611779516d5d675d17d309d9dbbfae00",
+      "tools/m9-browser.mjs": "8f30312001cfc328b22c10c1c2b5049b455fceb856a80e6f7cfb4fcebffcd6dd",
+      "vite.config.ts": "0379dd053e28ba554dde2fdd1d8a351aff16b4f8d5e2fbd9d39b9bf97508d772"
+    },
+    "trackedDiff": "src/runtime.ts\ntest/runtime-driver.test.ts",
+    "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+    "clipSha256": "8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a"
+  },
+  "sourceAndModelInvariant": true,
+  "completedAt": "2026-09-13T07:33:14.802Z"
+}

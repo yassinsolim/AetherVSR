@@ -71,7 +71,7 @@ export class RuntimeDriver {
         this.controller.setAvailable(this.timestamps && this.factory !== null, now);
       }
       this.onFrame?.(tick);
-      this.apply(this.controller.snapshot(now));
+      this.apply(this.controller.snapshot(performance.now()));
     };
     for (const event of ['playing', 'pause', 'ended', 'seeking', 'seeked']) {
       this.listen(video, event, () => {
