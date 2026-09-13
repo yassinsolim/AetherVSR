@@ -1,9 +1,10 @@
 import { defineConfig } from 'vitest/config';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     strictPort: true,
+    hmr: mode !== 'benchmark',
   },
   build: {
     target: 'es2022',
@@ -22,4 +23,4 @@ export default defineConfig({
     environment: 'node',
     include: ['test/**/*.test.ts'],
   },
-});
+}));
