@@ -360,9 +360,9 @@ M9 remains separate work and does not depend on replacing the production model.
 
 ---
 
-## Milestone 9 — Adaptive runtime quality controller [CURRENT]
+## Milestone 9 — Adaptive runtime quality controller [DONE]
 
-Measured recommendation: **REPLACE BudgetGuard** with a pure two-tier runtime
+Measured decision: **REPLACE BudgetGuard** with a pure two-tier runtime
 controller and separate session observation. Only production C16D2 and
 Catmull-Rom are real tiers; no model training or content-quality routing.
 Cadence-aware median budgets, genuine neural probes, bounded backoff and
@@ -373,7 +373,7 @@ The amended-CFR ten-minute M5 720p60 gate passed with no tier changes or probes,
 0.406 s and recovered through a real probe 16.356 s after removal. Twelve native
 browser lifecycle journeys passed. The original 720p60 and short CFR Auto loss
 failures remain visible; this is bounded feasibility, not a universal guarantee.
-Final publication gates remain in [docs/M9-STATUS.md](docs/M9-STATUS.md).
+Verification evidence and scope limits are in [docs/M9-STATUS.md](docs/M9-STATUS.md).
 
 ---
 

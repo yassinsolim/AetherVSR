@@ -1,8 +1,8 @@
 # M9 Runtime Controller Report
 
-Evidence date: 2026-09-13. **RECOMMENDED: REPLACE BudgetGuard**, subject to the pending closure gates in section 22. This is bounded measured success, not an all-pass verdict or completed-milestone announcement. Production neural weights are unchanged; R3 remains closed to production; M10 is not implemented.
+Evidence date: 2026-09-13. **Decision: REPLACE BudgetGuard. M9 is closed with documented scope limits.** This is bounded measured success, not an all-workload pass. Production neural weights are unchanged; R3 remains closed to production; M10 is not implemented. Section 22 records verified publication evidence and the exact-HEAD closing check.
 
-## 1. Starting
+## 1. Starting State
 
 M9 started from clean main and origin/main at `c65f67a45519bbbc5617a325f1e96ee4b4192f34`. The recorded baseline passed npm ci, typecheck, lint, build, 168 Vitest tests and 308 Python tests. Exact-source GitHub CI run `34694344764` succeeded. These are baseline results, not evidence for the final M9 HEAD.
 
@@ -10,7 +10,7 @@ The binding scope is [M9-PREREGISTRATION.md](M9-PREREGISTRATION.md), followed by
 
 Only production C16D2 neural x2 and Catmull-Rom are tiers. Production SHA256 remains `d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`. No training, R3 recovery, quality routing, temporal model, extension or NTIRE claim belongs to M9.
 
-## 2. Audit
+## 2. Existing BudgetGuard Audit
 
 The original guard already consumed raw neural GPU durations, used a true 30-sample median, and separated stage epochs. It did not consume a trailing median as though it were a raw sample. Baseline work could not certify neural recovery.
 
@@ -18,7 +18,7 @@ Starting defects were shared failure/recovery dwell, rejected samples advancing 
 
 The original fixed policy was failure >10 ms, recovery <=7 ms, dwell three, cumulative probe patience 60, and backoff 2/4/8/.../30 seconds. Its useful hysteresis and genuine-probe principles are retained.
 
-## 3. Design
+## 3. Controller Design
 
 [src/core/upscale/runtime-controller.ts](../src/core/upscale/runtime-controller.ts) owns pure timestamp-driven policy. [src/runtime.ts](../src/runtime.ts) applies actual tier changes, binds generations and handles video intent/lifecycle. [src/core/metrics/runtime-session.ts](../src/core/metrics/runtime-session.ts) observes without selecting a tier.
 
@@ -38,13 +38,13 @@ States are warmup, stable, fallback, probing, manual-baseline, suspended, unavai
 
 Acquisition, import, upscale and presentation remain replaceable boundaries. ADR-0041/0043 in [DECISIONS.md](../DECISIONS.md) document provenance hooks, separate session observation and prepared copy-import views. No video/page dependency enters the neural Upscaler.
 
-## 4. Modes
+## 4. User Modes
 
 Auto performance and Prefer neural intentionally share performance safeguards with only two real tiers. Prefer neural is not a force-through-overload switch. Baseline remains Catmull-Rom and never probes.
 
 Missing usable GPU timestamps keeps Auto/Prefer neural on baseline with an explicit unavailable reason; CPU timing is not substituted. Delayed model availability cannot override baseline intent, forced fallback or fatal failure. Development load controls are not production modes.
 
-## 5. Budget
+## 5. Budget Derivation
 
 For source interval T in milliseconds, failure is `min(24, max(6, 0.90*T))`; recovery is `min(22, max(5, 0.78*T))`. This gives 15/13 ms at 60 fps and 24/22 ms at 30 fps. These are calibrated policy boundaries, not universal GPU deadlines or a proof that the remaining frame stages fit.
 
@@ -52,7 +52,7 @@ Unknown cadence starts conservatively at 60 fps. The estimator uses the median o
 
 Relaxation requires 30 consecutive clean baseline intervals with exposed monotonic decoder counters and no drop increase. Neural observations may tighten, never relax, the inferred budget. Source/resolution/rate changes clear evidence; delivered cadence is not guaranteed encoded-file FPS. Other rates remain unvalidated workloads.
 
-## 6. Statistic
+## 6. Statistic Selection
 
 Decisions use 30 fresh positive finite neural samples and three consecutive evaluations of the same predicate. Invalid, duplicate, out-of-order, stale-generation, future or >500-ms-old submissions cannot advance dwell. Startup confirms non-failure; probes require recovery qualification.
 
@@ -60,7 +60,7 @@ Exclude the first three resolved samples and submissions within the first 150 ac
 
 Median was retained over an unvalidated tail trigger: calibration's every-fifth-frame burst had median 5.536 ms and p95 26.423 ms while rendering 59.064 fps. p90/p95 remain observations. Decoder loss and callback pressure corroborate performance but do not establish neural causality or steer policy.
 
-## 7. Trace
+## 7. Trace Tests
 
 [results/m9-replay-final.json](../results/m9-replay-final.json) identifies 15 valid calibration traces and explicitly excludes the retained invalid shader/device-loss run. Original diagnostic-enabled normal traces and later diagnostic-disabled repeated-graph traces are separate, not pooled.
 
@@ -68,7 +68,7 @@ Submission-bound generation, sequence, tier, source size, submittedAt and resolv
 
 Calibration used Playwright's default focus emulation: focus=true there is not independent native foreground evidence. Native final captures remove focus/visibility emulation. Earlier final artifacts remain retained, but the matrix below uses corrected final-v2/control/CFR/long summaries only; superseded accounting is not mixed into these numbers.
 
-## 8. Real
+## 8. Real M5 Traces
 
 All 13 matrix rows were captured on MacBook Pro, Apple M5, 24 GB, macOS 26.6.2/25G83, Chromium 153.0.8010.12, hardware Metal WebGPU, shader-f16 and GPU timestamps, external-texture import, visible/focused native foreground. Main-page viewport was 1200x820. The artifacts contain adapter features and exact execution flags.
 
@@ -78,7 +78,7 @@ The original 720p60 parent has PTS intervals 1.233..28.167 ms and average rate 7
 
 The parent and all original results remain retained permanently. CFR is an apparatus comparison, not retroactive repair of failing observations. Neither policy nor acceptance thresholds changed. Re-encoding can change workload as well as timestamps; it does not isolate every cause of loss.
 
-## 9. Changes
+## 9. Workload Changes
 
 Policy integration replaces live BudgetGuard routing with RuntimeController/RuntimeDriver and separate session accounting. Workload and lifecycle boundaries invalidate pending timing evidence; successful confirmation no longer rebuilds neural. Production model bytes and default neural graph are unchanged.
 
@@ -86,7 +86,7 @@ Reusable bind groups/views, samplers, buffers and textures are prepared in confi
 
 Destroy/recreate is retained. Corrected known requested graph storage is 77,427,856 bytes at 720p and 174,195,856 bytes at 1080p, excluding timers and browser/driver overhead. The raw payload-style report is 10 bytes below aligned allocation requests. API wording such as "persistent GPU allocation" means owned requested resources, not measured device residency or proof of no leak.
 
-## 10. Probes
+## 10. Probe And Backoff Results
 
 Initial fallback waits two active seconds. Failed probes increase backoff to 4/8/16/30 seconds; confirmation resets it to two. Scheduling is measured from probe start and never earlier than probe end. Force release does not reset evidence or create a fast recovery route.
 
@@ -94,7 +94,7 @@ A probe must qualify within two active seconds, stricter than the registered fou
 
 Configuration wall time in calibration was 1.5-1.9 ms, excluding first-submit/driver work. First GPU frames were 16.440 ms at 720p60 and 18.277 ms at 1080p30; first-three means were 9.074 and 14.306 ms, respectively. A cold-start anomaly spanned 681 ms across the first three 720p60 submissions; these are distinct scopes, not isolated shader compilation measurements. Live failed-probe dwell stayed below 0.878 seconds. Energy, watts and actual GPU memory are **not measured**.
 
-## 11. Load
+## 11. Controlled Overload
 
 Development-only stress repeats the existing neural graph inside one outer GPU timestamp span: seven extra executions on one frame, or three extra executions during sustained load. No fabricated timing values or force-fallback proxy enter live evidence. Inner diagnostics are disabled for these rows; normal rows retain production diagnostics.
 
@@ -102,7 +102,7 @@ The original shader stimulus suffered device loss and is invalid, retained and e
 
 The one-shot rows recorded slow neural maxima of 45.692428 ms (original) and 48.172890 ms (CFR), exceeding the >=25-ms stimulus target, with zero fallback/probes. They are controlled stress results, not ordinary neural processing costs.
 
-## 12. Long
+## 12. Long-Run Stability
 
 [results/m9-long-720p60-cfr-long.json.gz](../results/m9-long-720p60-cfr-long.json.gz) records **600.0011 active seconds**: 59.611557 rendered fps, 59.914890 presented fps, 182 callback skips and 133 decoder drops over 35,949 presented frames. Combined loss is `315/35949 = 0.876241%`.
 
@@ -112,7 +112,7 @@ There were 298 in-window state changes from 149 loop rewarm/stable cycles, not t
 
 First 120-second neural p50/p95: 9.0857775/10.1558031 ms, 7,118 samples. Last 120 seconds: 5.635247/5.75806205 ms, 7,138 samples. This is observed drift, with no established temperature or power cause. Subwindows select raw submissions/callback observations; decoder brackets are not interpolated into fictitious exact endpoints.
 
-## 13. Background
+## 13. Background And Device Failure
 
 [results/m9-lifecycle-final.json.gz](../results/m9-lifecycle-final.json.gz) records the final 12/12 passed native journeys at execution source `818b82a`, preserved in evidence commit `0f9c1d8`, with unchanged source during capture. They cover manual baseline, baseline seek/loop, Prefer neural desktop, neural seek/loop, source-picker round trip, neural pause/resume, backoff pause/resume, hidden/frozen resume, mobile viewport, fatal device loss, missing timestamps and delayed-model/manual races. The earlier passing report at `467e5b4` remains historical evidence.
 
@@ -120,7 +120,7 @@ Visibility was genuinely hidden and CDP freeze was exercised without Playwright 
 
 Default model-delay behavior never overrides baseline selection; fatal remains terminal. Source round trip is 720->1080->720 without reload. Owned-resource counters and deterministic stale-generation tests complement browser checks; actual memory leakage is not measured. Mobile here means desktop-Chromium viewport resizing, not mobile GPU validation.
 
-## 14. Telemetry
+## 14. Session Telemetry
 
 Whole-session counters survive tier/source changes; explicit Reset restarts session measurements. Active time includes stalls, configuration and callback silence, stopping only for explicit inactive lifecycle state. Legacy stage-local pipeline statistics retain their reset semantics.
 
@@ -130,7 +130,7 @@ GPU quantiles below are exact linear interpolation on raw neural durations selec
 
 Session UI quantiles instead use bounded 0.05-ms bins through 200 ms plus overflow; count/mean/max use raw values, and empty/overflow quantiles are null. Controller windows are 30 samples; transition history is bounded to 128 with lifetime/discard counts. Neither a UI trailing statistic nor a loaded-row aggregate is relabeled steady-state cost.
 
-## 15. Oldnew
+## 15. Old Versus New
 
 Replay loads the exact original `c65f67a` BudgetGuard git blob `70573ac611d4f70d829ab70dd7dfd0751d826c47`, not a rewritten approximation. It compares identical recorded arrivals with the pinned candidate and a virtual 100-ms polling schedule, separately for each of 15 valid traces.
 
@@ -138,13 +138,13 @@ On each normal 1080p30 and 1080p60 trace, legacy replay enters fallback four tim
 
 Replay is GPU-free and counterfactual. It uses externally known source FPS and virtual tiers/generations; it does not measure actual reconstruction, baseline performance, changed contention, cold-start cost or browser cadence inference. Live acceptance comes from the independent native artifacts, not replay counters.
 
-## 16. Replacement
+## 16. Replacement Verdict
 
-**RECOMMENDED: REPLACE BudgetGuard** in live routing with the bounded controller, while retaining exact legacy replay evidence. Its benefit is explicit lifecycle/intent handling, independent dwell, bounded missing-evidence behavior and avoiding unnecessary rejection of the measured normal 1080 workloads, while retaining real overload fallback and recovery.
+**REPLACE BudgetGuard** in live routing with the bounded controller, while retaining exact legacy replay evidence. Its benefit is explicit lifecycle/intent handling, independent dwell, bounded missing-evidence behavior and avoiding unnecessary rejection of the measured normal 1080 workloads, while retaining real overload fallback and recovery.
 
-This is not "all tests and workloads pass". The original and short CFR clean-run loss failures remain limitations. Closure still requires final source review, software/replay checks and exact-HEAD CI. No stronger model-quality, universal 60-fps, mobile, energy or memory claim follows.
+This is not "all tests and workloads pass". The original and short CFR clean-run loss failures remain limitations. Final source review, software/replay checks, fresh-clone validation and result-commit CI passed; closing metadata must also pass exact-HEAD CI. No stronger model-quality, universal 60-fps, mobile, energy or memory claim follows.
 
-## 17. Normal
+## 17. Normal Production Result
 
 The 13-row matrix is recomputed from each linked raw artifact's summary; `valid=true` means valid capture, not target success. All rows have zero recorded errors. Neural n is the in-window timing count; p50/p95 and callback p95 are milliseconds. Rates are whole-window means. Dash means **not measured**. Durations rounded below do not override exact boundaries in sections 12/18.
 
@@ -168,7 +168,7 @@ Dimensions are 960x540->1920x1080, 1280x720->2560x1440 and 1920x1080->3840x2160,
 
 **Short-row FAIL against the 1% clean-loss limit:** original Auto 2.566964%, original baseline 7.426019%, CFR Auto 1.057906%. The original baseline also misses 58 rendered fps. Baseline being worse does not prove Auto loss is unrelated to neural. The literal preregistered 1% acceptance gate is the ten-minute run, which passes; neither statement erases the short failures. Other normal rows demonstrate bounded feasibility, not ten-minute certification at every resolution/rate.
 
-## 18. Overload
+## 18. Overload Result
 
 Elapsed fallback is measured from the actual load action, including configuration and delivery, not from the first high sample: original 0.3898 seconds; CFR 0.4057 seconds. Both meet <=3 seconds. Four failed probes occur in each load run, with backoff 4/8/16/30 seconds and each failed dwell <0.878 seconds. No baseline observation confirms recovery.
 
@@ -176,13 +176,13 @@ Original load duration is **44.9998 seconds**, 0.2 ms below the literal >=45-sec
 
 Total fallback residence is 56.8403 seconds original and 56.8041 seconds CFR over the approximately 100-second rows. Each has five probe entries, four failures and one recovery. The observed schedule reaches the ceiling; untested hardware/scheduling regimes are not certified.
 
-## 19. Recovery
+## 19. Recovery Result
 
 Confirmed stable neural occurs 16.3668 seconds after original load removal and 16.3560 seconds after CFR removal, both below 35 seconds. Probe entry alone is not counted as recovery. Remaining observation is 33.6333/33.6440 seconds respectively, with no further fallback, exceeding the 15-second stability target subject to expected loop rewarming.
 
 Original final state is stable; CFR final state is warmup at a loop boundary, not failed recovery. Both preserve neural tier after confirmation. Normal/spike short rows have 14 loop-driven state changes; original/CFR load rows have 31/30, respectively. A state-change count is not a tier-change count.
 
-## 20. Reviewfindings
+## 20. Reviewer Findings
 
 Reviews corrected mixed dwell/invalid evidence, source generations, async intent and fatal handling; bounded interrupted probes and clocks; then timestamp provenance, diagnostic teardown and reusable configuration resources. Calibration review prevented neural-induced slowing from relaxing cadence. Integration review corrected queued-rVFC metadata versus observation clocks and source changes erasing session totals.
 
@@ -220,9 +220,9 @@ Actual commits after `c65f67a`, oldest first; these are existing history, not co
 
 CFR and long captures pin source `88ecc36856fc89730127137610d0965386eab0de`; original corrected matrix/control rows pin `508cfa6`. Their recorded RuntimeController and RuntimeDriver hashes match across all 13 rows. HTML/apparatus history is not silently labeled identical; the P2 observer fix is later than these captures. Closing documentation commits follow this evidence ledger; `git log --oneline c65f67a..HEAD` gives the complete published list including metadata-only closure.
 
-## 22. Finalrepo
+## 22. Final Repository State
 
-**Publication gates: PENDING push/exact-HEAD CI.** Result/evidence commit
+**Result publication gates passed.** Result/evidence commit
 `0f9c1d8e475846a0bde1d77a3a4c3a834127c6ab` passed final npm ci, typecheck, lint,
 build, **421 Vitest tests and 308 Python tests**, plus final frozen-legacy trace
 replay and independent review. A fresh local clone of that exact commit passed
@@ -240,10 +240,16 @@ excludes installed dependencies/caches. No history rewrite is implied.
 rows and keeps the three short loss-reference failures separate from the passed
 ten-minute gate. Final native lifecycle is 12/12 and output parity is 6/6.
 The production build excludes the development load/control hooks; production
-weights are unchanged. Publication still requires clean main == origin/main
-and successful exact-HEAD GitHub Actions; baseline CI is not M9 final CI.
+weights are unchanged. Result documentation was pushed at
+`0f86f3e1f6c3a04f1eaf90bb2bad7f185eec2a6b`; GitHub Actions
+[34745933686](https://github.com/yassinsolim/AetherVSR/actions/runs/34745933686)
+completed/success for that exact SHA, both gate and fusion. Main and origin/main
+were equal and clean at that verification. The subsequent metadata-only closing
+commit must independently pass the same clean/synchronized/exact-CI gate; its
+final SHA and CI are returned in the completion message, not self-pinned in a
+file that would change its own commit hash. Baseline CI is never reused as M9 CI.
 
-## 23. NextM10
+## 23. Recommended Milestone 10
 
 M10 remains the **Chrome/Chromium MV3 extension**, not further architecture training.
 Preregister least-privilege site activation, content-script/video discovery and

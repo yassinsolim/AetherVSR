@@ -1,7 +1,7 @@
 # M9 status and review ledger
 
-M9's measured decision is REPLACE BudgetGuard, with explicit performance limits.
-Publication gates remain pending; no all-scenarios pass is claimed.
+M9 is closed: REPLACE BudgetGuard, with explicit performance limits.
+Result publication gates passed; no all-scenarios pass is claimed.
 Baseline: c65f67a, 168 Vitest/308 Python, typecheck/lint/build/npm ci and exact
 GitHub CI success. Scope/protocol committed at 2683399; calibrated candidate
 at afdc05a. Production model bytes remain unchanged. R3 is research-only.
@@ -111,7 +111,7 @@ The 48.172890-ms single-frame stimulus caused no fallback. Normal 1080p30/60
 were feasible in the measured short runs; no cross-vendor or universal 4K claim.
 Full scopes, every matrix row and limitations are in M9-REPORT.md.
 
-## Remaining gates
+## Closure verification
 
 Result/evidence commit 0f9c1d8 passed npm ci, typecheck, lint, build, 421 Vitest,
 308 Python, and final trace replay. A fresh local clone passed the same code
@@ -119,6 +119,12 @@ gates without generated runtime media. Tracked bytes: 46,631,312 under the
 owner-approved 48 MiB cap. Local clone .git disk usage: 437,784 KiB, not network
 transfer size. Production-build diagnostic hook exclusion was checked.
 
-Remaining: clean pushed main and exact-HEAD GitHub CI. M10 is the recommended
-Chrome/Chromium extension, not implemented. Closure never means the short-window
-loss-reference failures disappeared or that every web stream is stutter-free.
+Result documentation was pushed at 0f86f3e1f6c3a04f1eaf90bb2bad7f185eec2a6b.
+Exact-SHA GitHub Actions run 34745933686 completed/success for both gate and
+fusion; main was clean and equal to origin/main. The closing metadata commit
+requires its own final fetch/clean/equal-HEAD/successful-CI check, returned in
+the completion message rather than self-pinned here.
+
+M10 is the recommended Chrome/Chromium extension, not implemented. Closure
+never means the short-window loss-reference failures disappeared or that every
+web stream is stutter-free.

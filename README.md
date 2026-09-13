@@ -8,7 +8,7 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine â
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: M9 runtime controller measured; publication gates pending.** The
+**Status: Milestone 9 complete; runtime controller replaced, weights retained.** The
 production 6,291-parameter C16D2 weights are unchanged. Auto performance selects
 neural or Catmull-Rom from runtime evidence, with hysteresis and real neural
 recovery probes; Baseline mode never probes. This does not predict scene quality.
