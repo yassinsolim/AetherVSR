@@ -1,0 +1,4812 @@
+{
+  "schema": "aethervsr.m9-replay/1",
+  "provenance": {
+    "head": "818b82a5f3c92a8f5a7ddac31e5aff67acfc6ac2",
+    "cleanWorktreeRequired": false,
+    "current": {
+      "path": "src/core/upscale/runtime-controller.ts",
+      "sha256": "60915ea32c6193e43d19b8e6e3fbf1d5f640e370b83e4fc89102e5df3690479d",
+      "loader": "Vite SSR working-tree source"
+    },
+    "lockedPolicy": {
+      "path": "docs/M9-CALIBRATION.md",
+      "sha256": "06fc6a607ad6529123c4f9e658c908b49c20da69d1c1406f0fe405742dc38ab4"
+    },
+    "toolSha256": "bab584d94a2bba1e1c3b34c959903b089f2e86ee42eaa9d3ff358bdd821b949c",
+    "reference": {
+      "label": "original BudgetGuard c65f67a (unmodified)",
+      "exactLegacy": true,
+      "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+      "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+      "path": "src/core/upscale/budget-guard.ts",
+      "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+      "typescript": "5.9.3",
+      "loader": "git show -> typescript.transpileModule -> data URL",
+      "failMs": 10,
+      "recoverMs": 7
+    }
+  },
+  "scope": "GPU-free counterfactual controller replay of each valid calibration steady window separately, not pooled. Uses all raw tagged arrivals and fixed externally known source FPS for workload configuration. Controller starts in warmup at recorded window start; startup trace is excluded. Each controller gates submissions against its own virtual tier/generation. Sample timestamps and durations are never synthesized; polling uses an explicit virtual 100 ms schedule.",
+  "limitations": [
+    "Continuously-neural recordings cannot measure actual baseline or recovery performance.",
+    "Virtual switches do not model cold starts, destroy/recreate, reconfiguration, decode, scheduling or changed GPU contention; probe outcomes are counterfactual, not runtime acceptance.",
+    "Fixed source FPS bypasses live cadence estimation; raw frame pressure is reported but never steers policy.",
+    "Descriptive median30/p90of30 comparisons do not retune the already locked policy."
+  ],
+  "excluded": [
+    {
+      "file": "results/m9-calibration-720p60-load4.json.gz",
+      "sha256": "f2eb1ac77eaf9e331ed8ca723389b142a34c937ffca1a4f78260de5a7182d0a9",
+      "reason": "Artifact marked invalid"
+    }
+  ],
+  "comparisons": [
+    {
+      "input": {
+        "file": "results/m9-calibration-1080p30-normal.json.gz",
+        "sha256": "46d6b4d6f518c09c86ea000adc674e33b566d25f1fb58c3c6e59a4b3d681023f",
+        "config": {
+          "name": "1080p30-normal",
+          "clip": "/media/m9/1080p30.mp4",
+          "durationMs": 30000
+        },
+        "captureHead": "e38acee642ea9c040ccb337f9fb320ac5e2228da",
+        "measuredAt": "2026-09-13T05:02:39.629Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "834e4f216798ed7f4ecc05b66ddbd5757f01800f398f952e01b09be086e691aa",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "window": {
+        "started": 3059.5,
+        "measuredEnd": 33059.59999999963,
+        "replayEnd": 33059.59999999963,
+        "drainMs": 0,
+        "tickMs": 100,
+        "tickCount": 300,
+        "rawSamples": 898,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3059.5,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 4281.200000001118,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 898,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3059.5,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 24,
+          "recoverMs": 22,
+          "medianMs": 11.5070955,
+          "p90Ms": 11.603864399999999,
+          "samples": 30,
+          "generation": 2,
+          "fps": 30,
+          "width": 1920,
+          "height": 1080,
+          "activeMs": 30000.099999999627,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 4281.200000001118,
+              "activeMs": 1221.7000000011176,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 9,
+        "since": 21405.599999999627,
+        "fallbackMs": 25789.39999999851,
+        "fallbackCount": 4,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 4106.200000001118,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.37 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 6159.5,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 7206.300000000745,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.63 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 11259.5,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 12330.599999999627,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.66 ms > 10 ms)",
+            "generation": 7
+          },
+          {
+            "atMs": 20359.5,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 8
+          },
+          {
+            "atMs": 21405.599999999627,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.66 ms > 10 ms)",
+            "generation": 9
+          }
+        ],
+        "routing": {
+          "offered": 128,
+          "baseline": 770,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3059.5,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 4106.200000001118,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 6159.5,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 7206.300000000745,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 11259.5,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 12330.599999999627,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 20359.5,
+            "generation": 8,
+            "tier": "neural"
+          },
+          {
+            "atMs": 21405.599999999627,
+            "generation": 9,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 24,
+        "median30": {
+          "maxMs": 11.718654,
+          "evaluations": 869,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 11.8349487,
+          "evaluations": 869,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 898,
+        "presentedSkips": 0,
+        "callbackP90Ms": 8.299999999999272,
+        "callbackMaxMs": 9.200000000000728,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1920,
+            "height": 1080
+          },
+          "targetSize": {
+            "width": 3840,
+            "height": 2160
+          },
+          "scaleFactor": 2,
+          "sourceFps": 28.934587165455017,
+          "renderFps": 28.934587165455017,
+          "meanSourceFps": 29.898903706864452,
+          "meanRenderFps": 29.898903706864452,
+          "elapsedMs": 30001.099999999627,
+          "framesRendered": 898,
+          "framesSkipped": 0,
+          "quality": {
+            "totalVideoFrames": 898,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.11875000001552204,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.2999999988824129,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 11.527985079166665,
+            "p50": 11.535511499999998,
+            "p95": 11.76714035,
+            "max": 11.899694,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 5.540000000000054,
+            "p50": 8.099999999998545,
+            "p95": 8.30000000000291,
+            "max": 8.799999999999272,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 105.94458333333336,
+            "p50": 99.9,
+            "p95": 233.2,
+            "max": 267.7,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-1080p60-normal.json.gz",
+        "sha256": "f9874e65e5a8a564d8a800f3aa95b1199cdec5a8319c1f8cb86c71df80728464",
+        "config": {
+          "name": "1080p60-normal",
+          "clip": "/media/m9/1080p60.mp4",
+          "durationMs": 30000
+        },
+        "captureHead": "e38acee642ea9c040ccb337f9fb320ac5e2228da",
+        "measuredAt": "2026-09-13T05:03:12.983Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "9f13cbcd07c77fda7ea0242f7a47dadcb0b1ec5b03a1d1d01738710e288e2795",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 60
+      },
+      "window": {
+        "started": 3068.39999999851,
+        "measuredEnd": 33068.59999999963,
+        "replayEnd": 33080.09999999963,
+        "drainMs": 11.5,
+        "tickMs": 100,
+        "tickCount": 300,
+        "rawSamples": 1791,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3068.39999999851,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 3768,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 1791,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3068.39999999851,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 11.6374055,
+          "p90Ms": 11.804877600000001,
+          "samples": 30,
+          "generation": 2,
+          "fps": 60,
+          "width": 1920,
+          "height": 1080,
+          "activeMs": 30011.700000001118,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 3768,
+              "activeMs": 699.6000000014901,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 9,
+        "since": 19417.299999998882,
+        "fallbackMs": 27836.299999998882,
+        "fallbackCount": 4,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 3622,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.73 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 5668.39999999851,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 6204.89999999851,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.75 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 10268.39999999851,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 10804.799999998882,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.80 ms > 10 ms)",
+            "generation": 7
+          },
+          {
+            "atMs": 18868.39999999851,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 8
+          },
+          {
+            "atMs": 19417.299999998882,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 11.74 ms > 10 ms)",
+            "generation": 9
+          }
+        ],
+        "routing": {
+          "offered": 128,
+          "baseline": 1660,
+          "beforeSwitch": 3,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3068.39999999851,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 3622,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 5668.39999999851,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 6204.89999999851,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 10268.39999999851,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 10804.799999998882,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 18868.39999999851,
+            "generation": 8,
+            "tier": "neural"
+          },
+          {
+            "atMs": 19417.299999998882,
+            "generation": 9,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 11.847173000000002,
+          "evaluations": 1762,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 12.0356836,
+          "evaluations": 1762,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 1791,
+        "presentedSkips": 5,
+        "callbackP90Ms": 8.200000000000728,
+        "callbackMaxMs": 9.30000000000291,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1920,
+            "height": 1080
+          },
+          "targetSize": {
+            "width": 3840,
+            "height": 2160
+          },
+          "scaleFactor": 2,
+          "sourceFps": 59.831660075065706,
+          "renderFps": 59.831660075065706,
+          "meanSourceFps": 59.877243311762705,
+          "meanRenderFps": 59.710454333178404,
+          "elapsedMs": 29977.99999999963,
+          "framesRendered": 1791,
+          "framesSkipped": 5,
+          "quality": {
+            "totalVideoFrames": 1796,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.11624999990841994,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 11.689126641666666,
+            "p50": 11.692009500000001,
+            "p95": 11.927797100000001,
+            "max": 12.14994,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 1.2750000000000759,
+            "p50": -0.09999999999854481,
+            "p95": 8.200000000000728,
+            "max": 9.299999999999272,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 56.10291666666669,
+            "p50": 49.9,
+            "p95": 116.7,
+            "max": 135.3,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-540p60-normal.json.gz",
+        "sha256": "9eccd01602eb19dde14c0e6963e43493c03885c1062c51f2813a8f80a18f4e83",
+        "config": {
+          "name": "540p60-normal",
+          "clip": "/media/m9/540p60.mp4",
+          "durationMs": 15000
+        },
+        "captureHead": "e38acee642ea9c040ccb337f9fb320ac5e2228da",
+        "measuredAt": "2026-09-13T05:04:20.840Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "2d584f5d2f7075ee2791aea9302faff4232dd4f7e20619df90721507b206f853",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 960,
+        "height": 540,
+        "fps": 60
+      },
+      "window": {
+        "started": 3136.199999999255,
+        "measuredEnd": 18136.89999999851,
+        "replayEnd": 18143.39999999851,
+        "drainMs": 6.5,
+        "tickMs": 100,
+        "tickCount": 150,
+        "rawSamples": 897,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3136.199999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 3826.7999999988824,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 897,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3136.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 5.984909,
+          "p90Ms": 6.7213345,
+          "samples": 30,
+          "generation": 2,
+          "fps": 60,
+          "width": 960,
+          "height": 540,
+          "activeMs": 15007.199999999255,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 3826.7999999988824,
+              "activeMs": 690.5999999996275,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3136.199999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [],
+        "routing": {
+          "offered": 897,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3136.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 7.1496405,
+          "evaluations": 868,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 7.5161805,
+          "evaluations": 868,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 897,
+        "presentedSkips": 3,
+        "callbackP90Ms": 8.100000000000364,
+        "callbackMaxMs": 9.200000000000728,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 960,
+            "height": 540
+          },
+          "targetSize": {
+            "width": 1920,
+            "height": 1080
+          },
+          "scaleFactor": 2,
+          "sourceFps": 59.807399898721954,
+          "renderFps": 59.807399898721954,
+          "meanSourceFps": 59.923745534053836,
+          "meanRenderFps": 59.72377752893464,
+          "elapsedMs": 15002.39999999851,
+          "framesRendered": 897,
+          "framesSkipped": 3,
+          "quality": {
+            "totalVideoFrames": 899,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.16708333332402012,
+            "p50": 0.19999999925494194,
+            "p95": 0.2999999988824129,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 6.273332112500002,
+            "p50": 6.237488,
+            "p95": 7.28767085,
+            "max": 7.764673,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 0.6425000000000561,
+            "p50": -0.1000000000003638,
+            "p95": 8.100000000000364,
+            "max": 9.200000000000728,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 56.103749999999906,
+            "p50": 50,
+            "p95": 116.82499999999999,
+            "max": 135.5,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-720p30-normal.json.gz",
+        "sha256": "d7ab0758229405fe06bcd508f1dc47aa0c918519c30896c40d65c5937b67fceb",
+        "config": {
+          "name": "720p30-normal",
+          "clip": "/media/m9/720p30.mp4",
+          "durationMs": 30000
+        },
+        "captureHead": "e38acee642ea9c040ccb337f9fb320ac5e2228da",
+        "measuredAt": "2026-09-13T05:02:06.326Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "5bbcaa2547c8714e83f8788178e0cc28741cacdd7306bea17fe5520ab3c7e422",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30
+      },
+      "window": {
+        "started": 3066.10000000149,
+        "measuredEnd": 33066.60000000149,
+        "replayEnd": 33066.60000000149,
+        "drainMs": 0,
+        "tickMs": 100,
+        "tickCount": 300,
+        "rawSamples": 899,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3066.10000000149,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 4284,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 899,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3066.10000000149,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 24,
+          "recoverMs": 22,
+          "medianMs": 7.1931825,
+          "p90Ms": 7.6144049,
+          "samples": 30,
+          "generation": 2,
+          "fps": 30,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 30000.5,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 4284,
+              "activeMs": 1217.8999999985099,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3066.10000000149,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [],
+        "routing": {
+          "offered": 899,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3066.10000000149,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 24,
+        "median30": {
+          "maxMs": 8.1167515,
+          "evaluations": 870,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 8.48165,
+          "evaluations": 870,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 899,
+        "presentedSkips": 0,
+        "callbackP90Ms": 8.200000000000728,
+        "callbackMaxMs": 9.200000000000728,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 29.489526133776774,
+          "renderFps": 29.489526133776774,
+          "meanSourceFps": 29.93233558881222,
+          "meanRenderFps": 29.93233558881222,
+          "elapsedMs": 30001.00000000149,
+          "framesRendered": 899,
+          "framesSkipped": 0,
+          "quality": {
+            "totalVideoFrames": 898,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.17208333332867673,
+            "p50": 0.19999999925494194,
+            "p95": 0.30000000074505806,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 7.373165979166661,
+            "p50": 7.402032999999999,
+            "p95": 8.16169825,
+            "max": 8.448913,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 6.2420833333333725,
+            "p50": 8.099999999998545,
+            "p95": 8.299999999999272,
+            "max": 9.099999999998545,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 105.67125,
+            "p50": 99.9,
+            "p95": 199.905,
+            "max": 269.5,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-720p60-normal.json.gz",
+        "sha256": "273fca5b94a66ba66f36d62c4e8c7738173c55f16c4e5a9cf741cbf7806d9044",
+        "config": {
+          "name": "720p60-normal",
+          "clip": "/media/aethervsr-testclip-720p60-h264.mp4",
+          "durationMs": 30000
+        },
+        "captureHead": "e38acee642ea9c040ccb337f9fb320ac5e2228da",
+        "measuredAt": "2026-09-13T05:01:33.003Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json 720p60 parent; docs/M9-CALIBRATION.md"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 60
+      },
+      "window": {
+        "started": 3777.199999999255,
+        "measuredEnd": 33777.699999999255,
+        "replayEnd": 33786.89999999851,
+        "drainMs": 9.199999999254942,
+        "tickMs": 100,
+        "tickCount": 300,
+        "rawSamples": 1778,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3777.199999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 4467,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 1778,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3777.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 6.4056315,
+          "p90Ms": 6.7705926000000005,
+          "samples": 30,
+          "generation": 2,
+          "fps": 60,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 30009.699999999255,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 4467,
+              "activeMs": 689.8000000007451,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3777.199999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [],
+        "routing": {
+          "offered": 1778,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3777.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 7.2938054999999995,
+          "evaluations": 1749,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 7.7968437999999995,
+          "evaluations": 1749,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 1778,
+        "presentedSkips": 13,
+        "callbackP90Ms": 8.299999999999272,
+        "callbackMaxMs": 9.399999999997817,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 58.91315388526534,
+          "renderFps": 57.89740985276076,
+          "meanSourceFps": 59.679000326735675,
+          "meanRenderFps": 59.2455774193348,
+          "elapsedMs": 29993.799999999253,
+          "framesRendered": 1778,
+          "framesSkipped": 13,
+          "quality": {
+            "totalVideoFrames": 1789,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.1425000000357007,
+            "p50": 0.10000000149011612,
+            "p95": 0.2050000010058267,
+            "max": 0.7000000011175871,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 6.4716257750000015,
+            "p50": 6.4326735,
+            "p95": 7.082032999999999,
+            "max": 7.6183,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 3.5325000000000424,
+            "p50": 0,
+            "p95": 8.30000000000291,
+            "max": 9.30000000000291,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 101.47500000000015,
+            "p50": 100.15,
+            "p95": 134.71499999999997,
+            "max": 142.7,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v2-720p30-load1.json.gz",
+        "sha256": "d8998775e1707d42648216baa6519ca45ace6b53c7e7a505d4c70fc52ce199f2",
+        "config": {
+          "name": "v2-720p30-load1",
+          "clip": "/media/m9/720p30.mp4",
+          "durationMs": 15000,
+          "passes": 1
+        },
+        "captureHead": "ef45590bd1071a381f415ba94b68e2a72bf7a63d",
+        "measuredAt": "2026-09-13T05:18:43.595Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "5bbcaa2547c8714e83f8788178e0cc28741cacdd7306bea17fe5520ab3c7e422",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30
+      },
+      "window": {
+        "started": 3057.199999999255,
+        "measuredEnd": 18058.5,
+        "replayEnd": 18058.5,
+        "drainMs": 0,
+        "tickMs": 100,
+        "tickCount": 150,
+        "rawSamples": 449,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3057.199999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 4272.5,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 449,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3057.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 24,
+          "recoverMs": 22,
+          "medianMs": 10.071388,
+          "p90Ms": 10.2263942,
+          "samples": 30,
+          "generation": 2,
+          "fps": 30,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 15001.300000000745,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 4272.5,
+              "activeMs": 1215.300000000745,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 7,
+        "since": 12322.599999999627,
+        "fallbackMs": 11847.400000000373,
+        "fallbackCount": 3,
+        "probeCount": 2,
+        "transitions": [
+          {
+            "atMs": 4097.799999998882,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 10.05 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 6157.199999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 7205.0999999996275,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 10.09 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 11257.199999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 12322.599999999627,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 10.06 ms > 10 ms)",
+            "generation": 7
+          }
+        ],
+        "routing": {
+          "offered": 96,
+          "baseline": 353,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3057.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 4097.799999998882,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 6157.199999999255,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 7205.0999999996275,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 11257.199999999255,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 12322.599999999627,
+            "generation": 7,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 24,
+        "median30": {
+          "maxMs": 10.2252815,
+          "evaluations": 420,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 10.4372402,
+          "evaluations": 420,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 449,
+        "presentedSkips": 0,
+        "callbackP90Ms": 8.300000000000182,
+        "callbackMaxMs": 10.200000000000728,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 29.05229412943296,
+          "renderFps": 29.05229412943296,
+          "meanSourceFps": 29.866865779105197,
+          "meanRenderFps": 29.866865779105197,
+          "elapsedMs": 14999.9,
+          "framesRendered": 449,
+          "framesSkipped": 0,
+          "quality": {
+            "totalVideoFrames": 450,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.14708333346061409,
+            "p50": 0.10000000149011612,
+            "p95": 0.30000000074505806,
+            "max": 0.3999999985098839,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 10.092993270833338,
+            "p50": 10.0685755,
+            "p95": 10.33243545,
+            "max": 10.55013,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 5.754166666666538,
+            "p50": 7.800000000001091,
+            "p95": 8.524999999999991,
+            "max": 10.200000000000728,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 105.66208333333336,
+            "p50": 100.1,
+            "p95": 200.20999999999998,
+            "max": 270.3,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v2-720p30-load2.json.gz",
+        "sha256": "4fd370ccd2409cc32742d9b1e55b1eef71099cc63c22bc522bb7b15b3afcbe0c",
+        "config": {
+          "name": "v2-720p30-load2",
+          "clip": "/media/m9/720p30.mp4",
+          "durationMs": 15000,
+          "passes": 2
+        },
+        "captureHead": "ef45590bd1071a381f415ba94b68e2a72bf7a63d",
+        "measuredAt": "2026-09-13T05:19:20.150Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "5bbcaa2547c8714e83f8788178e0cc28741cacdd7306bea17fe5520ab3c7e422",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30
+      },
+      "window": {
+        "started": 3054.699999999255,
+        "measuredEnd": 18057.300000000745,
+        "replayEnd": 18073.800000000745,
+        "drainMs": 16.5,
+        "tickMs": 100,
+        "tickCount": 150,
+        "rawSamples": 450,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3054.699999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 4274.5,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 450,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3054.699999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 24,
+          "recoverMs": 22,
+          "medianMs": 15.035332,
+          "p90Ms": 15.3079117,
+          "samples": 30,
+          "generation": 2,
+          "fps": 30,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 15019.10000000149,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 4274.5,
+              "activeMs": 1219.800000000745,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 7,
+        "since": 12340.5,
+        "fallbackMs": 11827.89999999851,
+        "fallbackCount": 3,
+        "probeCount": 2,
+        "transitions": [
+          {
+            "atMs": 4107.4000000003725,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 15.04 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 6154.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 7207.4000000003725,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 14.98 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 11254.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 12340.5,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 15.02 ms > 10 ms)",
+            "generation": 7
+          }
+        ],
+        "routing": {
+          "offered": 96,
+          "baseline": 353,
+          "beforeSwitch": 1,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3054.699999999255,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 4107.4000000003725,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 6154.699999999255,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 7207.4000000003725,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 11254.699999999255,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 12340.5,
+            "generation": 7,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 24,
+        "median30": {
+          "maxMs": 15.131769,
+          "evaluations": 421,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 15.369164999999999,
+          "evaluations": 421,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 450,
+        "presentedSkips": 0,
+        "callbackP90Ms": 8.299999999999272,
+        "callbackMaxMs": 10,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 30.19019824894582,
+          "renderFps": 30.19019824894582,
+          "meanSourceFps": 29.946709530255358,
+          "meanRenderFps": 29.946709530255358,
+          "elapsedMs": 14993.300000000745,
+          "framesRendered": 450,
+          "framesSkipped": 0,
+          "quality": {
+            "totalVideoFrames": 450,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.13874999995653828,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.40000000037252903,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 15.06974435416666,
+            "p50": 15.06427,
+            "p95": 15.37446245,
+            "max": 16.019006,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 4.2616666666665575,
+            "p50": 6.599999999998545,
+            "p95": 8.299999999999363,
+            "max": 10,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 105.65249999999997,
+            "p50": 100,
+            "p95": 199.91,
+            "max": 267.7,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v2-720p60-load1.json.gz",
+        "sha256": "a3fa13e00920182f3c5cf65b5f9a19e5d3f1db99d1459b7319b2114860301c8e",
+        "config": {
+          "name": "v2-720p60-load1",
+          "clip": "/media/aethervsr-testclip-720p60-h264.mp4",
+          "durationMs": 15000,
+          "passes": 1
+        },
+        "captureHead": "ef45590bd1071a381f415ba94b68e2a72bf7a63d",
+        "measuredAt": "2026-09-13T05:18:25.328Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json 720p60 parent; docs/M9-CALIBRATION.md"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 60
+      },
+      "window": {
+        "started": 3067.2999999988824,
+        "measuredEnd": 18067.400000000373,
+        "replayEnd": 18079.199999999255,
+        "drainMs": 11.799999998882413,
+        "tickMs": 100,
+        "tickCount": 150,
+        "rawSamples": 891,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3067.2999999988824,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 3771.5999999996275,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 891,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3067.2999999988824,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 10.2476765,
+          "p90Ms": 10.446828,
+          "samples": 30,
+          "generation": 2,
+          "fps": 60,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 15011.900000000373,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 3771.5999999996275,
+              "activeMs": 704.3000000007451,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 7,
+        "since": 10796.599999999627,
+        "fallbackMs": 13401.199999999255,
+        "fallbackCount": 3,
+        "probeCount": 2,
+        "transitions": [
+          {
+            "atMs": 3604.199999999255,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 10.23 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 5667.299999998882,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 6211.799999998882,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 10.24 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 10267.299999998882,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 10796.599999999627,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 10.31 ms > 10 ms)",
+            "generation": 7
+          }
+        ],
+        "routing": {
+          "offered": 96,
+          "baseline": 794,
+          "beforeSwitch": 1,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3067.2999999988824,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 3604.199999999255,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 5667.299999998882,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 6211.799999998882,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 10267.299999998882,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 10796.599999999627,
+            "generation": 7,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 10.4545905,
+          "evaluations": 862,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 10.7225825,
+          "evaluations": 862,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 891,
+        "presentedSkips": 5,
+        "callbackP90Ms": 9.799999999999727,
+        "callbackMaxMs": 10.400000000001455,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 59.97153893065417,
+          "renderFps": 59.97153893065417,
+          "meanSourceFps": 59.69810767003807,
+          "meanRenderFps": 59.3645986886412,
+          "elapsedMs": 14992.100000000373,
+          "framesRendered": 891,
+          "framesSkipped": 5,
+          "quality": {
+            "totalVideoFrames": 895,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.1154166667178894,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 10.224337524999992,
+            "p50": 10.24626,
+            "p95": 10.523472,
+            "max": 10.921541,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 7.789166666666385,
+            "p50": 8.199999999998909,
+            "p95": 10.199999999999,
+            "max": 10.300000000001091,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 101.97416666666658,
+            "p50": 101.6,
+            "p95": 135.41,
+            "max": 145.9,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v2-720p60-load2.json.gz",
+        "sha256": "a42db354b884c5b7967601875d4b189948cff655f4522c7aa494575951339f7b",
+        "config": {
+          "name": "v2-720p60-load2",
+          "clip": "/media/aethervsr-testclip-720p60-h264.mp4",
+          "durationMs": 15000,
+          "passes": 2
+        },
+        "captureHead": "ef45590bd1071a381f415ba94b68e2a72bf7a63d",
+        "measuredAt": "2026-09-13T05:19:01.868Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json 720p60 parent; docs/M9-CALIBRATION.md"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 60
+      },
+      "window": {
+        "started": 3056.0999999996275,
+        "measuredEnd": 18056.900000000373,
+        "replayEnd": 18070.799999998882,
+        "drainMs": 13.899999998509884,
+        "tickMs": 100,
+        "tickCount": 150,
+        "rawSamples": 892,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "probing",
+        "tier": "neural",
+        "generation": 8,
+        "since": 17756.099999999627,
+        "fallbackMs": 12603.999999998137,
+        "fallbackCount": 3,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 3753.4000000003725,
+            "from": "warmup",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 3
+          },
+          {
+            "atMs": 5756.0999999996275,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 4
+          },
+          {
+            "atMs": 6457.4000000003725,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 5
+          },
+          {
+            "atMs": 9756.099999999627,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 6
+          },
+          {
+            "atMs": 10453.5,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 7
+          },
+          {
+            "atMs": 17756.099999999627,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 8
+          }
+        ],
+        "routing": {
+          "offered": 140,
+          "baseline": 747,
+          "beforeSwitch": 5,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3056.0999999996275,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 3753.4000000003725,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 5756.0999999996275,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 6457.4000000003725,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 9756.099999999627,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 10453.5,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 17756.099999999627,
+            "generation": 8,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "probing",
+          "reason": "probing neural recovery",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 15.3695785,
+          "p90Ms": 15.5535545,
+          "samples": 18,
+          "generation": 8,
+          "fps": 60,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 15014.699999999255,
+          "backoffMs": 8000,
+          "nextProbeAtMs": null,
+          "transitionCount": 6,
+          "transitions": [
+            {
+              "atMs": 3753.4000000003725,
+              "activeMs": 697.3000000007451,
+              "from": "warmup",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 5756.0999999996275,
+              "activeMs": 2700,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 6457.4000000003725,
+              "activeMs": 3401.300000000745,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 9756.099999999627,
+              "activeMs": 6700,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 10453.5,
+              "activeMs": 7397.4000000003725,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 17756.099999999627,
+              "activeMs": 14700,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 3,
+          "failedProbeCount": 2,
+          "fallbackMs": 12603.999999998137,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 7,
+        "since": 10801.5,
+        "fallbackMs": 13367.599999997765,
+        "fallbackCount": 3,
+        "probeCount": 2,
+        "transitions": [
+          {
+            "atMs": 3603.9000000003725,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 15.45 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 5656.0999999996275,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 6210,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 15.46 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 10256.099999999627,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 10801.5,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 15.37 ms > 10 ms)",
+            "generation": 7
+          }
+        ],
+        "routing": {
+          "offered": 96,
+          "baseline": 793,
+          "beforeSwitch": 3,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3056.0999999996275,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 3603.9000000003725,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 5656.0999999996275,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 6210,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 10256.099999999627,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 10801.5,
+            "generation": 7,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 15.5317835,
+          "evaluations": 863,
+          "aboveFailureWindows": 863,
+          "threeWindowTriggerCount": 1
+        },
+        "p90of30": {
+          "maxMs": 15.701564,
+          "evaluations": 863,
+          "aboveFailureWindows": 863,
+          "threeWindowTriggerCount": 1
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 892,
+        "presentedSkips": 4,
+        "callbackP90Ms": 8.299999999999272,
+        "callbackMaxMs": 10.300000000001091,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 59.25479562114891,
+          "renderFps": 59.25479562114891,
+          "meanSourceFps": 59.684174024379,
+          "meanRenderFps": 59.4174291125382,
+          "elapsedMs": 14995.600000000373,
+          "framesRendered": 892,
+          "framesSkipped": 4,
+          "quality": {
+            "totalVideoFrames": 896,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.13375000004501392,
+            "p50": 0.10000000149011612,
+            "p95": 0.2000000011175871,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 15.358627374999978,
+            "p50": 15.346807,
+            "p95": 15.606997100000001,
+            "max": 16.113504,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 5.042500000000033,
+            "p50": 8,
+            "p95": 8.300000000001091,
+            "max": 9.899999999997817,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 102.01625,
+            "p50": 100.1,
+            "p95": 134.4,
+            "max": 142.7,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v2-720p60-normal.json.gz",
+        "sha256": "3ef7bf0729cf70db6014d978850fbe75bd39af08ce2cb4ea14e1fac270bf570d",
+        "config": {
+          "name": "v2-720p60-normal",
+          "clip": "/media/aethervsr-testclip-720p60-h264.mp4",
+          "durationMs": 15000
+        },
+        "captureHead": "ef45590bd1071a381f415ba94b68e2a72bf7a63d",
+        "measuredAt": "2026-09-13T05:18:07.020Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json 720p60 parent; docs/M9-CALIBRATION.md"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 60
+      },
+      "window": {
+        "started": 3128.199999999255,
+        "measuredEnd": 18128.599999999627,
+        "replayEnd": 18133.900000000373,
+        "drainMs": 5.300000000745058,
+        "tickMs": 100,
+        "tickCount": 150,
+        "rawSamples": 887,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3128.199999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 3809.800000000745,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 887,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3128.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 6.052678,
+          "p90Ms": 6.3686112999999995,
+          "samples": 30,
+          "generation": 2,
+          "fps": 60,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 15005.700000001118,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 3809.800000000745,
+              "activeMs": 681.6000000014901,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3128.199999999255,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [],
+        "routing": {
+          "offered": 887,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3128.199999999255,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 6.694710499999999,
+          "evaluations": 858,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 7.1475614,
+          "evaluations": 858,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 887,
+        "presentedSkips": 9,
+        "callbackP90Ms": 8.200000000000728,
+        "callbackMaxMs": 10.299999999999727,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 59.86201298703561,
+          "renderFps": 59.86201298703561,
+          "meanSourceFps": 59.690542883821685,
+          "meanRenderFps": 59.090302787783244,
+          "elapsedMs": 14993.999999999627,
+          "framesRendered": 887,
+          "framesSkipped": 9,
+          "quality": {
+            "totalVideoFrames": 895,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.12875000004811835,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 6.293519733333334,
+            "p50": 6.2772375,
+            "p95": 6.87834915,
+            "max": 7.093267,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 2.1174999999998816,
+            "p50": -0.09999999999854481,
+            "p95": 8.299999999999272,
+            "max": 8.600000000000364,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 102.87958333333333,
+            "p50": 100.6,
+            "p95": 134.6,
+            "max": 143,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v2-720p60-spike.json.gz",
+        "sha256": "5ac28c70b07fe771c496d146e2092495354cb9ab48ed202fdcd752e9f7a28dc2",
+        "config": {
+          "name": "v2-720p60-spike",
+          "clip": "/media/aethervsr-testclip-720p60-h264.mp4",
+          "durationMs": 15000,
+          "passes": 7,
+          "loadFrames": 1
+        },
+        "captureHead": "ef45590bd1071a381f415ba94b68e2a72bf7a63d",
+        "measuredAt": "2026-09-13T05:19:38.600Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json 720p60 parent; docs/M9-CALIBRATION.md"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 60
+      },
+      "window": {
+        "started": 3054.5999999996275,
+        "measuredEnd": 18055.5,
+        "replayEnd": 18055.5,
+        "drainMs": 0,
+        "tickMs": 100,
+        "tickCount": 150,
+        "rawSamples": 881,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3054.5999999996275,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 3736,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 881,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3054.5999999996275,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 5.4773119999999995,
+          "p90Ms": 6.7749803,
+          "samples": 30,
+          "generation": 2,
+          "fps": 60,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 15000.900000000373,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 3736,
+              "activeMs": 681.4000000003725,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3054.5999999996275,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [],
+        "routing": {
+          "offered": 881,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3054.5999999996275,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 6.710106,
+          "evaluations": 852,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 7.080875600000001,
+          "evaluations": 852,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 881,
+        "presentedSkips": 15,
+        "callbackP90Ms": 8.299999999999272,
+        "callbackMaxMs": 10.300000000001091,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 58.90118817914081,
+          "renderFps": 58.90118817914081,
+          "meanSourceFps": 59.66149600367968,
+          "meanRenderFps": 58.66158266283589,
+          "elapsedMs": 15001.3,
+          "framesRendered": 881,
+          "framesSkipped": 15,
+          "quality": {
+            "totalVideoFrames": 895,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.11666666661233951,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 6.093134474999995,
+            "p50": 6.109136,
+            "p95": 6.953616899999999,
+            "max": 7.359554,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 3.0212499999999407,
+            "p50": 0,
+            "p95": 8.80499999999929,
+            "max": 10.300000000001091,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 103.06708333333337,
+            "p50": 101.6,
+            "p95": 135.01,
+            "max": 142.5,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v3-720p30-load3.json.gz",
+        "sha256": "c618250fca72110160ed720e6572d8a56c23d1930f3e93ec3e3eb045f280edf1",
+        "config": {
+          "name": "v3-720p30-load3",
+          "clip": "/media/m9/720p30.mp4",
+          "durationMs": 20000,
+          "passes": 3
+        },
+        "captureHead": "33fb50392760e1943594b751232b5cdc6cc46fb7",
+        "measuredAt": "2026-09-13T05:21:04.790Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "5bbcaa2547c8714e83f8788178e0cc28741cacdd7306bea17fe5520ab3c7e422",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30
+      },
+      "window": {
+        "started": 3066.4000000003725,
+        "measuredEnd": 23067.300000000745,
+        "replayEnd": 23080.700000001118,
+        "drainMs": 13.400000000372529,
+        "tickMs": 100,
+        "tickCount": 200,
+        "rawSamples": 600,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3066.4000000003725,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 4289.300000000745,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 600,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3066.4000000003725,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 24,
+          "recoverMs": 22,
+          "medianMs": 20.234754000000002,
+          "p90Ms": 20.5262906,
+          "samples": 30,
+          "generation": 2,
+          "fps": 30,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 20014.300000000745,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 4289.300000000745,
+              "activeMs": 1222.9000000003725,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 9,
+        "since": 21455.400000000373,
+        "fallbackMs": 15741.200000001118,
+        "fallbackCount": 4,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 4127.300000000745,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.27 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 6166.4000000003725,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 7224.9000000003725,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.48 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 11266.400000000373,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 12331.099999999627,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.23 ms > 10 ms)",
+            "generation": 7
+          },
+          {
+            "atMs": 20366.400000000373,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 8
+          },
+          {
+            "atMs": 21455.400000000373,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.24 ms > 10 ms)",
+            "generation": 9
+          }
+        ],
+        "routing": {
+          "offered": 128,
+          "baseline": 471,
+          "beforeSwitch": 1,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3066.4000000003725,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 4127.300000000745,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 6166.4000000003725,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 7224.9000000003725,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 11266.400000000373,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 12331.099999999627,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 20366.400000000373,
+            "generation": 8,
+            "tier": "neural"
+          },
+          {
+            "atMs": 21455.400000000373,
+            "generation": 9,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 24,
+        "median30": {
+          "maxMs": 20.70658,
+          "evaluations": 571,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 21.7657345,
+          "evaluations": 571,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 600,
+        "presentedSkips": 0,
+        "callbackP90Ms": 8.299999999999272,
+        "callbackMaxMs": 9.5,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 29.688779688757045,
+          "renderFps": 29.688779688757045,
+          "meanSourceFps": 29.94985025074763,
+          "meanRenderFps": 29.94985025074763,
+          "elapsedMs": 20000.100000000744,
+          "framesRendered": 600,
+          "framesSkipped": 0,
+          "quality": {
+            "totalVideoFrames": 599,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.150000000007761,
+            "p50": 0.10000000149011612,
+            "p95": 0.2999999988824129,
+            "max": 0.3999999985098839,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 20.270585683333316,
+            "p50": 20.2360665,
+            "p95": 20.611695450000003,
+            "max": 21.219386,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 4.998333333333312,
+            "p50": 8.099999999998545,
+            "p95": 8.399999999997817,
+            "max": 9.299999999999272,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 105.56791666666658,
+            "p50": 100,
+            "p95": 200.005,
+            "max": 269.3,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v3-720p30-load5.json.gz",
+        "sha256": "39153218f677914c198d9c1d17a16ec5778cae9c23b97ac2f7ad96176ea9061c",
+        "config": {
+          "name": "v3-720p30-load5",
+          "clip": "/media/m9/720p30.mp4",
+          "durationMs": 20000,
+          "passes": 5
+        },
+        "captureHead": "33fb50392760e1943594b751232b5cdc6cc46fb7",
+        "measuredAt": "2026-09-13T05:21:28.156Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "5bbcaa2547c8714e83f8788178e0cc28741cacdd7306bea17fe5520ab3c7e422",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json ffprobe stream"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30
+      },
+      "window": {
+        "started": 3087.0999999996275,
+        "measuredEnd": 23087.800000000745,
+        "replayEnd": 23154,
+        "drainMs": 66.19999999925494,
+        "tickMs": 100,
+        "tickCount": 200,
+        "rawSamples": 585,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 9,
+        "since": 19697.599999999627,
+        "fallbackMs": 14950.79999999702,
+        "fallbackCount": 4,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 4326.4000000003725,
+            "from": "warmup",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 3
+          },
+          {
+            "atMs": 6387.0999999996275,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 4
+          },
+          {
+            "atMs": 7656.300000000745,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 5
+          },
+          {
+            "atMs": 10387.099999999627,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 6
+          },
+          {
+            "atMs": 11684.200000001118,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 7
+          },
+          {
+            "atMs": 18387.099999999627,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 8
+          },
+          {
+            "atMs": 19697.599999999627,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 9
+          }
+        ],
+        "routing": {
+          "offered": 144,
+          "baseline": 435,
+          "beforeSwitch": 6,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3087.0999999996275,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 4326.4000000003725,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 6387.0999999996275,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 7656.300000000745,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 10387.099999999627,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 11684.200000001118,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 18387.099999999627,
+            "generation": 8,
+            "tier": "neural"
+          },
+          {
+            "atMs": 19697.599999999627,
+            "generation": 9,
+            "tier": "baseline"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "baseline",
+          "state": "fallback",
+          "reason": "neural median exceeds failure threshold",
+          "failMs": 24,
+          "recoverMs": 22,
+          "medianMs": null,
+          "p90Ms": null,
+          "samples": 0,
+          "generation": 9,
+          "fps": 30,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 20066.900000000373,
+          "backoffMs": 16000,
+          "nextProbeAtMs": 34387.09999999963,
+          "transitionCount": 7,
+          "transitions": [
+            {
+              "atMs": 4326.4000000003725,
+              "activeMs": 1239.300000000745,
+              "from": "warmup",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 6387.0999999996275,
+              "activeMs": 3300,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 7656.300000000745,
+              "activeMs": 4569.200000001118,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 10387.099999999627,
+              "activeMs": 7300,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 11684.200000001118,
+              "activeMs": 8597.10000000149,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 18387.099999999627,
+              "activeMs": 15300,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 19697.599999999627,
+              "activeMs": 16610.5,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 3,
+          "failedProbeCount": 3,
+          "fallbackMs": 14950.79999999702,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 9,
+        "since": 21862.599999999627,
+        "fallbackMs": 15488.599999997765,
+        "fallbackCount": 4,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 4193.4000000003725,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 31.47 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 6287.0999999996275,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 7420.9000000003725,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 32.59 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 11487.099999999627,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 12649.800000000745,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 33.09 ms > 10 ms)",
+            "generation": 7
+          },
+          {
+            "atMs": 20687.099999999627,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 8
+          },
+          {
+            "atMs": 21862.599999999627,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 33.59 ms > 10 ms)",
+            "generation": 9
+          }
+        ],
+        "routing": {
+          "offered": 128,
+          "baseline": 451,
+          "beforeSwitch": 6,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3087.0999999996275,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 4193.4000000003725,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 6287.0999999996275,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 7420.9000000003725,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 11487.099999999627,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 12649.800000000745,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 20687.099999999627,
+            "generation": 8,
+            "tier": "neural"
+          },
+          {
+            "atMs": 21862.599999999627,
+            "generation": 9,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 24,
+        "median30": {
+          "maxMs": 33.8623165,
+          "evaluations": 556,
+          "aboveFailureWindows": 556,
+          "threeWindowTriggerCount": 1
+        },
+        "p90of30": {
+          "maxMs": 34.033110799999996,
+          "evaluations": 556,
+          "aboveFailureWindows": 556,
+          "threeWindowTriggerCount": 1
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 585,
+        "presentedSkips": 0,
+        "callbackP90Ms": 8.199999999998909,
+        "callbackMaxMs": 9.199999999999818,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 28.423510303501008,
+          "renderFps": 28.423510303501008,
+          "meanSourceFps": 29.233764998572266,
+          "meanRenderFps": 29.233764998572266,
+          "elapsedMs": 19976.900000000744,
+          "framesRendered": 585,
+          "framesSkipped": 0,
+          "quality": {
+            "totalVideoFrames": 597,
+            "droppedVideoFrames": 12,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.12499999993791183,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.30000000074505806,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 33.456494562500005,
+            "p50": 33.4205945,
+            "p95": 33.99535135,
+            "max": 34.330184,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": -0.025833333333260575,
+            "p50": -0.8000000000010914,
+            "p95": 8.200000000000728,
+            "max": 8.599999999998545,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 106.21541666666654,
+            "p50": 103.2,
+            "p95": 206.815,
+            "max": 279.3,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v3-720p60-load3.json.gz",
+        "sha256": "956f455279b7f6be256d92f17fcd5d92a27b165165500e8a422a253b50b473ca",
+        "config": {
+          "name": "v3-720p60-load3",
+          "clip": "/media/aethervsr-testclip-720p60-h264.mp4",
+          "durationMs": 20000,
+          "passes": 3
+        },
+        "captureHead": "33fb50392760e1943594b751232b5cdc6cc46fb7",
+        "measuredAt": "2026-09-13T05:20:41.476Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json 720p60 parent; docs/M9-CALIBRATION.md"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 60
+      },
+      "window": {
+        "started": 3073.699999999255,
+        "measuredEnd": 23075.39999999851,
+        "replayEnd": 23135.39999999851,
+        "drainMs": 60,
+        "tickMs": 100,
+        "tickCount": 200,
+        "rawSamples": 924,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 9,
+        "since": 18873.199999999255,
+        "fallbackMs": 16496.799999998882,
+        "fallbackCount": 4,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 3952.699999999255,
+            "from": "warmup",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 3
+          },
+          {
+            "atMs": 5973.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 4
+          },
+          {
+            "atMs": 6864.0999999996275,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 5
+          },
+          {
+            "atMs": 9973.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 6
+          },
+          {
+            "atMs": 10869.699999999255,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 7
+          },
+          {
+            "atMs": 17973.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing neural recovery",
+            "generation": 8
+          },
+          {
+            "atMs": 18873.199999999255,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural median exceeds failure threshold",
+            "generation": 9
+          }
+        ],
+        "routing": {
+          "offered": 157,
+          "baseline": 758,
+          "beforeSwitch": 9,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3073.699999999255,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 3952.699999999255,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 5973.699999999255,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 6864.0999999996275,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 9973.699999999255,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 10869.699999999255,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 17973.699999999255,
+            "generation": 8,
+            "tier": "neural"
+          },
+          {
+            "atMs": 18873.199999999255,
+            "generation": 9,
+            "tier": "baseline"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "baseline",
+          "state": "fallback",
+          "reason": "neural median exceeds failure threshold",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": null,
+          "p90Ms": null,
+          "samples": 0,
+          "generation": 9,
+          "fps": 60,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 20061.699999999255,
+          "backoffMs": 16000,
+          "nextProbeAtMs": 33973.699999999255,
+          "transitionCount": 7,
+          "transitions": [
+            {
+              "atMs": 3952.699999999255,
+              "activeMs": 879,
+              "from": "warmup",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 5973.699999999255,
+              "activeMs": 2900,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 6864.0999999996275,
+              "activeMs": 3790.4000000003725,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 9973.699999999255,
+              "activeMs": 6900,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 10869.699999999255,
+              "activeMs": 7796,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            },
+            {
+              "atMs": 17973.699999999255,
+              "activeMs": 14900,
+              "from": "fallback",
+              "to": "probing",
+              "tier": "neural",
+              "reason": "probing neural recovery"
+            },
+            {
+              "atMs": 18873.199999999255,
+              "activeMs": 15799.5,
+              "from": "probing",
+              "to": "fallback",
+              "tier": "baseline",
+              "reason": "neural median exceeds failure threshold"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 3,
+          "failedProbeCount": 3,
+          "fallbackMs": 16496.799999998882,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "fallback",
+        "tier": "baseline",
+        "generation": 9,
+        "since": 20223.5,
+        "fallbackMs": 17094.599999999627,
+        "fallbackCount": 4,
+        "probeCount": 3,
+        "transitions": [
+          {
+            "atMs": 3778.89999999851,
+            "from": "stable",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.50 ms > 10 ms)",
+            "generation": 3
+          },
+          {
+            "atMs": 5873.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 4
+          },
+          {
+            "atMs": 6629.699999999255,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.49 ms > 10 ms)",
+            "generation": 5
+          },
+          {
+            "atMs": 10673.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 6
+          },
+          {
+            "atMs": 11429.799999998882,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.48 ms > 10 ms)",
+            "generation": 7
+          },
+          {
+            "atMs": 19473.699999999255,
+            "from": "fallback",
+            "to": "probing",
+            "tier": "neural",
+            "reason": "probing whether the neural stage now fits",
+            "generation": 8
+          },
+          {
+            "atMs": 20223.5,
+            "from": "probing",
+            "to": "fallback",
+            "tier": "baseline",
+            "reason": "neural stage over budget (median 20.44 ms > 10 ms)",
+            "generation": 9
+          }
+        ],
+        "routing": {
+          "offered": 128,
+          "baseline": 787,
+          "beforeSwitch": 9,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3073.699999999255,
+            "generation": 2,
+            "tier": "neural"
+          },
+          {
+            "atMs": 3778.89999999851,
+            "generation": 3,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 5873.699999999255,
+            "generation": 4,
+            "tier": "neural"
+          },
+          {
+            "atMs": 6629.699999999255,
+            "generation": 5,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 10673.699999999255,
+            "generation": 6,
+            "tier": "neural"
+          },
+          {
+            "atMs": 11429.799999998882,
+            "generation": 7,
+            "tier": "baseline"
+          },
+          {
+            "atMs": 19473.699999999255,
+            "generation": 8,
+            "tier": "neural"
+          },
+          {
+            "atMs": 20223.5,
+            "generation": 9,
+            "tier": "baseline"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 20.577436,
+          "evaluations": 895,
+          "aboveFailureWindows": 895,
+          "threeWindowTriggerCount": 1
+        },
+        "p90of30": {
+          "maxMs": 20.822596,
+          "evaluations": 895,
+          "aboveFailureWindows": 895,
+          "threeWindowTriggerCount": 1
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 933,
+        "presentedSkips": 144,
+        "callbackP90Ms": 8.300000000000182,
+        "callbackMaxMs": 18.299999999999272,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 54.380664652649656,
+          "renderFps": 46.32426988929415,
+          "meanSourceFps": 53.81910578255682,
+          "meanRenderFps": 46.61654887485405,
+          "elapsedMs": 19992.89999999851,
+          "framesRendered": 933,
+          "framesSkipped": 144,
+          "quality": {
+            "totalVideoFrames": 1184,
+            "droppedVideoFrames": 231,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.11166666665424903,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 3,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 20.546874662499945,
+            "p50": 20.4462295,
+            "p95": 20.674013549999998,
+            "max": 40.519091,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": -0.463750000000285,
+            "p50": -2.2000000000007276,
+            "p95": 15.004999999999926,
+            "max": 18.299999999999272,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 103.15000000000013,
+            "p50": 106.89999999999999,
+            "p95": 144.70499999999998,
+            "max": 152.2,
+            "samples": 240
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "file": "results/m9-calibration-v3-720p60-tail.json.gz",
+        "sha256": "6988a486a6edab3b82842fbad4d0a516caa76d9bd99a3d17f18111a8ee1b9dab",
+        "config": {
+          "name": "v3-720p60-tail",
+          "clip": "/media/aethervsr-testclip-720p60-h264.mp4",
+          "durationMs": 20000,
+          "passes": 4,
+          "every": 5
+        },
+        "captureHead": "33fb50392760e1943594b751232b5cdc6cc46fb7",
+        "measuredAt": "2026-09-13T05:21:51.492Z",
+        "browser": "153.0.8010.12",
+        "machine": [
+          {
+            "name": "MacBook Pro",
+            "chip": "Apple M5",
+            "memory": "24 GB"
+          }
+        ],
+        "os": "26.6.2",
+        "osBuild": "25G83",
+        "displays": [
+          {
+            "gpu": "Apple M5",
+            "displays": [
+              {
+                "name": "Color LCD",
+                "resolution": "1512 x 982 @ 120.00Hz"
+              },
+              {
+                "name": "VG248",
+                "resolution": "1920 x 1080 @ 60.00Hz"
+              }
+            ]
+          }
+        ],
+        "precision": "f16",
+        "mediaSha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "cadenceBasis": "Fixed external source metadata; never inferred from callback/render/drop pressure",
+        "mediaMetadataSha256": "8a82941d65e9b3f315304c6ed4dcde203a873727a80e9c24686ada1989d43dc2",
+        "cadenceEvidence": "results/m9-media.json 720p60 parent; docs/M9-CALIBRATION.md"
+      },
+      "workload": {
+        "width": 1280,
+        "height": 720,
+        "fps": 60
+      },
+      "window": {
+        "started": 3078.89999999851,
+        "measuredEnd": 23079.39999999851,
+        "replayEnd": 23095.5,
+        "drainMs": 16.100000001490116,
+        "tickMs": 100,
+        "tickCount": 200,
+        "rawSamples": 1182,
+        "ordering": "Original absolute times; ticks precede equal-time arrivals, equal-time samples retain input order; trailing timestamp drain included"
+      },
+      "current": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3078.89999999851,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [
+          {
+            "atMs": 3779.199999999255,
+            "from": "warmup",
+            "to": "stable",
+            "tier": "neural",
+            "reason": "neural evidence confirmed",
+            "generation": 2
+          }
+        ],
+        "routing": {
+          "offered": 1182,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3078.89999999851,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "final": {
+          "mode": "auto",
+          "tier": "neural",
+          "state": "stable",
+          "reason": "neural evidence confirmed",
+          "failMs": 15,
+          "recoverMs": 13,
+          "medianMs": 5.5444569999999995,
+          "p90Ms": 26.1921502,
+          "samples": 30,
+          "generation": 2,
+          "fps": 60,
+          "width": 1280,
+          "height": 720,
+          "activeMs": 20016.60000000149,
+          "backoffMs": 2000,
+          "nextProbeAtMs": null,
+          "transitionCount": 1,
+          "transitions": [
+            {
+              "atMs": 3779.199999999255,
+              "activeMs": 700.3000000007451,
+              "from": "warmup",
+              "to": "stable",
+              "tier": "neural",
+              "reason": "neural evidence confirmed"
+            }
+          ],
+          "discardedTransitions": 0,
+          "probeCount": 0,
+          "failedProbeCount": 0,
+          "fallbackMs": 0,
+          "forced": false
+        }
+      },
+      "reference": {
+        "state": "stable",
+        "tier": "neural",
+        "generation": 2,
+        "since": 3078.89999999851,
+        "fallbackMs": 0,
+        "fallbackCount": 0,
+        "probeCount": 0,
+        "transitions": [],
+        "routing": {
+          "offered": 1182,
+          "baseline": 0,
+          "beforeSwitch": 0,
+          "wrongGeneration": 0,
+          "nonNeural": 0,
+          "outsideWindow": 0
+        },
+        "bindings": [
+          {
+            "atMs": 3078.89999999851,
+            "generation": 2,
+            "tier": "neural"
+          }
+        ],
+        "metadata": {
+          "label": "original BudgetGuard c65f67a (unmodified)",
+          "exactLegacy": true,
+          "revision": "c65f67a45519bbbc5617a325f1e96ee4b4192f34",
+          "blobSha": "70573ac611d4f70d829ab70dd7dfd0751d826c47",
+          "path": "src/core/upscale/budget-guard.ts",
+          "sha256": "2f246bc500b23bf760643f23ed970da2904af2451ac7dcc73dc23ca68e0d6c5d",
+          "typescript": "5.9.3",
+          "loader": "git show -> typescript.transpileModule -> data URL",
+          "failMs": 10,
+          "recoverMs": 7
+        }
+      },
+      "candidates": {
+        "scope": "Descriptive only, not a policy search or controller input. All raw positive neural samples, including cold exclusions and virtual baseline periods; overlapping arrival-order windows; one trigger per run of >=3 above-threshold windows.",
+        "failMs": 15,
+        "median30": {
+          "maxMs": 5.7042675,
+          "evaluations": 1153,
+          "aboveFailureWindows": 0,
+          "threeWindowTriggerCount": 0
+        },
+        "p90of30": {
+          "maxMs": 26.976579700000002,
+          "evaluations": 1153,
+          "aboveFailureWindows": 1153,
+          "threeWindowTriggerCount": 1
+        }
+      },
+      "pressure": {
+        "scope": "Recorded continuously-neural observations only; never controller inputs",
+        "frameCount": 1182,
+        "presentedSkips": 13,
+        "callbackP90Ms": 8.300000000000182,
+        "callbackMaxMs": 9.30000000000291,
+        "recordedStats": {
+          "running": true,
+          "clock": "rvfc",
+          "importPath": "external",
+          "upscalerId": "neural-aethersr-resizeconv-c16d2",
+          "upscalerLabel": "Neural C16D2 (aethersr-resizeconv)",
+          "neural": true,
+          "sourceSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "targetSize": {
+            "width": 2560,
+            "height": 1440
+          },
+          "scaleFactor": 2,
+          "sourceFps": 59.77104649993822,
+          "renderFps": 54.705703576214646,
+          "meanSourceFps": 59.71373415886099,
+          "meanRenderFps": 59.06358462446803,
+          "elapsedMs": 19995.39999999851,
+          "framesRendered": 1182,
+          "framesSkipped": 13,
+          "quality": {
+            "totalVideoFrames": 1195,
+            "droppedVideoFrames": 0,
+            "corruptedVideoFrames": 0
+          },
+          "cpuFrameMs": {
+            "mean": 0.12708333334109437,
+            "p50": 0.09999999962747097,
+            "p95": 0.2000000011175871,
+            "max": 0.5,
+            "samples": 240
+          },
+          "gpuPassMs": {
+            "mean": 9.538572320833339,
+            "p50": 5.5181450000000005,
+            "p95": 26.36213825,
+            "max": 26.990422,
+            "samples": 240
+          },
+          "callbackLatencyMs": {
+            "mean": 4.586666666666558,
+            "p50": 7.850000000000364,
+            "p95": 8.605000000002109,
+            "max": 9.30000000000291,
+            "samples": 240
+          },
+          "decodeLatencyMs": {
+            "mean": 101.36416666666666,
+            "p50": 100.55,
+            "p95": 134.9,
+            "max": 154,
+            "samples": 240
+          }
+        }
+      }
+    }
+  ]
+}
