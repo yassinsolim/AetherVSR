@@ -574,10 +574,16 @@ async function main(args) {
       const page = await context.newPage();
       await page.setViewportSize({ width: 1200, height: 820 });
       const errors = [];
+      const canceledMediaRequests = [];
       const recordError = (kind, message) => errors.push({ at: new Date().toISOString(), kind, message });
       page.on('pageerror', error => recordError('pageerror', error.message));
       page.on('crash', () => recordError('crash', 'Page crashed'));
-      page.on('requestfailed', request => recordError('requestfailed', `${request.url()}: ${request.failure()?.errorText}`));
+      page.on('requestfailed', request => {
+        const failure = request.failure()?.errorText;
+        if (failure === 'net::ERR_ABORTED' && request.resourceType() === 'media') {
+          canceledMediaRequests.push({ at: new Date().toISOString(), url: request.url(), failure });
+        } else recordError('requestfailed', `${request.url()}: ${failure}`);
+      });
       page.on('response', response => { if (response.status() >= 400) recordError('http', `${response.status()} ${response.url()}`); });
       page.on('console', message => {
         if (message.text().startsWith(progressPrefix)) console.log(message.text());
@@ -616,7 +622,7 @@ async function main(args) {
       } catch (error) { reasons.push(`Screenshot: ${error.message}`); }
       const artifact = { schema: 'aethervsr.m9-live/2', phase: 'main-index-live', config: entry.config,
         url: entry.url, diagnosticLoad: entry.diagnosticLoad, diagnostics: entry.diagnostics, valid: !reasons.length,
-        invalidReasons: reasons, errors, provenance: { before, after }, measuredAt: new Date().toISOString(),
+        invalidReasons: reasons, errors, canceledMediaRequests, provenance: { before, after }, measuredAt: new Date().toISOString(),
         ...environment, browser: browser.version(), executable: native.executable, flags, headless: false, playwright,
         visibilityControl: 'Native Chrome default context; CDP noDefaults=true; no focus/visibility emulation',
         media: mediaMetadata(entry.mediaFile), screenshot,
