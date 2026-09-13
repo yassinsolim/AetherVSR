@@ -4,12 +4,13 @@ import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { openNativeChrome } from './m9-browser.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const modelFile = 'public/models/aethersr-c16d2.json';
 const fixedModelSha256 = 'd76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a';
 const sourcePaths = ['src', 'index.html', 'vite.config.ts', 'tsconfig.json', 'package.json',
-  'package-lock.json', 'tools/m9-live.mjs', 'tools/m9-runtime.mjs'];
+  'package-lock.json', 'tools/m9-live.mjs', 'tools/m9-runtime.mjs', 'tools/m9-browser.mjs'];
 const flags = ['--enable-unsafe-webgpu', '--enable-dawn-features=allow_unsafe_apis',
   '--disable-dawn-features=timestamp_quantization', '--autoplay-policy=no-user-gesture-required',
   '--window-position=0,0', '--window-size=1280,900'];
@@ -452,14 +453,16 @@ async function main(args) {
   const playwright = { version: JSON.parse(readFileSync(playwrightFile, 'utf8')).version, packageSha256: digest(playwrightFile) };
   const { chromium } = await import(pathToFileURL(resolve(root, '.cache/m9/node_modules/playwright/index.mjs')).href);
   const environment = machineEnvironment();
-  const browser = await chromium.launch({ headless: false, args: flags, timeout: 20000 });
+  const native = await openNativeChrome(flags);
+  const { browser, context } = native;
   try {
     for (const entry of plan.cases) {
       const before = provenance(casesFile, entry.mediaFile);
       const earlyIssues = [...before.issues, ...changed({ ...first, mediaSha256: before.mediaSha256 }, before)];
       if (before.casesSha256 !== plan.casesSha256) earlyIssues.push('Cases changed since parsing');
       if (earlyIssues.length) throw new Error(earlyIssues.join('; '));
-      const page = await browser.newPage({ viewport: { width: 1200, height: 820 } });
+      const page = await context.newPage();
+      await page.setViewportSize({ width: 1200, height: 820 });
       const errors = [];
       const recordError = (kind, message) => errors.push({ at: new Date().toISOString(), kind, message });
       page.on('pageerror', error => recordError('pageerror', error.message));
@@ -505,6 +508,7 @@ async function main(args) {
         url: entry.url, diagnosticLoad: entry.diagnosticLoad, diagnostics: entry.diagnostics, valid: !reasons.length,
         invalidReasons: reasons, errors, provenance: { before, after }, measuredAt: new Date().toISOString(),
         ...environment, browser: browser.version(), executable: chromium.executablePath(), flags, headless: false, playwright,
+        visibilityControl: 'Native Chrome default context; CDP noDefaults=true; no focus/visibility emulation',
         media: mediaMetadata(entry.mediaFile), screenshot,
         scope: { frameColumns: ['time', 'mediaTime', 'presentedDelta', 'callbackLatencyMs', 'expectedDelayMs', 'actualTier',
           'totalVideoFrames', 'droppedVideoFrames', 'corruptedVideoFrames', 'loadGeneration', 'generationAtObservation', 'submissionSequence', 'observedAt', 'decodeLatencyMs'],
@@ -522,7 +526,7 @@ async function main(args) {
       if (!artifact.valid) throw new Error(`Invalid measurement ${entry.config.name}; raw evidence retained at ${entry.output}`);
     }
   } finally {
-    try { await bounded(browser.close(), 5000, 'Browser close'); }
+    try { await bounded(native.close(), 7000, 'Browser close'); }
     catch (error) { console.error(`${error.message}; exiting runner to avoid a hanging transport. Browser cleanup unverified.`); process.exit(1); }
   }
 }

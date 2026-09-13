@@ -524,6 +524,7 @@ async function run() {
       'Owned-memory reports/configuration counters do not measure browser/driver memory or prove all resources were freed.',
     ] };
   let browser;
+  let native;
   let context;
   let page;
   let current;
@@ -555,13 +556,17 @@ async function run() {
       playwright: JSON.parse(readFileSync(resolve(root, '.cache/m9/node_modules/playwright/package.json'), 'utf8')).version,
       profile: 'New temporary Playwright profile; no personal Chrome connection' };
     report.gating.checks.push(idleCalibration());
-    browser = await chromium.launch({ headless: false, executablePath, args: launchArgs });
+    const { openNativeChrome } = await import('./m9-browser.mjs');
+    native = await openNativeChrome(launchArgs);
+    browser = native.browser;
+    report.environment.launch.profile = 'Fresh native Chrome profile, CDP noDefaults=true; no visibility/focus emulation';
     report.environment.browser = browser.version();
 
     const freshPage = async () => {
-      if (context) await context.close();
-      context = await browser.newContext({ viewport: { width: 1200, height: 820 }, serviceWorkers: 'block' });
+      if (page && !page.isClosed()) await page.close();
+      context = native.context;
       page = await context.newPage();
+      await page.setViewportSize({ width: 1200, height: 820 });
       page.setDefaultTimeout(timeout);
       page.setDefaultNavigationTimeout(timeout);
       pageRecord = { page: report.pages.length + 1, errors: [], console: [], documents: [] };
@@ -735,7 +740,7 @@ async function run() {
         try { report.failureSnapshot = await snapshot(page); } catch (error) { report.failureSnapshotError = error.message; }
       }
     }
-    try { await browser?.close(); } catch (error) { fail(error); }
+    try { await native?.close(); } catch (error) { fail(error); }
     report.finishedAt = new Date().toISOString();
     report.counts = { total: report.tests.length,
       passed: report.tests.filter(test => test.status === 'passed').length,
