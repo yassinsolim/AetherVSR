@@ -85,8 +85,13 @@ HTML excludes the Vite reload client, which otherwise reloads after freeze.
 10. Actual old/new NeuralUpscaler GPU output comparison passed all six cases:
     fp32/f16, odd sampled sizes and reconfiguration, plus paused 720p external
     video. Maximum byte difference zero. This verifies binding-lifetime output
-    continuity, not new quality gains or performance. Native lifecycle is rerun
-    on final source separately from those output checks.
+   continuity, not new quality gains or performance. All twelve native lifecycle
+   journeys passed again on final code at 818b82a, saved in
+   results/m9-lifecycle-final.json.gz at evidence commit 0f9c1d8.
+11. Final report/closure review rechecked artifact hashes, scoped acceptance,
+   all 23 sections, the R3 prohibition and M10 extension recommendation. No
+   additional P0/P1 or missing technical acceptance evidence was found. The
+   stale closure ledger was updated; push and exact-HEAD CI remained required.
 
 ## Measured decision
 
@@ -108,7 +113,12 @@ Full scopes, every matrix row and limitations are in M9-REPORT.md.
 
 ## Remaining gates
 
-- Final native lifecycle verification after the non-measurement-path observer
-   repair; all software/replay gates and a fresh-clone check.
-- Final publication with clean pushed main and exact-HEAD GitHub CI.
-   M10 is the recommended Chrome/Chromium extension, not implemented.
+Result/evidence commit 0f9c1d8 passed npm ci, typecheck, lint, build, 421 Vitest,
+308 Python, and final trace replay. A fresh local clone passed the same code
+gates without generated runtime media. Tracked bytes: 46,631,312 under the
+owner-approved 48 MiB cap. Local clone .git disk usage: 437,784 KiB, not network
+transfer size. Production-build diagnostic hook exclusion was checked.
+
+Remaining: clean pushed main and exact-HEAD GitHub CI. M10 is the recommended
+Chrome/Chromium extension, not implemented. Closure never means the short-window
+loss-reference failures disappeared or that every web stream is stutter-free.

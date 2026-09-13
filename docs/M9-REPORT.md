@@ -62,7 +62,7 @@ Median was retained over an unvalidated tail trigger: calibration's every-fifth-
 
 ## 7. Trace
 
-[results/m9-replay.json](../results/m9-replay.json) identifies 15 valid calibration traces and explicitly excludes the retained invalid shader/device-loss run. Original diagnostic-enabled normal traces and later diagnostic-disabled repeated-graph traces are separate, not pooled.
+[results/m9-replay-final.json](../results/m9-replay-final.json) identifies 15 valid calibration traces and explicitly excludes the retained invalid shader/device-loss run. Original diagnostic-enabled normal traces and later diagnostic-disabled repeated-graph traces are separate, not pooled.
 
 Submission-bound generation, sequence, tier, source size, submittedAt and resolvedAt accompany each raw duration. Final compressed artifacts retain samples, frames, actions, transitions, configurations, boundary snapshots, errors and source/model/media provenance. Missing timing slots are explicit gaps, never invented samples.
 
@@ -114,7 +114,7 @@ First 120-second neural p50/p95: 9.0857775/10.1558031 ms, 7,118 samples. Last 12
 
 ## 13. Background
 
-[results/m9-lifecycle-passed.json.gz](../results/m9-lifecycle-passed.json.gz) records 12/12 passed native journeys at `467e5b4`, with unchanged source during capture. They cover manual baseline, baseline seek/loop, Prefer neural desktop, neural seek/loop, source-picker round trip, neural pause/resume, backoff pause/resume, hidden/frozen resume, mobile viewport, fatal device loss, missing timestamps and delayed-model/manual races.
+[results/m9-lifecycle-final.json.gz](../results/m9-lifecycle-final.json.gz) records the final 12/12 passed native journeys at execution source `818b82a`, preserved in evidence commit `0f9c1d8`, with unchanged source during capture. They cover manual baseline, baseline seek/loop, Prefer neural desktop, neural seek/loop, source-picker round trip, neural pause/resume, backoff pause/resume, hidden/frozen resume, mobile viewport, fatal device loss, missing timestamps and delayed-model/manual races. The earlier passing report at `467e5b4` remains historical evidence.
 
 Visibility was genuinely hidden and CDP freeze was exercised without Playwright focus emulation. Chrome may pause media after forced freeze; the controller remains suspended until explicit play and never overrides pause intent. Isolated native Chrome uses mock Keychain storage; benchmark HTML omits the reload client so freeze does not reload the document.
 
@@ -188,7 +188,7 @@ Reviews corrected mixed dwell/invalid evidence, source generations, async intent
 
 Native apparatus review removed emulated visibility, Keychain startup blocking, HMR reload after freeze and assumed media auto-resume. Capability withholding now affects the actual device feature request. Final accounting review corrected boundary denominators, decoder endpoints, transition provenance and bounded cleanup; canceled media ranges are separate from playback errors.
 
-The final reviewer P2 fix refreshes the controller clock after an optional frame observer reads a later snapshot; its regression passes in [test/runtime-driver.test.ts](../test/runtime-driver.test.ts). That callback behavior was not the measurement path, so this finding does not invalidate the recorded matrix. The legacy resource API's payload-versus-alignment scope is now explicit without changing historical values. Final native journeys on the closing source remain pending.
+The final reviewer P2 fix refreshes the controller clock after an optional frame observer reads a later snapshot; its regression passes in [test/runtime-driver.test.ts](../test/runtime-driver.test.ts). That callback behavior was not the measurement path, so this finding does not invalidate the recorded matrix. The legacy resource API's payload-versus-alignment scope is now explicit without changing historical values. All twelve native journeys passed again after the fix at `818b82a`.
 
 [GPU output parity](../results/m9-output-parity.json) compared the actual old c65f67a and new NeuralUpscaler: fp32/f16 on odd sampled inputs, reconfiguration and a paused 720p external video frame. All six cases were byte-identical, maximum byte difference zero. This checks binding-lifetime output continuity, not new image-quality gains or performance. Independent final evidence review reconstructed all 13 rows, 63,574 callbacks, 63,279 GPU samples and 236 evidence-driven decisions without a count/quantile/provenance mismatch.
 
@@ -215,16 +215,33 @@ Actual commits after `c65f67a`, oldest first; these are existing history, not co
 | `7242a43` | Record passing native lifecycle verification |
 | `508cfa6` | Separate media cancellation from playback failure |
 | `88ecc36` | Preserve final matrix; register CFR comparison |
+| `818b82a` | Audited long-run/result, observer fix and old/new output parity |
+| `0f9c1d8` | Final native lifecycle, replay and scoped acceptance records |
 
-CFR and long captures pin source `88ecc36856fc89730127137610d0965386eab0de`; original corrected matrix/control rows pin `508cfa6`. Their recorded RuntimeController and RuntimeDriver hashes match across all 13 rows. HTML/apparatus history is not silently labeled identical; the pending P2 driver edit is later than these captures.
+CFR and long captures pin source `88ecc36856fc89730127137610d0965386eab0de`; original corrected matrix/control rows pin `508cfa6`. Their recorded RuntimeController and RuntimeDriver hashes match across all 13 rows. HTML/apparatus history is not silently labeled identical; the P2 observer fix is later than these captures. Closing documentation commits follow this evidence ledger; `git log --oneline c65f67a..HEAD` gives the complete published list including metadata-only closure.
 
 ## 22. Finalrepo
 
-**Closure gates: PENDING.** At report preparation, branch is main at `88ecc36`, 17 commits ahead of origin/main. The observer fix and regression are modified; four CFR artifacts and the long artifact are untracked. This new report is additional pending documentation. No commit, push, clean-worktree result or final HEAD is claimed.
+**Publication gates: PENDING push/exact-HEAD CI.** Result/evidence commit
+`0f9c1d8e475846a0bde1d77a3a4c3a834127c6ab` passed final npm ci, typecheck, lint,
+build, **421 Vitest tests and 308 Python tests**, plus final frozen-legacy trace
+replay and independent review. A fresh local clone of that exact commit passed
+the same install/code/Python gates without generated media or browser binaries.
+The clone reused the installed Python environment; it did not rerun GPU tests.
+The same two moderate npm advisories seen at registration remain unchanged.
 
-Latest software totals supplied to this report are 420 Vitest and 308 Python before the new observer regression. The anticipated 421-test total is **not a verified final result**. Final npm ci/typecheck/lint/test/build, Python, replay, independent review, final native lifecycle verification, clean pushed main and exact-HEAD CI remain PENDING until the owner records their actual outputs. Baseline CI `34694344764` must not be reused as M9 final CI.
+At that evidence commit, the tracked tree is **46,631,312 bytes (44.471 MiB)**,
+below the owner-approved 48 MiB cap in ADR-0042. Per-file and generated-media
+restrictions remain. The fresh local clone's `.git` consumed **437,784 KiB** on
+disk, including available object history; this is not network transfer size and
+excludes installed dependencies/caches. No history rewrite is implied.
 
-The bounded numeric/local-link audit of this document is separate from those gates. The owner will update repository/closure status after verification. No heavy tests or browser runs were performed to write this report. Production remains unchanged and R3 remains research-only regardless of that pending closure.
+[results/m9-acceptance.json](../results/m9-acceptance.json) pins all 13 native
+rows and keeps the three short loss-reference failures separate from the passed
+ten-minute gate. Final native lifecycle is 12/12 and output parity is 6/6.
+The production build excludes the development load/control hooks; production
+weights are unchanged. Publication still requires clean main == origin/main
+and successful exact-HEAD GitHub Actions; baseline CI is not M9 final CI.
 
 ## 23. NextM10
 

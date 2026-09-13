@@ -2490,6 +2490,44 @@ is to retain production and stop this registered R3 path, not to claim that
 structural reparameterization never works. Any future diagnosis is a separate
 experiment; M9 has not been implemented and does not require a replacement model.
 
+## Milestone 9: adaptive runtime performance
+
+**Decision: REPLACE BudgetGuard, with measured scope limits.** The controller
+runs only the frozen production C16D2 or Catmull-Rom; it predicts runtime fit,
+not which scene looks better. There was no training or production-weight change.
+
+On Apple M5/24 GB, macOS 26.6.2/25G83 and native Chrome 153.0.8010.12, the
+post-amendment exact-CFR 720p60 -> 1440p run covered 600.0011 active foreground
+seconds: **59.6116 rendered / 59.9149 presented fps**, neural GPU p50/p95
+**6.3142/9.8922 ms** over 35,617 samples, 182 callback skips plus 133 decoder
+drops over 35,949 presented frames (**0.87624%**), and no fallback, probe or
+error. Its 298 loop rewarm/confirmation changes were not tier oscillation.
+
+Whole-stage hardware timestamps include ingest through final blit, excluding
+decode, CPU encoding, pre-span queue wait and browser composition. Rates and
+loss cover the full active interval; percentiles use raw neural samples, not
+trailing aggregates. First/last two-minute p95 were 10.1558/5.7581 ms. That is
+observed drift; temperature and power are not measured.
+
+CFR controlled overload fell back **0.4057 s** after injection. Four failed
+probes increased backoff to 4/8/16/30 s; recovery was confirmed on genuine neural
+evidence **16.3560 s** after load removal. A single measured **48.1729-ms** frame
+caused no fallback. Normal 1080p30/60 -> 4K rows retained neural in short runs;
+no general suitability or cross-vendor claim follows.
+
+Not all short-window loss checks passed: original irregular-cadence 720p60 Auto
+was **2.56696%**, its baseline control **7.42602%**, and short CFR Auto **1.05791%**.
+Those valid observations remain visible, not overwritten by the passing long
+window. The CFR source change was explicitly documented after observing loss;
+the controller and acceptance thresholds were not tuned afterward.
+
+The [full 23-section report](docs/M9-REPORT.md) contains all 13 matrix rows,
+failed/withdrawn apparatus history, exact source hashes, state transitions,
+old/new trace comparison, 12 native lifecycle journeys and 6 byte-identical
+old/new output checks. [Acceptance data](results/m9-acceptance.json) pins the
+raw captures. Actual device memory, energy and universal stutter-free playback
+remain **not measured**. Publication status is in [M9 status](docs/M9-STATUS.md).
+
 ## Reproducing
 
 ```bash
