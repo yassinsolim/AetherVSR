@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>M10 local fixtures</title>
+<style>
+body { margin: 24px; color: #171717; font: 16px sans-serif; }
+.player { position: relative; width: 640px; height: 360px; margin-bottom: 16px; background: #000; }
+video { display: block; width: 640px; height: 360px; border: 0; object-fit: contain; }
+.controls { position: absolute; bottom: 0; left: 0; z-index: 10; }
+.caption { position: absolute; bottom: 44px; left: 120px; z-index: 20; color: white; background: black; pointer-events: none; }
+button { min-height: 28px; } iframe { width: 740px; height: 480px; border: 0; }
+.contain, .cover { height: 480px; } .contain video, .cover video { height: 480px; }
+.cover video { object-fit: cover; } .clipped { width: 560px; height: 300px; overflow: hidden; }
+.radius video { border-radius: 24px; } .translated video { transform: translate(12px, 8px); }
+</style>
+<h1 id="title"></h1><p id="media"></p>
+<nav><button data-action="insert">Insert video</button><button data-action="route">Replace route</button><button data-action="source">Change source</button><button data-action="drm">Attach ClearKey MediaKeys</button></nav>
+<output id="result" data-state="idle"></output><main></main>
+<script type="application/json" id="config">__FIXTURE_CONFIG__</script>
+<script>
+const config = JSON.parse(document.querySelector('#config').textContent);
+const main = document.querySelector('main');
+const result = document.querySelector('#result');
+window.addEventListener('pageshow', event => { document.documentElement.dataset.pageshowPersisted = String(event.persisted); });
+document.body.style.background = config.background;
+document.querySelector('#title').textContent = config.name;
+document.querySelector('#media').textContent = config.media;
+function player() {
+  const wrapper = document.createElement('section'); wrapper.className = `player ${config.name}`;
+  const video = document.createElement('video'); video.muted = true; video.autoplay = true; video.loop = true; video.playsInline = true;
+  video.controls = config.name === 'native'; video.dataset.fixtureVideo = String(document.querySelectorAll('video').length);
+  if (config.name === 'cors') video.crossOrigin = 'anonymous';
+  if (config.name !== 'mse') video.src = ['cors', 'nocors'].includes(config.name) ? `http://127.0.0.1:5184/media/${config.name}.mp4` : '/media/same.mp4';
+  wrapper.append(video);
+  if (!video.controls) { const controls = document.createElement('div'); controls.className = 'controls'; controls.innerHTML = '<button data-action="play">Play</button><button data-action="pause">Pause</button><button data-action="fullscreen">Container fullscreen</button><button data-action="directfs">Video fullscreen</button><button data-action="pip">PiP</button>'; wrapper.append(controls); }
+  if (config.name === 'controls/captions') { const caption = document.createElement('div'); caption.className = 'caption'; caption.textContent = 'Page-owned caption'; wrapper.append(caption); }
+  main.append(wrapper); return video;
+}
+if (['iframe', 'sameiframe'].includes(config.name)) { const frame = document.createElement('iframe'); frame.src = `${config.name === 'iframe' ? 'http://127.0.0.1:5184' : ''}/fixture?case=custom`; main.append(frame); }
+else if (config.name !== 'late') { player(); if (config.name === 'multiple') player(); }
+document.addEventListener('click', async event => {
+  const action = event.target.closest('[data-action]')?.dataset.action; if (!action) return;
+  result.dataset.state = 'pending'; result.dataset.action = action;
+  try {
+    const video = event.target.closest('.player')?.querySelector('video') ?? document.querySelector('video');
+    if (action === 'play') await video.play();
+    if (action === 'pause') video.pause();
+    if (action === 'fullscreen') await video.parentElement.requestFullscreen();
+    if (action === 'directfs') await video.requestFullscreen();
+    if (action === 'pip') await video.requestPictureInPicture();
+    if (action === 'insert') player();
+    if (action === 'route') { main.replaceChildren(); player(); history.pushState({}, '', `${location.pathname}?case=spa&route=second`); }
+    if (action === 'source') { video.src = '/media/same.mp4?changed=1'; await video.play(); }
+    if (action === 'drm') { const access = await navigator.requestMediaKeySystemAccess('org.w3.clearkey', [{ initDataTypes: ['cenc'], videoCapabilities: [{ contentType: 'video/mp4; codecs="avc1.42E01E"' }] }]); await video.setMediaKeys(await access.createMediaKeys()); }
+    result.dataset.state = 'done'; result.textContent = action;
+  } catch (error) { result.dataset.state = 'error'; result.textContent = String(error); }
+});
+if (config.name === 'mse') (async () => {
+  try { const video = document.querySelector('video'); const source = new MediaSource(); video.src = URL.createObjectURL(source);
+    await new Promise(done => source.addEventListener('sourceopen', done, { once: true }));
+    const buffer = source.addSourceBuffer(config.mime); const bytes = await (await fetch('/media/mse.mp4')).arrayBuffer();
+    await new Promise((done, reject) => { buffer.addEventListener('updateend', done, { once: true }); buffer.addEventListener('error', reject, { once: true }); buffer.appendBuffer(bytes); });
+    source.endOfStream(); await video.play(); result.dataset.state = 'done'; result.textContent = 'Clear MSE appended';
+  } catch (error) { result.dataset.state = 'error'; result.textContent = String(error); }
+})();
+</script></html>

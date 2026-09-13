@@ -1472,3 +1472,15 @@ subframes, direct-video fullscreen and PiP preserve original presentation.
 Shared source/pipeline/driver disposal becomes terminal/idempotent and releases
 listeners and retained callbacks; controller policy and model weights do not
 change. The M9 prepared sampled-view copy contract is preserved.
+
+### M10 build dependency licenses
+
+esbuild 0.28.2 (MIT) is declared directly as build-time tooling; @types/chrome
+0.2.9 (MIT) supplies erased TypeScript declarations. Installed LICENSE files
+were inspected. Neither dependency adds remote executable code or ships its
+tooling binary/type sources in the extension. Their upstream notices remain
+in the installed packages; no third-party implementation source was copied
+into the adapter. The existing shared inference code remains independently
+engineered. The production bundle excludes development test configuration,
+and native acceptance uses default browser media/GPU security, not unsafe
+WebGPU or Dawn diagnostic feature overrides.

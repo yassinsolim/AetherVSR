@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AetherVSR</title>
+    <link rel="stylesheet" href="popup.css">
+    <script type="module" src="popup.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>AetherVSR</h1>
+      <p id="version">Version unavailable</p>
+    </header>
+    <main>
+      <p id="origin" aria-label="Current site">Checking active tab...</p>
+      <section aria-labelledby="state">
+        <h2 id="state">Checking status</h2>
+        <p id="message" role="status" aria-live="polite">Waiting for the extension worker.</p>
+        <dl>
+          <div><dt>Current renderer</dt><dd id="current">Not active</dd></div>
+          <div><dt>Candidates</dt><dd id="candidates">Not inspected</dd></div>
+          <div><dt>Embedded frames</dt><dd id="frames">Not inspected</dd></div>
+        </dl>
+      </section>
+      <fieldset id="modes" disabled>
+        <legend>Mode for this origin</legend>
+        <label><input type="radio" name="mode" value="auto" checked> Auto</label>
+        <label><input type="radio" name="mode" value="neural"> Neural</label>
+        <label><input type="radio" name="mode" value="baseline"> Baseline</label>
+      </fieldset>
+      <div class="commands">
+        <button id="enable" type="button" disabled>Enable</button>
+        <button id="disable" type="button" disabled>Disable</button>
+        <button id="refresh" type="button">Refresh</button>
+      </div>
+      <section class="limits" aria-labelledby="limits-heading">
+        <h2 id="limits-heading">Compatibility limits</h2>
+        <p>Non-DRM video only. Pixel access requires same-origin media or valid CORS; site access does not bypass media security.</p>
+        <p>Iframes and closed shadow roots are not enhanced. Native video controls and native captions may be unsupported.</p>
+        <p>Direct-video fullscreen and picture-in-picture (PiP) are not enhanced. WebGPU availability and performance vary by browser and hardware.</p>
+        <p>Enable applies to this tab's current document. Only the mode is remembered for this origin; persistent activation is not available.</p>
+      </section>
+    </main>
+    <footer id="source">Build provenance unavailable</footer>
+  </body>
+</html>

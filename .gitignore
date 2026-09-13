@@ -1,5 +1,7 @@
 node_modules/
 dist/
+/dist-extension/
+/dist-extension-test/
 .DS_Store
 *.local
 .vite/

@@ -1,0 +1,38 @@
+:root {
+  color-scheme: light;
+  font-family: 'Trebuchet MS', Verdana, sans-serif;
+  font-size: 14px;
+  color: #23272a;
+  background: #f5f7f7;
+  --accent: #126c5c;
+  --line: #c9d3d0;
+}
+* { box-sizing: border-box; letter-spacing: 0; }
+body { width: 380px; max-width: 100vw; margin: 0; border-top: 4px solid var(--accent); }
+header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; padding: 16px 18px 8px; }
+h1 { font: bold 26px Georgia, serif; margin: 0; }
+header p { font-size: 12px; color: #53605a; margin: 0; }
+main { padding: 0 18px; }
+h2 { font-size: 16px; margin: 12px 0 6px; }
+p { line-height: 1.45; overflow-wrap: anywhere; }
+#origin { margin: 4px 0 14px; font-weight: bold; color: var(--accent); }
+#message { min-height: 42px; margin: 6px 0 12px; }
+dl { margin: 0; font-size: 12px; }
+dl div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
+dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+fieldset { margin: 16px 0; padding: 10px 0 0; border: 0; border-top: 1px solid var(--line); }
+legend { padding: 0 8px 0 0; font-weight: bold; font-size: 13px; }
+fieldset label { display: inline-flex; align-items: center; gap: 4px; margin: 4px 12px 4px 0; }
+input { accent-color: var(--accent); }
+.commands { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+button { min-height: 36px; border: 1px solid #778b83; border-radius: 4px; padding: 6px; font: inherit; background: #fff; color: #253e34; }
+button:not(:disabled) { cursor: pointer; }
+button:not(:disabled):hover { background: #e3ede8; }
+#enable { background: var(--accent); color: #fff; }
+#enable:not(:disabled):hover { background: #0c584a; }
+button:disabled { opacity: 0.5; }
+:focus-visible { outline: 3px solid #b4493a; outline-offset: 3px; }
+.limits { margin-top: 20px; padding-top: 2px; border-top: 1px solid var(--line); }
+.limits h2 { font-size: 13px; color: #823e33; }
+.limits p { font-size: 12px; margin: 8px 0; }
+footer { margin-top: 14px; padding: 12px 18px; font: 11px/1.5 'Courier New', monospace; overflow-wrap: anywhere; background: #e7eeeb; }

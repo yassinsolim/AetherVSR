@@ -11,15 +11,18 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:extension": "node tools/build-extension.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --ignore-pattern 'dist-extension/**' --ignore-pattern 'dist-extension-test/**'",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
+    "@types/chrome": "0.2.9",
     "@webgpu/types": "^0.1.71",
+    "esbuild": "0.28.2",
     "eslint": "^9.39.0",
     "onnxruntime-web": "^1.29.0",
     "typescript": "^5.9.3",
