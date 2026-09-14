@@ -14,7 +14,7 @@ import { execFileSync } from 'node:child_process';
  */
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
-const MAX_TRACKED_BYTES = 48 * 1024 * 1024;
+const MAX_TRACKED_BYTES = 50 * 1024 * 1024;
 
 /**
  * Deliberate exceptions, each with a reason. Anything not listed here and over
@@ -70,7 +70,7 @@ describe('repository size discipline', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('keeps the whole tracked tree under 48 MiB', () => {
+  it('keeps the whole tracked tree under 50 MiB', () => {
     const total = files.reduce((n, f) => n + f.bytes, 0);
     const worst = [...files].sort((a, b) => b.bytes - a.bytes).slice(0, 5);
     const detail = worst.map((f) => `${f.path}=${(f.bytes / 1e6).toFixed(1)}MB`).join(' ');

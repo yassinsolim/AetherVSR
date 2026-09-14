@@ -1484,3 +1484,21 @@ into the adapter. The existing shared inference code remains independently
 engineered. The production bundle excludes development test configuration,
 and native acceptance uses default browser media/GPU security, not unsafe
 WebGPU or Dawn diagnostic feature overrides.
+
+## ADR-0046 - Owner-approved M10.5 source and compact-evidence headroom
+
+**Status:** accepted after explicit owner approval on 2026-09-14.
+
+The M10 closing tree occupied 50,270,076 bytes against the 48 MiB cap.
+M10.5's required counter instrumentation, controlled-comparison tooling, tests
+and reports cannot be accommodated by the remaining roughly 61 KB. After
+examining Git-normalized pending source sizes, the owner explicitly approved
+raising the tracked-tree cap from 48 to **50 MiB (52,428,800 bytes)**.
+
+This is bounded room for legitimate source, tests, documentation and compact
+hash-indexed evidence, not permission to add large raw recordings. The 8 MiB
+per-file limit and its existing exceptions remain unchanged. M10.5 long-run
+raw traces, Chrome traces, native screenshots and worktrees stay local under
+the ignored .cache/m105 directory. No historical evidence is deleted, no history
+is rewritten and M10's registered PARTIAL result is not revised. The executable
+repository-size test enforces the newly approved aggregate cap.
