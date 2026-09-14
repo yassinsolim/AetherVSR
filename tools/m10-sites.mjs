@@ -426,10 +426,14 @@ export async function runSites(output, configPath) {
           { at: 75000, name: 'scroll-down', suspended: true, run: async () => {
             scrollBack = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
             const result = await page.evaluate(() => { const from = scrollY; scrollBy({ top: innerHeight * 0.3, behavior: 'instant' }); return { from, requestedDelta: innerHeight * 0.3, to: scrollY }; });
-            if (Math.abs(result.to - result.from) < 1) return { ...result, notApplicable: 'Document is not scrollable in this player view; no forced layout adjustment' };
+            if (Math.abs(result.to - result.from) < 1) {
+              scrollBack.notApplicable = 'Document is not scrollable in this player view; no forced layout adjustment';
+              return { ...result, notApplicable: scrollBack.notApplicable };
+            }
             return result;
           } },
           { at: 80000, name: 'scroll-back', run: async () => {
+            if (scrollBack.notApplicable) return { notApplicable: scrollBack.notApplicable };
             const result = await page.evaluate(position => { scrollTo({ left: position.x, top: position.y, behavior: 'instant' }); return { x: scrollX, y: scrollY }; }, scrollBack);
             assert(Math.abs(result.x - scrollBack.x) < 1 && Math.abs(result.y - scrollBack.y) < 1, 'Original scroll position not restored');
             return result;
