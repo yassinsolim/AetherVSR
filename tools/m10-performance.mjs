@@ -345,7 +345,7 @@ export function validateCapture(raw, item) {
   }
 }
 
-async function harnessServer() {
+export async function harnessServer() {
   const origin = 'http://127.0.0.1:5173';
   let owned;
   try { await fetch(origin, { signal: AbortSignal.timeout(2000) }); }

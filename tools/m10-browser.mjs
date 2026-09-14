@@ -199,6 +199,49 @@ export async function openExtension(build, record = () => {}) {
         throw new Unverified(`Actual service-worker shutdown unverified: ${error}`);
       } finally { await bounded(session.detach(), 1000, 'Detach worker-stop observer').catch(() => {}); }
     };
+    const reloadExtension = async signal => {
+      const started = Date.now(); const deadline = started + 20000;
+      const remaining = maximum => Math.max(1, Math.min(maximum, deadline - Date.now()));
+      let previousWorker; let closed = false;
+      const onClose = () => { closed = true; };
+      try {
+        signal?.throwIfAborted();
+        if (sessions.size) throw new Unverified('Dismiss native popups before extension reload');
+        const previous = await until(async () => {
+          const matching = (await targets()).targetInfos.filter(target => target.type === 'service_worker' && target.url === workerURL);
+          const workers = context.serviceWorkers().filter(candidate => candidate.url() === workerURL);
+          return matching.length === 1 && workers.length === 1 ? { target: matching[0], worker: workers[0] } : null;
+        }, Boolean, remaining(4000), signal);
+        previousWorker = previous.worker; previousWorker.once('close', onClose);
+        record('extension-reload-request', { method: 'chrome.runtime.reload', extensionId, previousTargetId: previous.target.targetId, workerURL });
+        const scheduled = await bounded(previousWorker.evaluate(expected => {
+          if (chrome.runtime.id !== expected || typeof chrome.runtime.reload !== 'function') throw new Error('Exact extension runtime reload unavailable');
+          setTimeout(() => chrome.runtime.reload(), 0);
+          return { extensionId: chrome.runtime.id, workerURL: location.href };
+        }, extensionId), remaining(3000), 'Schedule native extension reload');
+        assert.deepEqual(scheduled, { extensionId, workerURL });
+        await until(async () => closed && (await targets()).targetInfos.every(target => target.targetId !== previous.target.targetId), Boolean, remaining(5000), signal);
+        const fresh = await until(async () => (await targets()).targetInfos.find(target => target.type === 'service_worker' && target.url === workerURL && target.targetId !== previous.target.targetId), Boolean, remaining(4000), signal);
+        const startup = await attach(browserCDP, fresh.targetId);
+        try { await bounded(startup.send('Runtime.runIfWaitingForDebugger'), remaining(3000), 'Start fresh extension worker'); }
+        finally { await bounded(startup.close(), 1500, 'Detach fresh worker startup'); }
+        const nextWorker = await until(() => {
+          const workers = context.serviceWorkers().filter(candidate => candidate.url() === workerURL);
+          return workers.length === 1 && workers[0] !== previousWorker ? workers[0] : null;
+        }, Boolean, remaining(3000), signal);
+        const identity = await bounded(nextWorker.evaluate(() => ({ extensionId: chrome.runtime.id, workerURL: location.href })), remaining(3000), 'Verify fresh extension worker');
+        assert.deepEqual(identity, { extensionId, workerURL });
+        const installed = await cdpSend(browserCDP, 'Extensions.getExtensions', {}, remaining(3000));
+        const exact = installed.extensions.find(item => item.id === extensionId);
+        assert(exact?.path && existsSync(exact.path) && realpathSync(exact.path) === realpathSync(build.directory), 'Reload changed the installed build identity');
+        const evidence = { ...identity, previousTargetId: previous.target.targetId, freshTargetId: fresh.targetId, oldWorkerClosed: closed, freshWorkerHandle: nextWorker !== previousWorker,
+          elapsedMs: Date.now() - started, scope: 'Runtime reload request through old-worker closure, fresh exact-ID worker and installed-path verification; no page reactivation claim' };
+        record('extension-reloaded', evidence); return evidence;
+      } catch (error) {
+        record('extension-reload-unverified', { extensionId, workerURL, elapsedMs: Date.now() - started, error: String(error) });
+        throw new Unverified(`Native runtime reload could not be reliably verified: ${error}`);
+      } finally { previousWorker?.off('close', onClose); }
+    };
     const captureFullscreenWindow = async (page, path) => {
       const target = (await targets()).targetInfos.find(item => item.type === 'page' && item.url === page.url());
       assert(target, 'Fullscreen page target missing');
@@ -221,7 +264,7 @@ export async function openExtension(build, record = () => {}) {
     record('browser', { version: await cdpSend(browserCDP, 'Browser.getVersion'), executable: native.executable,
       executableSha256: sha256(readFileSync(native.executable)), flags, extensionId, workerURL, launch: 'Native Chrome; default context; noDefaults:true; no focus emulation' });
     let closing;
-    return { ...native, extensionId, workerEval, tabId, popup, inspect, isolated, stopWorker, captureFullscreenWindow,
+    return { ...native, extensionId, workerEval, tabId, popup, inspect, isolated, stopWorker, reloadExtension, captureFullscreenWindow,
       workerRunning: async () => (await targets()).targetInfos.some(target => target.type === 'service_worker' && target.url === workerURL),
       close() { return closing ??= (async () => { try { await Promise.all([...sessions].map(session => bounded(session.close(), 1500).catch(() => {}))); } finally { await native.close(); } })(); } };
   } catch (error) { await native.close(); throw error; }

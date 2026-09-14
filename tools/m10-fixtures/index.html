@@ -12,35 +12,47 @@ button { min-height: 28px; } iframe { width: 740px; height: 480px; border: 0; }
 .radius video { border-radius: 24px; } .translated video { transform: translate(12px, 8px); }
 </style>
 <h1 id="title"></h1><p id="media"></p>
-<nav><button data-action="insert">Insert video</button><button data-action="route">Replace route</button><button data-action="source">Change source</button><button data-action="drm">Attach ClearKey MediaKeys</button></nav>
+<nav><button data-action="insert">Insert video</button><button data-action="route">Replace route</button><button data-action="back">Previous route</button><button data-action="source">Change source</button><button data-action="remove">Remove player</button><button data-action="reinsert">Reinsert player</button><button data-action="reparent">Move video</button><button data-action="ready">Load shadow video</button><button data-action="drm">Attach ClearKey MediaKeys</button></nav>
 <output id="result" data-state="idle"></output><main></main>
 <script type="application/json" id="config">__FIXTURE_CONFIG__</script>
 <script>
 const config = JSON.parse(document.querySelector('#config').textContent);
 const main = document.querySelector('main');
 const result = document.querySelector('#result');
+let removedPlayer = null;
 window.addEventListener('pageshow', event => { document.documentElement.dataset.pageshowPersisted = String(event.persisted); });
+window.addEventListener('popstate', () => { if (config.name === 'spa') { main.replaceChildren(); player(); } });
 document.body.style.background = config.background;
 document.querySelector('#title').textContent = config.name;
 document.querySelector('#media').textContent = config.media;
-function player() {
+function player(parent = main) {
   const wrapper = document.createElement('section'); wrapper.className = `player ${config.name}`;
   const video = document.createElement('video'); video.muted = true; video.autoplay = true; video.loop = true; video.playsInline = true;
   video.controls = config.name === 'native'; video.dataset.fixtureVideo = String(document.querySelectorAll('video').length);
   if (config.name === 'cors') video.crossOrigin = 'anonymous';
-  if (config.name !== 'mse') video.src = ['cors', 'nocors'].includes(config.name) ? `http://127.0.0.1:5184/media/${config.name}.mp4` : '/media/same.mp4';
+  if (!['mse', 'open-shadow-late'].includes(config.name)) video.src = ['cors', 'nocors'].includes(config.name) ? `http://127.0.0.1:5184/media/${config.name}.mp4` : '/media/same.mp4';
   wrapper.append(video);
   if (!video.controls) { const controls = document.createElement('div'); controls.className = 'controls'; controls.innerHTML = '<button data-action="play">Play</button><button data-action="pause">Pause</button><button data-action="fullscreen">Container fullscreen</button><button data-action="directfs">Video fullscreen</button><button data-action="pip">PiP</button>'; wrapper.append(controls); }
   if (config.name === 'controls/captions') { const caption = document.createElement('div'); caption.className = 'caption'; caption.textContent = 'Page-owned caption'; wrapper.append(caption); }
-  main.append(wrapper); return video;
+  if (config.name.startsWith('caption-')) {
+    const caption = document.createElement('div'); caption.className = 'caption'; caption.textContent = 'Passive page caption';
+    caption.style.zIndex = config.name === 'caption-before-positive-passive' ? '1' : 'auto';
+    if (config.name.startsWith('caption-before-')) wrapper.insertBefore(caption, video); else wrapper.append(caption);
+  }
+  parent.append(wrapper); return video;
 }
 if (['iframe', 'sameiframe'].includes(config.name)) { const frame = document.createElement('iframe'); frame.src = `${config.name === 'iframe' ? 'http://127.0.0.1:5184' : ''}/fixture?case=custom`; main.append(frame); }
+else if (config.name === 'open-shadow-late') {
+  const host = document.createElement('div'); host.dataset.openShadow = 'true'; main.append(host);
+  const root = host.attachShadow({ mode: 'open' }); const style = document.querySelector('style').cloneNode(true); root.append(style); player(root);
+}
 else if (config.name !== 'late') { player(); if (config.name === 'multiple') player(); }
 document.addEventListener('click', async event => {
   const action = event.target.closest('[data-action]')?.dataset.action; if (!action) return;
   result.dataset.state = 'pending'; result.dataset.action = action;
   try {
-    const video = event.target.closest('.player')?.querySelector('video') ?? document.querySelector('video');
+    const video = event.target.closest('.player')?.querySelector('video') ?? document.querySelector('video')
+      ?? document.querySelector('[data-open-shadow]')?.shadowRoot.querySelector('video');
     if (action === 'play') await video.play();
     if (action === 'pause') video.pause();
     if (action === 'fullscreen') await video.parentElement.requestFullscreen();
@@ -48,7 +60,15 @@ document.addEventListener('click', async event => {
     if (action === 'pip') await video.requestPictureInPicture();
     if (action === 'insert') player();
     if (action === 'route') { main.replaceChildren(); player(); history.pushState({}, '', `${location.pathname}?case=spa&route=second`); }
+    if (action === 'back') history.back();
     if (action === 'source') { video.src = '/media/same.mp4?changed=1'; await video.play(); }
+    if (action === 'remove') { removedPlayer = video.parentElement; removedPlayer.remove(); }
+    if (action === 'reinsert') { if (!removedPlayer) throw new Error('No removed player'); main.append(removedPlayer); removedPlayer = null; }
+    if (action === 'reparent') {
+      const previous = video.parentElement; const next = document.createElement('section'); next.className = previous.className;
+      previous.before(next); next.append(video, ...previous.querySelectorAll('.controls, .caption')); previous.remove();
+    }
+    if (action === 'ready') { video.src = '/media/same.mp4'; await video.play(); }
     if (action === 'drm') { const access = await navigator.requestMediaKeySystemAccess('org.w3.clearkey', [{ initDataTypes: ['cenc'], videoCapabilities: [{ contentType: 'video/mp4; codecs="avc1.42E01E"' }] }]); await video.setMediaKeys(await access.createMediaKeys()); }
     result.dataset.state = 'done'; result.textContent = action;
   } catch (error) { result.dataset.state = 'error'; result.textContent = String(error); }
