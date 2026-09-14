@@ -184,13 +184,13 @@ function errorObserver(page, extensionId, item) {
   return () => { page.off('pageerror', pageError); page.off('console', consoleError); };
 }
 
-async function nativeResize(native, page, width) {
+export async function nativeResize(native, page, width) {
   const session = await bounded(native.context.newCDPSession(page), 3000, 'Native resize CDP');
   const send = (method, params = {}) => bounded(session.send(method, params), 3000, method);
   try {
     const before = await send('Browser.getWindowForTarget');
     assert.equal(before.bounds.windowState, 'normal', 'Only resize a normal native window');
-    await send('Browser.setWindowBounds', { windowId: before.windowId, bounds: { width, height: 900 } });
+    await send('Browser.setWindowBounds', { windowId: before.windowId, bounds: { left: 40, top: 40, width, height: 900 } });
     return await until(async () => {
       const value = await send('Browser.getWindowForTarget'); return value.bounds.width === width ? value : null;
     }, Boolean, 3000);
