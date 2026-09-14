@@ -138,7 +138,7 @@ export class VideoAttachment {
       driver.onFrame = () => {
         if (this.disposed || this.failSource()) return;
         if (this.videoPipeline?.error) { this.failExecution(this.videoPipeline.error); return; }
-        if (this.video.seeking || !this.visible() || !this.videoPipeline?.running || this.outputReady) return;
+        if (this.video.seeking || this.video.readyState < 2 || !this.visible() || !this.videoPipeline?.running || this.outputReady) return;
         this.outputReady = true;
         this.style('visibility', 'visible');
       };
@@ -163,7 +163,7 @@ export class VideoAttachment {
     if (this.disposed) return;
     this.infrastructure.refreshCalls++;
     if (this.failSource()) return;
-    if (this.video.seeking) this.hide();
+    if (this.video.seeking || this.video.readyState < 2) this.hide();
     const reason = this.unavailableReason();
     if (reason !== null) this.suspend(reason);
     if (this.geometryFrame !== null || this.disposed) return;
@@ -178,7 +178,7 @@ export class VideoAttachment {
 
   private unavailableReason(): string | null {
     const document = this.video.ownerDocument;
-    if (!this.video.isConnected || this.video.readyState < 2 || this.video.videoWidth <= 0 || this.video.videoHeight <= 0) {
+    if (!this.video.isConnected || this.video.videoWidth <= 0 || this.video.videoHeight <= 0) {
       return 'video-not-ready';
     }
     if (this.video.paused) return 'video-paused';
@@ -218,6 +218,11 @@ export class VideoAttachment {
     this.observeParent();
     const reason = this.unavailableReason();
     if (reason !== null) { this.suspend(reason); return; }
+    if (this.video.readyState < 2 && this.runtime && this.eligible) {
+      this.hide();
+      this.runtime.syncActive();
+      return;
+    }
     const started = performance.now();
     let geometry: ReturnType<typeof inspectGeometry>;
     try { geometry = inspectGeometry(this.video); }
@@ -267,7 +272,7 @@ export class VideoAttachment {
     this.listen(view, 'resize', () => this.refresh());
     for (const type of ['fullscreenchange', 'visibilitychange']) this.listen(document, type, () => this.refresh());
     for (const type of ['resize', 'loadeddata', 'loadstart', 'emptied']) {
-      this.listen(this.video, type, () => { this.suspend('video-not-ready'); this.refresh(); });
+      this.listen(this.video, type, () => { this.hide(); this.refresh(); });
     }
     for (const type of ['pause', 'seeking', 'playing', 'seeked']) this.listen(this.video, type, () => this.refresh());
     const tracks = this.video.textTracks;

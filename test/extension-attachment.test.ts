@@ -224,6 +224,7 @@ describe('VideoAttachment', () => {
     frame();
     const before = attachment.driver!.snapshot();
     video.seeking = true;
+    video.readyState = 1;
     video.dispatchEvent(new Event('seeking'));
     document.flush();
     expect(pipeline.running).toBe(true);
@@ -233,6 +234,8 @@ describe('VideoAttachment', () => {
     expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
     expect(attachment.driver!.snapshot().session.activeMs).toBe(before.session.activeMs + 100);
     video.seeking = false;
+    video.readyState = 4;
+    video.dispatchEvent(new Event('loadeddata'));
     video.dispatchEvent(new Event('seeked'));
     document.flush();
     expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
@@ -564,11 +567,11 @@ describe('VideoAttachment', () => {
     const generation = pipeline.timingGeneration;
     video.readyState = 0;
     video.dispatchEvent(new Event('loadstart'));
-    expect(pipeline.running).toBe(false);
+    expect(pipeline.running).toBe(true);
     expect(pipeline.timingGeneration).toBeGreaterThan(generation);
     expect(attachment.snapshot().ready).toBe(false);
     document.flush();
-    expect(attachment.snapshot().suspendedReason).toBe('video-not-ready');
+    expect(attachment.snapshot()).toMatchObject({ active: true, ready: false });
     video.readyState = 4;
     video.videoWidth = 1280;
     video.videoHeight = 720;
