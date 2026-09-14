@@ -327,7 +327,7 @@ export async function runSites(output, configPath) {
           await consent(page, record);
           const ready = await page.evaluate(() => {
             const video = document.querySelector('video'); if (!video) return null;
-            return { loaded: video.readyState >= 1 && video.videoWidth > 0, paused: video.paused, mediaKeys: !!video.mediaKeys, failed: !!video.error };
+            return { loaded: video.readyState >= 2 && video.videoWidth > 0, paused: video.paused, mediaKeys: !!video.mediaKeys, failed: !!video.error };
           });
           if (ready?.mediaKeys || ready?.failed || ready?.loaded) return true;
           if (!metadataPlayClicked) {
