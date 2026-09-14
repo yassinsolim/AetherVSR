@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 function check(source: string): void {
   const output = execFileSync(process.execPath, ['--input-type=module', '-e', `
     import assert from 'node:assert/strict';
-    import { installNativeObserver, installRuntimeCounters, summarizeNative, validateNative, pairedBounds, floorDecision } from './tools/m106-counters.mjs';
+    import { installNativeObserver, installRuntimeCounters, summarizeNative, validateNative, pairedBounds, floorDecision, observerComparison } from './tools/m106-counters.mjs';
     import { activeSafety, parseFloorPlan, PRIMARY_ORDER, qualifiesDisabledGeometry, resumePrefix, floorCases, bindingNativeFailure } from './tools/m106-floor.mjs';
     import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure } from './tools/m106-sites.mjs';
     import { runInNewContext } from 'node:vm';
@@ -169,6 +169,15 @@ describe('native browser delivery floor accounting', () => {
     assert.equal(validateNative(raw,1000).submissionDeficit,1);
     assert.equal(raw.runtime.closing.pipelineError,'device lost');
   `));
+  it('separates exact session quality accumulation from the historical boundary-read capture formula', () => check(fixture + `
+    raw.runtime={opening:{attempts:0,runtime:{session:{framesRendered:0,framesPresented:0,framesSkipped:0,decoderDrops:2}}},
+      closing:{attempts:2,runtime:{session:{framesRendered:2,framesPresented:4,framesSkipped:2,decoderDrops:4}}},frames:[[100,2,1],[500,2,1]]};
+    const summary=summarizeNative(raw);
+    assert.equal(summary.nativeCombinedPercent,75);assert.equal(summary.historicalRuntimeCombinedPercent,75);
+    assert.equal(summary.runtimeDecoderDrops,2);assert.equal(summary.runtimeSessionCombinedPercent,100);assert.equal(summary.importedFrames,null);
+    raw.runtime.closing.runtime.session.decoderDrops=null;assert.equal(summarizeNative(raw).runtimeSessionCombinedPercent,null);
+    assert.equal(summarizeNative(raw).historicalRuntimeCombinedPercent,75);
+  `));
   it('retains closing loop waits and completely stalled playback as outcomes, not replacement opportunities', () => check(fixture + `
     raw.native.closing.readyState=1;assert.equal(validateNative(raw,1000).callbacks,2);
     raw.native.closing.mediaError=3;raw.native.closing.paused=true;assert.equal(validateNative(raw,1000).callbacks,2);
@@ -180,6 +189,13 @@ describe('native browser delivery floor accounting', () => {
     const bounds=pairedBounds([0,0,0,0]);assert.equal(bounds.upper95,0);assert.equal(bounds.sd,0);
     assert.throws(()=>pairedBounds([1,2,3]));assert.throws(()=>pairedBounds([1,2,3,NaN]));
     const spread=pairedBounds([-1,0,0,1]);assert(spread.lower95<0&&spread.upper95>0);
+  `));
+  it('does not infer uninstrumented callback neutrality from matching quality counters', () => check(`
+    const results=floorCases('observer').map(item=>({case:item,completion:'CAPTURED',summary:{qualityTotalFps:60,qualityDropPercent:0,
+      nativeCallbackFps:item.mode==='none'?null:59,nativeCombinedPercent:item.mode==='none'?null:2}}));
+    const result=observerComparison(results);assert.equal(result.observerCompatible,null);assert.equal(result.callbackDistortionBound,null);
+    assert.equal(result.readinessNormalizationJustified,false);assert.equal(result.blocks.length,3);
+    assert(result.blocks.every(block=>block.richMinusLeanCallbackFps===0));
   `));
   it('enforces the frozen order before executing an evidence plan', () => check(`
     for(const [phase,count]of[['observer',9],['primary',16],['proxy',3]])assert.equal(parseFloorPlan(floorCases(phase)).length,count);
@@ -215,9 +231,10 @@ describe('native browser delivery floor accounting', () => {
     assert.equal(activeSafety(raw,'D',undefined).checks.cleanup,false);
   `));
   it('does not turn uncertainty, a safety failure or absent observer justification into Case C', () => check(`
-    const make=()=>Array.from({length:4},()=>({A:{nativeCombinedPercent:3,nativeCallbackFps:59},B:{nativeCombinedPercent:3,nativeCallbackFps:59},C:{nativeCombinedPercent:3,renderedFps:59,safety:true},D:{nativeCombinedPercent:3,renderedFps:59,safety:true}}));
+    const make=()=>Array.from({length:4},()=>({A:{nativeCombinedPercent:3,nativeCallbackFps:59},B:{nativeCombinedPercent:3,nativeCallbackFps:59,safety:true},C:{nativeCombinedPercent:3,renderedFps:59,safety:true},D:{nativeCombinedPercent:3,renderedFps:59,safety:true}}));
     let blocks=make();assert.equal(floorDecision(blocks,true).case,'CASE C');assert.equal(floorDecision(blocks,null).case,'CASE D');
     blocks[0].D.safety=false;assert.equal(floorDecision(blocks,true).case,'CASE D');
+    blocks=make();blocks[0].B.safety=false;assert.equal(floorDecision(blocks,true).case,'CASE D');
     blocks=make();for(const block of blocks)block.A.nativeCombinedPercent=.5;assert.equal(floorDecision(blocks,true).case,'CASE A');
     blocks=make();for(const block of blocks)block.D.nativeCombinedPercent=4;assert.equal(floorDecision(blocks,true).case,'CASE B');
     blocks=make();blocks[0].D.nativeCombinedPercent=1;blocks[1].D.nativeCombinedPercent=6;assert.equal(floorDecision(blocks,true).case,'CASE D');

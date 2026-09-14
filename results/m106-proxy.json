@@ -1,0 +1,469 @@
+{
+  "schemaVersion": 1,
+  "phase": "proxy",
+  "completion": "CAPTURED",
+  "started": "2026-09-14T22:32:10.698Z",
+  "ended": "2026-09-14T22:33:08.821Z",
+  "sourceCommit": "06ebc4b9d65b0e22740838db10a0ef9b59f3f679",
+  "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+  "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "casesSha256": "0b1a6c590edd7ba70319c1ef79c5607df8c8206885040b1f0786c65af9b10ee0",
+  "sourcePins": {
+    "tools/m106-floor.mjs": "746fcd7d661520483899c9bd7db1f6ea09004df0fb198988df08569432cf80a3",
+    "tools/m106-counters.mjs": "399fdcac45d2d3db8eea78dbd40e4f86fb8fab251a448d01235346ee59ae61f4",
+    "tools/m105-fixture.html": "4ad2fa66cd949f3492e220d949f01566eacd960e6a058fb501cc8a6b69c26769",
+    "tools/m105-accounting.mjs": "b0534dbeaba7954df1e52756d1c56aaff056623e4b3e73c9f488a3d153bf3ed9",
+    "tools/m10-browser.mjs": "49159e2281d1d2db0b5dfe22877c99aaf8eb23a9e8aac2ff7d815026a5c84006",
+    "tools/m9-browser.mjs": "8f30312001cfc328b22c10c1c2b5049b455fceb856a80e6f7cfb4fcebffcd6dd",
+    "docs/M10.6-PREREGISTRATION.md": "741a85d4fdbd0935e746a8c8294df3a7a945d69a6472b496b3e9384f996231ea"
+  },
+  "machine": {
+    "os": "26.6.2",
+    "chip": "Apple M5",
+    "model": "Mac17,2",
+    "memoryBytes": 25769803776,
+    "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=22151267)\t100%; charged; 0:00 remaining present: true",
+    "displays": [
+      {
+        "name": "Built-in Retina Display",
+        "frame": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 1512,
+            "height": 982
+          }
+        },
+        "scale": 2
+      }
+    ],
+    "physicalRefresh": null
+  },
+  "browser": {
+    "version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/153.0.8010.12",
+      "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "jsVersion": "15.3.76.4"
+    },
+    "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+  },
+  "placement": {
+    "bounds": {
+      "bounds": {
+        "left": 40,
+        "top": 40,
+        "width": 1200,
+        "height": 903,
+        "windowState": "normal"
+      }
+    },
+    "nativeScreen": {
+      "width": 1512,
+      "height": 982,
+      "dpr": 2,
+      "x": 40,
+      "y": 40
+    },
+    "deviceMetricsOverride": false,
+    "scope": "Native window at desktop (40,40), actual 1200x760 content fits built-in display; no forced focus during capture; Screen API is observable geometry, not measured physical refresh"
+  },
+  "rawReport": {
+    "path": ".cache/m106/proxy-01.json",
+    "sha256": "484981cb4234f6f334cbab8f7be94e62ccb561fc00eab0cdfa4f48c313318697"
+  },
+  "postprocessor": {
+    "file": "tools/m106-counters.mjs",
+    "sha256": "c48bdd03207825fb099af91be18b966ab363a076dac7922b463f87d09602993c",
+    "change": "Added exact RuntimeSession quality accumulation and clarified scopes after capture; native observer and raw operands unchanged."
+  },
+  "results": [
+    {
+      "case": {
+        "id": "proxy-01-A",
+        "arm": "A",
+        "mode": "rich",
+        "durationMs": 12000,
+        "phase": "proxy",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/proxy-01.proxy-01-A.json.gz",
+        "sha256": "3790ad35cef10e80a76412385cb7b029518057ef1f77fe7b8794f39588569257",
+        "bytes": 24890
+      },
+      "summary": {
+        "durationMs": 12002.800000011921,
+        "callbacks": 697,
+        "presented": 718,
+        "gaps": 21,
+        "qualityTotal": 719,
+        "qualityDrops": 0,
+        "nativeCombinedPercent": 2.9247910863509747,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0,
+        "callbackGapPercent": 2.9247910863509747,
+        "nativeCallbackFps": 58.069783717075,
+        "nativePresentedFps": 59.819375478995475,
+        "qualityTotalFps": 59.90268937242026,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 696,
+          "p50": 16.700000002980232,
+          "p95": 18.92500000447035,
+          "mean": 17.205459770114942,
+          "max": 35
+        },
+        "latencyMs": {
+          "count": 697,
+          "p50": 8.399999999999636,
+          "p95": 10.299999997019768,
+          "mean": 6.254519362754104,
+          "max": 16.399999991059303
+        },
+        "rafIntervalsMs": {
+          "count": 713,
+          "p50": 16.699999999999818,
+          "p95": 18.199999999999818,
+          "mean": 16.795371669004208,
+          "max": 25.299999999999272
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.100304,
+        1.035352
+      ],
+      "mediaEvents": {
+        "seeking": 3,
+        "waiting": 3,
+        "seeked": 3,
+        "playing": 3
+      },
+      "longTasks": [],
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false
+      },
+      "before": {
+        "at": 120.59999999403954,
+        "path": ".cache/m106/proxy-01.proxy-01-A.before.png",
+        "finishedAt": 209.69999998807907,
+        "sha256": "771b9211701a0e2bb48a7c173e1a3623b66f47a3ebc4e07a18445f5a594e0619"
+      },
+      "after": {
+        "at": 17294,
+        "path": ".cache/m106/proxy-01.proxy-01-A.after.png",
+        "finishedAt": 17364.39999999106,
+        "sha256": "798d31547f2bc67df83065057b2204f8358307e76b4954160d63569b6b4b8192"
+      }
+    },
+    {
+      "case": {
+        "id": "proxy-02-C",
+        "arm": "C",
+        "mode": "rich",
+        "durationMs": 12000,
+        "phase": "proxy",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/proxy-01.proxy-02-C.json.gz",
+        "sha256": "8fc50718fb32b136901f57f119863dfb2a7eae12f5585f7357fe7bcc55eaeed7",
+        "bytes": 30734
+      },
+      "summary": {
+        "durationMs": 12000.60000000894,
+        "callbacks": 706,
+        "presented": 718,
+        "gaps": 12,
+        "qualityTotal": 718,
+        "qualityDrops": 10,
+        "nativeCombinedPercent": 3.064066852367688,
+        "historicalRuntimeCombinedPercent": 3.064066852367688,
+        "runtimeSessionCombinedPercent": 3.064066852367688,
+        "runtimeDecoderDrops": 10,
+        "qualityDropPercent": 1.392757660167131,
+        "callbackGapPercent": 1.6713091922005572,
+        "nativeCallbackFps": 58.83039181369882,
+        "nativePresentedFps": 59.830341816197944,
+        "qualityTotalFps": 59.830341816197944,
+        "submitted": 706,
+        "runtimePresented": 718,
+        "runtimeSkipped": 12,
+        "renderedFps": 58.83039181369882,
+        "runtimePresentedFps": 59.830341816197944,
+        "attempts": 706,
+        "submissionDeficit": 0,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": {
+          "presented": 0,
+          "skipped": 0,
+          "submittedMinusCallbacks": 0
+        },
+        "callbackIntervalsMs": {
+          "count": 705,
+          "p50": 16.700000002980232,
+          "p95": 18.579999995231624,
+          "mean": 17.011347517730496,
+          "max": 49.400000005960464
+        },
+        "latencyMs": {
+          "count": 706,
+          "p50": 0.8500000044700755,
+          "p95": 10.200000002980232,
+          "mean": 3.053116147616959,
+          "max": 10.899999997020132
+        },
+        "rafIntervalsMs": {
+          "count": 715,
+          "p50": 16.699999999999818,
+          "p95": 18.199999999999182,
+          "mean": 16.77020979020979,
+          "max": 25.299999999999272
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.835741,
+        1.766139
+      ],
+      "mediaEvents": {
+        "seeking": 3,
+        "waiting": 3,
+        "seeked": 3,
+        "playing": 3
+      },
+      "longTasks": [],
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "ownerStable": true,
+        "tierStable": true,
+        "noSubmissionDeficit": true,
+        "noError": true,
+        "averageRendered": true,
+        "averagePresented": true,
+        "lastRendered": null,
+        "lastPresented": null,
+        "cleanup": true,
+        "scope": "Short diagnostic proxy has no 120s acceptance window; omitted checks are not passes."
+      },
+      "before": {
+        "at": 836.7999999970198,
+        "path": ".cache/m106/proxy-01.proxy-02-C.before.png",
+        "finishedAt": 930.7000000029802,
+        "sha256": "30cb5df0762b781b3d0a5c0abd2c54650ffda2cbf86bb6f1857ca86a632d8f3a"
+      },
+      "after": {
+        "at": 18005.90000000596,
+        "path": ".cache/m106/proxy-01.proxy-02-C.after.png",
+        "finishedAt": 18090.29999999702,
+        "sha256": "aba1dfc7871ee1801fe334de594800a8ac859702c055b9cfa1e9a57642f87acb"
+      }
+    },
+    {
+      "case": {
+        "id": "proxy-03-D",
+        "arm": "D",
+        "mode": "rich",
+        "durationMs": 12000,
+        "phase": "proxy",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/proxy-01.proxy-03-D.json.gz",
+        "sha256": "e1227f7b5e521be3c7f92e347ab958f7bed2759803bbf1404e9d8d9b9f495a64",
+        "bytes": 30990
+      },
+      "summary": {
+        "durationMs": 12001.199999988079,
+        "callbacks": 702,
+        "presented": 718,
+        "gaps": 16,
+        "qualityTotal": 719,
+        "qualityDrops": 15,
+        "nativeCombinedPercent": 4.3175487465181055,
+        "historicalRuntimeCombinedPercent": 4.3175487465181055,
+        "runtimeSessionCombinedPercent": 4.3175487465181055,
+        "runtimeDecoderDrops": 15,
+        "qualityDropPercent": 2.086230876216968,
+        "callbackGapPercent": 2.2284122562674096,
+        "nativeCallbackFps": 58.49415058499961,
+        "nativePresentedFps": 59.827350598332934,
+        "qualityTotalFps": 59.91067559916627,
+        "submitted": 702,
+        "runtimePresented": 718,
+        "runtimeSkipped": 16,
+        "renderedFps": 58.49415058499961,
+        "runtimePresentedFps": 59.827350598332934,
+        "attempts": 702,
+        "submissionDeficit": 0,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": {
+          "presented": 0,
+          "skipped": 0,
+          "submittedMinusCallbacks": 0
+        },
+        "callbackIntervalsMs": {
+          "count": 701,
+          "p50": 16.700000002980232,
+          "p95": 18.600000008940697,
+          "mean": 17.095149786024223,
+          "max": 49.70000000298023
+        },
+        "latencyMs": {
+          "count": 702,
+          "p50": 2.0000000119216566,
+          "p95": 10.100000011771225,
+          "mean": 4.316809122739889,
+          "max": 10.400000011921293
+        },
+        "rafIntervalsMs": {
+          "count": 714,
+          "p50": 16.69999999999891,
+          "p95": 18,
+          "mean": 16.783613445378155,
+          "max": 25.299999999999272
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        2.977562,
+        2.91242
+      ],
+      "mediaEvents": {
+        "seeking": 3,
+        "waiting": 3,
+        "seeked": 3,
+        "playing": 3
+      },
+      "longTasks": [],
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "ownerStable": true,
+        "tierStable": true,
+        "noSubmissionDeficit": true,
+        "noError": true,
+        "averageRendered": true,
+        "averagePresented": true,
+        "lastRendered": null,
+        "lastPresented": null,
+        "cleanup": true,
+        "scope": "Short diagnostic proxy has no 120s acceptance window; omitted checks are not passes."
+      },
+      "before": {
+        "at": 1948.1000000089407,
+        "path": ".cache/m106/proxy-01.proxy-03-D.before.png",
+        "finishedAt": 2061.300000011921,
+        "sha256": "a6b6f49313a8a1aa13e09d5357bda51791bd99b979adde70d1100a862ae8988e"
+      },
+      "after": {
+        "at": 19130.20000000298,
+        "path": ".cache/m106/proxy-01.proxy-03-D.after.png",
+        "finishedAt": 19235.60000000894,
+        "sha256": "3176de0237e4f6325a07b122e7cc8e10bd8c58fa38c5d8a6babe8f702d53a041"
+      }
+    }
+  ],
+  "pixelChecks": {
+    "raw": {
+      "path": ".cache/m106/proxy-pixel-checks.json",
+      "sha256": "a4bbcf8632b5d90b09b469f9d270cf6f35f55651b69f982e6311329c5ab872c9"
+    },
+    "results": [
+      {
+        "id": "proxy-01-A",
+        "beforeMarkerLeftPixels": 80,
+        "afterMarkerLeftPixels": 556,
+        "expectedAfterMarkerLeftPixels": 556,
+        "markerWidthPixels": 24,
+        "videoCropPixels": 921600,
+        "changedVideoPixels": 83159,
+        "nonblank": true
+      },
+      {
+        "id": "proxy-02-C",
+        "beforeMarkerLeftPixels": 80,
+        "afterMarkerLeftPixels": 558,
+        "expectedAfterMarkerLeftPixels": 558,
+        "markerWidthPixels": 24,
+        "videoCropPixels": 921600,
+        "changedVideoPixels": 124058,
+        "nonblank": true
+      },
+      {
+        "id": "proxy-03-D",
+        "beforeMarkerLeftPixels": 80,
+        "afterMarkerLeftPixels": 558,
+        "expectedAfterMarkerLeftPixels": 558,
+        "markerWidthPixels": 24,
+        "videoCropPixels": 921600,
+        "changedVideoPixels": 59107,
+        "nonblank": true
+      }
+    ],
+    "recipe": "Pillow RGB PNGs 2400x1520. Video crop (80,240)-(1360,960): each channel range >100; count unequal before/after pixels. At y196, red marker pixels satisfy R>=180,G<65,B<65; width24. Expected final left=80+2*(floor((lastRAF.now-opening.at)*0.12)%600). Check image SHA256 before decoding.",
+    "scope": "Screenshot/compositor pixel coordinates, not measured physical scanout. Before image precedes 5s warmup; after image follows capture. Two endpoints and in-window callback/rAF rows do not establish continuous physical delivery or observer neutrality."
+  }
+}

@@ -1,0 +1,975 @@
+{
+  "schemaVersion": 1,
+  "phase": "observer",
+  "completion": "CAPTURED",
+  "started": "2026-09-14T22:22:16.909Z",
+  "ended": "2026-09-14T22:32:10.683Z",
+  "sourceCommit": "06ebc4b9d65b0e22740838db10a0ef9b59f3f679",
+  "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+  "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "casesSha256": "b20dd333bdd38781c25eaa4b10e46909d98cc7c66bf48b11bbfc09fed9e459bc",
+  "sourcePins": {
+    "tools/m106-floor.mjs": "746fcd7d661520483899c9bd7db1f6ea09004df0fb198988df08569432cf80a3",
+    "tools/m106-counters.mjs": "399fdcac45d2d3db8eea78dbd40e4f86fb8fab251a448d01235346ee59ae61f4",
+    "tools/m105-fixture.html": "4ad2fa66cd949f3492e220d949f01566eacd960e6a058fb501cc8a6b69c26769",
+    "tools/m105-accounting.mjs": "b0534dbeaba7954df1e52756d1c56aaff056623e4b3e73c9f488a3d153bf3ed9",
+    "tools/m10-browser.mjs": "49159e2281d1d2db0b5dfe22877c99aaf8eb23a9e8aac2ff7d815026a5c84006",
+    "tools/m9-browser.mjs": "8f30312001cfc328b22c10c1c2b5049b455fceb856a80e6f7cfb4fcebffcd6dd",
+    "docs/M10.6-PREREGISTRATION.md": "741a85d4fdbd0935e746a8c8294df3a7a945d69a6472b496b3e9384f996231ea"
+  },
+  "machine": {
+    "os": "26.6.2",
+    "chip": "Apple M5",
+    "model": "Mac17,2",
+    "memoryBytes": 25769803776,
+    "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=22151267)\t100%; charged; 0:00 remaining present: true",
+    "displays": [
+      {
+        "name": "Built-in Retina Display",
+        "frame": {
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 1512,
+            "height": 982
+          }
+        },
+        "scale": 2
+      }
+    ],
+    "physicalRefresh": null
+  },
+  "browser": {
+    "version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/153.0.8010.12",
+      "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "jsVersion": "15.3.76.4"
+    },
+    "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+  },
+  "placement": {
+    "bounds": {
+      "bounds": {
+        "left": 40,
+        "top": 40,
+        "width": 1200,
+        "height": 903,
+        "windowState": "normal"
+      }
+    },
+    "nativeScreen": {
+      "width": 1512,
+      "height": 982,
+      "dpr": 2,
+      "x": 40,
+      "y": 40
+    },
+    "deviceMetricsOverride": false,
+    "scope": "Native window at desktop (40,40), actual 1200x760 content fits built-in display; no forced focus during capture; Screen API is observable geometry, not measured physical refresh"
+  },
+  "rawReport": {
+    "path": ".cache/m106/observer-01.json",
+    "sha256": "81c7dec397cf61fe4a3ded5d94d4bb76300bd0d8bd5783f90955e69dc4e50b34"
+  },
+  "postprocessor": {
+    "file": "tools/m106-counters.mjs",
+    "sha256": "c48bdd03207825fb099af91be18b966ab363a076dac7922b463f87d09602993c",
+    "change": "Added exact RuntimeSession quality accumulation and clarified scopes after capture; native observer and raw operands unchanged."
+  },
+  "results": [
+    {
+      "case": {
+        "id": "observer-01-A",
+        "arm": "A",
+        "mode": "none",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-01-A.json.gz",
+        "sha256": "f4d7312d98d3c7d036e5fd029870e788db87ad8324a1d0870ce5a121e2e04061",
+        "bytes": 1593
+      },
+      "summary": {
+        "durationMs": 60005.39999999106,
+        "callbacks": null,
+        "presented": null,
+        "gaps": null,
+        "qualityTotal": 3594,
+        "qualityDrops": 1,
+        "nativeCombinedPercent": null,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0.027824151363383415,
+        "callbackGapPercent": null,
+        "nativeCallbackFps": null,
+        "nativePresentedFps": null,
+        "qualityTotalFps": 59.894609485155264,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": null,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "latencyMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "rafIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        0.999011,
+        0.647254
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": null,
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-02-A",
+        "arm": "A",
+        "mode": "lean",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-02-A.json.gz",
+        "sha256": "69134bfc160e17851d40e207030e001e06501c3ba190cc8709ba5b0b4fc9f034",
+        "bytes": 85121
+      },
+      "summary": {
+        "durationMs": 60001.70000000298,
+        "callbacks": 3499,
+        "presented": 3595,
+        "gaps": 96,
+        "qualityTotal": 3595,
+        "qualityDrops": 3,
+        "nativeCombinedPercent": 2.753824756606398,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0.08344923504867872,
+        "callbackGapPercent": 2.670375521557719,
+        "nativeCallbackFps": 58.31501440792221,
+        "nativePresentedFps": 59.91496907587321,
+        "qualityTotalFps": 59.91496907587321,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 3498,
+          "p50": 16.700000002980232,
+          "p95": 17.600000008940697,
+          "mean": 17.14785591766809,
+          "max": 50
+        },
+        "latencyMs": {
+          "count": 3499,
+          "p50": 0.20000000298023224,
+          "p95": 1.8999999940399903,
+          "mean": 0.6479851357057631,
+          "max": 16.799999999999272
+        },
+        "rafIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.022146,
+        0.680447
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": null,
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-03-A",
+        "arm": "A",
+        "mode": "rich",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-03-A.json.gz",
+        "sha256": "49287214afeff21aad935422409a19bce61dc8cf0cf117413ecad28168792d7c",
+        "bytes": 111841
+      },
+      "summary": {
+        "durationMs": 60001.79999999702,
+        "callbacks": 3475,
+        "presented": 3595,
+        "gaps": 120,
+        "qualityTotal": 3595,
+        "qualityDrops": 2,
+        "nativeCombinedPercent": 3.3936022253129345,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0.055632823365785816,
+        "callbackGapPercent": 3.3379694019471486,
+        "nativeCallbackFps": 57.91492921879298,
+        "nativePresentedFps": 59.914869220593026,
+        "qualityTotalFps": 59.914869220593026,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 3474,
+          "p50": 16.700000002980232,
+          "p95": 17.700000002980232,
+          "mean": 17.263816925734023,
+          "max": 51.5
+        },
+        "latencyMs": {
+          "count": 3475,
+          "p50": 0.19999998807907104,
+          "p95": 1.7999999940366251,
+          "mean": 0.4659280515746056,
+          "max": 16.700000000000728
+        },
+        "rafIntervalsMs": {
+          "count": 3606,
+          "p50": 16.69999999999709,
+          "p95": 17.599999999998545,
+          "mean": 16.632224070992788,
+          "max": 17.700000000004366
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.001285,
+        0.664616
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": [],
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-04-A",
+        "arm": "A",
+        "mode": "lean",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-04-A.json.gz",
+        "sha256": "2ee4cbe7e5f7b5c3de564e7d8175eb462793a1d1905cd4e6d2dc2fb537fa802e",
+        "bytes": 84898
+      },
+      "summary": {
+        "durationMs": 60001.29999999702,
+        "callbacks": 3450,
+        "presented": 3594,
+        "gaps": 144,
+        "qualityTotal": 3594,
+        "qualityDrops": 0,
+        "nativeCombinedPercent": 4.006677796327212,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0,
+        "callbackGapPercent": 4.006677796327212,
+        "nativeCallbackFps": 57.498754193661995,
+        "nativePresentedFps": 59.898702194788754,
+        "qualityTotalFps": 59.898702194788754,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 3449,
+          "p50": 16.700000002980232,
+          "p95": 18.600000008940697,
+          "mean": 17.394201217746865,
+          "max": 50.79999999701977
+        },
+        "latencyMs": {
+          "count": 3450,
+          "p50": 0.1000000000003638,
+          "p95": 3.1999999910605768,
+          "mean": 0.8230724578189235,
+          "max": 17.59999999106003
+        },
+        "rafIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.008078,
+        0.654117
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": null,
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-05-A",
+        "arm": "A",
+        "mode": "rich",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-05-A.json.gz",
+        "sha256": "2dac8d40d230a7cc0086ba59e802e214d0fa8ecf25e71e3fa503cb6195d43663",
+        "bytes": 117775
+      },
+      "summary": {
+        "durationMs": 60003,
+        "callbacks": 3557,
+        "presented": 3594,
+        "gaps": 37,
+        "qualityTotal": 3594,
+        "qualityDrops": 0,
+        "nativeCombinedPercent": 1.0294936004451865,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0,
+        "callbackGapPercent": 1.0294936004451865,
+        "nativeCallbackFps": 59.28036931486759,
+        "nativePresentedFps": 59.89700514974251,
+        "qualityTotalFps": 59.89700514974251,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 3556,
+          "p50": 16.700000002980232,
+          "p95": 18.5,
+          "mean": 16.865804274464853,
+          "max": 49.900000005960464
+        },
+        "latencyMs": {
+          "count": 3557,
+          "p50": 0.19999999999708962,
+          "p95": 3.1000000059582815,
+          "mean": 0.7630587573881906,
+          "max": 17.00000000595901
+        },
+        "rafIntervalsMs": {
+          "count": 3606,
+          "p50": 16.69999999999709,
+          "p95": 18.200000000000728,
+          "mean": 16.63239046034387,
+          "max": 18.80000000000291
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.014369,
+        0.6675
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": [],
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-06-A",
+        "arm": "A",
+        "mode": "none",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-06-A.json.gz",
+        "sha256": "5341a4a6dbbf1e90152cc31a5f0b8170a2a3d823f1a1311b3b3fb17c96316a56",
+        "bytes": 1585
+      },
+      "summary": {
+        "durationMs": 60002.89999999106,
+        "callbacks": null,
+        "presented": null,
+        "gaps": null,
+        "qualityTotal": 3593,
+        "qualityDrops": 1,
+        "nativeCombinedPercent": null,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0.027831895352073477,
+        "callbackGapPercent": null,
+        "nativeCallbackFps": null,
+        "nativePresentedFps": null,
+        "qualityTotalFps": 59.8804391121185,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": null,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "latencyMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "rafIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        0.999481,
+        0.648213
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": null,
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-07-A",
+        "arm": "A",
+        "mode": "rich",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-07-A.json.gz",
+        "sha256": "26ad153d67509f91efd009a64f48c70abfa898602807539d06543c7d34299759",
+        "bytes": 113679
+      },
+      "summary": {
+        "durationMs": 60001.59999999404,
+        "callbacks": 3417,
+        "presented": 3593,
+        "gaps": 176,
+        "qualityTotal": 3593,
+        "qualityDrops": 1,
+        "nativeCombinedPercent": 4.926245477317005,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0.027831895352073477,
+        "callbackGapPercent": 4.898413581964932,
+        "nativeCallbackFps": 56.94848137383569,
+        "nativePresentedFps": 59.88173648703296,
+        "qualityTotalFps": 59.88173648703296,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 3416,
+          "p50": 16.700000002980232,
+          "p95": 31.400000005960464,
+          "mean": 17.564197892275153,
+          "max": 50.20000000298023
+        },
+        "latencyMs": {
+          "count": 3417,
+          "p50": 0.19999999701940396,
+          "p95": 2.999999997017403,
+          "mean": 0.7594381006891829,
+          "max": 16.99999999404099
+        },
+        "rafIntervalsMs": {
+          "count": 3608,
+          "p50": 16.69999999999709,
+          "p95": 18.19999999999709,
+          "mean": 16.629573170731707,
+          "max": 24
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.012899,
+        0.657948
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": [],
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-08-A",
+        "arm": "A",
+        "mode": "none",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-08-A.json.gz",
+        "sha256": "e228ffe4403c64c248781487aff0186bfa682cc4d8693a3c8e25a89ccc90c5b9",
+        "bytes": 1536
+      },
+      "summary": {
+        "durationMs": 60003.09999999404,
+        "callbacks": null,
+        "presented": null,
+        "gaps": null,
+        "qualityTotal": 3593,
+        "qualityDrops": 0,
+        "nativeCombinedPercent": null,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0,
+        "callbackGapPercent": null,
+        "nativeCallbackFps": null,
+        "nativePresentedFps": null,
+        "qualityTotalFps": 59.88023952096403,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": null,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "latencyMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "rafIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        0.997781,
+        0.652576
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": null,
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    },
+    {
+      "case": {
+        "id": "observer-09-A",
+        "arm": "A",
+        "mode": "lean",
+        "durationMs": 60000,
+        "phase": "observer",
+        "warmupMs": 5000
+      },
+      "completion": "CAPTURED",
+      "raw": {
+        "path": ".cache/m106/observer-01.observer-09-A.json.gz",
+        "sha256": "3c807b1937aa18d856afcc1754115fbc23f8e83f6366a7a5fa1d5e5d1967b397",
+        "bytes": 85427
+      },
+      "summary": {
+        "durationMs": 60002,
+        "callbacks": 3462,
+        "presented": 3593,
+        "gaps": 131,
+        "qualityTotal": 3593,
+        "qualityDrops": 1,
+        "nativeCombinedPercent": 3.6738101864736987,
+        "historicalRuntimeCombinedPercent": null,
+        "runtimeSessionCombinedPercent": null,
+        "runtimeDecoderDrops": null,
+        "qualityDropPercent": 0.027831895352073477,
+        "callbackGapPercent": 3.6459782911216254,
+        "nativeCallbackFps": 57.69807673077564,
+        "nativePresentedFps": 59.88133728875704,
+        "qualityTotalFps": 59.88133728875704,
+        "submitted": null,
+        "runtimePresented": null,
+        "runtimeSkipped": null,
+        "renderedFps": null,
+        "runtimePresentedFps": null,
+        "attempts": null,
+        "submissionDeficit": null,
+        "callbackBoundaryResidual": 0,
+        "runtimeNativeAlignment": null,
+        "callbackIntervalsMs": {
+          "count": 3461,
+          "p50": 16.700000002980232,
+          "p95": 18.700000002980232,
+          "mean": 17.334094192429074,
+          "max": 50.19999998807907
+        },
+        "latencyMs": {
+          "count": 3462,
+          "p50": 0.19999999999708962,
+          "p95": 3.4999999970204954,
+          "mean": 0.9676487608530225,
+          "max": 16.800000002978777
+        },
+        "rafIntervalsMs": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "mean": null,
+          "max": null
+        },
+        "first120": null,
+        "last120": null,
+        "importedFrames": null,
+        "uniquePhysicalLostFrames": null,
+        "counterOverlap": null,
+        "scopes": {
+          "nativeCombinedPercent": "Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.",
+          "historicalRuntimeCombinedPercent": "Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.",
+          "runtimeSessionCombinedPercent": "Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.",
+          "attempts": "Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured."
+        }
+      },
+      "mediaPositionsSeconds": [
+        1.037714,
+        0.680783
+      ],
+      "mediaEvents": {
+        "seeking": 15,
+        "waiting": 15,
+        "seeked": 15,
+        "playing": 15
+      },
+      "longTasks": null,
+      "integrity": {
+        "invalid": null,
+        "overflow": false,
+        "errors": []
+      },
+      "domPreserved": true,
+      "lifecycleChecks": {
+        "applicable": false,
+        "pass": null
+      }
+    }
+  ],
+  "comparison": {
+    "blocks": [
+      {
+        "block": 1,
+        "leanMinusNoneQualityTotalFps": 0.020359590717944798,
+        "richMinusNoneQualityTotalFps": 0.020259735437761606,
+        "leanMinusNoneQualityDropPercentagePoints": 0.05562508368529531,
+        "richMinusNoneQualityDropPercentagePoints": 0.0278086720024024,
+        "richMinusLeanCallbackFps": -0.40008518912923563,
+        "richMinusLeanCombinedPercentagePoints": 0.6397774687065367
+      },
+      {
+        "block": 2,
+        "leanMinusNoneQualityTotalFps": 0.018263082670252118,
+        "richMinusNoneQualityTotalFps": 0.016566037624009766,
+        "leanMinusNoneQualityDropPercentagePoints": -0.027831895352073477,
+        "richMinusNoneQualityDropPercentagePoints": -0.027831895352073477,
+        "richMinusLeanCallbackFps": 1.781615121205597,
+        "richMinusLeanCombinedPercentagePoints": -2.9771841958820255
+      },
+      {
+        "block": 3,
+        "leanMinusNoneQualityTotalFps": 0.001097767793005744,
+        "richMinusNoneQualityTotalFps": 0.0014969660689274633,
+        "leanMinusNoneQualityDropPercentagePoints": 0.027831895352073477,
+        "richMinusNoneQualityDropPercentagePoints": 0.027831895352073477,
+        "richMinusLeanCallbackFps": -0.7495953569399489,
+        "richMinusLeanCombinedPercentagePoints": 1.2524352908433065
+      }
+    ],
+    "observerCompatible": null,
+    "callbackDistortionBound": null,
+    "readinessNormalizationJustified": false,
+    "scope": "Descriptive paired blocks, not equivalence. Boundary quality measures exist in all three modes; no-observer callback loss is unobservable. Neither stable quality totals nor rich-minus-lean differences bound total callback distortion versus uninstrumented playback."
+  }
+}

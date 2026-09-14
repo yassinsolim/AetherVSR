@@ -149,6 +149,7 @@ export function summarizeNative(raw) {
   const submitted = counterDelta(session(runtime?.opening)?.framesRendered, session(runtime?.closing)?.framesRendered);
   const runtimePresented = counterDelta(session(runtime?.opening)?.framesPresented, session(runtime?.closing)?.framesPresented);
   const runtimeSkipped = counterDelta(session(runtime?.opening)?.framesSkipped, session(runtime?.closing)?.framesSkipped);
+  const runtimeDecoderDrops = counterDelta(session(runtime?.opening)?.decoderDrops, session(runtime?.closing)?.decoderDrops);
   const attempts = counterDelta(runtime?.opening?.attempts, runtime?.closing?.attempts);
   const rate = count => count !== null && durationMs > 0 ? count * 1000 / durationMs : null;
   const window = (start, end) => {
@@ -159,11 +160,13 @@ export function summarizeNative(raw) {
       nativeCallbackFps: rows.length * 1000 / milliseconds, nativePresentedFps: rows.reduce((sum, row) => sum + row[6], 0) * 1000 / milliseconds,
       submitted: frames?.length ?? null, renderedFps: frames ? frames.length * 1000 / milliseconds : null,
       runtimePresentedFps: frames ? frames.reduce((sum, row) => sum + row[1], 0) * 1000 / milliseconds : null,
-      scope: 'Half-open callback-entry selected rows; first delta may include interval preceding slice. Not physical display count.' };
+      scope: 'Half-open native rVFC-entry rows and runtime post-submit hook-entry rows, respectively. The first presented delta may include an interval preceding the slice; row counts do not. Not physical display count.' };
   };
   return { durationMs, callbacks, presented, gaps, qualityTotal, qualityDrops,
     nativeCombinedPercent: gaps !== null && qualityDrops !== null ? ratio(gaps + qualityDrops, presented) : null,
     historicalRuntimeCombinedPercent: runtimeSkipped !== null && qualityDrops !== null ? ratio(runtimeSkipped + qualityDrops, runtimePresented) : null,
+    runtimeSessionCombinedPercent: runtimeSkipped !== null && runtimeDecoderDrops !== null ? ratio(runtimeSkipped + runtimeDecoderDrops, runtimePresented) : null,
+    runtimeDecoderDrops,
     qualityDropPercent: ratio(qualityDrops, qualityTotal), callbackGapPercent: ratio(gaps, presented),
     nativeCallbackFps: rate(callbacks), nativePresentedFps: rate(presented), qualityTotalFps: rate(qualityTotal),
     submitted, runtimePresented, runtimeSkipped, renderedFps: rate(submitted), runtimePresentedFps: rate(runtimePresented),
@@ -174,7 +177,13 @@ export function summarizeNative(raw) {
     latencyMs: distribution(data.rows.map(row => row[0] - row[3])), rafIntervalsMs: distribution(data.raf?.map(row => row[2]) ?? []),
     first120: data.mode !== 'none' && durationMs >= 240000 ? window(data.opening.at, data.opening.at + 120000) : null,
     last120: data.mode !== 'none' && durationMs >= 240000 ? window(data.closing.at - 120000, data.closing.at) : null,
-    uniquePhysicalLostFrames: null, counterOverlap: null };
+    importedFrames: null, uniquePhysicalLostFrames: null, counterOverlap: null,
+    scopes: {
+      nativeCombinedPercent: 'Native callback gaps plus boundary-read quality drops, divided by metadata presented delta. Potentially overlapping observations, not unique lost frames.',
+      historicalRuntimeCombinedPercent: 'Historical M10/M10.5 capture formula: RuntimeSession skipped delta plus common boundary-read quality drops, divided by RuntimeSession presented delta.',
+      runtimeSessionCombinedPercent: 'Exact RuntimeSession accumulation: skipped delta plus decoderDrops delta, divided by presented delta. Quality is sampled on accepted post-submit frames; snapshot() does not refresh quality.',
+      attempts: 'Actual pipeline tick entries. Successful whole-window submissions use RuntimeSession frame deltas; interval slices use post-submit hook rows. Imports and physical presentation are not independently measured.',
+    } };
 }
 
 export function validateNative(raw, expectedMs) {
@@ -212,6 +221,28 @@ export function pairedBounds(values, critical = 2.3533634348) {
     scope: 't bounds over four sessions/block contrasts, not frames. Normality/independence assumptions; one-sided95 equals two-sided90 endpoints.' };
 }
 
+export function observerComparison(results) {
+  assert.equal(results.length,9,'Three frozen observer blocks required');
+  const order=['none','lean','rich','lean','rich','none','rich','none','lean'];
+  assert.deepEqual(results.map(result=>result.case.mode),order);
+  assert(results.every(result=>result.case.phase==='observer'&&result.case.arm==='A'&&result.completion==='CAPTURED'));
+  const blocks=[];
+  for(let index=0;index<3;index++){
+    const group=Object.fromEntries(results.slice(index*3,index*3+3).map(result=>[result.case.mode,result.summary]));
+    for(const value of Object.values(group))assert(Number.isFinite(value.qualityTotalFps)&&Number.isFinite(value.qualityDropPercent));
+    assert.equal(group.none.nativeCallbackFps,null);assert.equal(group.none.nativeCombinedPercent,null);
+    blocks.push({block:index+1,
+      leanMinusNoneQualityTotalFps:group.lean.qualityTotalFps-group.none.qualityTotalFps,
+      richMinusNoneQualityTotalFps:group.rich.qualityTotalFps-group.none.qualityTotalFps,
+      leanMinusNoneQualityDropPercentagePoints:group.lean.qualityDropPercent-group.none.qualityDropPercent,
+      richMinusNoneQualityDropPercentagePoints:group.rich.qualityDropPercent-group.none.qualityDropPercent,
+      richMinusLeanCallbackFps:group.rich.nativeCallbackFps-group.lean.nativeCallbackFps,
+      richMinusLeanCombinedPercentagePoints:group.rich.nativeCombinedPercent-group.lean.nativeCombinedPercent});
+  }
+  return {blocks,observerCompatible:null,callbackDistortionBound:null,readinessNormalizationJustified:false,
+    scope:'Descriptive paired blocks, not equivalence. Boundary quality measures exist in all three modes; no-observer callback loss is unobservable. Neither stable quality totals nor rich-minus-lean differences bound total callback distortion versus uninstrumented playback.'};
+}
+
 export function floorDecision(blocks, observerCompatible) {
   assert(blocks.length === 4);
   const missing = blocks.flatMap((block, index) => ['A', 'B', 'C', 'D'].flatMap(arm =>
@@ -230,8 +261,9 @@ export function floorDecision(blocks, observerCompatible) {
   const harm = ['C', 'D'].some(arm => contrasts[arm].combined.lower95 > 0.5 || contrasts[arm].cadence.lower95 > 0.5);
   const equivalent = Object.values(contrasts).every(value => value.combined.upper95 <= 0.5 && value.cadence.upper95 <= 0.5);
   const safety = blocks.every(block => ['C', 'D'].every(arm => block[arm].safety === true));
-  return { case: low ? 'CASE A' : high && harm ? 'CASE B' : high && equivalent && safety && observerCompatible === true ? 'CASE C' : 'CASE D',
-    native, contrasts, high, low, harm, equivalent, safety, observerCompatible,
-    readinessADRPermitted: high && equivalent && safety && observerCompatible === true && !harm,
+  const controls = blocks.every(block=>block.B.safety===true);
+  return { case: low ? 'CASE A' : high && harm ? 'CASE B' : high && equivalent && safety && controls && observerCompatible === true ? 'CASE C' : 'CASE D',
+    native, contrasts, high, low, harm, equivalent, safety, controls, observerCompatible,
+    readinessADRPermitted: high && equivalent && safety && controls && observerCompatible === true && !harm,
     scope: 'Observable-counter degradation decision, not unique physical loss or automatic READY. Missing observer justification cannot authorize normalization.' };
 }
