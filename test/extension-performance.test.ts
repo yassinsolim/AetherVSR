@@ -9,6 +9,7 @@ function check(source: string): void {
       installVideoObserver, installRuntimeRecorder, summarizeCapture, validateCapture, windowSummary } from './tools/m10-performance.mjs';
     import { deliverySummary, validateScheduling, installScheduling, installOwnedCost } from './tools/m105-accounting.mjs';
     import { parsePlan, ARMS } from './tools/m105-compare.mjs';
+    import { summarizeTrace } from './tools/m105-trace.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -91,6 +92,19 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('summarizes nested Chrome trace slices without treating drop batches as unique frame identities', () => check(`
+    const name='VideoFrameCallbackRequesterImpl::ExecuteVideoFrameCallbacks';
+    const rows=summarizeTrace({traceEvents:[
+      {name,ph:'B',pid:1,tid:2,ts:1000},{name:'nested',ph:'B',pid:1,tid:2,ts:1100},
+      {ph:'E',pid:1,tid:2,ts:1200},{ph:'E',pid:1,tid:2,ts:2000},
+      {name,ph:'X',pid:1,tid:2,ts:17000,dur:500},
+      {name:'VideoFramesDropped',ph:'I',pid:1,tid:3,ts:18000,args:{count:4,id:7}}
+    ]});
+    assert.equal(rows[0].events,2);assert.equal(rows[0].durationMs.p50,.75);assert.equal(rows[0].intervalsMs.p50,16);
+    assert.equal(rows[1].dropBatchCount,4);assert.deepEqual(rows[1].playerIds,[7]);assert.equal(rows[1].durationMs.p50,null);
+    assert.throws(()=>summarizeTrace({traceEvents:[{name:'VideoFramesDropped',ph:'I',pid:1,tid:1,ts:1,args:{}}]}));
+  `));
+
   it('validates controlled arms without accepting hidden fields or weakening historical case rules', () => check(`
     const plan = parsePlan(ARMS.map((arm,index)=>({id:'case'+index,arm,durationMs:30000})));
     assert.equal(plan[4].noRuntime,true); assert.equal(plan[7].kind,'extension-baseline');

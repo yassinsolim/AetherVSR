@@ -86,7 +86,7 @@ function frozenBuild(root) {
   return { directory, provenance, manifest, apparatusCommit: git(ROOT, 'rev-parse', 'HEAD') };
 }
 
-export async function runComparison(casesPath, prefix) {
+export async function runComparison(casesPath, prefix, trace = false) {
   let m9, m10;
   try {
     m9 = await revisionServer('m9', 5186); m10 = await revisionServer('m10', 5187);
@@ -95,7 +95,7 @@ export async function runComparison(casesPath, prefix) {
       parseCases: parsePlan, verifyBuild: () => frozenBuild(m10.root), accounting: item => item.diagnostics !== 'legacy',
       viewport: item => ({ width: 1200, height: item.diagnostics === 'legacy' ? 820 : 760 }),
       rawByteLimit: 12 * 1024 * 1024,
-      sources: ['tools/m105-accounting.mjs', 'tools/m105-compare.mjs', 'tools/m105-fixture.html'],
+      sources: ['tools/m105-accounting.mjs', 'tools/m105-compare.mjs', 'tools/m105-fixture.html', ...(trace ? ['tools/m105-trace.mjs'] : [])],
       description: { milestone: 'M10.5', acceptance: 'Exploratory attribution/replication, not final acceptance',
         sourceRoots: { m9: m9.root, m10: m10.root }, pins,
         comparison: 'Original M9/M10 root harness UI retained. All other arms use byte-identical matched HTML, 640x360 at (40,120), white background, no controls; 2560x1440 runtime output. Standard scheduling/metadata observer common; owned callback instrumentation only in separately labelled diagnostic arms.',
@@ -111,6 +111,13 @@ export async function runComparison(casesPath, prefix) {
           : `${m10.origin}/m105?consumer=${item.arm === 'matched-harness' ? 'harness' : 'none'}`,
       preparePage: async (page, native, item) => {
         const placement = await nativeWindow(page, native.context);
+        if (trace) {
+          assert(item.durationMs >= 20000 && item.diagnostics === 'standard', 'Trace needs a separate >=20s standard diagnostic window');
+          const { prepareTrace } = await import('./m105-trace.mjs');
+          native.m105Trace = await prepareTrace(native, page, `${prefix}.${item.id}.chrome.json.gz`);
+          const close = native.close.bind(native);
+          native.close = async () => { try { await native.m105Trace.close(); } finally { await close(); } };
+        }
         placement.failedRequests = [];
         page.on('response', response => { if (response.status() >= 400 && placement.failedRequests.length < 20) placement.failedRequests.push({ url: response.url(), status: response.status() }); });
         if (item.diagnostics === 'legacy') {
@@ -161,7 +168,8 @@ export async function runComparison(casesPath, prefix) {
           closingNative = { bounds: window.bounds, screen: await page.evaluate(() => ({ width: screen.width, height: screen.height, dpr: devicePixelRatio, x: screenX, y: screenY })) };
         } finally { await cdp.detach(); native.m105Emulation = null; }
         const manager = item.noRuntime ? await native.isolated(page, () => globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)].status()) : null;
-        return { scheduling, owned, closingScreen, closingNative, manager, workerEvents: native.m105WorkerEvents, sourceCommit: item.arm === 'm9-harness' ? REVISIONS.m9 : REVISIONS.m10,
+        const chromeTrace = native.m105Trace ? await bounded(native.m105Trace.done, 15000, 'Trace drain') : null;
+        return { scheduling, owned, closingScreen, closingNative, manager, chromeTrace, workerEvents: native.m105WorkerEvents, sourceCommit: item.arm === 'm9-harness' ? REVISIONS.m9 : REVISIONS.m10,
           bundleSha256: item.kind.startsWith('extension-') || item.kind === 'installed-idle' ? frozenBuild(m10.root).provenance.bundleSha256 : null };
       },
       validate: (raw, item, result) => {
@@ -170,6 +178,7 @@ export async function runComparison(casesPath, prefix) {
         assert.deepEqual(raw.closingNative.bounds, result.preparation.bounds.bounds, 'Native window bounds changed');
         if (!['lean', 'legacy'].includes(item.diagnostics)) validateScheduling(raw.scheduling);
         if (item.noRuntime) assert.equal(raw.manager.code, 'webgpu-unavailable');
+        if (trace) assert.equal(raw.chromeTrace.verdict, 'VALID');
       },
       summarize: raw => ({ ...deliverySummary(raw), rafIntervalsMs: distribution(raw.scheduling?.raf.map(row => row[2]) ?? []),
         longTasks: raw.scheduling?.tasks ?? null, mediaEvents: raw.scheduling?.events ?? null, owned: raw.owned,
@@ -179,6 +188,6 @@ export async function runComparison(casesPath, prefix) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  assert(process.argv.length === 4 && existsSync(process.argv[2]), 'Usage: node tools/m105-compare.mjs CASES.json .cache/m105/PREFIX');
-  await runComparison(resolve(process.argv[2]), resolve(process.argv[3]));
+  assert((process.argv.length === 4 || process.argv.length === 5 && process.argv[4] === '--trace') && existsSync(process.argv[2]), 'Usage: node tools/m105-compare.mjs CASES.json .cache/m105/PREFIX [--trace]');
+  await runComparison(resolve(process.argv[2]), resolve(process.argv[3]), process.argv[4] === '--trace');
 }
