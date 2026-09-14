@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "phase": "METADATA_ONLY",
+  "completion": "PINNED",
+  "observedAt": "2026-09-14T22:21:18.943Z",
+  "apparatusCommit": "823e095c79c484a54ecc6320449f4f1839f8ab50",
+  "browser": "Chrome/153.0.8010.12",
+  "browserExecutableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+  "productionPayloadSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+  "identity": {
+    "origin": "https://videojs.org",
+    "urlSha256": "ccc48f1ddfca28af83848f98a648d20a5e26d9f458876de37ef9997b67643d5d",
+    "duration": 35.95354,
+    "width": 960,
+    "height": 540
+  },
+  "historicalDurationSeconds": 35.963044,
+  "preregisteredDurationToleranceSeconds": 0.01,
+  "prescribedSeekSeconds": 34.963044,
+  "raw": {
+    "path": ".cache/m106/videojs-identity-01.json",
+    "sha256": "7567d45759c9a4880e6ad2f9499b064585acdce83a0b8a45d3307e8bb29e99e1"
+  },
+  "outcome": "not measured",
+  "scope": "Metadata-only pin before public journey outcomes. No Play command, loss measurement, public frame, or full media URL retained. Observed duration is within the already committed tolerance; seek target unchanged. URL digest plus metadata identifies this study's reference, not a content-byte hash or proof of historical asset identity."
+}
