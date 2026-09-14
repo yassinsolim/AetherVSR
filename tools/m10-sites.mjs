@@ -41,12 +41,15 @@ function safeEvidence(value) {
   return value;
 }
 
-function siteSnapshot(extensionId) {
+export function siteSnapshot(extensionId) {
   const rect = element => { const bounds = element.getBoundingClientRect(); return { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }; };
   const properties = ['display', 'visibility', 'opacity', 'position', 'z-index', 'object-fit', 'object-position',
     'overflow-x', 'overflow-y', 'transform', 'filter', 'backdrop-filter', 'perspective', 'contain', 'will-change',
     'clip-path', 'mask-image', 'border-radius', 'border-width', 'padding', 'mix-blend-mode', 'isolation', 'pointer-events',
-    'content-visibility', 'container-type', 'overflow-clip-margin'];
+    'content-visibility', 'container-type', 'overflow-clip-margin', 'translate', 'rotate', 'scale', 'clip',
+    '-webkit-mask-image', 'zoom', 'border-top-left-radius', 'border-top-right-radius',
+    'border-bottom-right-radius', 'border-bottom-left-radius', 'border-top-width', 'border-right-width',
+    'border-bottom-width', 'border-left-width', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left'];
   const style = element => { const computed = getComputedStyle(element); return Object.fromEntries(properties.map(key => [key, computed.getPropertyValue(key)])); };
   const source = video => {
     try { const url = new URL(video.currentSrc); return { present: true, scheme: url.protocol, origin: url.origin === 'null' ? null : url.origin }; }
@@ -54,7 +57,13 @@ function siteSnapshot(extensionId) {
   };
   const videos = [...document.querySelectorAll('video')].map((video, index) => {
     const ancestors = []; let ancestor = video.parentElement;
-    while (ancestor && ancestors.length < 32) { ancestors.push({ tag: ancestor.tagName, rect: rect(ancestor), style: style(ancestor) }); ancestor = ancestor.parentElement; }
+    while (ancestor && ancestors.length < 32) {
+      ancestors.push({ tag: ancestor.tagName, id: ancestor.id, classes: typeof ancestor.className === 'string' ? ancestor.className : null,
+        assignedSlot: ancestor.assignedSlot?.tagName ?? null, offsetParent: ancestor.offsetParent?.tagName ?? null,
+        clientLeft: ancestor.clientLeft, clientTop: ancestor.clientTop, clientWidth: ancestor.clientWidth, clientHeight: ancestor.clientHeight,
+        offsetWidth: ancestor.offsetWidth, offsetHeight: ancestor.offsetHeight, rect: rect(ancestor), style: style(ancestor) });
+      ancestor = ancestor.parentElement;
+    }
     const quality = video.getVideoPlaybackQuality?.();
     return { index, rect: rect(video), style: style(video), ancestors, ancestorsTruncated: !!ancestor,
       source: source(video), controls: video.controls, crossOrigin: video.crossOrigin, mediaKeys: !!video.mediaKeys,
