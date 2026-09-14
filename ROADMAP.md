@@ -416,10 +416,34 @@ M10 acceptance.
 
 ---
 
-## Milestone 11 — Cross-vendor validation
+## Milestone 10.5 - Extension stabilization and delivery-loss attribution [PARTIAL]
 
-Recommended only after M10's absolute-loss and whole-extension-reload gaps are
-closed; no M11 implementation is included. Then verify on NVIDIA, AMD and Intel
+Counter semantics audited against Chromium and native probes; unique overlap is
+not measurable, so the historical combined-loss gate remains binding. Fresh M9/M10
+worktrees, four balanced repetitions per primary arm, instrumentation comparisons,
+four initial long replications and bounded browser traces did not justify any
+model/controller change. No thermal/GC/GPU-saturation attribution is supported.
+
+Generic rounded clipping and size-query container support now have native corner,
+placement, control and cleanup evidence. Chrome extensions-page Reload supports
+observed same-document reactivation; runtime-API reload remains unverified. Final
+production45/45, diagnostic49/49 and output parity6/6 pass.
+
+Both final preregistered 600-second trials failed <=1% combined loss:
+**3.477970% / 2.897662%**, despite passing average and final-120s >=58-fps gates.
+Shaka passed; Plyr retains control-stack rejection; Video.js had earlier success
+but two final source stalls after seeking. **EXTENSION MVP PARTIAL** remains the
+verdict. See [docs/M10.5-REPORT.md](docs/M10.5-REPORT.md). Owner explicitly approved
+a 50 MiB tracked-tree cap for source/tests/docs and compact evidence; raw traces
+stay local and the 8 MiB per-file restriction remains.
+
+---
+
+## Milestone 11 - Cross-vendor validation [GATED]
+
+Not the default next step while M10.5 delivery/public-media robustness remains
+unresolved and has not been proved vendor-specific. No M11 implementation is
+included. After READY or a justified vendor-specific research gate, verify on NVIDIA, AMD and Intel
 GPUs across Windows and Linux. Everything measured so far is one Apple Silicon
 machine; nothing here should be assumed to transfer.
 

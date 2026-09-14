@@ -8,15 +8,22 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine â
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: M10 EXTENSION MVP PARTIAL, not complete or READY.** The MV3 extension
-has 40 passing native production journeys and 44 passing diagnostic journeys.
-The public Shaka clear-content player passed 180.026923 seconds of integration
-including seek, pause, resize and container fullscreen; scroll down/back was
-N/A because the page had no scroll extent. Plyr and Video.js were negative on
-geometry, leaving one successful public player and a PARTIAL ceiling. Whole
-extension reload is **UNVERIFIED** after a native action timeout.
+**Status: M10.5 EXTENSION MVP PARTIAL.** Both preregistered ten-minute M5
+trials failed the unchanged 1% delivery-loss gate: **3.48% and 2.90%**, at
+58.74 and 58.91 rendered fps. Both final 120-second rate gates passed. The
+counter audit found possible overlap, not a measurable unique-loss correction;
+the original metric and controller thresholds remain unchanged.
 
-The M10 ten-minute run retained neural at 58.3515888645 rendered fps and
+The current MV3 candidate passes 45 production and 49 diagnostic native journeys,
+including 20 cleanup cycles and same-document reactivation after Chrome's
+extensions-page Reload control. Six output-parity cases match exactly. Generic
+coincident rounded clips and verified size-query containers are supported.
+Shaka passed repeatedly; Plyr retains a dynamic control-stack rejection. Video.js
+passed an earlier candidate but stalled near the source's end in both final
+sessions. Runtime-API reload automation remains unverified. Full evidence, limits
+and reproduction details are in [docs/M10.5-REPORT.md](docs/M10.5-REPORT.md).
+
+**M10 history remains PARTIAL.** Its ten-minute run retained neural at 58.3515888645 rendered fps and
 59.811586918 presented fps, but **4.8011814863% combined callback/decoder loss
 failed the absolute 1% gate**. Passing relative GPU overhead does not waive
 that failure. See the separate M10 environment, results and measurement scopes
@@ -24,7 +31,7 @@ in [BENCHMARKS.md](BENCHMARKS.md) and the full
 [M10 report](docs/M10-REPORT.md).
 
 **M9 history: complete; runtime controller replaced, weights retained.** The
-production 6,291-parameter C16D2 weights remain unchanged in M10. Auto performance selects
+production 6,291-parameter C16D2 weights remain unchanged through M10.5. Auto performance selects
 neural or Catmull-Rom from runtime evidence, with hysteresis and real neural
 recovery probes; Baseline mode never probes. This does not predict scene quality.
 
@@ -175,8 +182,8 @@ playback, audio, source, seeking and controls: no page-owned node, style or medi
 attribute is modified, replaced or reparented; only extension-owned DOM is added
 and removed.
 
-The measured production payload is **263,008 bytes**. Its SHA256 is
-`724507ec7d3e7a8c9a4ce7bf0fc772f2d2de9f56c1218693db52d6cba195258a`.
+The measured M10.5 production payload is **265,958 bytes**. Its SHA256 is
+`a796a9ec1b0a1f050f992d3d712bf1164799eeb073ca23d5035a61199ee228c3`.
 The unchanged 6,291-parameter C16D2 model SHA256 is
 `d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
 This is a load-unpacked MVP, not store publication or broad player compatibility.

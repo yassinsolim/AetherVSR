@@ -15,10 +15,20 @@ video path.
 
 The standalone harness and M10 MV3 extension reuse `RuntimeDriver`,
 `RuntimeController` and `VideoPipeline`, including the same production upscalers.
-M10's verdict is **EXTENSION MVP PARTIAL**, not complete or READY: integration
-works within a bounded scope, but the absolute loss gate failed and whole
-extension reload remains unverified. See the M10 section of
-[BENCHMARKS.md](BENCHMARKS.md); M9 measurements remain separate historical evidence.
+M10 and M10.5 both closed **EXTENSION MVP PARTIAL**: integration works within a
+bounded scope, but registered delivery loss still fails. M10.5 verified Chrome
+extensions-page reload with same-document explicit reactivation; runtime-API
+reload automation remains unverified. See [docs/M10.5-REPORT.md](docs/M10.5-REPORT.md)
+and the separate historical measurements in [BENCHMARKS.md](BENCHMARKS.md).
+
+M10.5 changes only extension geometry/validation, not shared inference or
+controller policy. Coincident circular pixel ancestor clips use a rounded
+clip-path intersected with rectangular clipping; size-query containers require
+actual canvas-coordinate verification before output. Unresolved containing blocks,
+zoom, effects, conflicting clips and passive-caption ordering fail closed. Fullscreen
+uses its actual top-layer clipping boundary. These checks run during geometry
+reconciliation, not per-frame layout/pixel readbacks. Diagnostic frame accounting,
+callback timing and Chrome traces are unshipped tools, never policy inputs.
 
 **What Milestone 3 settled about the neural stage, and Milestone 4 built.** Its
 kernels are hand-written WGSL rather than a third-party runtime, and they took

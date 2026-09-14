@@ -2672,6 +2672,98 @@ M11 cross-vendor validation is recommended only after the absolute-loss and
 whole-extension-reload gaps are closed; no M11 implementation or cross-vendor
 performance claim is included.
 
+## Milestone 10.5: repeated delivery acceptance
+
+**EXTENSION MVP PARTIAL. Both final delivery-loss gates failed.** M10's earlier
+PARTIAL verdict and registered 4.801181% result above are not retroactively
+changed. [Counter audit](docs/M10.5-COUNTERS.md) proves possible overlap, not its
+amount; the historical sum remains binding. Do not relabel it unique physical
+display loss, or label playback-quality drops decoder-only.
+
+### Final environment and scope
+
+Apple M5 Mac17,2 MacBook Pro, 24 GB; macOS 26.6.2; Chrome for Testing
+153.0.8010.12. AC power, native 1200x760 content, DPR2, window at desktop(40,40)
+fully on built-in 1512x982 logical display. Physical refresh, temperature, energy,
+GC and GPU residency are **not measured**. This is not pooled with the earlier
+emulated1200x820/DPR1 legacy replications or M9's Dawn-override timings.
+
+Same CFR H.2641280x720,60/1fps source
+`8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a`, fixed C16D2
+model `d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`, external
+import, 2560x1440 output. Production payload265958 bytes,
+`a796a9ec1b0a1f050f992d3d712bf1164799eeb073ca23d5035a61199ee228c3`, measurement
+source `51ca58c46e7a1a43096af1e43a53d5c4aa30ae2f`.
+
+[Preregistration](docs/M10.5-PREREGISTRATION.md) at `cd4ab5b` requires two
+independent passes. Each final trial has five seconds of stable warmup, then
+at least600 seconds wall/active time. FPS divides successful submission/presented
+counter deltas by the wall observation interval; active time is separately gated.
+No final retries or omitted valid trials.
+
+| Final metric | final-1 | final-2 |
+|---|---:|---:|
+| Wall / active ms | 600001.5 / 600004.8 | 600001.4 / 600002.5 |
+| Submitted / presented frames | 35242 / 35883 | 35346 / 35891 |
+| Rendered / presented fps | 58.736520 / 59.804850 | 58.909863 / 59.818194 |
+| Callback skips / quality drops | 641 / 607 | 545 / 495 |
+| Registered combined loss | **3.477970% FAIL** | **2.897662% FAIL** |
+| Quality-drop / callback-gap % | 1.688785 / 1.786361 | 1.377142 / 1.518487 |
+| Whole-upscale GPU samples | 35092 | 35197 |
+| GPU p50 / p95 ms | 5.963776 / 6.815744 | 5.898240 / 6.619136 |
+| GPU max ms | 8.781824 | 8.847360 |
+| Core CPU p50 / p95 ms | 0.2 / 0.3 | 0.2 / 0.3 |
+| Driver callback p50 / p95 ms | 0.1 / 0.2 | 0.1 / 0.2 |
+| Discovery + geometry ms/s | 0.320666 | 0.310333 |
+| Submission deficit / tier / owner changes / errors | 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 |
+
+Combined loss is `100*(skips+qualityDrops)/runtimePresented`. Quality-drop rate
+uses quality-total instead; do not add the component percentages. Available GPU
+samples select submitted-in-window timestamps and include cold samples. The GPU
+bracket excludes decode/import, pre-span queue wait, CPU submission and browser
+composition/presentation. Missing samples are not zero-time frames; readbacks
+drain after closing, outside rate denominators. Core CPU brackets import/encode/
+submit; shared-driver CPU includes the nested attachment callback. Discovery and
+geometry omit other adapter/browser work. None is total renderer CPU. Final
+instrumentation includes frame metadata/attempts but no extra rAF/long-task/owned
+timing/Chrome trace; neutrality is not assumed.
+
+| Slice | Rendered fps | Presented fps | GPU samples | GPU p50 / p95 ms |
+|---|---:|---:|---:|---:|
+| final-1 first120s | 58.658333 | 59.833333 | 7009 | 6.160384 / 7.143424 |
+| final-1 last120s | 58.058333 | 59.800000 | 6937 | 5.963776 / 6.422528 |
+| final-2 first120s | 59.141667 | 59.800000 | 7067 | 5.898240 / 6.619136 |
+| final-2 last120s | 58.691667 | 59.833333 | 7013 | 5.963776 / 6.815744 |
+
+Both late-window gates pass. Quality slice endpoints use outward native samples
+with recorded coverage, not interpolated counts. Late-rate decline remains
+visible; it does not imply thermal throttling.
+
+### Attribution and other gates
+
+Before behavior changes, both additional legacy extension600s replications failed
+loss at5.516550% and3.335005%; both paired harness replicas also failed at3.891516%
+and3.062757%. Thirty-two balanced short trials plus twelve instrumentation trials
+showed wide run variation, callback deficits with no GPU, zero runtime submission
+deficits and no consistent baseline benefit. The four observed extension-minus-
+matched-harness FPS differences favored extension, but their mechanism is unknown.
+No controller/model change is justified. Bounded traces correlate compositor
+updates and callback batches, not exact unique-frame loss or GPU execution.
+
+Final native production45/45, diagnostic49/49 and within-route paused output
+parity6/6 pass. UI package reload passes; runtime-API reload automation remains
+unverified. Final public evidence: Shaka PASS, Plyr control-stack NEGATIVE,
+Video.js two source stalls after seek despite earlier candidate success. These
+are not calibrated public performance/quality measurements.
+
+Full environment, every run, provenance, failed attempts, reviewers and scoped
+claims: [docs/M10.5-REPORT.md](docs/M10.5-REPORT.md),
+[results/m105-final.json](results/m105-final.json),
+[results/m105-comparison.json](results/m105-comparison.json),
+[results/m105-verification.json](results/m105-verification.json).
+Raw long/Chrome traces stay local under the owner-approved50MiB policy; compact
+hashes/recipes are committed. A hash reference is not a redistributed raw trace.
+
 ## Reproducing
 
 ```bash
