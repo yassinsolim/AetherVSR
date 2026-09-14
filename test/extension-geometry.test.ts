@@ -160,6 +160,20 @@ describe('inspectGeometry', () => {
     setup.view.getComputedStyle.mockImplementation(element => element === setup.video ? setup.videoStyle : element === caption ? captionStyle : setup.parentStyle);
     expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
     captionStyle.zIndex = '3'; expect(setup.inspect()).toMatchObject({ ok: true });
+    captionStyle.zIndex = 'auto'; setup.parentStyle.zIndex = '1';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+  });
+
+  it.each(['hidden', 'clip'])('rejects unresolved fixed containment before an outer rectangular %s clip', overflow => {
+    const setup = fixture();
+    const outer = { ...setup.parent, parentElement: null, parentNode: setup.document,
+      clientWidth: 200, offsetWidth: 200, getBoundingClientRect: () => ({left:10,top:20,width:200,height:180}) };
+    const outerStyle = { ...setup.parentStyle, overflowX: overflow, overflowY: overflow };
+    Object.assign(setup.parent, { parentElement: outer, parentNode: outer });
+    Object.assign(setup.parentStyle, { position: 'fixed', overflowX: 'hidden', overflowY: 'hidden',
+      borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' });
+    setup.view.getComputedStyle.mockImplementation(element => element === setup.video ? setup.videoStyle : element === outer ? outerStyle : setup.parentStyle);
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
   });
 
   it('rejects inherited ancestor zoom even when rounded clip rectangles coincide', () => {

@@ -282,6 +282,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   if (borderRadius === null) return reject('unsupported-geometry', 'Only uniform pixel or percentage corner radii are supported.');
   let verifyPlacement = false;
   let unresolvedZoom = false;
+  let unresolvedOverflow = false;
   let ancestorRadius: string | null = null;
   let containingBlockOutside = computed.position === 'fixed' ? 'fixed' : computed.position === 'absolute' ? 'absolute' : null;
   let clip = intersect(rect, { left: 0, top: 0,
@@ -308,6 +309,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
       if (containingBlockOutside !== 'fixed' && (style.position === 'absolute' || style.position === 'fixed')) containingBlockOutside = style.position;
       continue;
     }
+    if (containingBlockOutside !== null) unresolvedOverflow = true;
     if (nonDefault(style.overflowClipMargin, '0px') && (style.overflowX === 'clip' || style.overflowY === 'clip')) {
       return reject('unsupported-geometry', 'Only rectangular ancestor overflow clipping is supported.');
     }
@@ -346,12 +348,20 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   }
   if (clip.width <= 0 || clip.height <= 0) return reject('offscreen', 'Video is outside the viewport or ancestor clip.');
   if (verifyPlacement && unresolvedZoom) return reject('unsupported-geometry', 'New clipping/container cases require an unzoomed ancestor chain.');
+  if (verifyPlacement && unresolvedOverflow) return reject('unsupported-geometry', 'Overflow outside the containing-block chain is not supported for new clipping/container cases.');
   if (paintOrderRisk(video, computed, view)) {
     return reject('unsupported-controls', 'Preceding sibling paint order cannot be preserved.');
   }
   if (verifyPlacement) {
     for (let ancestor = composedParent(video); ancestor; ancestor = composedParent(ancestor)) {
       const style = view.getComputedStyle(ancestor);
+      if (style.position === 'static' && style.zIndex !== 'auto') {
+        const parent = composedParent(ancestor);
+        if (!parent || !/^(?:inline-)?(?:flex|grid)$/.test(view.getComputedStyle(parent).display)) {
+          return reject('unsupported-controls', 'An inactive ancestor z-index cannot prove caption paint order.');
+        }
+        break;
+      }
       if (style.isolation === 'isolate' || Number(style.opacity) < 1
         || (style.position !== 'static' && style.zIndex !== 'auto')) break;
       if (paintOrderRisk(ancestor, style, view)) {
