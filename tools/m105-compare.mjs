@@ -114,7 +114,8 @@ export async function runComparison(casesPath, prefix) {
         placement.failedRequests = [];
         page.on('response', response => { if (response.status() >= 400 && placement.failedRequests.length < 20) placement.failedRequests.push({ url: response.url(), status: response.status() }); });
         if (item.diagnostics === 'legacy') {
-          await page.setViewportSize({ width: 1200, height: 820 });
+          native.m105Emulation = await native.context.newCDPSession(page);
+          await native.m105Emulation.send('Emulation.setDeviceMetricsOverride', { width: 1200, height: 820, deviceScaleFactor: 1, mobile: false, screenWidth: 1200, screenHeight: 820 });
           placement.deviceMetricsOverride = true; placement.scope = 'M10 viewport-emulated 1200x820 protocol; native window pinned to built-in display. Screen API is not physical screen geometry.';
         }
         if (!['lean', 'legacy'].includes(item.diagnostics)) await page.addInitScript(installScheduling);
@@ -151,13 +152,14 @@ export async function runComparison(casesPath, prefix) {
           scheduling = await page.evaluate(() => { const data = globalThis[Symbol.for('aethervsr.m105.scheduling')]; return { ...data, done: undefined }; });
         }
         if (item.diagnostics === 'owned') owned = await native.isolated(page, () => { const data = globalThis[Symbol.for('aethervsr.m105.owned')]; return { ...data, restore: undefined }; });
-        const cdp = await native.context.newCDPSession(page);
+        const cdp = native.m105Emulation ?? await native.context.newCDPSession(page);
         let closingNative;
         try {
           const window = await cdp.send('Browser.getWindowForTarget');
           await cdp.send('Emulation.clearDeviceMetricsOverride');
+          await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
           closingNative = { bounds: window.bounds, screen: await page.evaluate(() => ({ width: screen.width, height: screen.height, dpr: devicePixelRatio, x: screenX, y: screenY })) };
-        } finally { await cdp.detach(); }
+        } finally { await cdp.detach(); native.m105Emulation = null; }
         const manager = item.noRuntime ? await native.isolated(page, () => globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)].status()) : null;
         return { scheduling, owned, closingScreen, closingNative, manager, workerEvents: native.m105WorkerEvents, sourceCommit: item.arm === 'm9-harness' ? REVISIONS.m9 : REVISIONS.m10,
           bundleSha256: item.kind.startsWith('extension-') || item.kind === 'installed-idle' ? frozenBuild(m10.root).provenance.bundleSha256 : null };
