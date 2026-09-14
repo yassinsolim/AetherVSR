@@ -496,6 +496,7 @@ Actual M10 history after the starting SHA, oldest first:
 | `f0b8b57` | Non-scrollable public action limitation |
 | `b75ded5` | Fail-fast invalid foreground recording and focus diagnosis |
 | `1bebcef` | Public scroll N/A propagation and explicit MV3 CI build gate |
+| `f5e5af0` | Measured PARTIAL report and native/visual evidence archive |
 
 Production journeys pin `504a797`; diagnostic journeys pin `760cc3e`; Shaka
 pins `f0b8b57`; final long performance pins `b75ded5`. Their payload identity
@@ -519,9 +520,24 @@ The existing two moderate npm advisories remain; no force-upgrade was attempted.
 Tool `.mjs` files are outside ESLint's configured coverage: syntax, unit execution
 and focused actual scroll-action behavior checks provide their relevant validation.
 
-Clean-clone reproducibility, synchronized push and exact-closing-HEAD CI remain
-**pending**. Their actual results will be recorded before completion; baseline or
-earlier-commit CI is not closure evidence.
+Fresh local clone of evidence commit
+`f5e5af0ee8cf541e221218d4ea46f28910d0ede8` passed separate install, typecheck,
+lint, 629 Vitest tests, build and 308 Python tests. It installed its own npm
+dependencies and reused the existing Python environment; no ignored generated
+media/browser files or GPU measurements were imported into clone validation.
+Two production builds matched every file including provenance and reproduced the
+measured payload. Two diagnostic builds also matched. Manifest/CSP, exact model
+and production debug stripping passed; clone worktree remained clean. The
+[reproducibility record](../results/m10-reproducibility.json) pins these artifacts.
+
+At that evidence commit, the tracked tree is **50,265,261 bytes**, below
+50,331,648 (48 MiB), with existing per-file exceptions unchanged. The local fresh
+clone's `.git` occupied **442,172 KiB**, including history: this is not network
+transfer size or installed-dependency size. No history rewrite was performed.
+
+Synchronized push and exact-closing-HEAD CI remain **pending**. Their actual
+results will be recorded before completion; baseline or earlier-commit CI is
+not closure evidence.
 
 ## 29. Recommended Milestone 11
 

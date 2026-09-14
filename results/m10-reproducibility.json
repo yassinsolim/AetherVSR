@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS",
+  "scope": "Fresh local clone, no hardlinks, tracked source only. npm dependencies installed anew. Python tests reused the existing environment; browser/GPU journeys were not rerun in this clone.",
+  "sourceCommit": "f5e5af0ee8cf541e221218d4ea46f28910d0ede8",
+  "sourceClean": true,
+  "production": {
+    "payloadBytes": 263008,
+    "bundleSha256": "724507ec7d3e7a8c9a4ce7bf0fc772f2d2de9f56c1218693db52d6cba195258a",
+    "allFilesIncludingProvenanceIdenticalAcrossTwoBuilds": true,
+    "hashes": {
+      "content.js": "0232e0baa01a2c139c590c39ed8dfb129248e0fce3c445bb98be37fccb81336a",
+      "manifest.json": "37e7922754f44097d60a2b81dfb6ba2a04f6f49cdb19aefa71b436fee7627e82",
+      "models/production.json": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "popup.css": "daac6fdde1732ef8ab41615a9440a65a66ba8cf3c9ee4d45a476ad6b9d7d798c",
+      "popup.html": "d9bc0a5ef9dc562eee6802f983ba411e4bf15b314bb6bef0853b266ed2fbe30f",
+      "popup.js": "606ea6645a03b5b51d060af59560a1bb7fbcda314b798f56d8ed5084c0e0cb57",
+      "service-worker.js": "645d389bcbce1d1d550bc0b71353a959a4c5fa5bb10fb41113a62db98e99d72c",
+      "build-provenance.json": "077e03aa36bfd6be10f1c95c9dd550b374b8dcac9c2303539b47c58924135744"
+    }
+  },
+  "diagnostic": {
+    "payloadBytes": 263295,
+    "bundleSha256": "d9bca95b6dea1834fcaee18a3e222d2051c01e6220bbf332ab1436e78b6e668e",
+    "allFilesIncludingProvenanceIdenticalAcrossTwoBuilds": true,
+    "hashes": {
+      "content.js": "837dd2be04116af8f8c51d078055db74a368b8309128a2e6ee7354a1e30e7043",
+      "manifest.json": "37e7922754f44097d60a2b81dfb6ba2a04f6f49cdb19aefa71b436fee7627e82",
+      "models/production.json": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "popup.css": "daac6fdde1732ef8ab41615a9440a65a66ba8cf3c9ee4d45a476ad6b9d7d798c",
+      "popup.html": "d9bc0a5ef9dc562eee6802f983ba411e4bf15b314bb6bef0853b266ed2fbe30f",
+      "popup.js": "606ea6645a03b5b51d060af59560a1bb7fbcda314b798f56d8ed5084c0e0cb57",
+      "service-worker.js": "645d389bcbce1d1d550bc0b71353a959a4c5fa5bb10fb41113a62db98e99d72c",
+      "build-provenance.json": "ec3b650862ea34d8fc83e83ab1f3e89d39694050117c8c80067435ca7800e08b"
+    }
+  },
+  "manifestValidation": "PASS",
+  "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "trackedBytes": 50265261,
+  "localGitDiskKiB": 442172,
+  "gitDiskScope": "Local cloned object history on disk, not network transfer size; excludes dependencies and generated artifacts."
+}
