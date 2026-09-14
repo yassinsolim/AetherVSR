@@ -2569,7 +2569,7 @@ this is not an isolated causal comparison of adapter cost.
 | Metric | Result / scope |
 |---|---|
 | Active runtime interval | 600001.5 ms; passes the literal 600000-ms gate |
-| Wall observation interval | 600000.8 ms; independent video-observer bracket. Pipeline rates below use the 600001.5-ms active runtime bracket |
+| Wall observation interval | 600000.8 ms; denominator for pipeline rates below. The independent native video observer has its own synchronous boundaries; runtime active time is a separate duration gate |
 | Rendered / presented frames | 35,011 / 35,887 |
 | Rendered / presented fps | 58.3515888645 / 59.811586918; both pass >=58 |
 | Callback skips / decoder drops | 876 / 847, over the full window |

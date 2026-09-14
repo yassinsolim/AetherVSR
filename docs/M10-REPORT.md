@@ -258,8 +258,9 @@ quantization. Display refresh, energy, temperature and actual GPU residency:
 external import, x2 2560x1440 output, fixed production neural stage.
 
 Five-second readiness warmup precedes each independently fixed 30-second window.
-Runtime rates use opening/closing active-clock deltas; native observer rates use
-its own synchronous boundaries. Decode stalls remain in active time. GPU
+Pipeline rates divide opening/closing session counter deltas by the wall
+observation interval; native observer rates use its own synchronous boundaries.
+The active-clock delta independently gates duration. Decode stalls remain in active time. GPU
 quantiles select raw submitted-in-window upscale timestamps, including cold
 samples; late readbacks drain without extending rate denominators. This brackets
 the upscale stage, not decode/import, queue wait or browser presentation. Default
@@ -448,6 +449,13 @@ Independent final report and packaged-evidence review returned PASS without
 additional findings. Closing executable and publication gates remain separate;
 no review substitutes for an unperformed gate.
 
+A final direct arithmetic audit corrected documentation that had described
+pipeline rate denominators as active time. The actual summarizer uses the wall
+observation interval and independently checks active duration. Every active short
+and long rate was rechecked against raw counts; numbers, traces and verdicts did
+not change. This reporting correction supersedes the wording in the publication
+checkpoint, not its recorded measurements.
+
 ## 25. Extension verdict
 
 **EXTENSION MVP PARTIAL**
@@ -497,6 +505,7 @@ Actual M10 history after the starting SHA, oldest first:
 | `b75ded5` | Fail-fast invalid foreground recording and focus diagnosis |
 | `1bebcef` | Public scroll N/A propagation and explicit MV3 CI build gate |
 | `f5e5af0` | Measured PARTIAL report and native/visual evidence archive |
+| `776e02b` | Fresh-clone gates and deterministic production/diagnostic artifacts |
 
 Production journeys pin `504a797`; diagnostic journeys pin `760cc3e`; Shaka
 pins `f0b8b57`; final long performance pins `b75ded5`. Their payload identity
@@ -535,9 +544,16 @@ At that evidence commit, the tracked tree is **50,265,261 bytes**, below
 clone's `.git` occupied **442,172 KiB**, including history: this is not network
 transfer size or installed-dependency size. No history rewrite was performed.
 
-Synchronized push and exact-closing-HEAD CI remain **pending**. Their actual
-results will be recorded before completion; baseline or earlier-commit CI is
-not closure evidence.
+Publication commit `776e02b2a410af49b6595ea9edd83c3e86a86481` was pushed to
+`main`; origin/main matched that SHA. Exact-SHA GitHub Actions
+[34813673799](https://github.com/yassinsolim/AetherVSR/actions/runs/34813673799)
+completed **success**, both `gate` and `fusion`, including the explicit MV3
+build. The current documentation-only closure corrects the rate-denominator
+wording without modifying runtime or raw results. It must independently meet
+clean `main == origin/main` and exact-HEAD CI after publication; its final SHA,
+tracked size and CI result are returned in the completion message rather than
+self-pinned in a file that would change its own commit hash. Earlier CI success
+is never substituted for that closing check.
 
 ## 29. Recommended Milestone 11
 
