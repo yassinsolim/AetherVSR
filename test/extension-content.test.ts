@@ -63,6 +63,9 @@ class TreeNode extends EventTarget {
   parent: TreeNode | null = null;
   children: TreeNode[] = [];
   paused = false; ended = false; mediaKeys = null; controls = false; src = 'first.mp4'; fullscreenElement = null;
+  override removeEventListener(type: string, listener: EventListenerOrEventListenerObject | null, options?: EventListenerOptions | boolean): void {
+    super.removeEventListener(type, listener, typeof options === 'boolean' ? { capture: options } : options);
+  }
   get isConnected(): boolean { return this === document || (this.parent?.isConnected ?? false); }
   get video(): HTMLVideoElement { return this as unknown as HTMLVideoElement; }
   append(child: TreeNode) { child.parent = this; this.children.push(child); mutation(this, [child]); }
@@ -216,6 +219,38 @@ describe('isolated top-document content manager', () => {
     expect(attachments.map(attachment => attachment.video)).toEqual([old.video, current.video]);
     expect(attachments[0]!.destroy.mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(VideoAttachment).mock.invocationCallOrder[1]!);
     expect(attachments.filter(attachment => !attachment.disposed)).toHaveLength(1);
+  });
+  it('can reattach the same video removed at a watchdog boundary without treating removal as tampering', async () => {
+    const video = candidate(); await load(); command(); await flush(); await advance(450);
+    video.remove(); await advance(50);
+    expect(attachments[0]!.disposed).toBe(true);
+    expect(access().attachment()).toBeNull();
+    await advance(25); document.append(video); await advance(75);
+    expect(attachments.map(attachment => attachment.video)).toEqual([video.video, video.video]);
+    expect(attachments[0]!.destroy.mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(VideoAttachment).mock.invocationCallOrder[1]!);
+    expect(access().status()).toMatchObject({ code: 'active', details: { infrastructure: { maximumConcurrent: 1, created: 2, destroyed: 1 } } });
+  });
+  it('listens for non-composed media readiness in discovered open roots and releases removed roots', async () => {
+    const root = new TreeNode(); document.append(root);
+    const video = candidate(); video.remove(); root.append(video);
+    const geometry = CANDIDATES.get(video)!;
+    CANDIDATES.set(video, { ok: false, code: 'video-not-ready', reason: 'Decoded dimensions are not ready.' });
+    vi.mocked(discoverVideos).mockImplementation(() => ({ videos: video.isConnected ? [video.video] : [],
+      openRoots: root.isConnected ? [root as unknown as ShadowRoot] : [], embeddedFrames: 0, truncated: false, closedShadowLimitation: true }));
+    const add = vi.spyOn(root, 'addEventListener'); const remove = vi.spyOn(root, 'removeEventListener');
+    await load(); command(); await flush();
+    expect(attachments).toHaveLength(0); expect(add).toHaveBeenCalledTimes(7);
+    CANDIDATES.set(video, geometry);
+    root.dispatchEvent(new Event('loadeddata', { bubbles: false, composed: false })); await advance();
+    expect(access().status().code).toBe('active'); expect(attachments).toHaveLength(1);
+    document.dispatchEvent(new Event('resize')); await advance(); expect(add).toHaveBeenCalledTimes(7);
+    root.remove(); await advance(); expect(remove.mock.calls).toEqual(add.mock.calls);
+    expect(attachments[0]!.disposed).toBe(true);
+    await advance(); expect(vi.getTimerCount()).toBe(1);
+    const calls = vi.mocked(discoverVideos).mock.calls.length;
+    root.dispatchEvent(new Event('playing')); await advance(1500);
+    expect(discoverVideos).toHaveBeenCalledTimes(calls);
+    command({ type: 'm10.stop' }); expect(vi.getTimerCount()).toBe(0);
   });
   it('rejects native controls both initially and when shown on the current owner', async () => {
     const video = candidate(); video.controls = true; await load(); command(); await flush();

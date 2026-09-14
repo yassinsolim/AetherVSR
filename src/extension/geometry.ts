@@ -155,6 +155,21 @@ function inset(box: Rect, clip: Rect): string {
     + `${box.top + box.height - clip.top - clip.height}px ${clip.left - box.left}px`;
 }
 
+function paintOrderRisk(video: HTMLVideoElement, style: CSSStyleDeclaration, view: Window): boolean {
+  if (style.position !== 'static' || style.zIndex !== 'auto'
+    || [style.transform, style.translate, style.rotate, style.scale].some((value) => nonDefault(value))) return false;
+  let remaining = 32;
+  for (let sibling = video.previousElementSibling; sibling; sibling = sibling.previousElementSibling) {
+    if (remaining-- === 0) return true;
+    const siblingStyle = view.getComputedStyle(sibling);
+    if (siblingStyle.display === 'none') continue;
+    const siblingZ = Number(siblingStyle.zIndex);
+    if (siblingStyle.position !== 'static' && Number.isFinite(siblingZ) && siblingZ !== 0) continue;
+    return true;
+  }
+  return false;
+}
+
 function controlsRemainAbove(
   video: HTMLVideoElement,
   parent: Element | ShadowRoot,
@@ -282,6 +297,9 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     });
   }
   if (clip.width <= 0 || clip.height <= 0) return reject('offscreen', 'Video is outside the viewport or ancestor clip.');
+  if (paintOrderRisk(video, computed, view)) {
+    return reject('unsupported-controls', 'Preceding sibling paint order cannot be preserved.');
+  }
   if (!controlsRemainAbove(video, parent, clip, computed, view)) {
     return reject('unsupported-controls', 'Sampled video visibility or control stacking cannot be preserved.');
   }

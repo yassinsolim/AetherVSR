@@ -42,6 +42,7 @@ describe('calculateImageRect', () => {
 function fixture() {
   const defaults = {
     objectFit: 'contain', objectPosition: '50% 50%', position: 'static', zIndex: 'auto',
+    pointerEvents: 'auto',
     display: 'block', visibility: 'visible', opacity: '1', width: '320px', height: '180px',
     transform: 'none', translate: 'none', rotate: 'none', scale: 'none',
     filter: 'none', backdropFilter: 'none', perspective: 'none', clipPath: 'none',
@@ -73,16 +74,17 @@ function fixture() {
     clientWidth: 320, clientHeight: 180, offsetWidth: 320, offsetHeight: 180,
     getBoundingClientRect: vi.fn(() => ({ left: 10, top: 20, width: 320, height: 180 })),
   };
-  const control = { parentNode: parent, parentElement: parent };
+  const control = { parentNode: parent, parentElement: parent, previousElementSibling: null as unknown };
   const video = {
     isConnected: true, readyState: 2, videoWidth: 640, videoHeight: 360, controls: false,
     textTracks: [] as { mode: string }[], ownerDocument: document, assignedSlot: null as unknown,
     parentElement: parent as unknown, parentNode: parent as unknown,
+    previousElementSibling: null as unknown,
     nextSibling: control as unknown, getRootNode: () => document as unknown,
     getBoundingClientRect: vi.fn(() => ({ left: 10, top: 20, width: 320, height: 180 })),
     compareDocumentPosition: vi.fn(() => 4),
   };
-  return { video, parent, control, document, videoStyle, parentStyle, controlStyle,
+  return { video, parent, control, document, view, videoStyle, parentStyle, controlStyle,
     inspect: () => inspectGeometry(video as unknown as HTMLVideoElement) };
 }
 
@@ -269,6 +271,68 @@ describe('inspectGeometry', () => {
     setup.video.compareDocumentPosition.mockReturnValue(4);
     setup.controlStyle.position = 'static';
     expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+  });
+
+  it.each([
+    { id: 'caption-before-auto-passive', precedes: true, zIndex: 'auto', supported: false },
+    { id: 'caption-before-zero-passive', precedes: true, zIndex: '0', supported: false },
+    { id: 'caption-after-auto-passive', precedes: false, zIndex: 'auto', supported: true },
+    { id: 'caption-before-positive-passive', precedes: true, zIndex: '1', supported: true },
+    { id: 'caption-before-negative-passive', precedes: true, zIndex: '-1', supported: true },
+  ])('$id preserves visual ordering independently of pointer targets', ({ precedes, zIndex, supported }) => {
+    const setup = fixture();
+    setup.controlStyle.pointerEvents = 'none';
+    setup.controlStyle.zIndex = zIndex;
+    if (precedes) {
+      setup.video.previousElementSibling = setup.control;
+      setup.video.nextSibling = null;
+      setup.video.compareDocumentPosition.mockReturnValue(2);
+    }
+    expect(setup.document.elementsFromPoint()).not.toContain(setup.control);
+    expect(setup.inspect()).toMatchObject(supported ? { ok: true }
+      : { ok: false, code: 'unsupported-controls', reason: 'Preceding sibling paint order cannot be preserved.' });
+  });
+
+  it('rejects unproved preceding branches without walking their potentially overflowing descendants', () => {
+    const setup = fixture();
+    setup.video.previousElementSibling = setup.control;
+    setup.controlStyle.position = 'static';
+    setup.controlStyle.pointerEvents = 'none';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+    expect(setup.document.elementsFromPoint).not.toHaveBeenCalled();
+    setup.controlStyle.visibility = 'hidden';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+    setup.controlStyle.display = 'none';
+    expect(setup.inspect().ok).toBe(true);
+  });
+
+  it.each([
+    ['position', 'relative'], ['transform', 'matrix(2, 0, 0, 2, 0, 0)'], ['scale', '2'],
+  ] as const)('does not reject an already positioned/stacking video through %s', (property, value) => {
+    const setup = fixture();
+    setup.video.previousElementSibling = setup.control;
+    setup.videoStyle[property] = value;
+    expect(setup.inspect().ok).toBe(true);
+  });
+
+  it('bounds preceding sibling checks to 32 styles and refuses an unproved remainder', () => {
+    const setup = fixture();
+    setup.parentStyle.position = 'relative';
+    setup.parentStyle.zIndex = '1';
+    const siblings: { previousElementSibling: unknown }[] = Array.from({ length: 33 },
+      () => ({ previousElementSibling: null }));
+    for (const [index, sibling] of siblings.entries()) {
+      sibling.previousElementSibling = siblings[index + 1] ?? null;
+    }
+    setup.video.previousElementSibling = siblings[1];
+    expect(setup.inspect().ok).toBe(true);
+    setup.view.getComputedStyle.mockClear();
+    setup.video.previousElementSibling = siblings[0];
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+    expect(setup.view.getComputedStyle.mock.calls.filter(([element]) => siblings.includes(element as typeof siblings[number])))
+      .toHaveLength(32);
+    expect(setup.video.getBoundingClientRect).toHaveBeenCalledTimes(2);
+    expect(setup.parent.getBoundingClientRect).not.toHaveBeenCalled();
   });
 
   it('checks more than the center and fails closed when the video is absent from hit testing', () => {

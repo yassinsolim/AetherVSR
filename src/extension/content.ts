@@ -53,18 +53,16 @@ class DocumentAdapter {
       this.counters.mutationBatches++;
       this.schedule();
     });
-    for (const type of ['playing', 'pause', 'loadeddata', 'emptied', 'resize', 'fullscreenchange', 'visibilitychange']) {
-      const listener = () => this.schedule();
-      document.addEventListener(type, listener, true);
-      this.listeners.push([document, type, listener]);
-    }
+    this.listen(document);
     this.watchdog = setInterval(() => {
       if (!chrome.runtime?.id) { this.stop(); return; }
-      if (this.attachment && (!this.attachment.video.isConnected ||
-        (this.attachment.snapshot().ready && !this.attachment.canvas.isConnected))) {
+      if (this.attachment && !this.attachment.video.isConnected) {
+        this.detach('owner removed');
+        this.schedule();
+      } else if (this.attachment?.snapshot().ready && !this.attachment.canvas.isConnected) {
         const owner = this.attachment.video;
         this.blocked.set(owner, { code: 'unsupported-geometry', message: 'The page removed the owned output. Disable and enable to retry.' });
-        this.detach('owner or overlay removed');
+        this.detach('overlay removed');
         this.schedule();
       }
     }, 500);
@@ -83,6 +81,14 @@ class DocumentAdapter {
     this.timer = setTimeout(() => { this.timer = null; this.reconcile(); }, 150);
   }
 
+  private listen(target: EventTarget): void {
+    for (const type of ['playing', 'pause', 'loadeddata', 'emptied', 'resize', 'fullscreenchange', 'visibilitychange']) {
+      const listener = () => this.schedule();
+      target.addEventListener(type, listener, true);
+      this.listeners.push([target, type, listener]);
+    }
+  }
+
   private reconcile(): void {
     if (!this.enabled) return;
     const started = performance.now();
@@ -96,6 +102,14 @@ class DocumentAdapter {
       attributeFilter: ['src', 'class', 'style', 'controls', 'hidden', 'width', 'height'] };
     this.observer?.observe(document, observation);
     for (const root of found.openRoots) this.observer?.observe(root, observation);
+    const roots = new Set<EventTarget>([document, ...found.openRoots]);
+    this.listeners = this.listeners.filter(([target, type, listener]) => {
+      if (roots.has(target)) return true;
+      target.removeEventListener(type, listener, true);
+      return false;
+    });
+    const listening = new Set(this.listeners.map(([target]) => target));
+    for (const root of roots) if (!listening.has(root)) this.listen(root);
     const geometry = new Map<HTMLVideoElement, GeometryResult>();
     const candidates = found.videos.map(video => {
       const before = performance.now();
