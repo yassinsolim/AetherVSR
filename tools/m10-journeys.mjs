@@ -169,7 +169,8 @@ export async function runJourneys(output, testBuild = false, only = null) {
     const screenshot = async (page, name) => { const path = join(screenshots, `${name.replaceAll('/', '-')}.png`); await page.screenshot({ path, timeout: 3000 }); emit('screenshot', { path: relative(ROOT, path), sha256: sha256(readFileSync(path)), verdict: 'UNVERIFIED manual pixels' }); };
     const isolatedStatus = async page => snapshotExtensionStatus({ ok: true, status: await native.isolated(page, () => globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)].status()) });
     const active = async (page, id) => {
-      const value = await status(id); const view = await dom(page);
+      const value = await status(id, state => state.code === 'active' && state.details?.attachment?.ready);
+      const view = await until(() => dom(page), state => state.canvases.some(canvas => !canvas.pageOwned && canvas.visibility === 'visible'), 5000, journeySignal);
       assert.equal(view.visibility, 'visible'); assert.equal(view.focused, true); assert.equal(view.mainTestHook, 'undefined'); assert.equal(view.mainSingleton, 'undefined');
       const owned = view.canvases.filter(canvas => !canvas.pageOwned); assert.equal(owned.length, 1); const canvas = owned[0];
       assert.match(canvas.uuid, /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i); assert(canvas.siblingOfVideo);
