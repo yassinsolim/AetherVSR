@@ -11,6 +11,8 @@ import { bounded, openExtension, OperationTimeout, until, verifyBuild, Unverifie
 const SITES = {
   plyr: { url: 'https://plyr.io/', player: '.plyr', kind: 'Public custom-control player demo' },
   videojs: { url: 'https://videojs.org/', player: '.video-js', kind: 'Independent public custom-control player demo' },
+  shaka: { url: 'https://shaka-project.github.io/shaka-player-release/demo/', player: '.shaka-video-container',
+    assetTitle: 'Big Buck Bunny: the Dark Truths', kind: 'Public clear adaptive-streaming demo selected through its existing asset card' },
 };
 const NEGATIVE = new Set(['inactive', 'permission-required', 'no-video', 'unsupported', 'unsupported-page',
   'unsupported-geometry', 'unsupported-media', 'unsupported-controls', 'unsupported-frame', 'protected-media',
@@ -43,7 +45,8 @@ function siteSnapshot(extensionId) {
   const rect = element => { const bounds = element.getBoundingClientRect(); return { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }; };
   const properties = ['display', 'visibility', 'opacity', 'position', 'z-index', 'object-fit', 'object-position',
     'overflow-x', 'overflow-y', 'transform', 'filter', 'backdrop-filter', 'perspective', 'contain', 'will-change',
-    'clip-path', 'mask-image', 'border-radius', 'border-width', 'padding', 'mix-blend-mode', 'isolation', 'pointer-events'];
+    'clip-path', 'mask-image', 'border-radius', 'border-width', 'padding', 'mix-blend-mode', 'isolation', 'pointer-events',
+    'content-visibility', 'container-type', 'overflow-clip-margin'];
   const style = element => { const computed = getComputedStyle(element); return Object.fromEntries(properties.map(key => [key, computed.getPropertyValue(key)])); };
   const source = video => {
     try { const url = new URL(video.currentSrc); return { present: true, scheme: url.protocol, origin: url.origin === 'null' ? null : url.origin }; }
@@ -142,7 +145,7 @@ function publicConfig(path) {
   const durationMs = config.durationMs ?? 180000; const sites = config.sites ?? ['plyr', 'videojs'];
   assert(Number.isSafeInteger(durationMs) && durationMs > 0 && durationMs <= 600000, 'durationMs must be 1..600000');
   assert(Array.isArray(sites) && sites.length > 0 && sites.every(id => Object.hasOwn(SITES, id)) && new Set(sites).size === sites.length,
-    'sites must be unique entries from plyr, videojs');
+    'sites must be unique entries from plyr, videojs, shaka');
   return { durationMs, sites };
 }
 
@@ -314,6 +317,11 @@ export async function runSites(output, configPath) {
         await bounded(page.bringToFront(), 3000, 'Focus public page');
         item.initialWindow = await nativeResize(native, page, 1200);
         await consent(page, record);
+        if (site.assetTitle) {
+          const card = page.locator('.asset-card').filter({ has: page.getByRole('heading', { name: site.assetTitle, exact: true }) }).first();
+          await card.getByRole('button', { name: /^Play$/i }).click({ timeout: 15000 });
+          record('public-asset-selection', { title: site.assetTitle, method: 'Trusted click on existing public asset-card Play control' });
+        }
         let metadataPlayClicked = false;
         await until(async () => {
           await consent(page, record);
@@ -428,6 +436,28 @@ export async function runSites(output, configPath) {
           } },
           { at: 100000, name: 'resize-1024', run: () => nativeResize(native, page, 1024) },
           { at: 115000, name: 'resize-1200', run: () => nativeResize(native, page, 1200) },
+          { at: 145000, name: 'original-fullscreen', run: async () => {
+            const player = page.locator(site.player).filter({ has: page.locator('video') }).first();
+            await player.hover({ timeout: 3000 });
+            const button = await visibleButton(player, /^(Enter )?Full\s*screen(?: mode)?$/i);
+            if (!button) { item.fullscreen = 'not measured: no visible original fullscreen button'; return { attempted: false, reason: item.fullscreen }; }
+            await button.click({ timeout: 3000 });
+            try {
+              await page.waitForFunction(() => document.fullscreenElement !== null, undefined, { timeout: 4000 });
+              const direct = await page.evaluate(() => document.fullscreenElement instanceof HTMLVideoElement);
+              await until(async () => {
+                const state = await inspect();
+                return direct ? state.details?.attachment?.suspendedReason === 'video-fullscreen' : state.details?.attachment?.active && state.details.attachment.ready;
+              }, Boolean, 4000, controller.signal);
+              const result = await check('original-fullscreen', direct);
+              if (!direct) assert(await page.evaluate(() => document.fullscreenElement.contains(document.querySelector('canvas[data-aethervsr-m10]'))));
+              item.fullscreen = direct ? 'PASS: direct-video fullscreen shows original' : 'PASS: original container fullscreen retains enhancement';
+              return { attempted: true, direct, owner: result.status.owner, fullscreen: result.dom.fullscreen };
+            } finally {
+              await page.evaluate(async () => { if (document.fullscreenElement) await document.exitFullscreen(); });
+              await page.bringToFront();
+            }
+          } },
         ];
         while (performance.now() - started < config.durationMs) {
           controller.signal.throwIfAborted();
