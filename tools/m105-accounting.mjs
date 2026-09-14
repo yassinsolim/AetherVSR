@@ -87,6 +87,7 @@ export function installOwnedCost(options = {}) {
     if (typeof globalThis[name] === 'function') replace(globalThis, name, Original => class extends Original { constructor(callback) { super(wrap(name, callback)); } });
   }
   for (const name of ['setTimeout', 'setInterval']) replace(globalThis, name, original => function(callback, delay, ...args) { return original(wrap(`${name}:${delay ?? 0}`, callback), delay, ...args); });
+  if (typeof globalThis.queueMicrotask === 'function') replace(globalThis, 'queueMicrotask', original => function(callback) { return original(wrap('microtask', callback)); });
   replace(HTMLVideoElement.prototype, 'requestVideoFrameCallback', original => function(callback) { return original.call(this, wrap('rVFC', callback)); });
   if (typeof globalThis.requestAnimationFrame === 'function') replace(globalThis, 'requestAnimationFrame', original => function(callback) { return original(wrap('rAF', callback)); });
   const message = chrome.runtime.onMessage;

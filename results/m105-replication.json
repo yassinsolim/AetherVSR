@@ -1,0 +1,959 @@
+{
+  "schemaVersion": 1,
+  "phase": "Initial replication before production behavior changes, not final acceptance",
+  "apparatusCommit": "61a1691f040ac464c716c17213b42ee762242888",
+  "runtimeCommit": "acb50f8e69aa2893e221d654edb7d22e7876636e",
+  "scope": "Legacy M10 fixture/harness and emulated1200x820 DPR1; native window pinned to built-in display. All valid trials retained. FPS uses wall interval; active duration separately verified. Quality drops are not decoder-only or unique loss. Raw traces local only.",
+  "reports": [
+    {
+      "path": ".cache/m105/replication-01.json.gz",
+      "sha256": "8a8c5b597fd35b909fe173fb5474deb17a78e074f7fa50b59e115b1e1c8a1776",
+      "completion": "UNVERIFIED",
+      "error": "AssertionError [ERR_ASSERTION]: Error: Playback/foreground integrity event: blur",
+      "casesSha256": "c061d5a42239cc9293609067018d2df37d8c938e6080b1a06416ff89bccb625c",
+      "plannedCases": [
+        "rep-extension-1",
+        "rep-harness-1",
+        "rep-harness-2",
+        "rep-extension-2"
+      ]
+    },
+    {
+      "path": ".cache/m105/replication-02.json.gz",
+      "sha256": "361c2fb98cdcdd1c0977ed31fba2d88c38b215cd9039b2f5a38029a18694ff3f",
+      "completion": "CAPTURED",
+      "error": null,
+      "casesSha256": "931fa5cc436ce0ed050053b7d7821723f17c258df42ef7bd9e0444086922add2",
+      "plannedCases": [
+        "rep-harness-1-retry",
+        "rep-harness-2",
+        "rep-extension-2"
+      ]
+    }
+  ],
+  "valid": [
+    {
+      "id": "rep-extension-1",
+      "arm": "legacy-neural",
+      "raw": {
+        "path": ".cache/m105/replication-01.rep-extension-1.json.gz",
+        "bytes": 1621036,
+        "sha256": "58f9641414302c881ced4726ae3fc3e6cc386e09dca5c7e7ceef97a9d978dd7f"
+      },
+      "browser": {
+        "version": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/153.0.8010.12",
+          "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+          "jsVersion": "15.3.76.4"
+        },
+        "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+        "flags": [
+          "--autoplay-policy=no-user-gesture-required",
+          "--window-size=1280,900",
+          "--load-extension=/Users/ysoli/Projects/AetherVSR/.cache/m105/m10/dist-extension",
+          "--disable-extensions-except=/Users/ysoli/Projects/AetherVSR/.cache/m105/m10/dist-extension",
+          "--enable-unsafe-extension-debugging"
+        ]
+      },
+      "placement": {
+        "bounds": {
+          "bounds": {
+            "left": 40,
+            "top": 40,
+            "width": 1200,
+            "height": 903,
+            "windowState": "normal"
+          }
+        },
+        "nativeScreen": {
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "x": 40,
+          "y": 40
+        },
+        "deviceMetricsOverride": true,
+        "scope": "M10 viewport-emulated 1200x820 protocol; native window pinned to built-in display. Screen API is not physical screen geometry.",
+        "failedRequests": []
+      },
+      "summary": {
+        "durationMs": 600002.200000003,
+        "activeMs": 600003.5,
+        "renderedFps": 58.13478683911463,
+        "presentedFps": 59.81978066080395,
+        "nativeCallbackFps": 58.134602746881804,
+        "rendered": 34881,
+        "presented": 35892,
+        "skipped": 1011,
+        "qualityDrops": 969,
+        "qualityTotal": 35948,
+        "qualityCoverageMs": null,
+        "gpu": {
+          "count": 34731,
+          "p50": 6.5536,
+          "p95": 8.388608,
+          "mean": 6.655999646194948,
+          "max": 13.697024
+        },
+        "coreCpu": {
+          "count": 34881,
+          "p50": 0.10000000894069672,
+          "p95": 0.29999999701976776,
+          "mean": 0.15593589625216478,
+          "max": 2.2000000029802322
+        },
+        "driverCpu": {
+          "count": 34881,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.0689601789701662,
+          "max": 0.7000000029802322
+        },
+        "callbackLatency": {
+          "count": 34880,
+          "p50": 6.599999999998545,
+          "p95": 9.60000000000582,
+          "mean": 4.334741972477063,
+          "max": 18.39999999999418
+        },
+        "infrastructure": {
+          "calls": 596,
+          "totalMs": 151.99999995529652,
+          "wallFraction": 0.00025333240437334356,
+          "msPerSecond": 0.2533324043733436,
+          "meanMs": 0.255033556971974
+        }
+      },
+      "metrics": {
+        "decoderDropPercent": 2.6955602536997887,
+        "qualityLabel": "Playback-quality reported drops, not decoder-only or unique display loss",
+        "callbackGapPercent": 2.816783684386493,
+        "callbacks": 34881,
+        "presented": 35892,
+        "gaps": 1011,
+        "callbackBoundaryResidual": 0,
+        "submitted": 34881,
+        "submissionAttempts": null,
+        "submissionDeficit": null,
+        "renderedVsPresentedDeficitPercent": 2.816783684386493,
+        "m10CombinedPercent": 5.516549648946841,
+        "callbackIntervalsMs": {
+          "count": 34880,
+          "p50": 16.700000002980232,
+          "p95": 19.30000001192093,
+          "mean": 17.20113245412844,
+          "max": 60.099999994039536
+        },
+        "mediaIntervalsMs": {
+          "count": 34731,
+          "p50": 16.666999999999987,
+          "p95": 16.667000000000044,
+          "mean": 17.123990412029997,
+          "max": 33.33400000000009
+        },
+        "mediaIntervalExclusions": {
+          "candidates": 34880,
+          "backwardOrGenerationBoundary": 149,
+          "scope": "Callback-sampled PTS differences, not every decoded/displayed frame; loop rewinds and load-generation boundaries excluded explicitly"
+        },
+        "exactUniqueLostFrames": null,
+        "exactOverlap": null,
+        "identityScope": "PTS, source generation and callback/submission sequence identify observations, not a shared native frame ID; counters have separate boundaries and asynchronous publication",
+        "runtimeSamples": 34881
+      },
+      "first120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 58.05,
+        "presentedFps": 59.791666666666664,
+        "nativeCallbackFps": 58.05,
+        "rendered": 6966,
+        "presented": 7175,
+        "skipped": 209,
+        "qualityDrops": 207,
+        "qualityTotal": 7192,
+        "qualityCoverageMs": 120010.79999999702,
+        "gpu": {
+          "count": 6936,
+          "p50": 6.946816,
+          "p95": 8.84736,
+          "mean": 7.071576286043871,
+          "max": 12.648448
+        },
+        "coreCpu": {
+          "count": 6966,
+          "p50": 0.10000000894069672,
+          "p95": 0.20000000298023224,
+          "mean": 0.13409417162604145,
+          "max": 0.7000000029802322
+        },
+        "driverCpu": {
+          "count": 6966,
+          "p50": 0,
+          "p95": 0.10000000894069672,
+          "mean": 0.04748779796908855,
+          "max": 0.4000000059604645
+        },
+        "callbackLatency": {
+          "count": 6966,
+          "p50": 7.400000000001455,
+          "p95": 9.599999999991269,
+          "mean": 4.85445018662068,
+          "max": 17.400000000001455
+        },
+        "infrastructure": null
+      },
+      "last120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 58.06666666666667,
+        "presentedFps": 59.84166666666667,
+        "nativeCallbackFps": 58.06666666666667,
+        "rendered": 6968,
+        "presented": 7181,
+        "skipped": 213,
+        "qualityDrops": 198,
+        "qualityTotal": 7189,
+        "qualityCoverageMs": 120002.19999998808,
+        "gpu": {
+          "count": 6939,
+          "p50": 6.291456,
+          "p95": 7.929856,
+          "mean": 6.434135399337104,
+          "max": 13.041664
+        },
+        "coreCpu": {
+          "count": 6968,
+          "p50": 0.20000000298023224,
+          "p95": 0.30000001192092896,
+          "mean": 0.17986509749873292,
+          "max": 2.2000000029802322
+        },
+        "driverCpu": {
+          "count": 6968,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.08628013789713657,
+          "max": 0.7000000029802322
+        },
+        "callbackLatency": {
+          "count": 6968,
+          "p50": 6.5,
+          "p95": 9.5,
+          "mean": 4.241862801378585,
+          "max": 18.399999999965075
+        },
+        "infrastructure": null
+      },
+      "tierChanges": 0,
+      "stateRecords": 299,
+      "neuralFrames": 34881,
+      "ownerChanges": 0,
+      "integrityEvents": [],
+      "errors": []
+    },
+    {
+      "id": "rep-harness-1-retry",
+      "arm": "m10-harness",
+      "raw": {
+        "path": ".cache/m105/replication-02.rep-harness-1-retry.json.gz",
+        "bytes": 1621132,
+        "sha256": "70607c80d80e1c91e4b1feab1b6e60f98c0fe6bcbd4004e82a8349580475dc4f"
+      },
+      "browser": {
+        "version": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/153.0.8010.12",
+          "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+          "jsVersion": "15.3.76.4"
+        },
+        "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+        "flags": [
+          "--autoplay-policy=no-user-gesture-required",
+          "--window-size=1280,900"
+        ]
+      },
+      "placement": {
+        "bounds": {
+          "bounds": {
+            "left": 40,
+            "top": 40,
+            "width": 1200,
+            "height": 903,
+            "windowState": "normal"
+          }
+        },
+        "nativeScreen": {
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "x": 40,
+          "y": 40
+        },
+        "deviceMetricsOverride": true,
+        "scope": "M10 viewport-emulated 1200x820 protocol; native window pinned to built-in display. Screen API is not physical screen geometry.",
+        "failedRequests": []
+      },
+      "summary": {
+        "durationMs": 600002.299999997,
+        "activeMs": 600002.799999997,
+        "renderedFps": 58.71810824725201,
+        "presentedFps": 59.91643698699185,
+        "nativeCallbackFps": 58.71805931572349,
+        "rendered": 35231,
+        "presented": 35950,
+        "skipped": 719,
+        "qualityDrops": 680,
+        "qualityTotal": 35950,
+        "qualityCoverageMs": null,
+        "gpu": {
+          "count": 35079,
+          "p50": 6.5536,
+          "p95": 8.323072,
+          "mean": 6.63425940488613,
+          "max": 11.337728
+        },
+        "coreCpu": {
+          "count": 35231,
+          "p50": 0.19999998807907104,
+          "p95": 0.29999999701976776,
+          "mean": 0.1657063381778186,
+          "max": 0.7999999970197678
+        },
+        "driverCpu": {
+          "count": 35231,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.08609463256460989,
+          "max": 0.800000011920929
+        },
+        "callbackLatency": {
+          "count": 35231,
+          "p50": 8.19999999999709,
+          "p95": 9.599999999976717,
+          "mean": 7.940861343703079,
+          "max": 18.600000000034925
+        },
+        "infrastructure": {
+          "calls": null,
+          "totalMs": null,
+          "wallFraction": null,
+          "msPerSecond": null,
+          "meanMs": null
+        }
+      },
+      "metrics": {
+        "decoderDropPercent": 1.8915159944367177,
+        "qualityLabel": "Playback-quality reported drops, not decoder-only or unique display loss",
+        "callbackGapPercent": 2,
+        "callbacks": 35231,
+        "presented": 35950,
+        "gaps": 719,
+        "callbackBoundaryResidual": 0,
+        "submitted": 35231,
+        "submissionAttempts": null,
+        "submissionDeficit": null,
+        "renderedVsPresentedDeficitPercent": 2,
+        "m10CombinedPercent": 3.8915159944367175,
+        "callbackIntervalsMs": {
+          "count": 35230,
+          "p50": 16.700000002980232,
+          "p95": 19.5,
+          "mean": 17.030505251206442,
+          "max": 35.099999994039536
+        },
+        "mediaIntervalsMs": {
+          "count": 35081,
+          "p50": 16.666999999999987,
+          "p95": 16.667000000000016,
+          "mean": 16.99067837291416,
+          "max": 49.99999999999982
+        },
+        "mediaIntervalExclusions": {
+          "candidates": 35230,
+          "backwardOrGenerationBoundary": 149,
+          "scope": "Callback-sampled PTS differences, not every decoded/displayed frame; loop rewinds and load-generation boundaries excluded explicitly"
+        },
+        "exactUniqueLostFrames": null,
+        "exactOverlap": null,
+        "identityScope": "PTS, source generation and callback/submission sequence identify observations, not a shared native frame ID; counters have separate boundaries and asynchronous publication",
+        "runtimeSamples": 35231
+      },
+      "first120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 59.833333333333336,
+        "presentedFps": 59.925,
+        "nativeCallbackFps": 59.833333333333336,
+        "rendered": 7180,
+        "presented": 7191,
+        "skipped": 11,
+        "qualityDrops": 1,
+        "qualityTotal": 7192,
+        "qualityCoverageMs": 120012.29999999702,
+        "gpu": {
+          "count": 7150,
+          "p50": 6.815744,
+          "p95": 8.454144,
+          "mean": 6.846632995804215,
+          "max": 10.81344
+        },
+        "coreCpu": {
+          "count": 7180,
+          "p50": 0.10000000894069672,
+          "p95": 0.29999999701976776,
+          "mean": 0.14891364902340934,
+          "max": 0.5
+        },
+        "driverCpu": {
+          "count": 7180,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.06732590537632409,
+          "max": 0.30000001192092896
+        },
+        "callbackLatency": {
+          "count": 7180,
+          "p50": 8.19999999999709,
+          "p95": 9.099999999998545,
+          "mean": 8.160944289693438,
+          "max": 9.39999999999418
+        },
+        "infrastructure": null
+      },
+      "last120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 57.733333333333334,
+        "presentedFps": 59.916666666666664,
+        "nativeCallbackFps": 57.733333333333334,
+        "rendered": 6928,
+        "presented": 7190,
+        "skipped": 262,
+        "qualityDrops": 256,
+        "qualityTotal": 7190,
+        "qualityCoverageMs": 120014.79999999702,
+        "gpu": {
+          "count": 6898,
+          "p50": 6.291456,
+          "p95": 8.323072,
+          "mean": 6.473404381559862,
+          "max": 9.371648
+        },
+        "coreCpu": {
+          "count": 6928,
+          "p50": 0.19999998807907104,
+          "p95": 0.29999999701976776,
+          "mean": 0.16377020805351453,
+          "max": 0.5999999940395355
+        },
+        "driverCpu": {
+          "count": 6928,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.08549364881835207,
+          "max": 0.4000000059604645
+        },
+        "callbackLatency": {
+          "count": 6928,
+          "p50": 8.200000000011642,
+          "p95": 9.900000000023283,
+          "mean": 7.759773094688127,
+          "max": 18.20000000006985
+        },
+        "infrastructure": null
+      },
+      "tierChanges": 0,
+      "stateRecords": 299,
+      "neuralFrames": 35231,
+      "ownerChanges": null,
+      "integrityEvents": [],
+      "errors": []
+    },
+    {
+      "id": "rep-harness-2",
+      "arm": "m10-harness",
+      "raw": {
+        "path": ".cache/m105/replication-02.rep-harness-2.json.gz",
+        "bytes": 1640909,
+        "sha256": "45003ed0ba79256656b9768ed9a7221fe512a56d429e689c6d303d692c9a03e0"
+      },
+      "browser": {
+        "version": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/153.0.8010.12",
+          "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+          "jsVersion": "15.3.76.4"
+        },
+        "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+        "flags": [
+          "--autoplay-policy=no-user-gesture-required",
+          "--window-size=1280,900"
+        ]
+      },
+      "placement": {
+        "bounds": {
+          "bounds": {
+            "left": 40,
+            "top": 40,
+            "width": 1200,
+            "height": 903,
+            "windowState": "normal"
+          }
+        },
+        "nativeScreen": {
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "x": 40,
+          "y": 40
+        },
+        "deviceMetricsOverride": true,
+        "scope": "M10 viewport-emulated 1200x820 protocol; native window pinned to built-in display. Screen API is not physical screen geometry.",
+        "failedRequests": []
+      },
+      "summary": {
+        "durationMs": 600001.200000003,
+        "activeMs": 600001.3000000119,
+        "renderedFps": 58.96321540690223,
+        "presentedFps": 59.913213506906025,
+        "nativeCallbackFps": 58.963195752544124,
+        "rendered": 35378,
+        "presented": 35948,
+        "skipped": 570,
+        "qualityDrops": 531,
+        "qualityTotal": 35949,
+        "qualityCoverageMs": null,
+        "gpu": {
+          "count": 35227,
+          "p50": 6.291456,
+          "p95": 7.995392,
+          "mean": 6.372492779288604,
+          "max": 9.568256
+        },
+        "coreCpu": {
+          "count": 35378,
+          "p50": 0.19999998807907104,
+          "p95": 0.29999999701976776,
+          "mean": 0.1619141838896658,
+          "max": 0.7000000029802322
+        },
+        "driverCpu": {
+          "count": 35378,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.08526768044047522,
+          "max": 0.5
+        },
+        "callbackLatency": {
+          "count": 35377,
+          "p50": 8.199999999953434,
+          "p95": 9.799999999988358,
+          "mean": 7.969923453090878,
+          "max": 18.5
+        },
+        "infrastructure": {
+          "calls": null,
+          "totalMs": null,
+          "wallFraction": null,
+          "msPerSecond": null,
+          "meanMs": null
+        }
+      },
+      "metrics": {
+        "decoderDropPercent": 1.477092547776016,
+        "qualityLabel": "Playback-quality reported drops, not decoder-only or unique display loss",
+        "callbackGapPercent": 1.5856236786469344,
+        "callbacks": 35378,
+        "presented": 35948,
+        "gaps": 570,
+        "callbackBoundaryResidual": 0,
+        "submitted": 35378,
+        "submissionAttempts": null,
+        "submissionDeficit": null,
+        "renderedVsPresentedDeficitPercent": 1.5856236786469344,
+        "m10CombinedPercent": 3.0627573161232893,
+        "callbackIntervalsMs": {
+          "count": 35377,
+          "p50": 16.700000002980232,
+          "p95": 19,
+          "mean": 16.959086412075475,
+          "max": 35
+        },
+        "mediaIntervalsMs": {
+          "count": 35227,
+          "p50": 16.666999999999987,
+          "p95": 16.667,
+          "mean": 16.917894058540966,
+          "max": 33.33400000000009
+        },
+        "mediaIntervalExclusions": {
+          "candidates": 35377,
+          "backwardOrGenerationBoundary": 150,
+          "scope": "Callback-sampled PTS differences, not every decoded/displayed frame; loop rewinds and load-generation boundaries excluded explicitly"
+        },
+        "exactUniqueLostFrames": null,
+        "exactOverlap": null,
+        "identityScope": "PTS, source generation and callback/submission sequence identify observations, not a shared native frame ID; counters have separate boundaries and asynchronous publication",
+        "runtimeSamples": 35378
+      },
+      "first120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 58.225,
+        "presentedFps": 59.916666666666664,
+        "nativeCallbackFps": 58.225,
+        "rendered": 6987,
+        "presented": 7190,
+        "skipped": 203,
+        "qualityDrops": 197,
+        "qualityTotal": 7191,
+        "qualityCoverageMs": 120007.29999999702,
+        "gpu": {
+          "count": 6957,
+          "p50": 6.094848,
+          "p95": 8.192,
+          "mean": 6.357594889751345,
+          "max": 9.568256
+        },
+        "coreCpu": {
+          "count": 6987,
+          "p50": 0.10000000894069672,
+          "p95": 0.29999999701976776,
+          "mean": 0.1421926433314611,
+          "max": 0.6000000089406967
+        },
+        "driverCpu": {
+          "count": 6987,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.06360383572344004,
+          "max": 0.5
+        },
+        "callbackLatency": {
+          "count": 6986,
+          "p50": 8.19999999999709,
+          "p95": 9.900000000001455,
+          "mean": 7.873535642713713,
+          "max": 17.69999999999709
+        },
+        "infrastructure": null
+      },
+      "last120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 58.88333333333333,
+        "presentedFps": 59.916666666666664,
+        "nativeCallbackFps": 58.88333333333333,
+        "rendered": 7066,
+        "presented": 7190,
+        "skipped": 124,
+        "qualityDrops": 118,
+        "qualityTotal": 7191,
+        "qualityCoverageMs": 120015.29999999702,
+        "gpu": {
+          "count": 7035,
+          "p50": 6.291456,
+          "p95": 7.929856,
+          "mean": 6.347573820042665,
+          "max": 9.568256
+        },
+        "coreCpu": {
+          "count": 7066,
+          "p50": 0.10000000894069672,
+          "p95": 0.29999999701976776,
+          "mean": 0.14981602033626046,
+          "max": 0.6000000089406967
+        },
+        "driverCpu": {
+          "count": 7066,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.0803283327595222,
+          "max": 0.4000000059604645
+        },
+        "callbackLatency": {
+          "count": 7066,
+          "p50": 8.199999999953434,
+          "p95": 9.800000000046566,
+          "mean": 7.973903198413821,
+          "max": 18.20000000006985
+        },
+        "infrastructure": null
+      },
+      "tierChanges": 0,
+      "stateRecords": 300,
+      "neuralFrames": 35378,
+      "ownerChanges": null,
+      "integrityEvents": [],
+      "errors": []
+    },
+    {
+      "id": "rep-extension-2",
+      "arm": "legacy-neural",
+      "raw": {
+        "path": ".cache/m105/replication-02.rep-extension-2.json.gz",
+        "bytes": 1613906,
+        "sha256": "e1d57a4abf1d3a75776620d7aadf3a864c6d2fb2df5510d418b14fd2cc9e30ea"
+      },
+      "browser": {
+        "version": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/153.0.8010.12",
+          "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+          "jsVersion": "15.3.76.4"
+        },
+        "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+        "flags": [
+          "--autoplay-policy=no-user-gesture-required",
+          "--window-size=1280,900",
+          "--load-extension=/Users/ysoli/Projects/AetherVSR/.cache/m105/m10/dist-extension",
+          "--disable-extensions-except=/Users/ysoli/Projects/AetherVSR/.cache/m105/m10/dist-extension",
+          "--enable-unsafe-extension-debugging"
+        ]
+      },
+      "placement": {
+        "bounds": {
+          "bounds": {
+            "left": 40,
+            "top": 40,
+            "width": 1200,
+            "height": 903,
+            "windowState": "normal"
+          }
+        },
+        "nativeScreen": {
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "x": 40,
+          "y": 40
+        },
+        "deviceMetricsOverride": true,
+        "scope": "M10 viewport-emulated 1200x820 protocol; native window pinned to built-in display. Screen API is not physical screen geometry.",
+        "failedRequests": []
+      },
+      "summary": {
+        "durationMs": 600001.3999999911,
+        "activeMs": 600001.900000006,
+        "renderedFps": 58.78486283532093,
+        "presentedFps": 59.81986042032658,
+        "nativeCallbackFps": 58.78481384809036,
+        "rendered": 35271,
+        "presented": 35892,
+        "skipped": 621,
+        "qualityDrops": 576,
+        "qualityTotal": 35947,
+        "qualityCoverageMs": null,
+        "gpu": {
+          "count": 35122,
+          "p50": 6.5536,
+          "p95": 7.798784,
+          "mean": 6.52652502249301,
+          "max": 9.043968
+        },
+        "coreCpu": {
+          "count": 35271,
+          "p50": 0.19999998807907104,
+          "p95": 0.29999999701976776,
+          "mean": 0.1706189220151579,
+          "max": 2.199999988079071
+        },
+        "driverCpu": {
+          "count": 35271,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.07475830002018431,
+          "max": 0.7999999970197678
+        },
+        "callbackLatency": {
+          "count": 35271,
+          "p50": 0,
+          "p95": 9.5,
+          "mean": 3.7995945677752228,
+          "max": 18
+        },
+        "infrastructure": {
+          "calls": 596,
+          "totalMs": 171.8000001758337,
+          "wallFraction": 0.0002863326655168409,
+          "msPerSecond": 0.2863326655168409,
+          "meanMs": 0.28825503385206996
+        }
+      },
+      "metrics": {
+        "decoderDropPercent": 1.602359028569839,
+        "qualityLabel": "Playback-quality reported drops, not decoder-only or unique display loss",
+        "callbackGapPercent": 1.7301905717151453,
+        "callbacks": 35271,
+        "presented": 35892,
+        "gaps": 621,
+        "callbackBoundaryResidual": 0,
+        "submitted": 35271,
+        "submissionAttempts": null,
+        "submissionDeficit": null,
+        "renderedVsPresentedDeficitPercent": 1.7301905717151453,
+        "m10CombinedPercent": 3.3350050150451356,
+        "callbackIntervalsMs": {
+          "count": 35270,
+          "p50": 16.700000002980232,
+          "p95": 18.899999991059303,
+          "mean": 17.011094414516503,
+          "max": 58.29999999701977
+        },
+        "mediaIntervalsMs": {
+          "count": 35121,
+          "p50": 16.666999999999987,
+          "p95": 16.667,
+          "mean": 16.934312092486493,
+          "max": 50
+        },
+        "mediaIntervalExclusions": {
+          "candidates": 35270,
+          "backwardOrGenerationBoundary": 149,
+          "scope": "Callback-sampled PTS differences, not every decoded/displayed frame; loop rewinds and load-generation boundaries excluded explicitly"
+        },
+        "exactUniqueLostFrames": null,
+        "exactOverlap": null,
+        "identityScope": "PTS, source generation and callback/submission sequence identify observations, not a shared native frame ID; counters have separate boundaries and asynchronous publication",
+        "runtimeSamples": 35271
+      },
+      "first120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 58.958333333333336,
+        "presentedFps": 59.833333333333336,
+        "nativeCallbackFps": 58.958333333333336,
+        "rendered": 7075,
+        "presented": 7180,
+        "skipped": 105,
+        "qualityDrops": 95,
+        "qualityTotal": 7190,
+        "qualityCoverageMs": 120011.20000000298,
+        "gpu": {
+          "count": 7045,
+          "p50": 6.619136,
+          "p95": 7.798784,
+          "mean": 6.595619320369087,
+          "max": 8.781824
+        },
+        "coreCpu": {
+          "count": 7075,
+          "p50": 0.20000000298023224,
+          "p95": 0.30000001192092896,
+          "mean": 0.1788692577630808,
+          "max": 1.5
+        },
+        "driverCpu": {
+          "count": 7075,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.0693568904745284,
+          "max": 0.3999999910593033
+        },
+        "callbackLatency": {
+          "count": 7075,
+          "p50": 0,
+          "p95": 9.5,
+          "mean": 3.8905583038869413,
+          "max": 16.30000000000291
+        },
+        "infrastructure": null
+      },
+      "last120": {
+        "durationMs": 120000,
+        "activeMs": 120000,
+        "renderedFps": 58.84166666666667,
+        "presentedFps": 59.81666666666667,
+        "nativeCallbackFps": 58.84166666666667,
+        "rendered": 7061,
+        "presented": 7178,
+        "skipped": 117,
+        "qualityDrops": 105,
+        "qualityTotal": 7190,
+        "qualityCoverageMs": 120007.89999999106,
+        "gpu": {
+          "count": 7032,
+          "p50": 6.5536,
+          "p95": 7.733248,
+          "mean": 6.516330593856678,
+          "max": 8.781824
+        },
+        "coreCpu": {
+          "count": 7061,
+          "p50": 0.20000000298023224,
+          "p95": 0.30000001192092896,
+          "mean": 0.19579379687041168,
+          "max": 2.199999988079071
+        },
+        "driverCpu": {
+          "count": 7061,
+          "p50": 0.09999999403953552,
+          "p95": 0.20000000298023224,
+          "mean": 0.09011471470731663,
+          "max": 0.5999999940395355
+        },
+        "callbackLatency": {
+          "count": 7061,
+          "p50": 0,
+          "p95": 9.300000000046566,
+          "mean": 3.2723835150831526,
+          "max": 10.300000000046566
+        },
+        "infrastructure": null
+      },
+      "tierChanges": 0,
+      "stateRecords": 299,
+      "neuralFrames": 35271,
+      "ownerChanges": 0,
+      "integrityEvents": [],
+      "errors": []
+    }
+  ],
+  "invalid": [
+    {
+      "id": "rep-harness-1",
+      "raw": {
+        "path": ".cache/m105/replication-01.rep-harness-1.json.gz",
+        "bytes": 584059,
+        "sha256": "0af6292b68d5a45cb1af2769e06d3529b674d81a3db3c545eee88d6031a87b85"
+      },
+      "error": "Error: Playback/foreground integrity event: blur",
+      "events": [
+        {
+          "at": 219238.19999998808,
+          "type": "blur",
+          "visibility": "visible",
+          "focused": false
+        }
+      ],
+      "frontmost": {
+        "bundleId": "com.mitchellh.ghostty",
+        "name": "Ghostty"
+      }
+    }
+  ],
+  "machine": {
+    "os": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "memoryBytes": 25769803776,
+    "displayRefreshRate": "not measured",
+    "osVersion": "26.6.2",
+    "hardware": {
+      "model": "Mac17,2",
+      "chip": "Apple M5",
+      "memory": "24 GB"
+    }
+  },
+  "media": {
+    "path": "public/media/m9/720p60.mp4",
+    "sha256": "8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a"
+  },
+  "bundle": "724507ec7d3e7a8c9a4ce7bf0fc772f2d2de9f56c1218693db52d6cba195258a"
+}

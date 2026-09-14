@@ -125,6 +125,7 @@ describe('M10 performance protocol helpers (no browser)', () => {
       globalThis.HTMLVideoElement=class extends EventTarget {requestVideoFrameCallback(fn){this.callback=fn;return 1;}};
       globalThis.MutationObserver=class {constructor(fn){this.callback=fn;}};
       globalThis.setTimeout=globalThis.setInterval=(fn)=>fn;
+      globalThis.queueMicrotask=(fn)=>{globalThis.pendingMicrotask=fn;};
       globalThis.navigator={gpu:{requestAdapter:async()=>({real:true})}};
       globalThis.chrome={runtime:{onMessage:{addListener(fn){this.fn=fn;},removeListener(fn){if(this.fn===fn)this.fn=null;}},sendMessage(){clock+=2;return 7;}}};
       globalThis.target=new EventTarget();globalThis.original=EventTarget.prototype.addEventListener;
@@ -136,6 +137,7 @@ describe('M10 performance protocol helpers (no browser)', () => {
       target.addEventListener('work',listener);window.dispatchEvent({type:'aethervsr:m10:performance:start'});
       target.dispatchEvent({type:'work'});assert.equal(data.totalMs,9);assert.equal(data.categories['runtime:sendMessage'].totalMs,2);assert.equal(data.categories['event:work'].totalMs,9);
       target.removeEventListener('work',listener);target.dispatchEvent({type:'work'});assert.equal(data.callbacks,1);
+      queueMicrotask(()=>{clock+=5;});pendingMicrotask();assert.equal(data.categories.microtask.totalMs,5);assert.equal(data.totalMs,14);
       window.dispatchEvent({type:'aethervsr:m10:performance:end'});data.restore();assert.equal(EventTarget.prototype.addEventListener,original);
     \`).runInContext(realm);
   `));
