@@ -9,7 +9,8 @@ export const ROOT = fileURLToPath(new URL('../', import.meta.url));
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const CASES = ['custom', 'native', 'multiple', 'late', 'spa', 'iframe', 'sameiframe', 'cors', 'nocors',
   'contain', 'cover', 'clipped', 'radius', 'translated', 'controls/captions', 'pip', 'fullscreen', 'mse', 'drm',
-  'reinsert', 'open-shadow-late', 'caption-before-auto-passive', 'caption-after-auto-passive', 'caption-before-positive-passive'];
+  'reinsert', 'open-shadow-late', 'caption-before-auto-passive', 'caption-after-auto-passive', 'caption-before-positive-passive',
+  'rounded-ancestor', 'size-container', 'positioned-ancestor', 'rounded-offset'];
 
 export async function startFixtures({ mse = true } = {}) {
   const preferred = join(ROOT, 'public/media/m9/720p60.mp4');
