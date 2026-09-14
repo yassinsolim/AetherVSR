@@ -22,7 +22,8 @@ export async function withJourneyWatchdog(body, shutdown, milliseconds = 60000) 
 }
 export function assertPageErrors(errors, fixture, observedCodes) {
   const taintedVideo = "SecurityError: Failed to execute 'importExternalTexture' on 'GPUDevice': Video element is tainted by cross-origin data and may not be loaded.";
-  const classified = errors.map(error => ({ error, expected: fixture === 'nocors' && observedCodes.has('cors-blocked') && error === taintedVideo }));
+  const taintedCopy = "SecurityError: Failed to execute 'copyExternalImageToTexture' on 'GPUQueue': Video element is tainted by cross-origin data and may not be loaded.";
+  const classified = errors.map(error => ({ error, expected: fixture === 'nocors' && observedCodes.has('cors-blocked') && [taintedVideo, taintedCopy].includes(error) }));
   assert.deepEqual(classified.filter(item => !item.expected), [], 'Unexpected page errors');
   return classified;
 }
