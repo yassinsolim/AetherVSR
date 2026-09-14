@@ -61,7 +61,7 @@ export function verifyBuild(testBuild = false, ignoredOutput) {
 }
 
 const cdpSend = (session, method, params = {}, timeout = 5000) => bounded(session.send(method, params), timeout, `CDP ${method}`);
-async function attach(browserCDP, targetId) {
+export async function attach(browserCDP, targetId) {
   const { sessionId } = await cdpSend(browserCDP, 'Target.attachToTarget', { targetId, flatten: false });
   let nextId = 0;
   const pending = new Map();
@@ -117,7 +117,12 @@ export async function openExtension(build, record = () => {}) {
       await bounded(page.bringToFront(), 3000, 'Focus popup tab');
       const outer = await until(async () => (await cdpSend(browserCDP, 'Target.getTargets', { filter: [{ type: 'tab', exclude: false }, { exclude: true }] })).targetInfos.find(target => target.url === page.url()));
       const before = new Set((await targets()).targetInfos.map(target => target.targetId));
-      await cdpSend(browserCDP, 'Extensions.triggerAction', { id: extensionId, targetId: outer.targetId });
+      const dispatchedAt = Date.now();
+      record('native-action-dispatch', { extensionId, targetId: outer.targetId, dispatchedAt });
+      try {
+        await cdpSend(browserCDP, 'Extensions.triggerAction', { id: extensionId, targetId: outer.targetId });
+        record('native-action-reply', { elapsedMs: Date.now() - dispatchedAt });
+      } catch (error) { record('native-action-error', { elapsedMs: Date.now() - dispatchedAt, error: String(error) }); throw error; }
       const popupURL = `chrome-extension://${extensionId}/popup.html`;
       const target = await until(async () => (await targets()).targetInfos.find(candidate => !before.has(candidate.targetId) &&
         (candidate.url === popupURL || (candidate.type === 'other' && candidate.url === ''))));
