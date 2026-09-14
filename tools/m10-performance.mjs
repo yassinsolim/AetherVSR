@@ -49,11 +49,11 @@ export function distribution(values) {
     max: finite.length ? finite.reduce((maximum, value) => Math.max(maximum, value), -Infinity) : null };
 }
 
-export function installVideoObserver() {
+export function installVideoObserver(options = {}) {
   const key = Symbol.for('aethervsr.m10.performance.video');
   const prefix = 'aethervsr:m10:performance:';
   const observer = globalThis[key] = { rows: [], events: [], callbacks: 0, presented: null, overflow: false };
-  let recording = false, handle, progress, previous = null;
+  let recording = false, handle, progress, previous = null, sourceGeneration = 0;
   observer.done = new Promise(done => { observer.complete = done; });
   const quality = video => {
     const value = video.getVideoPlaybackQuality?.();
@@ -73,12 +73,16 @@ export function installVideoObserver() {
       previous = observer.presented = metadata.presentedFrames;
       if (recording) {
         const counts = quality(video);
-        push(observer.rows, [observedAt, now, metadata.mediaTime, metadata.presentedFrames, delta,
-          now - metadata.presentationTime, counts?.total ?? null, counts?.dropped ?? null, performance.now() - observedAt]);
+        const row = [observedAt, now, metadata.mediaTime, metadata.presentedFrames, delta,
+          now - metadata.presentationTime, counts?.total ?? null, counts?.dropped ?? null, performance.now() - observedAt];
+        if (options.accounting) row.push(metadata.presentationTime, metadata.expectedDisplayTime,
+          sourceGeneration, observer.callbacks, metadata.processingDuration ?? null);
+        push(observer.rows, row);
       }
       handle = video.requestVideoFrameCallback(tick);
     };
     handle = video.requestVideoFrameCallback(tick);
+    if (options.accounting) video.addEventListener('loadstart', () => { sourceGeneration++; previous = null; });
     for (const type of ['visibilitychange', 'blur', 'focus', 'pagehide', 'loadstart', 'error', 'ratechange', 'pause', 'play']) {
       const target = ['blur', 'focus', 'pagehide'].includes(type) ? window : ['loadstart', 'error', 'ratechange', 'pause', 'play'].includes(type) ? video : document;
       target.addEventListener(type, () => { if (recording) push(observer.events, { at: performance.now(), type, ...foreground() }); });
@@ -109,7 +113,7 @@ export function installRuntimeRecorder(options) {
   const record = globalThis[key] = { timeOrigin: performance.timeOrigin, samples: [], frames: [], driverCpuRows: [], states: [], configurations: [], overflow: false, error: null };
   const previous = driver ? { onSample: driver.onSample, onFrame: driver.onFrame, onChange: driver.onChange, onConfigure: driver.onConfigure } : {};
   const previousPipelineFrame = pipeline?.onFrame;
-  let started = null, ended = null, finishing = false, lastState = null, timer, deadline;
+  let started = null, ended = null, finishing = false, lastState = null, timer, deadline, submittedSequence = 0;
   const activityListeners = [];
   let inPipelineFrame = false, ownedCallbackMs = null, pendingState = null, pendingConfiguration = null;
   const push = (rows, row) => { if (rows.length < 160000) rows.push(row); else record.overflow = true; };
@@ -160,9 +164,12 @@ export function installRuntimeRecorder(options) {
         if (started !== null && ended === null) {
           push(record.driverCpuRows, [before, after - before]);
           const quality = video.getVideoPlaybackQuality?.();
-          push(record.frames, [before, tick.now, tick.mediaTime, tick.presentedDelta,
+          const frame = [before, tick.now, tick.mediaTime, tick.presentedDelta,
             tick.presentationTime === tick.now && tick.expectedDisplayTime === tick.now ? null : Math.max(0, tick.now - tick.presentationTime), quality?.totalVideoFrames ?? null,
-            quality?.droppedVideoFrames ?? null, pipeline.cpuFrame.last(), ownedCallbackMs, neural]);
+            quality?.droppedVideoFrames ?? null, pipeline.cpuFrame.last(), ownedCallbackMs, neural];
+          if (options.accounting) frame.push(tick.presentationTime, tick.expectedDisplayTime,
+            pipeline.source?.loadGeneration ?? null, ++submittedSequence);
+          push(record.frames, frame);
         }
         if (pendingState) state(pendingState);
         if (pendingConfiguration) configuration(pendingConfiguration);

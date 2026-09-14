@@ -7,6 +7,7 @@ function check(source: string): void {
     import { Script, createContext } from 'node:vm';
     import { parseCases, quantile, distribution, counterDelta, windowRate,
       installVideoObserver, installRuntimeRecorder, summarizeCapture, validateCapture, windowSummary } from './tools/m10-performance.mjs';
+    import { deliverySummary } from './tools/m105-accounting.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -89,6 +90,41 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('reports media-time intervals in milliseconds and retains unknown overlap and submission identity', () => check(fixture + `
+    const record = install('no-extension');
+    await advance(5000); await advance(5010); nativeFrame(11);
+    await advance(5030); nativeFrame(13); await advance(35000); await observer.done;
+    const summary = deliverySummary({ runtime: record, video: observer });
+    assert(Math.abs(summary.mediaIntervalsMs.p50 - 20) < 1e-9);
+    assert.equal(summary.gaps, 1);
+    assert.equal(summary.callbackBoundaryResidual, 0);
+    assert.equal(summary.exactOverlap, null);
+    assert.equal(summary.submissionDeficit, null);
+    assert.equal(summary.m10CombinedPercent, null);
+  `));
+
+  it('adds diagnostic metadata without inventing frame identity or changing legacy columns', () => check(fixture + `
+    const diagnosticContext = createContext({ ...context });
+    new Script('(' + installVideoObserver.toString() + ')({accounting:true})').runInContext(diagnosticContext);
+    document.dispatchEvent({ type: 'DOMContentLoaded' });
+    const diagnostic = new Script('globalThis[Symbol.for("aethervsr.m10.performance.video")]').runInContext(diagnosticContext);
+    window.dispatchEvent({ type: 'aethervsr:m10:performance:start' });
+    for (const [handle, callback] of [...frameCallbacks]) {
+      frameCallbacks.delete(handle);
+      callback(100, { mediaTime: 2, presentedFrames: 123, presentationTime: 90, expectedDisplayTime: 110 });
+    }
+    assert.equal(diagnostic.rows.length, 1);
+    assert.deepEqual(Array.from(diagnostic.rows[0].slice(9)), [90,110,0,1,null]);
+    video.dispatchEvent({ type: 'loadstart' });
+    for (const [handle, callback] of [...frameCallbacks]) {
+      frameCallbacks.delete(handle);
+      callback(120, { mediaTime: 0, presentedFrames: 1, presentationTime: 115, expectedDisplayTime: 130 });
+    }
+    assert.equal(diagnostic.rows[1][4], null);
+    assert.equal(diagnostic.rows[1][11], 1);
+    assert.equal(diagnostic.rows[1][12], 2);
+  `));
+
   it('preserves supplied case order, rejects malformed input and limits long runs to the production extension', () => check(`
     assert.deepEqual(parseCases([{id:'pair3_b',kind:'harness'},{id:'pair3_a',kind:'extension-auto'}]).map(item => item.id), ['pair3_b','pair3_a']);
     assert.equal(parseCases([{id:'long',kind:'extension-auto'}])[0].durationMs, 600000);
