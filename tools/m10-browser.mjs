@@ -226,16 +226,20 @@ export async function openExtension(build, record = () => {}) {
         }, extensionId), remaining(3000), 'Schedule native extension reload');
         assert.deepEqual(scheduled, { extensionId, workerURL });
         await until(async () => closed && (await targets()).targetInfos.every(target => target.targetId !== previous.target.targetId), Boolean, remaining(5000), signal);
+        const fresh = await until(async () => (await targets()).targetInfos.find(target => target.type === 'service_worker' && target.url === workerURL && target.targetId !== previous.target.targetId), Boolean, remaining(5000), signal);
+        const startup = await attach(browserCDP, fresh.targetId);
+        try {
+          await bounded(startup.send('Runtime.runIfWaitingForDebugger'), remaining(3000), 'Start fresh extension worker');
+          const ready = await bounded(startup.evaluate('({extensionId:chrome.runtime.id,workerURL:location.href})'), remaining(3000), 'Fresh worker execution');
+          assert.deepEqual(ready, { extensionId, workerURL });
+          record('extension-reload-worker-ready', { targetId: fresh.targetId, ...ready });
+        } finally { await bounded(startup.close(), 1500, 'Detach fresh worker startup'); }
         const action = await bounded(popup(page), remaining(10000), 'Wake reloaded extension through native action');
         try {
           const state = await action.request('m10.status');
           assert.equal(state.enabled, false, 'Reload must not silently reactivate content');
           record('extension-reload-action-wake', { tabId: action.tabId, status: state });
         } finally { await bounded(action.dismiss(), remaining(5000), 'Dismiss reload wake popup'); }
-        const fresh = await until(async () => (await targets()).targetInfos.find(target => target.type === 'service_worker' && target.url === workerURL && target.targetId !== previous.target.targetId), Boolean, remaining(4000), signal);
-        const startup = await attach(browserCDP, fresh.targetId);
-        try { await bounded(startup.send('Runtime.runIfWaitingForDebugger'), remaining(3000), 'Start fresh extension worker'); }
-        finally { await bounded(startup.close(), 1500, 'Detach fresh worker startup'); }
         const nextWorker = await until(() => {
           const workers = context.serviceWorkers().filter(candidate => candidate.url() === workerURL);
           return workers.length === 1 && workers[0] !== previousWorker ? workers[0] : null;

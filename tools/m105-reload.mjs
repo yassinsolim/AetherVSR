@@ -91,6 +91,12 @@ export async function runReload(output, mechanism, earlyResume) {
     report.oldPrivilege = await oldEvaluate(`(async()=>{try{const result=await chrome.runtime.sendMessage({type:'m10.model'});return {privileged:result?.ok===true};}catch(error){return {privileged:false,error:String(error)};}})()`);
     assert.notEqual(report.oldPrivilege?.privileged, true, 'Old world retained model privilege');
     report.afterReload = await page.evaluate(pageSnapshot, native.extensionId);
+    const freshWorker = await until(async () => (await targets()).find(target => target.type === 'service_worker' && target.url === workerURL && target.targetId !== oldTarget.targetId), Boolean, 10000);
+    resume(freshWorker);
+    await bounded(Promise.all([...pending.values()]), 5000, 'Fresh worker resume');
+    report.workerReadyBeforeAction = await native.workerEval(() => ({ id: chrome.runtime.id, url: location.href }));
+    assert.deepEqual(report.workerReadyBeforeAction, { id: native.extensionId, url: workerURL });
+    emit('fresh-worker-ready-before-action', { targetId: freshWorker.targetId, ...report.workerReadyBeforeAction });
     const reenable = async () => {
       const probe = bounded(browserCDP.send('Browser.getVersion'), 3000, 'Concurrent browser liveness').then(value => emit('browser-liveness', { product: value.product })).catch(error => emit('browser-liveness-error', String(error)));
       const action = await native.popup(page);
