@@ -174,6 +174,8 @@ describe('inspectGeometry', () => {
       borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' });
     setup.view.getComputedStyle.mockImplementation(element => element === setup.video ? setup.videoStyle : element === outer ? outerStyle : setup.parentStyle);
     expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+    setup.document.fullscreenElement = setup.parent;
+    expect(setup.inspect()).toMatchObject({ ok: true, borderRadius: '12px', clip: {left:10,top:20,width:320,height:180} });
   });
 
   it('rejects inherited ancestor zoom even when rounded clip rectangles coincide', () => {

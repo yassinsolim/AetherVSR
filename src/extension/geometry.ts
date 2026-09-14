@@ -306,6 +306,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     const clipsX = /^(?:hidden|clip|auto|scroll)$/.test(style.overflowX);
     const clipsY = /^(?:hidden|clip|auto|scroll)$/.test(style.overflowY);
     if (!clipsX && !clipsY) {
+      if (element === video.ownerDocument.fullscreenElement) break;
       if (containingBlockOutside !== 'fixed' && (style.position === 'absolute' || style.position === 'fixed')) containingBlockOutside = style.position;
       continue;
     }
@@ -344,6 +345,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
       width: clipsX ? ancestor.clientWidth * zoomX : clip.width,
       height: clipsY ? ancestor.clientHeight * zoomY : clip.height,
     });
+    if (element === video.ownerDocument.fullscreenElement) break;
     if (containingBlockOutside !== 'fixed' && (style.position === 'absolute' || style.position === 'fixed')) containingBlockOutside = style.position;
   }
   if (clip.width <= 0 || clip.height <= 0) return reject('offscreen', 'Video is outside the viewport or ancestor clip.');
