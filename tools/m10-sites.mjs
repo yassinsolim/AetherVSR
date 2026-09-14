@@ -137,8 +137,13 @@ async function consent(page, record) {
   }
 }
 
+export function playerCommand(action) {
+  assert(['play', 'pause'].includes(action), 'Unknown player command');
+  return action === 'pause' ? /^Pause(?: Video)?(?:, .+)?$/i : /^(Play(?: Video)?|Replay|Restart)(?:, .+)?$/i;
+}
+
 async function playerButton(page, site, action) {
-  const name = action === 'pause' ? /^Pause(?: Video)?$/i : /^(Play(?: Video)?|Replay|Restart)$/i;
+  const name = playerCommand(action);
   const player = page.locator(site.player).filter({ has: page.locator('video') }).first();
   if (!await player.count()) throw new Unverified('Original custom player container not found');
   await player.hover({ timeout: 3000 });
@@ -341,7 +346,7 @@ export async function runSites(output, configPath) {
           if (ready?.mediaKeys || ready?.failed || ready?.loaded) return true;
           if (!metadataPlayClicked) {
             const player = page.locator(site.player).filter({ has: page.locator('video') }).first();
-            const play = await visibleButton(player, /^(Play(?: Video)?|Replay)$/i);
+            const play = await visibleButton(player, playerCommand('play'));
             if (play) { await play.click({ timeout: 3000 }); metadataPlayClicked = true; }
           }
           return false;
@@ -349,7 +354,7 @@ export async function runSites(output, configPath) {
         try {
           await until(async () => {
             const player = page.locator(site.player).filter({ has: page.locator('video') }).first();
-            return !!await visibleButton(player, /^(Play(?: Video)?|Pause(?: Video)?|Replay|Restart)$/i);
+            return !!(await visibleButton(player, playerCommand('play')) || await visibleButton(player, playerCommand('pause')));
           }, Boolean, 5000, controller.signal);
           item.customPlayerSettled = true;
         } catch (error) {

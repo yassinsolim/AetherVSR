@@ -282,6 +282,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   if (borderRadius === null) return reject('unsupported-geometry', 'Only uniform pixel or percentage corner radii are supported.');
   let verifyPlacement = false;
   let unresolvedZoom = false;
+  let ancestorRadius: string | null = null;
   let containingBlockOutside = computed.position === 'fixed' ? 'fixed' : computed.position === 'absolute' ? 'absolute' : null;
   let clip = intersect(rect, { left: 0, top: 0,
     width: video.ownerDocument.documentElement.clientWidth,
@@ -319,15 +320,18 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
         style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft].every(value => Number.parseFloat(value) === 0);
       const coincident = Math.abs(ancestorRect.left - rect.left) < 0.01 && Math.abs(ancestorRect.top - rect.top) < 0.01
         && Math.abs(ancestorRect.width - rect.width) < 0.01 && Math.abs(ancestorRect.height - rect.height) < 0.01;
+      const matchingRadius = ancestorRadius !== null ? ancestorRadius === radius : borderRadius === '0px'
+        || (uniformRadius(computed, 1, 1) === radius && Math.abs(rect.width - layoutWidth) < 1 / 64 && Math.abs(rect.height - layoutHeight) < 1 / 64);
       if (containingBlockOutside !== null || ['HTML', 'BODY'].includes(element.tagName)
         || !plainBox || !coincident || !radius || !/^\d+(?:\.\d+)?px$/.test(radius)
         || !['contain', 'cover', 'fill'].includes(computed.objectFit)
         || !['hidden', 'clip'].includes(style.overflowX) || style.overflowX !== style.overflowY
         || (style.zoom && !['1', 'normal'].includes(style.zoom))
-        || (borderRadius !== '0px' && borderRadius !== radius)) {
+        || !matchingRadius) {
         return reject('unsupported-geometry', 'Rounded ancestor clips require coincident undecorated boxes and matching circular pixel radii.');
       }
       borderRadius = radius;
+      ancestorRadius = radius;
       verifyPlacement = true;
     }
     const zoomX = ancestorRect.width / ancestor.offsetWidth;

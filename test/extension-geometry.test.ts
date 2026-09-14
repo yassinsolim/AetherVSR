@@ -172,6 +172,19 @@ describe('inspectGeometry', () => {
     expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
   });
 
+  it('accepts equal circular radii across computed-style serialization rounding but not real scale', () => {
+    const setup = fixture();
+    Object.assign(setup.videoStyle, { width: '320px', height: '180.336px', borderTopLeftRadius: '24px',
+      borderTopRightRadius: '24px', borderBottomLeftRadius: '24px', borderBottomRightRadius: '24px' });
+    Object.assign(setup.parentStyle, { position: 'relative', overflowX: 'clip', overflowY: 'clip',
+      borderTopLeftRadius: '24px', borderTopRightRadius: '24px', borderBottomLeftRadius: '24px', borderBottomRightRadius: '24px' });
+    setup.video.getBoundingClientRect.mockReturnValue({ left: 10, top: 20, width: 320, height: 180.3359375 });
+    setup.parent.getBoundingClientRect.mockReturnValue({ left: 10, top: 20, width: 320, height: 180.3359375 });
+    expect(setup.inspect()).toMatchObject({ ok: true, borderRadius: '24px', style: { 'clip-path': 'inset(0px round 24px)' } });
+    setup.videoStyle.objectFit = 'fill'; setup.videoStyle.height = '180px';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+  });
+
   it('returns viewport coordinates, a low stack level and an immediate after-video placement without writes', () => {
     const setup = fixture();
     const result = setup.inspect();

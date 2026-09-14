@@ -10,6 +10,7 @@ function check(source: string): void {
     import { deliverySummary, validateScheduling, installScheduling, installOwnedCost } from './tools/m105-accounting.mjs';
     import { parsePlan, ARMS } from './tools/m105-compare.mjs';
     import { summarizeTrace } from './tools/m105-trace.mjs';
+    import { playerCommand } from './tools/m10-sites.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -92,6 +93,14 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('recognizes original player command labels with media titles without matching unrelated actions', () => check(`
+    assert(playerCommand('play').test('Play, View From A Blue Moon'));
+    assert(playerCommand('pause').test('Pause, Sample clip'));
+    assert(playerCommand('play').test('Play Video'));assert(playerCommand('play').test('Replay'));
+    assert(!playerCommand('play').test('Play next video'));assert(!playerCommand('play').test('Pause'));
+    assert.throws(()=>playerCommand('enable'));
+  `));
+
   it('summarizes nested Chrome trace slices without treating drop batches as unique frame identities', () => check(`
     const name='VideoFrameCallbackRequesterImpl::ExecuteVideoFrameCallbacks';
     const rows=summarizeTrace({traceEvents:[
