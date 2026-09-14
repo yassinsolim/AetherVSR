@@ -182,6 +182,30 @@ afterEach(() => {
 });
 
 describe('VideoAttachment', () => {
+  it('keeps diagnostic ownership and geometry live without acquiring a GPU or constructing frame processing', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, canvas, video, parent, next, observer, document, failure } = harness({ processingDisabled: true });
+    await attachment.start();
+    expect(acquireGpu).not.toHaveBeenCalled(); expect(VideoPipeline).not.toHaveBeenCalled();
+    expect(attachment.driver).toBeNull(); expect(attachment.gpu).toBeNull();
+    expect(parent.children).toEqual([video, canvas, next]);
+    expect(attachment.snapshot()).toMatchObject({ ready: false, active: false, current: null,
+      suspendedReason: 'diagnostic-processing-disabled', resources: {device:0,pipeline:0,canvas:1,resizeObservers:1,frameCallback:0} });
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    const before = attachment.snapshot().infrastructure.geometryCalls;
+    attachment.refresh(); document.flush();
+    expect(attachment.snapshot().infrastructure.geometryCalls).toBeGreaterThan(before);
+    expect(observer.observe).toHaveBeenCalled(); expect(failure).not.toHaveBeenCalled();
+    attachment.destroy(); expect(parent.children).toEqual([video,next]);
+    expect(Object.values(attachment.snapshot().resources).every(value => value === 0)).toBe(true);
+  });
+
+  it('cannot disable processing through diagnostic options in production', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', false);
+    const { attachment } = harness({ processingDisabled: true });
+    await attachment.start(); expect(acquireGpu).toHaveBeenCalledTimes(1); expect(VideoPipeline).toHaveBeenCalledTimes(1);
+  });
+
   it.each([false, true])('rejects actual canvas coordinate mismatch after runtime start=%s', async afterStart => {
     const { attachment, canvas, parent, video, next, device, failure, document } = harness();
     const inspect = vi.mocked(inspectGeometry).getMockImplementation()!;

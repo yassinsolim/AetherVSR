@@ -8,12 +8,15 @@ import { RuntimeDriver } from '../runtime.js';
 import { inspectGeometry, type Rect } from './geometry.js';
 import type { StatusCode } from './protocol.js';
 
+declare const __AETHERVSR_TEST__: boolean;
+
 export interface AttachmentOptions {
   mode: RuntimeMode;
   model: PackedModel;
   onFailure: (code: StatusCode, message: string) => void;
   forceCopy?: boolean;
   withheldFeatures?: GPUFeatureName[];
+  processingDisabled?: boolean;
 }
 
 export interface AttachmentSnapshot {
@@ -57,6 +60,7 @@ export class VideoAttachment {
   private failure: AttachmentOptions['onFailure'] | null;
   private readonly forceCopy: boolean;
   private readonly withheldFeatures: GPUFeatureName[];
+  private readonly processingDisabled: boolean;
   private mode: RuntimeMode;
   private disposed = false;
   private generation = 0;
@@ -82,6 +86,7 @@ export class VideoAttachment {
     this.failure = options.onFailure;
     this.forceCopy = options.forceCopy ?? false;
     this.withheldFeatures = [...(options.withheldFeatures ?? [])];
+    this.processingDisabled = typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__ && options.processingDisabled === true;
     this.canvas = video.ownerDocument.createElement('canvas');
     this.canvas.width = 0;
     this.canvas.height = 0;
@@ -106,6 +111,7 @@ export class VideoAttachment {
       this.observe();
       this.checkGeometry();
       if (this.disposed) return;
+      if (typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__ && this.processingDisabled) return;
       let gpu: GpuContext;
       try {
         gpu = await acquireGpu({ optionalFeatures: NEURAL_OPTIONAL_FEATURES,
@@ -247,7 +253,8 @@ export class VideoAttachment {
     this.style('animation', 'none');
     this.style('transition', 'none');
     if (geometry.verifyPlacement) this.style('visibility', 'hidden');
-    if ((this.videoPipeline || geometry.verifyPlacement) && (this.canvas.parentNode !== geometry.placement.parent || this.video.nextSibling !== this.canvas)) {
+    if ((this.videoPipeline || geometry.verifyPlacement || (typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__ && this.processingDisabled))
+      && (this.canvas.parentNode !== geometry.placement.parent || this.video.nextSibling !== this.canvas)) {
       geometry.placement.parent.insertBefore(this.canvas, geometry.placement.before);
     }
     if (geometry.verifyPlacement) {
@@ -264,6 +271,9 @@ export class VideoAttachment {
     this.style('visibility', this.outputReady ? 'visible' : 'hidden');
     this.eligible = true;
     this.suspendedReason = null;
+    if (typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__ && this.processingDisabled) {
+      this.suspendedReason = 'diagnostic-processing-disabled';
+    }
     this.runtime?.syncActive();
   }
 
