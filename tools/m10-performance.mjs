@@ -113,6 +113,7 @@ export function installRuntimeRecorder(options) {
   const record = globalThis[key] = { timeOrigin: performance.timeOrigin, samples: [], frames: [], driverCpuRows: [], states: [], configurations: [], overflow: false, error: null };
   const previous = driver ? { onSample: driver.onSample, onFrame: driver.onFrame, onChange: driver.onChange, onConfigure: driver.onConfigure } : {};
   const previousPipelineFrame = pipeline?.onFrame;
+  const previousPipelineTick = pipeline?.onTick;
   let started = null, ended = null, finishing = false, lastState = null, timer, deadline, submittedSequence = 0;
   const activityListeners = [];
   let inPipelineFrame = false, ownedCallbackMs = null, pendingState = null, pendingConfiguration = null;
@@ -131,6 +132,19 @@ export function installRuntimeRecorder(options) {
       push(record.states, [performance.now(), value.state, value.tier, value.reason]); lastState = identity;
     }
   };
+  if (options.accounting && pipeline) {
+    if (typeof previousPipelineTick !== 'function') throw new Error('Actual pipeline tick method required for accounting');
+    record.attempts = [];
+    pipeline.onTick = function(tick) {
+      const before = performance.now(), sequence = submittedSequence;
+      const measured = started !== null && ended === null;
+      try { return previousPipelineTick.call(this, tick); }
+      finally {
+        if (measured) push(record.attempts, [before, tick.now, tick.mediaTime, tick.presentedDelta,
+          pipeline.source?.loadGeneration ?? null, sequence, submittedSequence, pipeline.error ? String(pipeline.error) : null]);
+      }
+    };
+  }
   if (driver) {
     driver.onSample = sample => {
       previous.onSample?.call(driver, sample);
@@ -186,6 +200,7 @@ export function installRuntimeRecorder(options) {
       record.closing = snapshot();
       window.dispatchEvent(new Event(`${prefix}end`));
       if (pipeline) pipeline.onFrame = previousPipelineFrame;
+      if (pipeline && options.accounting) pipeline.onTick = previousPipelineTick;
       pipeline?.stop();
       if (pipeline) {
         let drainTimer;
@@ -198,6 +213,7 @@ export function installRuntimeRecorder(options) {
     } catch (failure) { record.error = String(failure); }
     finally {
       if (pipeline) pipeline.onFrame = previousPipelineFrame;
+      if (pipeline && options.accounting) pipeline.onTick = previousPipelineTick;
       try { video.pause(); driver?.syncActive(); } catch (failure) { record.error ??= String(failure); }
       if (driver) Object.assign(driver, previous);
       record.completedAt = performance.now();
@@ -207,7 +223,7 @@ export function installRuntimeRecorder(options) {
   const begin = () => {
     try {
       const runtime = driver?.snapshot();
-      if (runtime && (!runtime.running || (options.kind === 'extension-baseline'
+      if (runtime && (!runtime.running || (options.kind === 'extension-baseline' || options.baseline
         ? runtime.actualTier !== 'baseline' || runtime.controller.state !== 'manual-baseline'
         : runtime.actualTier !== 'neural' || runtime.controller.state !== 'stable'))) throw new Error('Runtime not stable at window opening');
       if (document.visibilityState !== 'visible' || !document.hasFocus() || video.paused) throw new Error('Foreground playing video required');
@@ -423,17 +439,18 @@ const SCOPES = {
   comparison: 'Harness uses the actual root index with normal UI/stats, unchanged CSS. Extension fixture video is 640x360 CSS. Same CFR bytes, 1200x820 viewport; not a display-CSS-matched comparison.',
 };
 
-export async function runPerformance(casesPath, outputPrefix) {
-  const casesBytes = readFileSync(resolve(casesPath)), cases = parseCases(JSON.parse(casesBytes));
+export async function runPerformance(casesPath, outputPrefix, environment = {}) {
+  const casesBytes = readFileSync(resolve(casesPath)), cases = (environment.parseCases ?? parseCases)(JSON.parse(casesBytes));
   const prefix = resolve(outputPrefix);
   assert(relative(join(ROOT, '.cache'), prefix) && !relative(join(ROOT, '.cache'), prefix).startsWith('..'), 'Output prefix must be inside root .cache');
   const outputs = [`${prefix}.json.gz`, ...cases.flatMap(item => [`${prefix}.${item.id}.json.gz`, `${prefix}.${item.id}.png`])];
   assert(outputs.every(path => !existsSync(path)), 'Never overwrite output evidence');
-  const build = verifyBuild(false);
-  const sourcePins = Object.fromEntries(['tools/m10-performance.mjs', 'tools/m10-browser.mjs', 'tools/m10-fixtures.mjs', 'tools/m10-fixtures/index.html', 'tools/m9-browser.mjs']
+  const checkBuild = environment.verifyBuild ?? (() => verifyBuild(false));
+  const build = checkBuild();
+  const sourcePins = Object.fromEntries(['tools/m10-performance.mjs', 'tools/m10-browser.mjs', 'tools/m10-fixtures.mjs', 'tools/m10-fixtures/index.html', 'tools/m9-browser.mjs', ...(environment.sources ?? [])]
     .map(path => [path, sha256(readFileSync(join(ROOT, path)))]));
   const report = { schemaVersion: 1, started: new Date().toISOString(), completion: 'UNVERIFIED', acceptance: 'not evaluated; calibration required',
-    casesSha256: sha256(casesBytes), cases, sourcePins, build, scopes: SCOPES, machine: machineInfo(), results: [] };
+    casesSha256: sha256(casesBytes), cases, sourcePins, build, scopes: SCOPES, machine: machineInfo(), results: [], apparatus: environment.description ?? null };
   let fixtures, server, native, interrupted = false;
   const cleanup = async () => { try { await native?.close(); } finally { try { await fixtures?.close(); } finally { await server?.close(); } } };
   const abort = () => { interrupted = true; void cleanup().catch(error => { report.cleanupError = String(error); }); };
@@ -441,18 +458,19 @@ export async function runPerformance(casesPath, outputPrefix) {
   process.once('SIGINT', abort); process.once('SIGTERM', abort);
   try {
     mkdirSync(dirname(prefix), { recursive: true });
-    fixtures = await startFixtures({ mse: false });
+    fixtures = await (environment.startFixtures ?? startFixtures)({ mse: false });
     assert.equal(fixtures.evidence.path, 'public/media/m9/720p60.mp4', 'Exact CFR fixture required, no fallback');
     const stream = fixtures.evidence.probe.streams.find(item => item.codec_type === 'video');
     assert(stream?.width === 1280 && stream.height === 720 && stream.r_frame_rate === '60/1' && stream.avg_frame_rate === '60/1', '720p60 CFR metadata required');
     report.media = fixtures.evidence;
     if (cases.some(item => item.kind === 'harness')) {
-      server = await harnessServer(); report.harness = { owned: server.owned, pins: server.pins };
+      server = await (environment.harnessServer ?? harnessServer)(); report.harness = { owned: server.owned, pins: server.pins };
       assert.equal(server.pins['models/aethersr-c16d2.json'], build.provenance.modelSha256, 'Harness production model mismatch');
     }
     for (const item of cases) {
       assert(!interrupted, 'Interrupted');
       const active = item.kind.startsWith('extension-'), installed = active || item.kind === 'installed-idle';
+      const accounting = typeof environment.accounting === 'function' ? !!environment.accounting(item) : !!environment.accounting;
       const result = { case: item, events: [], errors: [], completion: 'UNVERIFIED' }; report.results.push(result);
       const record = (name, data) => result.events.push({ name, data });
       const flags = ['--autoplay-policy=no-user-gesture-required', '--window-size=1280,900'];
@@ -462,7 +480,9 @@ export async function runPerformance(casesPath, outputPrefix) {
         const cdp = await native.browser.newBrowserCDPSession();
         try { result.browser = { version: await bounded(cdp.send('Browser.getVersion')), executableSha256: sha256(readFileSync(native.executable)), flags: installed ? result.events.find(event => event.name === 'browser').data.flags : flags }; }
         finally { await cdp.detach(); }
-        const page = await native.context.newPage(); await page.setViewportSize({ width: 1200, height: 820 });
+        const page = await native.context.newPage();
+        if (environment.preparePage) result.preparation = await environment.preparePage(page, native, item);
+        else await page.setViewportSize({ width: 1200, height: 820 });
         page.on('pageerror', error => result.errors.push(String(error)));
         page.on('console', message => {
           if (message.type() === 'error' && result.errors.length < 100) result.errors.push(message.text());
@@ -475,9 +495,9 @@ export async function runPerformance(casesPath, outputPrefix) {
             } catch (error) { result.frontmostAtInvalidation = { error: String(error) }; }
           }
         });
-        await page.addInitScript(installVideoObserver);
+        await page.addInitScript(installVideoObserver, { accounting });
         const readyStarted = Date.now();
-        await page.goto(item.kind === 'harness' ? `${server.origin}/?mode=auto&clip=/media/m9/720p60.mp4` : `${fixtures.url}?case=custom`);
+        await page.goto(environment.url ? environment.url(item, fixtures, server) : item.kind === 'harness' ? `${server.origin}/?mode=auto&clip=/media/m9/720p60.mp4` : `${fixtures.url}?case=custom`);
         await page.bringToFront();
         await page.waitForFunction(() => globalThis[Symbol.for('aethervsr.m10.performance.video')]?.callbacks >= 2);
         if (installed) {
@@ -488,33 +508,45 @@ export async function runPerformance(casesPath, outputPrefix) {
         }
         if (active) {
           const popup = await native.popup(page);
-          try { assert((await popup.click('#enable')).enabled); if (item.kind === 'extension-baseline') await popup.click('input[value="baseline"]'); }
+          try {
+            await environment.beforeActivation?.(native, page, item, popup);
+            assert((await popup.click('#enable')).enabled); if (item.kind === 'extension-baseline') await popup.click('input[value="baseline"]');
+          }
           finally { await popup.dismiss(); }
         }
-        const evaluate = (fn, arg) => active ? native.isolated(page, fn, arg) : bounded(page.evaluate(fn, arg));
-        if (active || item.kind === 'harness') await until(() => evaluate(extension => {
+        const runtimeActive = active && !item.noRuntime;
+        const evaluate = (fn, arg) => runtimeActive ? native.isolated(page, fn, arg) : bounded(page.evaluate(fn, arg));
+        if (runtimeActive || item.kind === 'harness') await until(() => evaluate(extension => {
           const driver = extension ? globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)]?.attachment?.driver : globalThis.aethervsrRuntime?.driver;
           return driver?.snapshot() ?? null;
-        }, active), value => value?.running && (item.kind === 'extension-baseline' ? value.actualTier === 'baseline' && value.controller.state === 'manual-baseline' : value.actualTier === 'neural' && value.controller.state === 'stable'), 20000);
+        }, runtimeActive), value => value?.running && (item.kind === 'extension-baseline' || item.baseline ? value.actualTier === 'baseline' && value.controller.state === 'manual-baseline' : value.actualTier === 'neural' && value.controller.state === 'stable'), 20000);
         result.readyMs = Date.now() - readyStarted; result.modelInitializationMs = null;
-        await evaluate(installRuntimeRecorder, { ...item, extension: active });
+        await environment.ready?.(native, page, item, result);
+        await evaluate(installRuntimeRecorder, { ...item, kind: item.noRuntime ? 'no-extension' : item.kind, extension: runtimeActive, accounting });
         await bounded(page.evaluate(() => globalThis[Symbol.for('aethervsr.m10.performance.video')].done), item.warmupMs + item.durationMs + 20000, 'Performance window');
         const runtime = await evaluate(() => globalThis[Symbol.for('aethervsr.m10.performance.runtime')]);
         const video = await page.evaluate(() => { const value = globalThis[Symbol.for('aethervsr.m10.performance.video')]; return { opening: value.opening, closing: value.closing, rows: value.rows, events: value.events, overflow: value.overflow }; });
+        const extra = await environment.collect?.(native, page, item, result);
         const raw = { case: item, sourceCommit: build.provenance.sourceCommit, bundleSha256: build.provenance.bundleSha256,
           casesSha256: report.casesSha256, mediaSha256: report.media.sha256, runtime, video, columns: { samples: ['ms', 'submittedAt', 'resolvedAt', 'sequence', 'generation', 'neural'],
           driverCpuRows: ['observedAt', 'ms'],
           frames: ['observedAt', 'now', 'mediaTime', 'presentedDelta', 'latencyMs', 'qualityTotal', 'qualityDropped', 'coreCpuMs', 'adapterOnFrameMs', 'neural'],
-          video: ['observedAt', 'now', 'mediaTime', 'presentedFrames', 'presentedDelta', 'latencyMs', 'qualityTotal', 'qualityDropped', 'observerMs'] } };
+          video: ['observedAt', 'now', 'mediaTime', 'presentedFrames', 'presentedDelta', 'latencyMs', 'qualityTotal', 'qualityDropped', 'observerMs'] }, ...extra };
+        if (accounting) {
+          raw.columns.frames.push('presentationTime', 'expectedDisplayTime', 'sourceGeneration', 'windowSubmittedSequence');
+          raw.columns.video.push('presentationTime', 'expectedDisplayTime', 'sourceGeneration', 'callbackSequence', 'processingDurationSeconds');
+          raw.columns.attempts = ['observedAt', 'now', 'mediaTime', 'presentedDelta', 'sourceGeneration', 'submittedBefore', 'submittedAfter', 'error'];
+        }
         result.raw = write(`${prefix}.${item.id}.json.gz`, raw);
-        assert(result.raw.bytes <= 3 * 1024 * 1024, 'Raw trace exceeds 3 MiB evidence budget; retained as unverified');
+        assert(result.raw.bytes <= (environment.rawByteLimit ?? 3 * 1024 * 1024), 'Raw trace exceeds local evidence budget; retained as unverified');
         assert.deepEqual(result.errors, [], 'Unexpected page errors');
         validateCapture(raw, item);
         result.summary = summarizeCapture(raw);
+        result.diagnostics = environment.summarize?.(raw) ?? null;
         result.boundaries = { opening: runtime.opening, closing: runtime.closing, nativeOpening: video.opening, nativeClosing: video.closing };
         await page.screenshot({ path: `${prefix}.${item.id}.png`, timeout: 5000 });
         result.screenshot = { path: relative(ROOT, `${prefix}.${item.id}.png`), sha256: sha256(readFileSync(`${prefix}.${item.id}.png`)), scope: 'Post-window local fixture/harness viewport; manual visual review not performed' };
-        if (active) result.teardown = await evaluate(() => {
+        if (active) result.teardown = await native.isolated(page, () => {
           const manager = globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)];
           const before = performance.now(); manager.stop(); const elapsedMs = performance.now() - before;
           return { elapsedMs, status: manager.status(), scope: 'Synchronous manager.stop only, after window/drain/pause/screenshot; not frame CPU or popup roundtrip' };
@@ -525,7 +557,7 @@ export async function runPerformance(casesPath, outputPrefix) {
       } finally { await native.close(); native = undefined; }
     }
     assert(!interrupted, 'Interrupted');
-    assert.deepEqual(verifyBuild(false), build, 'Build/source changed during capture');
+    assert.deepEqual(checkBuild(), build, 'Build/source changed during capture');
     for (const [path, digest] of Object.entries(sourcePins)) assert.equal(sha256(readFileSync(join(ROOT, path))), digest, `Runner source changed: ${path}`);
     assert.equal(sha256(readFileSync(resolve(casesPath))), report.casesSha256, 'Cases changed');
     assert.equal(sha256(readFileSync(join(ROOT, fixtures.evidence.path))), fixtures.evidence.sha256, 'Media changed');

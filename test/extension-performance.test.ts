@@ -7,7 +7,8 @@ function check(source: string): void {
     import { Script, createContext } from 'node:vm';
     import { parseCases, quantile, distribution, counterDelta, windowRate,
       installVideoObserver, installRuntimeRecorder, summarizeCapture, validateCapture, windowSummary } from './tools/m10-performance.mjs';
-    import { deliverySummary } from './tools/m105-accounting.mjs';
+    import { deliverySummary, validateScheduling, installScheduling, installOwnedCost } from './tools/m105-accounting.mjs';
+    import { parsePlan, ARMS } from './tools/m105-compare.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -75,8 +76,8 @@ const fixture = `
     callback(clock, { mediaTime: clock / 1000, presentedFrames: presented, presentationTime: clock - 1 });
   };
   nativeFrame();
-  const install = (kind = 'extension-auto', durationMs = 30000) => {
-    const options = { extension: kind.startsWith('extension-'), kind, warmupMs: 5000, durationMs };
+  const install = (kind = 'extension-auto', durationMs = 30000, accounting = false) => {
+    const options = { extension: kind.startsWith('extension-'), kind, warmupMs: 5000, durationMs, accounting };
     new Script('(' + installRuntimeRecorder.toString() + ')(' + JSON.stringify(options) + ')').runInContext(context);
     return new Script('globalThis[Symbol.for("aethervsr.m10.performance.runtime")]').runInContext(context);
   };
@@ -90,6 +91,77 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('validates controlled arms without accepting hidden fields or weakening historical case rules', () => check(`
+    const plan = parsePlan(ARMS.map((arm,index)=>({id:'case'+index,arm,durationMs:30000})));
+    assert.equal(plan[4].noRuntime,true); assert.equal(plan[7].kind,'extension-baseline');
+    assert.equal(parsePlan([{id:'long',arm:'matched-harness',durationMs:600000}])[0].kind,'harness');
+    for(const row of [{id:'x',arm:'neural',durationMs:0},{id:'x',arm:'neural',durationMs:1000,threshold:0},
+      {id:'x',arm:'bare',durationMs:1000,diagnostics:'owned'}]) assert.throws(()=>parsePlan([row]));
+  `));
+
+  it('drains delayed long tasks by start-time boundaries and removes scheduling observers', () => check(fixture + `
+    let pending = [], disconnected = false;
+    context.PerformanceObserver = class { static supportedEntryTypes = ['longtask'];
+      constructor(callback) { this.callback = callback; } observe() {} takeRecords() { return pending.splice(0); } disconnect() { disconnected = true; } };
+    Object.assign(context, { screen:{width:1400,height:1000}, screenX:40,screenY:40,outerWidth:1200,outerHeight:900,
+      requestAnimationFrame:() => 1,cancelAnimationFrame() {} });
+    new Script('(' + installScheduling.toString() + ')()').runInContext(context);
+    const data = new Script('globalThis[Symbol.for("aethervsr.m105.scheduling")]').runInContext(context);
+    await advance(100); window.dispatchEvent({type:'aethervsr:m10:performance:start'});
+    pending.push({startTime:90,duration:100,name:'boundary-before'}, {startTime:790,duration:100,name:'inside'}, {startTime:810,duration:100,name:'after'});
+    await advance(800); window.dispatchEvent({type:'aethervsr:m10:performance:end'});
+    window.dispatchEvent({type:'aethervsr:m10:performance:complete'}); await advance(801); await data.done;
+    assert.equal(data.tasks.length, 1); assert.equal(data.tasks[0].at, 790); assert.equal(data.tasks[0].ms, 100);
+    assert(disconnected);
+  `));
+
+  it('preserves diagnostic listener identity, receiver and non-overlapping outer CPU accounting', () => check(`
+    const realm = createContext({assert});
+    new Script(\`
+      let clock=0;
+      globalThis.performance={now:()=>clock};
+      class EventTarget { constructor(){this.listeners=new Map();} addEventListener(type,fn){const rows=this.listeners.get(type)??new Set();rows.add(fn);this.listeners.set(type,rows);} removeEventListener(type,fn){this.listeners.get(type)?.delete(fn);} dispatchEvent(event){for(const fn of this.listeners.get(event.type)??[])fn.call(this,event);} }
+      globalThis.EventTarget=EventTarget;globalThis.window=new EventTarget();
+      globalThis.HTMLVideoElement=class extends EventTarget {requestVideoFrameCallback(fn){this.callback=fn;return 1;}};
+      globalThis.MutationObserver=class {constructor(fn){this.callback=fn;}};
+      globalThis.setTimeout=globalThis.setInterval=(fn)=>fn;
+      globalThis.navigator={gpu:{requestAdapter:async()=>({real:true})}};
+      globalThis.chrome={runtime:{onMessage:{addListener(fn){this.fn=fn;},removeListener(fn){if(this.fn===fn)this.fn=null;}},sendMessage(){clock+=2;return 7;}}};
+      globalThis.target=new EventTarget();globalThis.original=EventTarget.prototype.addEventListener;
+    \`).runInContext(realm);
+    new Script('(' + installOwnedCost.toString() + ')({noRuntime:true})').runInContext(realm);
+    new Script(\`
+      const data=globalThis[Symbol.for('aethervsr.m105.owned')];
+      function listener(){assert.equal(this,target);clock+=3;assert.equal(chrome.runtime.sendMessage(),7);clock+=4;}
+      target.addEventListener('work',listener);window.dispatchEvent({type:'aethervsr:m10:performance:start'});
+      target.dispatchEvent({type:'work'});assert.equal(data.totalMs,9);assert.equal(data.categories['runtime:sendMessage'].totalMs,2);assert.equal(data.categories['event:work'].totalMs,9);
+      target.removeEventListener('work',listener);target.dispatchEvent({type:'work'});assert.equal(data.callbacks,1);
+      window.dispatchEvent({type:'aethervsr:m10:performance:end'});data.restore();assert.equal(EventTarget.prototype.addEventListener,original);
+    \`).runInContext(realm);
+  `));
+
+  it('separates diagnostic tick attempts from successful post-submit callbacks and restores the tick method', () => check(fixture + `
+    let submit = true;
+    pipeline.source = {loadGeneration:3};
+    const originalTick = pipeline.onTick = function(tick) {
+      assert.equal(this, pipeline);
+      if (submit) { counters.framesRendered++; counters.framesPresented++; this.onFrame(tick); }
+      else this.error = 'diagnostic failed attempt';
+    };
+    const record = install('extension-auto', 30000, true);
+    await advance(5000);
+    const tick = {now:5010,mediaTime:2,presentedDelta:1,presentationTime:5008,expectedDisplayTime:5020};
+    await advance(5010); pipeline.onTick(tick);
+    submit = false; await advance(5030); pipeline.onTick({...tick,now:5030});
+    assert.equal(record.frames.length, 1); assert.equal(record.attempts.length, 2);
+    assert.deepEqual(Array.from(record.frames[0].slice(10)), [5008,5020,3,1]);
+    assert.deepEqual(Array.from(record.attempts[0].slice(4)), [3,0,1,null]);
+    assert.deepEqual(Array.from(record.attempts[1].slice(4)), [3,1,1,'diagnostic failed attempt']);
+    await advance(35000); drainResolve(); await advance(35001); await observer.done;
+    assert.equal(pipeline.onTick, originalTick);
+    assert.equal(deliverySummary({runtime:record,video:observer}).submissionDeficit, 1);
+  `));
+
   it('reports media-time intervals in milliseconds and retains unknown overlap and submission identity', () => check(fixture + `
     const record = install('no-extension');
     await advance(5000); await advance(5010); nativeFrame(11);
@@ -101,6 +173,21 @@ describe('M10 performance protocol helpers (no browser)', () => {
     assert.equal(summary.exactOverlap, null);
     assert.equal(summary.submissionDeficit, null);
     assert.equal(summary.m10CombinedPercent, null);
+    const active = install();
+    active.opening = { runtime: { session: {framesRendered:0,framesPresented:0,framesSkipped:0},controller:{activeMs:0} } };
+    active.closing = { runtime: { session: {framesRendered:1,framesPresented:2,framesSkipped:1},controller:{activeMs:30000} } };
+    active.started = 0; active.ended = 30000;
+    observer.closing.quality = null;
+    assert.equal(deliverySummary({ runtime: active, video: observer }).m10CombinedPercent, null);
+  `));
+
+  it('requires complete in-window stimuli, bounded scheduling buffers and stable display observations', () => check(`
+    const data = { overflow:false, started:10, ended:1000, opening:{width:1200}, closing:{width:1200}, stimuli:[{at:100,ended:150,requestedAtMs:90,requestedMs:50}] };
+    validateScheduling(data, [{at:90,ms:50}]);
+    assert.throws(() => validateScheduling({...data,overflow:true},[{at:90,ms:50}]));
+    assert.throws(() => validateScheduling({...data,stimuli:[]},[{at:90,ms:50}]));
+    assert.throws(() => validateScheduling({...data,ended:149},[{at:90,ms:50}]));
+    assert.throws(() => validateScheduling({...data,closing:{width:800}},[{at:90,ms:50}]));
   `));
 
   it('adds diagnostic metadata without inventing frame identity or changing legacy columns', () => check(fixture + `

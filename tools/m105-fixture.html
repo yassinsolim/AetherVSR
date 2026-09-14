@@ -1,0 +1,42 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>AetherVSR matched delivery fixture</title>
+<style>
+  html, body { margin: 0; background: #fff; }
+  #player { position: absolute; left: 40px; top: 120px; width: 640px; height: 360px; }
+  video { display: block; width: 640px; height: 360px; object-fit: contain; }
+  #output { position: fixed; left: 40px; top: 120px; width: 640px; height: 360px; pointer-events: none; visibility: hidden; }
+</style>
+<div id="player"><video id="source" autoplay muted loop playsinline src="/media/m9/720p60.mp4"></video></div>
+<script type="module">
+  const video = document.getElementById('source');
+  const params = new URLSearchParams(location.search);
+  if (params.get('consumer') === 'harness') {
+    const [{ acquireGpu, watchDeviceFailures }, { VideoPipeline }, { RuntimeDriver },
+      { BaselineScaler }, { NeuralUpscaler, NEURAL_OPTIONAL_FEATURES }, { loadModel }] = await Promise.all([
+      import('/src/core/gpu/device.ts'), import('/src/core/pipeline.ts'), import('/src/runtime.ts'),
+      import('/src/core/upscale/baseline-scaler.ts'), import('/src/core/upscale/neural-upscaler.ts'),
+      import('/src/core/neural/model.ts')]);
+    const model = await loadModel('/models/aethersr-c16d2.json');
+    const gpu = await acquireGpu({ optionalFeatures: NEURAL_OPTIONAL_FEATURES });
+    const canvas = document.createElement('canvas');
+    canvas.id = 'output'; canvas.setAttribute('aria-hidden', 'true'); video.after(canvas);
+    const pipeline = new VideoPipeline(gpu, video, canvas, new BaselineScaler('catmull-rom'));
+    const driver = new RuntimeDriver(pipeline, video, gpu.capabilities.timestampQuery, 'auto');
+    const unwatch = watchDeviceFailures(gpu.device, message => driver.fail(message));
+    const reveal = () => {
+      const visibility = !video.seeking && video.readyState >= 2 && !video.paused && document.visibilityState === 'visible' && pipeline.running ? 'visible' : 'hidden';
+      if (canvas.style.visibility !== visibility) canvas.style.visibility = visibility;
+    };
+    driver.onFrame = reveal;
+    const types = ['seeking', 'waiting', 'pause', 'playing'];
+    for (const type of types) video.addEventListener(type, reveal);
+    driver.setNeuralFactory(() => new NeuralUpscaler(model, { passDiagnostics: true }));
+    globalThis.aethervsrRuntime = { driver, dispose() {
+      unwatch(); driver.destroy(); pipeline.destroy(); gpu.device.destroy(); canvas.remove();
+      for (const type of types) video.removeEventListener(type, reveal);
+    } };
+    driver.syncActive();
+  }
+  await video.play();
+</script>
