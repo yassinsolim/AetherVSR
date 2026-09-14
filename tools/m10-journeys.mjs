@@ -124,9 +124,9 @@ function detachedCheck(value, expectedCode) {
   for (const [name, count] of Object.entries(value.details.lastTeardown)) assert.equal(count, 0, `Live ${name} after teardown`);
 }
 
-export async function runJourneys(output, testBuild = false) {
+export async function runJourneys(output, testBuild = false, only = null) {
   output = resolve(output); assert(!existsSync(output), 'Never overwrite raw evidence');
-  const report = { schemaVersion: 1, started: new Date().toISOString(), verdict: 'UNVERIFIED', completion: 'RUNNING', testBuild, performance: 'not measured',
+  const report = { schemaVersion: 1, started: new Date().toISOString(), verdict: 'UNVERIFIED', completion: 'RUNNING', testBuild, only, performance: 'not measured',
     scope: 'Native unpacked-extension lifecycle assertions. Popup focus interrupts visibility; status timing counters are diagnostic snapshots, not benchmarks. No pixel readback or parity claim.',
     manual: { visual: 'UNVERIFIED: review local screenshots for object-fit, clipping, radii and caption stacking', encryptedStream: 'UNVERIFIED: ClearKey test attaches MediaKeys to clear media only', displayRefreshRate: 'not measured' },
     machine: { hostname: hostname(), os: platform(), release: release(), arch: arch(), cpu: cpus()[0]?.model ?? 'not measured',
@@ -210,6 +210,7 @@ export async function runJourneys(output, testBuild = false) {
     };
     let sequence = 0;
     const journey = async (name, fixture, body) => {
+      if (only !== null && name !== only) return;
       assert(CASES.includes(fixture), `Missing root fixture: ${fixture}`);
       const item = { name, fixture, verdict: 'RUNNING', started: new Date().toISOString() }; report.journeys.push(item); save();
       let page;
@@ -677,7 +678,7 @@ export async function runJourneys(output, testBuild = false) {
       const original = await dom(page); const id = await enable(page); await active(page, id);
       const oldUuid = (await dom(page)).canvases.find(canvas => !canvas.pageOwned).uuid;
       await page.evaluate(() => { const saved = globalThis[Symbol.for('aethervsr.m10.reload-identity')]; saved.output = saved.video.nextElementSibling; });
-      const reloaded = await native.reloadExtension(journeySignal);
+      const reloaded = await native.reloadExtension(page, journeySignal);
       assert.equal(reloaded.extensionId, native.extensionId); assert.equal(reloaded.oldWorkerClosed, true); assert.equal(reloaded.freshWorkerHandle, true);
       assert.notEqual(reloaded.previousTargetId, reloaded.freshTargetId);
       await until(() => dom(page), view => view.canvases.filter(canvas => !canvas.pageOwned).length === 0, 6000, journeySignal);
@@ -699,6 +700,7 @@ export async function runJourneys(output, testBuild = false) {
       await screenshot(page, `${sequence}-reload-reactivated`); await disable(page, original);
       assert(await page.evaluate(() => { const saved = globalThis[Symbol.for('aethervsr.m10.reload-identity')]; return saved.spoof.isConnected && document.querySelector('canvas') === saved.spoof; }));
     });
+    assert(report.journeys.length > 0, 'No journey matched the requested selection');
     const finalBuild = verifyBuild(testBuild, relative(ROOT, output).startsWith('..') ? undefined : output);
     assert.equal(finalBuild.provenanceSha256, report.build.provenanceSha256);
   } catch (error) { report.fatal = String(error); report.fatalVerdict = error instanceof Unverified ? 'UNVERIFIED' : 'FAIL'; }
@@ -715,8 +717,14 @@ export async function runJourneys(output, testBuild = false) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [output, ...flags] = process.argv.slice(2);
-  if (!output || output.startsWith('--') || flags.some(flag => flag !== '--test-build') || flags.length > 1) throw new Error('Usage: node tools/m10-journeys.mjs output.json [--test-build]');
-  const report = await runJourneys(output, flags.includes('--test-build'));
+  let testBuild = false, only = null;
+  for (let index = 0; index < flags.length; index++) {
+    if (flags[index] === '--test-build' && !testBuild) testBuild = true;
+    else if (flags[index] === '--only' && only === null && flags[index + 1] && !flags[index + 1].startsWith('--')) only = flags[++index];
+    else throw new Error('Invalid or duplicate journey argument');
+  }
+  if (!output || output.startsWith('--')) throw new Error('Usage: node tools/m10-journeys.mjs output.json [--test-build] [--only "journey name"]');
+  const report = await runJourneys(output, testBuild, only);
   console.log(JSON.stringify({ output: resolve(output), verdict: report.verdict, journeys: report.journeys.length, fatal: report.fatal ?? null }));
   if (report.verdict !== 'PASS_LIFECYCLE_ONLY') process.exitCode = 1;
 }

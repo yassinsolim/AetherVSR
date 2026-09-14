@@ -199,7 +199,7 @@ export async function openExtension(build, record = () => {}) {
         throw new Unverified(`Actual service-worker shutdown unverified: ${error}`);
       } finally { await bounded(session.detach(), 1000, 'Detach worker-stop observer').catch(() => {}); }
     };
-    const reloadExtension = async signal => {
+    const reloadExtension = async (page, signal) => {
       const started = Date.now(); const deadline = started + 20000;
       const remaining = maximum => Math.max(1, Math.min(maximum, deadline - Date.now()));
       let previousWorker; let closed = false;
@@ -221,6 +221,12 @@ export async function openExtension(build, record = () => {}) {
         }, extensionId), remaining(3000), 'Schedule native extension reload');
         assert.deepEqual(scheduled, { extensionId, workerURL });
         await until(async () => closed && (await targets()).targetInfos.every(target => target.targetId !== previous.target.targetId), Boolean, remaining(5000), signal);
+        const action = await bounded(popup(page), remaining(10000), 'Wake reloaded extension through native action');
+        try {
+          const state = await action.request('m10.status');
+          assert.equal(state.enabled, false, 'Reload must not silently reactivate content');
+          record('extension-reload-action-wake', { tabId: action.tabId, status: state });
+        } finally { await bounded(action.dismiss(), remaining(5000), 'Dismiss reload wake popup'); }
         const fresh = await until(async () => (await targets()).targetInfos.find(target => target.type === 'service_worker' && target.url === workerURL && target.targetId !== previous.target.targetId), Boolean, remaining(4000), signal);
         const startup = await attach(browserCDP, fresh.targetId);
         try { await bounded(startup.send('Runtime.runIfWaitingForDebugger'), remaining(3000), 'Start fresh extension worker'); }
