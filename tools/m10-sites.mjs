@@ -10,7 +10,7 @@ import { bounded, openExtension, OperationTimeout, until, verifyBuild, Unverifie
 
 const SITES = {
   plyr: { url: 'https://plyr.io/', player: '.plyr', kind: 'Public custom-control player demo' },
-  videojs: { url: 'https://videojs.org/', player: '.video-js', kind: 'Independent public custom-control player demo' },
+  videojs: { url: 'https://videojs.org/', player: '[role="group"][aria-label="Media player"]', kind: 'Independent public custom-control player demo' },
   shaka: { url: 'https://shaka-project.github.io/shaka-player-release/demo/', player: '.shaka-video-container',
     assetTitle: 'Big Buck Bunny: the Dark Truths', kind: 'Public clear adaptive-streaming demo selected through its existing asset card' },
 };
