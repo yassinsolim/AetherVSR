@@ -17,7 +17,7 @@ export function installNativeObserver(options) {
   const quality = () => { const value = video.getVideoPlaybackQuality?.(); return value ? { total: value.totalVideoFrames, dropped: value.droppedVideoFrames, at: value.creationTime } : null; };
   const snapshot = () => ({ at: performance.now(), callbacks: data.callbacks, presented: data.presented, gaps: data.gaps,
     quality: quality(), currentTime: video.currentTime, duration: Number.isFinite(video.duration) ? video.duration : null,
-    readyState: video.readyState, networkState: video.networkState, paused: video.paused, ended: video.ended,
+    readyState: video.readyState, networkState: video.networkState, paused: video.paused, ended: video.ended, mediaError: video.error?.code ?? null,
     rate: video.playbackRate, source: video.currentSrc, generation, visibility: document.visibilityState, focused: document.hasFocus() });
   const taskEntries = entries => { for (const entry of entries) if (data.opening && entry.startTime >= data.opening.at && (!data.closing || entry.startTime < data.closing.at)) push(data.tasks, { at: entry.startTime, ms: entry.duration, name: entry.name }); };
   const finish = reason => {
@@ -69,7 +69,7 @@ export function installNativeObserver(options) {
         if (!active) return;
         push(data.events, { type, ...snapshot() });
         if (type === 'error') push(data.failures, 'Original media error');
-        if (['loadstart', 'ratechange', 'pause', 'play'].includes(type)) finish(`Media event: ${type}`);
+        if (['loadstart', 'ratechange', 'pause', 'play'].includes(type) && !video.error) finish(`Media event: ${type}`);
       });
     }
     for (const [target, type] of [[window, 'blur'], [window, 'pagehide'], [window, 'resize'], [document, 'visibilitychange']]) {
@@ -182,7 +182,8 @@ export function validateNative(raw, expectedMs) {
   assert.equal(data.invalid, null, `Invalid observation: ${data.invalid}`); assert.equal(data.overflow, false);
   assert(summary.durationMs >= expectedMs && summary.durationMs <= expectedMs + 1000, 'Native window length');
   for (const boundary of [data.opening, data.closing]) {
-    assert.equal(boundary.visibility, 'visible'); assert.equal(boundary.focused, true); assert.equal(boundary.paused, false);
+    assert.equal(boundary.visibility, 'visible'); assert.equal(boundary.focused, true);
+    assert(boundary.paused === false || boundary === data.closing && boundary.mediaError != null, 'Unexpected original pause');
     assert.equal(boundary.rate, 1); assert(boundary.quality);
   }
   assert(data.opening.readyState >= 2);

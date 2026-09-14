@@ -8,7 +8,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { ROOT, sha256 } from './m10-fixtures.mjs';
 import { bounded, openExtension, OperationTimeout, until, verifyBuild, Unverified } from './m10-browser.mjs';
 
-const SITES = {
+export const SITES = {
   plyr: { url: 'https://plyr.io/', player: '.plyr', kind: 'Public custom-control player demo' },
   videojs: { url: 'https://videojs.org/', player: '[role="group"][aria-label="Media player"]', kind: 'Independent public custom-control player demo' },
   shaka: { url: 'https://shaka-project.github.io/shaka-player-release/demo/', player: '.shaka-video-container',
@@ -34,7 +34,7 @@ function redact(value) {
   }).slice(0, 2048);
 }
 
-function safeEvidence(value) {
+export function safeEvidence(value) {
   if (typeof value === 'string') return redact(value);
   if (Array.isArray(value)) return value.map(safeEvidence);
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, safeEvidence(entry)]));
@@ -86,7 +86,7 @@ export function siteSnapshot(extensionId) {
     })) };
 }
 
-function geometryCheck(status, dom, owner) {
+export function geometryCheck(status, dom, owner) {
   assert.equal(dom.mainTestHook, 'undefined', 'Public page sees a test hook');
   assert.equal(dom.mainSingleton, 'undefined', 'Public page sees extension singleton');
   assert.equal(dom.visibility, 'visible', 'Public test tab hidden');
@@ -116,7 +116,7 @@ function geometryCheck(status, dom, owner) {
   return video;
 }
 
-async function visibleButton(scope, name) {
+export async function visibleButton(scope, name) {
   const buttons = scope.getByRole('button', { name });
   for (let index = 0; index < await buttons.count(); index++) {
     const button = buttons.nth(index);
@@ -125,7 +125,7 @@ async function visibleButton(scope, name) {
   return null;
 }
 
-async function consent(page, record) {
+export async function consent(page, record) {
   const explicit = await visibleButton(page, /^(Reject all cookies|Accept all cookies|Allow all cookies|Only necessary cookies|Continue without accepting)$/i);
   if (explicit) { await explicit.click({ timeout: 3000 }); record('cookie-consent', { method: 'Visible cookie-specific button' }); return; }
   const banners = page.getByRole('dialog').or(page.locator('#onetrust-banner-sdk, .cc-window, [aria-label*="cookie" i]'));
@@ -142,7 +142,7 @@ export function playerCommand(action) {
   return action === 'pause' ? /^Pause(?: Video)?(?:, .+)?$/i : /^(Play(?: Video)?|Replay|Restart)(?:, .+)?$/i;
 }
 
-async function playerButton(page, site, action) {
+export async function playerButton(page, site, action) {
   const name = playerCommand(action);
   const player = page.locator(site.player).filter({ has: page.locator('video') }).first();
   if (!await player.count()) throw new Unverified('Original custom player container not found');
@@ -163,7 +163,7 @@ function publicConfig(path) {
   return { durationMs, sites };
 }
 
-function errorObserver(page, extensionId, item) {
+export function errorObserver(page, extensionId, item) {
   const extensionOrigin = `chrome-extension://${extensionId}/`;
   const add = (kind, message, location = '') => {
     const origins = [...new Set((`${location}\n${message}`.match(/(?:https?:\/\/|chrome-extension:\/\/)[^\s)<>"']+/g) ?? [])

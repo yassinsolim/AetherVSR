@@ -5,7 +5,8 @@ function check(source: string): void {
   const output = execFileSync(process.execPath, ['--input-type=module', '-e', `
     import assert from 'node:assert/strict';
     import { installNativeObserver, installRuntimeCounters, summarizeNative, validateNative, pairedBounds, floorDecision } from './tools/m106-counters.mjs';
-    import { activeSafety, parseFloorPlan, PRIMARY_ORDER, qualifiesDisabledGeometry } from './tools/m106-floor.mjs';
+    import { activeSafety, parseFloorPlan, PRIMARY_ORDER, qualifiesDisabledGeometry, resumePrefix, floorCases, bindingNativeFailure } from './tools/m106-floor.mjs';
+    import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure } from './tools/m106-sites.mjs';
     import { runInNewContext } from 'node:vm';
     ${source}
     console.log('checked');
@@ -37,6 +38,60 @@ const observerFixture = `
 `;
 
 describe('native browser delivery floor accounting', () => {
+  it('keeps native public-stall reproduction distinct from a safe public-scope pass', () => check(`
+    const results=['P','Q','R','S'].flatMap(arm=>Array.from({length:3},()=>({case:{arm},completion:'CAPTURED',observedMs:180000,comparable:true,actions:[{name:'prescribed-seek',pass:true}],stalls:[{}],safetyPass:true,journeyPass:false,recoveryComparison:'UNRESOLVED'})));
+    assert.equal(publicCausality(results).verdict,'PLAYER/SOURCE REPRODUCED WITHOUT AETHERVSR');
+    assert.equal(publicCausality(results).videojsScopePass,false);
+    for(const result of results)result.recoveryComparison='NO_OBSERVED_WORSENING';
+    assert.equal(publicCausality(results).videojsScopePass,true);
+    results[6].safetyPass=false;assert.equal(publicCausality(results).videojsScopePass,false);
+    for(const result of results.filter(value=>['P','Q'].includes(value.case.arm)))result.stalls=[];
+    assert.equal(publicCausality(results).verdict,'EXTENSION-ASSOCIATED');
+    results[0].actions[0].pass=false;assert.equal(publicCausality(results).verdict,'UNRESOLVED');results[0].actions[0].pass=true;
+    results[0].comparable=false;assert.equal(publicCausality(results).verdict,'UNRESOLVED');
+  `));
+  it('requires two seconds from the original opening media time and a committed identity record', () => check(`
+    assert.equal(advancedForOpening({time:3.99,paused:false},2),false);assert.equal(advancedForOpening({time:4,paused:false},2),true);
+    assert.equal(advancedForOpening({time:4,paused:true},2),false);
+    assert.throws(()=>loadCommittedReference('.cache/m106/uncommitted.json'),/committed results/);
+    assert.equal(retainBindingPublicFailure({errors:{counts:{extension:1}}}),true);
+    assert.equal(retainBindingPublicFailure({bindingFailure:true}),true);
+    assert.equal(retainBindingPublicFailure({errors:{counts:{'third-party-page':1}}}),false);
+  `));
+  it('retains an observed extension failure when an external interruption follows it', () => check(fixture + `
+    const status={enabled:true,owner:'owner-1',code:'active',details:{infrastructure:{created:1,destroyed:0,maximumConcurrent:1},
+      attachment:{infrastructure:{cleanupErrors:0},resources:{device:1,pipeline:1,canvas:1,resizeObservers:1}}}};
+    assert.equal(publicStateFailure(status,'owner-1'),false);status.owner='owner-2';
+    const item={bindingFailure:publicStateFailure(status,'owner-1'),error:'External integrity event: blur'};
+    assert.equal(retainBindingPublicFailure(item),true);
+    raw.errors=[];raw.native.invalid='Integrity event: blur';assert.equal(bindingNativeFailure(raw),false);
+    raw.native.failures=['Original media error'];assert.equal(bindingNativeFailure(raw),true);
+  `));
+  it('does not exempt blur or unexpected playback changes during public actions', () => check(observerFixture + `
+    context.setInterval=context.setTimeout;context.clearInterval=context.clearTimeout;
+    const data=runInNewContext('('+installPublicObserver.toString()+')();globalThis[Symbol.for("aethervsr.m106.public")]',context);
+    data.start();data.action='original-fullscreen';window.dispatchEvent(new Event('resize'));assert.equal(data.invalid,null);
+    window.dispatchEvent(new Event('blur'));assert.equal(data.invalid,'External integrity event: blur');
+    data.invalid=null;data.action='original-pause-resume';video.dispatchEvent(new Event('pause'));assert.equal(data.invalid,null);
+    data.action=null;video.dispatchEvent(new Event('pause'));assert.equal(data.invalid,'Unexpected media event: pause');
+    data.stop();assert.equal(timers.size,0);assert.equal(video.listeners+window.listeners+document.listeners,0);
+  `));
+  it('requires a matched public asset and never invents a substitute seek target', () => check(`
+    const reference={urlSha256:'a'.repeat(64),origin:'https://example.test',duration:35.963044,width:1280,height:720};
+    assert.equal(samePublicIdentity(reference,reference),true);
+    for(const changed of[{duration:36},{width:1920},{urlSha256:'b'.repeat(64)},{duration:null}])assert.equal(samePublicIdentity({...reference,...changed},reference),false);
+  `));
+  it('retains qualifying near-end stalls and censors recovery at scheduled actions', () => check(`
+    const rows=Array.from({length:81},(_,index)=>({at:30000+index*250,currentTime:35.8852,qualityTotal:844,paused:false,ended:false,readyState:2,networkState:2}));
+    const commands=[{name:'prescribed-seek',at:30000,pass:true},{name:'original-pause-resume',at:50000,pass:true}];
+    const episodes=targetStalls(rows,commands,51000);assert.equal(episodes.length,1);assert.equal(episodes[0].censoredAt,50000);
+    assert.equal(episodes[0].durationLowerMs,19750);assert.equal(episodes[0].recoveryInterval,null);
+    assert.equal(targetStalls(rows.slice(0,60),commands,45000).length,0);
+    assert.equal(targetStalls(rows.map(row=>({...row,ended:true})),commands,51000).length,0);
+    assert.equal(targetStalls(rows,[],51000).length,0);
+    assert.equal(targetStalls(rows.map(row=>({...row,qualityTotal:null})),commands,51000).length,0);
+    assert.equal(targetStalls(rows,[...commands,{name:'original-ended-replay',at:30250,pass:true}],51000).length,0);
+  `));
   it('retains a real submission when the original post-submit callback throws', () => check(`
     let submitted=0;const window=new EventTarget();
     const pipeline={currentUpscaler:{neural:true},error:null,onTick(tick){this.onFrame(tick);},onFrame(){submitted++;throw new Error('post-submit failure');}};
@@ -116,6 +171,8 @@ describe('native browser delivery floor accounting', () => {
   `));
   it('retains closing loop waits and completely stalled playback as outcomes, not replacement opportunities', () => check(fixture + `
     raw.native.closing.readyState=1;assert.equal(validateNative(raw,1000).callbacks,2);
+    raw.native.closing.mediaError=3;raw.native.closing.paused=true;assert.equal(validateNative(raw,1000).callbacks,2);
+    raw.native.closing.mediaError=null;assert.throws(()=>validateNative(raw,1000));
     raw.native.rows=[];raw.native.closing={...raw.native.opening,at:1000};
     const summary=validateNative(raw,1000);assert.equal(summary.qualityTotal,0);assert.equal(summary.nativeCombinedPercent,null);
   `));
@@ -125,10 +182,19 @@ describe('native browser delivery floor accounting', () => {
     const spread=pairedBounds([-1,0,0,1]);assert(spread.lower95<0&&spread.upper95>0);
   `));
   it('enforces the frozen order before executing an evidence plan', () => check(`
+    for(const [phase,count]of[['observer',9],['primary',16],['proxy',3]])assert.equal(parseFloorPlan(floorCases(phase)).length,count);
     const cases=PRIMARY_ORDER.map((arm,index)=>({id:'primary-'+index,arm,phase:'primary',mode:'lean',durationMs:600000}));
     assert.equal(parseFloorPlan(cases).length,16);
     assert.throws(()=>parseFloorPlan(cases.slice(1)));
     [cases[0],cases[1]]=[cases[1],cases[0]];assert.throws(()=>parseFloorPlan(cases));
+  `));
+  it('resumes only the next interrupted ordinal without replacing captured failures', () => check(`
+    const cases=parseFloorPlan(PRIMARY_ORDER.map((arm,index)=>({id:'primary-'+index,arm,phase:'primary',mode:'lean',durationMs:600000})));
+    const failed={case:cases[0],completion:'CAPTURED',safety:{pass:false},raw:{sha256:'retained'}};
+    const prior={cases,completion:'UNVERIFIED',results:[failed,{case:cases[1],completion:'UNVERIFIED'}]};
+    assert.deepEqual(resumePrefix(prior,cases),[failed]);
+    prior.results[1].case=cases[2];assert.throws(()=>resumePrefix(prior,cases));
+    prior.results=[failed];assert.throws(()=>resumePrefix(prior,cases));
   `));
   it('requires each active run to pass average, final-window and error-aware cleanup gates', () => check(fixture + `
     const counts={ownerChanges:1,created:1,maximumConcurrent:1};

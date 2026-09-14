@@ -14,6 +14,15 @@ import { installNativeObserver, installRuntimeCounters, summarizeNative, validat
 export const SOURCE_SHA = '8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a';
 export const BROWSER_SHA = '8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a';
 export const PRIMARY_ORDER = [...'ABDCBCADCDBADACB'];
+export function floorCases(phase) {
+  assert(['observer','primary','proxy'].includes(phase));
+  const arms=phase==='primary'?PRIMARY_ORDER:phase==='observer'?Array(9).fill('A'):['A','C','D'];
+  const modes=phase==='observer'?['none','lean','rich','lean','rich','none','rich','none','lean']:null;
+  const durationMs=phase==='primary'?600000:phase==='observer'?60000:12000;
+  return arms.map((arm,index)=>({id:`${phase}-${String(index+1).padStart(2,'0')}-${arm}`,arm,
+    mode:modes?.[index]??(phase==='proxy'?'rich':'lean'),durationMs,phase}));
+}
+
 export function parseFloorPlan(value) {
   assert(Array.isArray(value) && value.length > 0 && value.length <= 64, 'Expected fixed cases');
   const ids = new Set();
@@ -77,6 +86,21 @@ export function qualifiesDisabledGeometry(opening, moved, restored) {
       &&value.snapshot.resources.device===0&&value.snapshot.resources.pipeline===0&&value.snapshot.resources.frameCallback===0);
 }
 
+export function resumePrefix(prior, cases) {
+  assert.deepEqual(prior.cases, cases, 'A resumed run must retain its frozen cases');
+  assert.equal(prior.completion, 'UNVERIFIED', 'Only an interrupted study can resume');
+  const accepted = [];
+  for (const result of prior.results) {
+    assert.deepEqual(result.case, cases[accepted.length], 'Prior results are not an ordered prefix');
+    if (result.completion !== 'CAPTURED') break;
+    assert(result.raw?.sha256, 'Previously captured result needs retained raw evidence');
+    accepted.push(result);
+  }
+  assert(accepted.length < cases.length, 'All scheduled trials already captured');
+  assert(prior.results.length === accepted.length + 1, 'Expected exactly one interrupted next ordinal');
+  return accepted;
+}
+
 export function activeSafety(raw, arm, cleanup, geometry) {
   if (arm === 'A') return { applicable: false, pass: null };
   const before = raw.runtime?.opening, after = raw.runtime?.closing;
@@ -106,7 +130,17 @@ export function activeSafety(raw, arm, cleanup, geometry) {
   return { applicable: true, pass: Object.values(checks).every(Boolean), checks };
 }
 
-export async function runFloor(planPath, prefix) {
+export function bindingNativeFailure(raw) {
+  if(raw.errors?.length||raw.native?.failures?.length)return true;
+  const opening=raw.runtime?.opening,closing=raw.runtime?.closing;
+  if(!opening?.runtime)return false;
+  const summary=summarizeNative(raw),tier=opening.runtime.actualTier;
+  return closing?.pipelineError!=null||closing?.sameAttachment!==true||closing?.runtime?.controller?.state==='failed'
+    ||closing?.status?.owner!==opening.status?.owner||closing?.runtime?.actualTier!==tier
+    ||raw.runtime.frames.some(row=>row[2]!==Number(tier==='neural'))||Number.isFinite(summary.submissionDeficit)&&summary.submissionDeficit!==0;
+}
+
+export async function runFloor(planPath, prefix, resumePath) {
   prefix = resolve(prefix); assert(relative(join(ROOT,'.cache/m106'),prefix) && !relative(join(ROOT,'.cache/m106'),prefix).startsWith('..'));
   assert(!existsSync(`${prefix}.json`), 'Never overwrite evidence'); mkdirSync(dirname(prefix), { recursive: true });
   const bytes = readFileSync(planPath), cases = parseFloorPlan(JSON.parse(bytes));
@@ -114,15 +148,29 @@ export async function runFloor(planPath, prefix) {
   const sourcePins = Object.fromEntries(['tools/m106-floor.mjs','tools/m106-counters.mjs','tools/m105-fixture.html','tools/m105-accounting.mjs','tools/m10-browser.mjs','tools/m9-browser.mjs','docs/M10.6-PREREGISTRATION.md']
     .map(path => [path,sha256(readFileSync(join(ROOT,path)))]));
   const report = { schemaVersion: 1, started: new Date().toISOString(), completion: 'RUNNING', cases, casesSha256: sha256(bytes), production, diagnostic, sourcePins,
-    machine: { os: execFileSync('sw_vers',['-productVersion'],{encoding:'utf8'}).trim(), chip: 'Apple M5', memory: '24 GB',
+    machine: { os: execFileSync('sw_vers',['-productVersion'],{encoding:'utf8'}).trim(),
+      chip: execFileSync('sysctl',['-n','machdep.cpu.brand_string'],{encoding:'utf8'}).trim(),
+      model: execFileSync('sysctl',['-n','hw.model'],{encoding:'utf8'}).trim(),
+      memoryBytes: Number(execFileSync('sysctl',['-n','hw.memsize'],{encoding:'utf8'}).trim()),
       power: execFileSync('pmset',['-g','batt'],{encoding:'utf8'}).trim(),
       displays: JSON.parse(execFileSync('osascript',['-l','JavaScript','-e','ObjC.import("AppKit"); const screens=$.NSScreen.screens;const result=[];for(let index=0;index<screens.count;index++){const display=screens.objectAtIndex(index);result.push({name:display.localizedName.js,frame:display.frame,scale:display.backingScaleFactor});}JSON.stringify(result);'],{encoding:'utf8'})), physicalRefresh: null }, results: [],
     scope: 'Common native-observer counters. No unique physical loss or observer-free callback claim. C/D have a minimal actual attempt/submission hook; B is explicitly diagnostic infrastructure without GPU. All raw local; rates use common native wall window.' };
   assert(report.machine.power.includes('AC Power'), 'AC power required');
+  assert.equal(report.machine.chip,'Apple M5');assert.equal(report.machine.model,'Mac17,2');assert.equal(report.machine.memoryBytes,24*1024**3);
+  if (resumePath) {
+    const previousBytes = readFileSync(resolve(resumePath)), prior = JSON.parse(previousBytes);
+    assert.deepEqual(prior.production, production, 'Apparatus changes require separately documented affected reruns');
+    assert.deepEqual(prior.diagnostic, diagnostic); assert.deepEqual(prior.sourcePins, sourcePins);
+    const accepted = resumePrefix(prior, cases);
+    for (const result of accepted) assert.equal(sha256(readFileSync(join(ROOT, result.raw.path))), result.raw.sha256, 'Prior raw changed');
+    report.results.push(...accepted);
+    report.resume = { path: relative(ROOT, resolve(resumePath)), sha256: sha256(previousBytes), acceptedOrdinals: accepted.length,
+      repeatedOrdinal: accepted.length + 1, interrupted: prior.results.at(-1) };
+  }
   let server, native;
   try {
     server = await floorServer(); report.fixture = { htmlSha256: server.htmlSha256, mediaSha256: server.mediaSha256 };
-    for (const item of cases) {
+    for (const item of cases.slice(report.results.length)) {
       const result = { case: item, completion: 'UNVERIFIED', errors: [], events: [] }; report.results.push(result);
       const record = (name,data) => result.events.push({name,data});
       native = item.arm === 'A' ? await openNativeChrome(['--autoplay-policy=no-user-gesture-required']) : await openExtension(item.arm === 'B' ? diagnostic : production, record);
@@ -153,7 +201,9 @@ export async function runFloor(planPath, prefix) {
         assert.equal(result.geometry.canvases,item.arm==='A'?0:1);
         if (item.phase === 'proxy') {
           await page.evaluate(() => {const marker=document.createElement('div');marker.id='m106-marker';marker.style.cssText='position:fixed;left:40px;top:90px;width:12px;height:16px;background:#cf1020';document.body.append(marker);});
+          result.proxyBefore={at:await page.evaluate(()=>performance.now()),path:relative(ROOT,`${prefix}.${item.id}.before.png`)};
           await page.screenshot({path:`${prefix}.${item.id}.before.png`});
+          result.proxyBefore.finishedAt=await page.evaluate(()=>performance.now());result.proxyBefore.sha256=sha256(readFileSync(`${prefix}.${item.id}.before.png`));
         }
         await page.evaluate(milliseconds=>new Promise(done=>setTimeout(done,milliseconds)),item.warmupMs);
         await page.evaluate(milliseconds=>globalThis[Symbol.for('aethervsr.m106.native')].start(milliseconds),item.durationMs);
@@ -173,7 +223,11 @@ export async function runFloor(planPath, prefix) {
           assert.deepEqual(closingPlacement.screen,result.placement.nativeScreen);assert.deepEqual(closingPlacement.bounds,result.placement.bounds.bounds);
           result.completion='CAPTURED';
         } catch(error) {result.error=String(error);}
-        if (item.phase==='proxy')await page.screenshot({path:`${prefix}.${item.id}.after.png`});
+        if (item.phase==='proxy'){
+          result.proxyAfter={at:await page.evaluate(()=>performance.now()),path:relative(ROOT,`${prefix}.${item.id}.after.png`)};
+          await page.screenshot({path:`${prefix}.${item.id}.after.png`});
+          result.proxyAfter.finishedAt=await page.evaluate(()=>performance.now());result.proxyAfter.sha256=sha256(readFileSync(`${prefix}.${item.id}.after.png`));
+        }
         if (item.arm==='B') {
           const geometryState=()=>native.isolated(page,()=>{
             const attachment=globalThis.__AETHERVSR_EXTENSION_TEST__.attachment();
@@ -200,6 +254,10 @@ export async function runFloor(planPath, prefix) {
         result.domPreserved=after.html===before.html&&after.source===before.source;
         result.safety=activeSafety(raw,item.arm,{status:result.teardown,attachment:result.teardownAttachment,domPreserved:result.domPreserved},result.geometryQualification);
         if(item.arm==='A'&&!result.domPreserved){result.completion='UNVERIFIED';result.error='Native source DOM changed';}
+        if(result.completion!=='CAPTURED'&&bindingNativeFailure(raw)){
+          result.completion='CAPTURED';result.observation='INCOMPLETE_BINDING_FAILURE';result.safety.pass=false;
+          result.partialSummary=summarizeNative(raw);delete result.summary;
+        }
         console.log(`${item.id}: ${result.completion}; native L=${result.summary?.nativeCombinedPercent??'not measured'}, callback=${result.summary?.nativeCallbackFps??'not measured'}, submitted=${result.summary?.renderedFps??'not measured'}`);
         if(result.completion!=='CAPTURED')throw new Error(`Invalid case ${item.id}; raw retained; remaining order not run`);
       } finally {await native.close();native=null;}
@@ -213,6 +271,6 @@ export async function runFloor(planPath, prefix) {
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  assert(process.argv.length===4,'Usage: node tools/m106-floor.mjs CASES.json .cache/m106/PREFIX');
-  await runFloor(resolve(process.argv[2]),resolve(process.argv[3]));
+  assert(process.argv.length===4||process.argv.length===5,'Usage: node tools/m106-floor.mjs CASES.json .cache/m106/PREFIX [PRIOR_INTERRUPTED_REPORT.json]');
+  await runFloor(resolve(process.argv[2]),resolve(process.argv[3]),process.argv[4]);
 }
