@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS",
+  "sourceCommit": "482c7c64028396df26c9cacebc7a88b1653d0407",
+  "sourceClean": true,
+  "node": "v26.5.0",
+  "scope": "Fresh local clone without Git hardlinks; own npm ci/node_modules; Python308 tests reuse installed environment. No native browser/GPU measurements rerun inside clone. Hashes include provenance and payload.",
+  "gates": {
+    "npmCi": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "vitest": {
+      "files": 33,
+      "tests": 664,
+      "verdict": "PASS"
+    },
+    "harnessBuild": "PASS",
+    "extensionBuild": "PASS",
+    "python": {
+      "tests": 308,
+      "verdict": "PASS"
+    },
+    "manifest": "PASS"
+  },
+  "production": {
+    "payloadBytes": 265958,
+    "bundleSha256": "a796a9ec1b0a1f050f992d3d712bf1164799eeb073ca23d5035a61199ee228c3",
+    "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+    "twoBuildsIdentical": true,
+    "hashes": {
+      "content.js": "219ccbd7b9ff0150fe710ef951ccfb8be02af021cfa9d68867a0723d8de3626e",
+      "manifest.json": "37e7922754f44097d60a2b81dfb6ba2a04f6f49cdb19aefa71b436fee7627e82",
+      "models/production.json": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "popup.css": "daac6fdde1732ef8ab41615a9440a65a66ba8cf3c9ee4d45a476ad6b9d7d798c",
+      "popup.html": "d9bc0a5ef9dc562eee6802f983ba411e4bf15b314bb6bef0853b266ed2fbe30f",
+      "popup.js": "606ea6645a03b5b51d060af59560a1bb7fbcda314b798f56d8ed5084c0e0cb57",
+      "service-worker.js": "645d389bcbce1d1d550bc0b71353a959a4c5fa5bb10fb41113a62db98e99d72c",
+      "build-provenance.json": "6bd01cc127dddef3706d0d5401d6979db636b8fb5add5ba580f1cdbd290a80cd"
+    }
+  },
+  "diagnostic": {
+    "payloadBytes": 266245,
+    "bundleSha256": "915fd586d2c2d40ba4fe5de5e12e48094a88a29e4a30638aabdd24d1963e2950",
+    "twoBuildsIdentical": true,
+    "hashes": {
+      "content.js": "61410a91878a600b7b682cf257f456e202c3ee4749bab0d88af48cfaf2690b0b",
+      "manifest.json": "37e7922754f44097d60a2b81dfb6ba2a04f6f49cdb19aefa71b436fee7627e82",
+      "models/production.json": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "popup.css": "daac6fdde1732ef8ab41615a9440a65a66ba8cf3c9ee4d45a476ad6b9d7d798c",
+      "popup.html": "d9bc0a5ef9dc562eee6802f983ba411e4bf15b314bb6bef0853b266ed2fbe30f",
+      "popup.js": "606ea6645a03b5b51d060af59560a1bb7fbcda314b798f56d8ed5084c0e0cb57",
+      "service-worker.js": "645d389bcbce1d1d550bc0b71353a959a4c5fa5bb10fb41113a62db98e99d72c",
+      "build-provenance.json": "da97e45c0007f4664f38aeee60d078c0508586ef9b08e04a26092553fd2adb55"
+    }
+  },
+  "trackedBytes": 50793582,
+  "capBytes": 52428800,
+  "localGitDiskKiB": 443612,
+  "gitDiskScope": "Local cloned history on disk, not network transfer size; excludes installed dependencies and generated artifacts."
+}
