@@ -60,7 +60,7 @@ export class VideoAttachment {
   private failure: AttachmentOptions['onFailure'] | null;
   private readonly forceCopy: boolean;
   private readonly withheldFeatures: GPUFeatureName[];
-  private readonly processingDisabled: boolean;
+  declare private readonly processingDisabled: boolean;
   private mode: RuntimeMode;
   private disposed = false;
   private generation = 0;
@@ -86,7 +86,7 @@ export class VideoAttachment {
     this.failure = options.onFailure;
     this.forceCopy = options.forceCopy ?? false;
     this.withheldFeatures = [...(options.withheldFeatures ?? [])];
-    this.processingDisabled = typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__ && options.processingDisabled === true;
+    if (typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__) this.processingDisabled = options.processingDisabled === true;
     this.canvas = video.ownerDocument.createElement('canvas');
     this.canvas.width = 0;
     this.canvas.height = 0;

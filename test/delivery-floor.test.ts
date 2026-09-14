@@ -1,0 +1,163 @@
+import { describe, expect, it } from 'vitest';
+import { execFileSync } from 'node:child_process';
+
+function check(source: string): void {
+  const output = execFileSync(process.execPath, ['--input-type=module', '-e', `
+    import assert from 'node:assert/strict';
+    import { installNativeObserver, installRuntimeCounters, summarizeNative, validateNative, pairedBounds, floorDecision } from './tools/m106-counters.mjs';
+    import { activeSafety, parseFloorPlan, PRIMARY_ORDER, qualifiesDisabledGeometry } from './tools/m106-floor.mjs';
+    import { runInNewContext } from 'node:vm';
+    ${source}
+    console.log('checked');
+  `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
+  expect(output.trim()).toBe('checked');
+}
+
+const fixture = `
+ const boundary={callbacks:10,presented:100,gaps:0,quality:{total:120,dropped:2},currentTime:1,readyState:4,networkState:1,paused:false,rate:1,source:'local',generation:1,visibility:'visible',focused:true};
+ const raw={native:{mode:'lean',invalid:null,overflow:false,opening:{...boundary,at:0},closing:{...boundary,at:1000,callbacks:12,presented:104,gaps:2,quality:{total:180,dropped:3}},
+ rows:[[100,100,1.1,90,110,102,2,140,2,1.1,4,1,1],[500,500,1.5,490,510,104,2,160,3,1.5,4,1,1]],events:[],raf:[]},runtime:null};
+`;
+
+const observerFixture = `
+  const callbacks=new Map(),timers=new Map();let nextId=0,clock=0;
+  class TrackedTarget extends EventTarget{
+    listeners=0;
+    addEventListener(...args){this.listeners++;super.addEventListener(...args);}
+    removeEventListener(...args){this.listeners--;super.removeEventListener(...args);}
+  }
+  const video=Object.assign(new TrackedTarget(),{currentTime:1,duration:4,readyState:4,networkState:1,paused:false,ended:false,
+    playbackRate:1,currentSrc:'local',getVideoPlaybackQuality:()=>({totalVideoFrames:100+clock,droppedVideoFrames:0,creationTime:clock}),
+    requestVideoFrameCallback:callback=>{const id=++nextId;callbacks.set(id,callback);return id;},cancelVideoFrameCallback:id=>callbacks.delete(id)});
+  const document=Object.assign(new TrackedTarget(),{visibilityState:'visible',hasFocus:()=>true,querySelector:()=>video});
+  const window=new TrackedTarget();
+  const context={document,window,Event,performance:{now:()=>clock},setTimeout:(callback,ms)=>{const id=++nextId;timers.set(id,{callback,ms});return id;},clearTimeout:id=>timers.delete(id)};
+  const frame=(presentedFrames,mediaTime)=>{const [id,callback]=callbacks.entries().next().value;callbacks.delete(id);callback(clock,{presentedFrames,mediaTime,presentationTime:clock-5,expectedDisplayTime:clock+5});};
+  const flush=()=>{const entries=[...timers.values()];timers.clear();for(const entry of entries)entry.callback();};
+`;
+
+describe('native browser delivery floor accounting', () => {
+  it('retains a real submission when the original post-submit callback throws', () => check(`
+    let submitted=0;const window=new EventTarget();
+    const pipeline={currentUpscaler:{neural:true},error:null,onTick(tick){this.onFrame(tick);},onFrame(){submitted++;throw new Error('post-submit failure');}};
+    const driver={onChange:null,snapshot:()=>({session:{framesRendered:submitted},controller:{state:'stable',tier:'neural'}})};
+    const attachment={pipeline,driver,snapshot:()=>({})};const manager={attachment,status:()=>({})};
+    const context={manager,chrome:{runtime:{id:'test'}},window,Event,performance:{now:()=>10}};
+    const originalTick=pipeline.onTick,originalFrame=pipeline.onFrame;
+    const data=runInNewContext('globalThis[Symbol.for("aethervsr.m10.document.test")]=manager;('+installRuntimeCounters.toString()+')();globalThis[Symbol.for("aethervsr.m106.runtime")]',context);
+    window.dispatchEvent(new Event('aethervsr:m106:start'));
+    assert.throws(()=>pipeline.onTick({presentedDelta:2}),/post-submit failure/);
+    window.dispatchEvent(new Event('aethervsr:m106:end'));
+    assert.equal(data.frames.length,1);assert.equal(data.attempts,1);assert.equal(data.closing.runtime.session.framesRendered,1);
+    assert.equal(pipeline.onTick,originalTick);assert.equal(pipeline.onFrame,originalFrame);
+  `));
+  it('qualifies hidden live geometry using the attachment Rect contract', () => check(`
+    const state=(left,geometryCalls)=>({cssRect:{left,top:120,width:640,height:360},connected:true,visibility:'hidden',pointerEvents:'none',
+      snapshot:{infrastructure:{geometryCalls},resources:{device:0,pipeline:0,frameCallback:0}}});
+    const opening=state(40,1),moved=state(50,2),restored=state(40,3);
+    assert.equal(qualifiesDisabledGeometry(opening,moved,restored),true);
+    moved.visibility='visible';assert.equal(qualifiesDisabledGeometry(opening,moved,restored),false);moved.visibility='hidden';
+    moved.snapshot.infrastructure.geometryCalls=1;assert.equal(qualifiesDisabledGeometry(opening,moved,restored),false);
+    assert.equal(qualifiesDisabledGeometry(opening,undefined,restored),false);
+  `));
+  it('executes native callback bookkeeping and removes observer-owned handles without a GPU', () => check(observerFixture + `
+    const data=runInNewContext('('+installNativeObserver.toString()+')({mode:"lean"});globalThis[Symbol.for("aethervsr.m106.native")]',context);
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    frame(10,1);clock=16;frame(11,1.016);data.start(1000);
+    clock=40;frame(14,1.04);assert.equal(data.rows.length,1);assert.equal(data.gaps,2);
+    clock=48;video.dispatchEvent(new Event('seeking'));frame(15,0);
+    assert.equal(data.rows[1][12],data.opening.generation);
+    clock=1016;flush();flush();await data.done;
+    assert.equal(data.closing.presented-data.opening.presented,4);assert.equal(data.invalid,null);
+    assert.equal(callbacks.size,0);assert.equal(timers.size,0);assert.equal(video.listeners+window.listeners+document.listeners,0);
+    assert.equal(data.tasks.length,0);assert.equal(data.raf.length,0);
+  `));
+  it('invalidates a transient resize even when final native bounds would match', () => check(observerFixture + `
+    const data=runInNewContext('('+installNativeObserver.toString()+')({mode:"lean"});globalThis[Symbol.for("aethervsr.m106.native")]',context);
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    frame(10,1);clock=16;frame(11,1.016);data.start(1000);clock=100;window.dispatchEvent(new Event('resize'));flush();await data.done;
+    assert.equal(data.invalid,'Integrity event: resize');assert.equal(callbacks.size,0);
+    assert.equal(video.listeners+window.listeners+document.listeners,0);
+  `));
+  it('never requests a video callback in the no-observer comparison', () => check(observerFixture + `
+    const data=runInNewContext('('+installNativeObserver.toString()+')({mode:"none"});globalThis[Symbol.for("aethervsr.m106.native")]',context);
+    document.dispatchEvent(new Event('DOMContentLoaded'));data.start(1000);
+    assert.equal(callbacks.size,0);clock=1000;flush();flush();await data.done;
+    assert.equal(data.closing.callbacks,null);assert.equal(data.rows.length,0);
+  `));
+  it('defines an exact native analogue without a runtime, GPU or invented zero processing rate', () => check(fixture + `
+    const summary=validateNative(raw,1000);
+    assert.equal(summary.callbacks,2);assert.equal(summary.presented,4);assert.equal(summary.gaps,2);
+    assert.equal(summary.nativeCombinedPercent,75);assert.equal(summary.callbackGapPercent,50);
+    assert.equal(summary.qualityDropPercent,100/60);assert.equal(summary.nativeCallbackFps,2);
+    assert.equal(summary.renderedFps,null);assert.equal(summary.historicalRuntimeCombinedPercent,null);
+    assert.equal(summary.submissionDeficit,null);assert.equal(summary.counterOverlap,null);
+  `));
+  it('rejects source/counter resets, short windows and imperfect callback accounting', () => check(fixture + `
+    assert.throws(()=>validateNative(raw,1001));
+    raw.native.closing.presented=105;assert.throws(()=>validateNative(raw,1000));raw.native.closing.presented=104;
+    raw.native.closing.generation=2;assert.throws(()=>validateNative(raw,1000));raw.native.closing.generation=1;
+    raw.native.closing.quality.dropped=0;assert.equal(summarizeNative(raw).nativeCombinedPercent,null);assert.throws(()=>validateNative(raw,1000));
+  `));
+  it('leaves no-observer callback quantities unavailable while retaining boundary quality metrics', () => check(fixture + `
+    raw.native.mode='none';raw.native.rows=[];
+    for(const boundary of[raw.native.opening,raw.native.closing]){boundary.callbacks=null;boundary.presented=null;boundary.gaps=null;}
+    const summary=validateNative(raw,1000);assert.equal(summary.nativeCombinedPercent,null);assert.equal(summary.callbacks,null);
+    assert.equal(summary.qualityDrops,1);assert.equal(summary.qualityTotal,60);
+  `));
+  it('reports real runtime counter mismatches separately from the common native analogue', () => check(fixture + `
+    raw.runtime={overflow:false,opening:{attempts:0,runtime:{session:{framesRendered:0,framesPresented:0,framesSkipped:0}}},
+      closing:{attempts:2,pipelineError:null,sameAttachment:true,runtime:{session:{framesRendered:2,framesPresented:4,framesSkipped:2}}},frames:[[100,2,1],[500,2,1]]};
+    const summary=validateNative(raw,1000);assert.equal(summary.historicalRuntimeCombinedPercent,75);assert.equal(summary.submissionDeficit,0);
+    assert.deepEqual(summary.runtimeNativeAlignment,{presented:0,skipped:0,submittedMinusCallbacks:0});
+    raw.runtime.closing.attempts=3;raw.runtime.closing.pipelineError='device lost';
+    assert.equal(validateNative(raw,1000).submissionDeficit,1);
+    assert.equal(raw.runtime.closing.pipelineError,'device lost');
+  `));
+  it('retains closing loop waits and completely stalled playback as outcomes, not replacement opportunities', () => check(fixture + `
+    raw.native.closing.readyState=1;assert.equal(validateNative(raw,1000).callbacks,2);
+    raw.native.rows=[];raw.native.closing={...raw.native.opening,at:1000};
+    const summary=validateNative(raw,1000);assert.equal(summary.qualityTotal,0);assert.equal(summary.nativeCombinedPercent,null);
+  `));
+  it('uses four run-level observations and fixed t bounds, never frame pseudoreplication', () => check(`
+    const bounds=pairedBounds([0,0,0,0]);assert.equal(bounds.upper95,0);assert.equal(bounds.sd,0);
+    assert.throws(()=>pairedBounds([1,2,3]));assert.throws(()=>pairedBounds([1,2,3,NaN]));
+    const spread=pairedBounds([-1,0,0,1]);assert(spread.lower95<0&&spread.upper95>0);
+  `));
+  it('enforces the frozen order before executing an evidence plan', () => check(`
+    const cases=PRIMARY_ORDER.map((arm,index)=>({id:'primary-'+index,arm,phase:'primary',mode:'lean',durationMs:600000}));
+    assert.equal(parseFloorPlan(cases).length,16);
+    assert.throws(()=>parseFloorPlan(cases.slice(1)));
+    [cases[0],cases[1]]=[cases[1],cases[0]];assert.throws(()=>parseFloorPlan(cases));
+  `));
+  it('requires each active run to pass average, final-window and error-aware cleanup gates', () => check(fixture + `
+    const counts={ownerChanges:1,created:1,maximumConcurrent:1};
+    const status={details:{infrastructure:counts}};
+    const controller={state:'stable',tier:'neural'};
+    const runtime={controller,actualTier:'neural',session:{framesRendered:0,framesPresented:0,framesSkipped:0}};
+    raw.native.closing.at=600000;
+    raw.runtime={opening:{attempts:0,status,runtime},closing:{attempts:35400,status,pipelineError:null,sameAttachment:true,
+      runtime:{...runtime,session:{framesRendered:35400,framesPresented:35900,framesSkipped:500}}},
+      states:[],frames:Array.from({length:7080},(_,index)=>[480001+index*16.7,1,1])};
+    raw.errors=[];
+    const cleanup={domPreserved:true,status:{enabled:false,details:{timerCount:0,discoveryActive:false}},attachment:{resources:{device:0,canvas:0},infrastructure:{cleanupErrors:0}}};
+    assert.equal(activeSafety(raw,'D',cleanup).pass,true);
+    cleanup.attachment.infrastructure.cleanupErrors=1;assert.equal(activeSafety(raw,'D',cleanup).pass,false);cleanup.attachment.infrastructure.cleanupErrors=0;
+    raw.runtime.frames=raw.runtime.frames.slice(0,6800);assert.equal(activeSafety(raw,'D',cleanup).checks.lastRendered,false);
+    raw.runtime.closing.runtime.session.framesRendered=34000;assert.equal(activeSafety(raw,'D',cleanup).checks.averageRendered,false);
+    raw.runtime.closing.runtime.session.framesRendered=null;assert.equal(activeSafety(raw,'D',cleanup).checks.averageRendered,false);
+    assert.equal(activeSafety(raw,'D',undefined).checks.cleanup,false);
+  `));
+  it('does not turn uncertainty, a safety failure or absent observer justification into Case C', () => check(`
+    const make=()=>Array.from({length:4},()=>({A:{nativeCombinedPercent:3,nativeCallbackFps:59},B:{nativeCombinedPercent:3,nativeCallbackFps:59},C:{nativeCombinedPercent:3,renderedFps:59,safety:true},D:{nativeCombinedPercent:3,renderedFps:59,safety:true}}));
+    let blocks=make();assert.equal(floorDecision(blocks,true).case,'CASE C');assert.equal(floorDecision(blocks,null).case,'CASE D');
+    blocks[0].D.safety=false;assert.equal(floorDecision(blocks,true).case,'CASE D');
+    blocks=make();for(const block of blocks)block.A.nativeCombinedPercent=.5;assert.equal(floorDecision(blocks,true).case,'CASE A');
+    blocks=make();for(const block of blocks)block.D.nativeCombinedPercent=4;assert.equal(floorDecision(blocks,true).case,'CASE B');
+    blocks=make();blocks[0].D.nativeCombinedPercent=1;blocks[1].D.nativeCombinedPercent=6;assert.equal(floorDecision(blocks,true).case,'CASE D');
+    for(const field of['nativeCombinedPercent','renderedFps'])for(const value of[null,undefined,NaN,Infinity]){
+      blocks=make();blocks[0].D[field]=value;const result=floorDecision(blocks,true);
+      assert.equal(result.case,'CASE D');assert.equal(result.readinessADRPermitted,false);
+    }
+  `));
+});
