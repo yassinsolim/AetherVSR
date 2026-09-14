@@ -93,13 +93,14 @@ export async function runComparison(casesPath, prefix) {
     const pins = { m9: m9.pins, m10: m10.pins, 'models/aethersr-c16d2.json': m10.pins['models/aethersr-c16d2.json'] };
     return await runPerformance(casesPath, prefix, {
       parseCases: parsePlan, verifyBuild: () => frozenBuild(m10.root), accounting: item => item.diagnostics !== 'legacy',
+      viewport: item => ({ width: 1200, height: item.diagnostics === 'legacy' ? 820 : 760 }),
       rawByteLimit: 12 * 1024 * 1024,
       sources: ['tools/m105-accounting.mjs', 'tools/m105-compare.mjs', 'tools/m105-fixture.html'],
       description: { milestone: 'M10.5', acceptance: 'Exploratory attribution/replication, not final acceptance',
         sourceRoots: { m9: m9.root, m10: m10.root }, pins,
         comparison: 'Original M9/M10 root harness UI retained. All other arms use byte-identical matched HTML, 640x360 at (40,120), white background, no controls; 2560x1440 runtime output. Standard scheduling/metadata observer common; owned callback instrumentation only in separately labelled diagnostic arms.',
         metric: 'Historical combined retained; unique frame loss/overlap unavailable',
-        placement: 'Native 1200x820 viewport at desktop(40,40), cleared device metrics override, no focus forcing during capture',
+        placement: 'Native 1200x760 viewport at desktop(40,40), cleared device metrics override, no focus forcing during capture. Legacy replication alone retains M10 emulated1200x820; native bounds remain on the same display.',
         rawPolicy: 'Full raw local only, compact hash-indexed summaries for Git; 12MiB local compressed-file limit is not a repository-cap change' },
       startFixtures: async () => { const fixtures = await startFixtures({ mse: false }); return { ...fixtures, legacyUrl: fixtures.url, url: `${m10.origin}/m105` }; },
       harnessServer: async () => ({ origin: m10.origin, owned: true, pins,
@@ -143,15 +144,28 @@ export async function runComparison(casesPath, prefix) {
       collect: async (native, page, item, result) => {
         let scheduling = null, owned = null;
         const closingScreen = await page.evaluate(() => ({ width: screen.width, height: screen.height, availLeft: screen.availLeft, availTop: screen.availTop, availWidth: screen.availWidth, availHeight: screen.availHeight, dpr: devicePixelRatio, x: screenX, y: screenY }));
-        assert.deepEqual(closingScreen, result.pageGeometry.screen, 'Window/display changed');
         if (!['lean', 'legacy'].includes(item.diagnostics)) {
           await bounded(page.evaluate(() => globalThis[Symbol.for('aethervsr.m105.scheduling')].done), 3000);
           scheduling = await page.evaluate(() => { const data = globalThis[Symbol.for('aethervsr.m105.scheduling')]; return { ...data, done: undefined }; });
-          validateScheduling(scheduling);
         }
         if (item.diagnostics === 'owned') owned = await native.isolated(page, () => { const data = globalThis[Symbol.for('aethervsr.m105.owned')]; return { ...data, restore: undefined }; });
-        return { scheduling, owned, workerEvents: native.m105WorkerEvents, sourceCommit: item.arm === 'm9-harness' ? REVISIONS.m9 : REVISIONS.m10,
+        const cdp = await native.context.newCDPSession(page);
+        let closingNative;
+        try {
+          const window = await cdp.send('Browser.getWindowForTarget');
+          await cdp.send('Emulation.clearDeviceMetricsOverride');
+          closingNative = { bounds: window.bounds, screen: await page.evaluate(() => ({ width: screen.width, height: screen.height, dpr: devicePixelRatio, x: screenX, y: screenY })) };
+        } finally { await cdp.detach(); }
+        const manager = item.noRuntime ? await native.isolated(page, () => globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)].status()) : null;
+        return { scheduling, owned, closingScreen, closingNative, manager, workerEvents: native.m105WorkerEvents, sourceCommit: item.arm === 'm9-harness' ? REVISIONS.m9 : REVISIONS.m10,
           bundleSha256: item.kind.startsWith('extension-') || item.kind === 'installed-idle' ? frozenBuild(m10.root).provenance.bundleSha256 : null };
+      },
+      validate: (raw, item, result) => {
+        assert.deepEqual(raw.closingScreen, result.pageGeometry.screen, 'Window/display changed');
+        assert.deepEqual(raw.closingNative.screen, result.preparation.nativeScreen, 'Native display changed');
+        assert.deepEqual(raw.closingNative.bounds, result.preparation.bounds.bounds, 'Native window bounds changed');
+        if (!['lean', 'legacy'].includes(item.diagnostics)) validateScheduling(raw.scheduling);
+        if (item.noRuntime) assert.equal(raw.manager.code, 'webgpu-unavailable');
       },
       summarize: raw => ({ ...deliverySummary(raw), rafIntervalsMs: distribution(raw.scheduling?.raf.map(row => row[2]) ?? []),
         longTasks: raw.scheduling?.tasks ?? null, mediaEvents: raw.scheduling?.events ?? null, owned: raw.owned,

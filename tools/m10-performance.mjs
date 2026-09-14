@@ -362,7 +362,7 @@ export function summarizeCapture(raw) {
       last120s: windowSummary(raw, runtime.ended - 120000, runtime.ended) } : null };
 }
 
-export function validateCapture(raw, item) {
+export function validateCapture(raw, item, viewport = { width: 1200, height: 820 }) {
   const { runtime, video } = raw;
   assert(!runtime.error, runtime.error); assert(!runtime.overflow && !video.overflow, 'Trace capacity exceeded');
   validateActivity(raw);
@@ -371,7 +371,7 @@ export function validateCapture(raw, item) {
   assert(video.rows.length > 0 && video.rows.every(row => row[4] === null || row[4] >= 0), 'Video counter reset/no callbacks');
   assert.equal(counterDelta(video.opening.callbacks, video.closing.callbacks), video.rows.length, 'Incomplete observer trace');
   for (const boundary of [runtime.opening, runtime.closing]) {
-    assert.equal(boundary.viewport.width, 1200); assert.equal(boundary.viewport.height, 820);
+    assert.equal(boundary.viewport.width, viewport.width); assert.equal(boundary.viewport.height, viewport.height);
     assert(boundary.video.width === 1280 && boundary.video.height === 720 && boundary.video.rate === 1 && !boundary.video.paused, 'Unexpected source state');
     assert.equal(boundary.canvasCount, boundary.runtime ? 1 : 0);
     if (item.kind !== 'harness') assert(boundary.video.rect.width === 640 && boundary.video.rect.height === 360, 'Fixture CSS changed');
@@ -526,21 +526,25 @@ export async function runPerformance(casesPath, outputPrefix, environment = {}) 
         await bounded(page.evaluate(() => globalThis[Symbol.for('aethervsr.m10.performance.video')].done), item.warmupMs + item.durationMs + 20000, 'Performance window');
         const runtime = await evaluate(() => globalThis[Symbol.for('aethervsr.m10.performance.runtime')]);
         const video = await page.evaluate(() => { const value = globalThis[Symbol.for('aethervsr.m10.performance.video')]; return { opening: value.opening, closing: value.closing, rows: value.rows, events: value.events, overflow: value.overflow }; });
-        const extra = await environment.collect?.(native, page, item, result);
+        let extra = {}, collectionError = null;
+        try { extra = await environment.collect?.(native, page, item, result) ?? {}; }
+        catch (error) { collectionError = String(error); }
         const raw = { case: item, sourceCommit: build.provenance.sourceCommit, bundleSha256: build.provenance.bundleSha256,
           casesSha256: report.casesSha256, mediaSha256: report.media.sha256, runtime, video, columns: { samples: ['ms', 'submittedAt', 'resolvedAt', 'sequence', 'generation', 'neural'],
           driverCpuRows: ['observedAt', 'ms'],
           frames: ['observedAt', 'now', 'mediaTime', 'presentedDelta', 'latencyMs', 'qualityTotal', 'qualityDropped', 'coreCpuMs', 'adapterOnFrameMs', 'neural'],
-          video: ['observedAt', 'now', 'mediaTime', 'presentedFrames', 'presentedDelta', 'latencyMs', 'qualityTotal', 'qualityDropped', 'observerMs'] }, ...extra };
+          video: ['observedAt', 'now', 'mediaTime', 'presentedFrames', 'presentedDelta', 'latencyMs', 'qualityTotal', 'qualityDropped', 'observerMs'] }, ...extra, collectionError };
         if (accounting) {
           raw.columns.frames.push('presentationTime', 'expectedDisplayTime', 'sourceGeneration', 'windowSubmittedSequence');
           raw.columns.video.push('presentationTime', 'expectedDisplayTime', 'sourceGeneration', 'callbackSequence', 'processingDurationSeconds');
           raw.columns.attempts = ['observedAt', 'now', 'mediaTime', 'presentedDelta', 'sourceGeneration', 'submittedBefore', 'submittedAfter', 'error'];
         }
         result.raw = write(`${prefix}.${item.id}.json.gz`, raw);
+        assert.equal(collectionError, null, 'Diagnostic collection failed; available raw retained');
+        await environment.validate?.(raw, item, result);
         assert(result.raw.bytes <= (environment.rawByteLimit ?? 3 * 1024 * 1024), 'Raw trace exceeds local evidence budget; retained as unverified');
         assert.deepEqual(result.errors, [], 'Unexpected page errors');
-        validateCapture(raw, item);
+        validateCapture(raw, item, environment.viewport?.(item));
         result.summary = summarizeCapture(raw);
         result.diagnostics = environment.summarize?.(raw) ?? null;
         result.boundaries = { opening: runtime.opening, closing: runtime.closing, nativeOpening: video.opening, nativeClosing: video.closing };

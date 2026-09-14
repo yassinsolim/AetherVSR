@@ -58,7 +58,7 @@ export function installOwnedCost(options = {}) {
   const key = Symbol.for('aethervsr.m105.owned');
   if (globalThis[key]) throw new Error('Duplicate diagnostic wrapper');
   const data = globalThis[key] = { active: false, totalMs: 0, callbacks: 0, categories: {}, depth: 0,
-    scope: 'Synchronous isolated-world entry callbacks and message calls; outermost total includes shared core JS but excludes GPU work, browser internals, unwrapped async continuations and instrumentation bookkeeping. Category times may nest; never sum them.' };
+    scope: 'Instrumented isolated-world wrapped-callback occupancy within the window, including shared core and recorder bookkeeping. Not total adapter or renderer CPU; excludes GPU work, browser internals, unwrapped async continuations. Category times may nest; never sum them.' };
   const restores = [], cache = new WeakMap();
   const wrap = (name, callback) => {
     if (typeof callback !== 'function' && (typeof callback !== 'object' || callback === null)) return callback;
@@ -71,7 +71,7 @@ export function installOwnedCost(options = {}) {
       const before = performance.now(); data.depth++;
       try { return call(); }
       finally {
-        const elapsed = performance.now() - before; data.depth--;
+        const elapsed = Math.max(0, Math.min(performance.now(), data.ended ?? Infinity) - Math.max(before, data.started)); data.depth--;
         const bucket = data.categories[name] ??= { calls: 0, totalMs: 0, maxMs: 0 };
         bucket.calls++; bucket.totalMs += elapsed; bucket.maxMs = Math.max(bucket.maxMs, elapsed);
         if (data.depth === 0) { data.totalMs += elapsed; data.callbacks++; }
@@ -88,6 +88,7 @@ export function installOwnedCost(options = {}) {
   }
   for (const name of ['setTimeout', 'setInterval']) replace(globalThis, name, original => function(callback, delay, ...args) { return original(wrap(`${name}:${delay ?? 0}`, callback), delay, ...args); });
   replace(HTMLVideoElement.prototype, 'requestVideoFrameCallback', original => function(callback) { return original.call(this, wrap('rVFC', callback)); });
+  if (typeof globalThis.requestAnimationFrame === 'function') replace(globalThis, 'requestAnimationFrame', original => function(callback) { return original(wrap('rAF', callback)); });
   const message = chrome.runtime.onMessage;
   replace(message, 'addListener', original => function(callback) { return original.call(this, wrap('runtime:onMessage', callback)); });
   replace(message, 'removeListener', original => function(callback) { return original.call(this, cache.get(callback)?.get('runtime:onMessage') ?? callback); });
@@ -140,11 +141,20 @@ export async function nativeWindow(page, context) {
     await cdp.send('Emulation.clearDeviceMetricsOverride');
     const { windowId } = await cdp.send('Browser.getWindowForTarget');
     await cdp.send('Browser.setWindowBounds', { windowId, bounds: { left: 40, top: 40, width: 1280, height: 900, windowState: 'normal' } });
-    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
-    await cdp.send('Browser.setWindowBounds', { windowId, bounds: { left: 40, top: 40, width: 1280 + 1200 - viewport.width, height: 900 + 820 - viewport.height } });
-    await page.waitForFunction(() => innerWidth === 1200 && innerHeight === 820, undefined, { timeout: 5000 });
-    return { bounds: await cdp.send('Browser.getWindowBounds', { windowId }), deviceMetricsOverride: false,
-      scope: 'Native window at desktop (40,40), actual 1200x820 content; no forced focus during capture; Screen API is observable geometry, not measured physical refresh' };
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+      if (viewport.width === 1200 && viewport.height === 760) break;
+      const { bounds } = await cdp.send('Browser.getWindowBounds', { windowId });
+      await cdp.send('Browser.setWindowBounds', { windowId, bounds: { left: 40, top: 40, width: bounds.width + 1200 - viewport.width, height: bounds.height + 760 - viewport.height } });
+    }
+    await page.waitForFunction(() => innerWidth === 1200 && innerHeight === 760, undefined, { timeout: 5000 });
+    const nativeScreen = await page.evaluate(() => ({ width: screen.width, height: screen.height, dpr: devicePixelRatio, x: screenX, y: screenY }));
+    assert.deepEqual(nativeScreen, { width: 1512, height: 982, dpr: 2, x: 40, y: 40 }, 'Expected built-in Retina screen');
+    const bounds = await cdp.send('Browser.getWindowBounds', { windowId });
+    assert(bounds.bounds.left >= 0 && bounds.bounds.top >= 0 && bounds.bounds.left + bounds.bounds.width <= 1512 && bounds.bounds.top + bounds.bounds.height <= 982, 'Window crosses display boundary');
+    return { bounds, nativeScreen, deviceMetricsOverride: false,
+      scope: 'Native window at desktop (40,40), actual 1200x760 content fits built-in display; no forced focus during capture; Screen API is observable geometry, not measured physical refresh' };
   } finally { await cdp.detach(); }
 }
 
@@ -196,7 +206,7 @@ export async function runCounterProbe(prefix) {
       const bytes = gzipSync(JSON.stringify(raw));
       row.raw = { path: `${prefix}.${kind}.json.gz`, sha256: sha256(bytes), bytes: bytes.length };
       writeFileSync(row.raw.path, bytes, { flag: 'wx' });
-      try { validateCapture(raw, item); validateScheduling(raw.scheduling, stalls); assert.deepEqual(row.errors, []); row.verdict = 'VALID'; }
+      try { validateCapture(raw, item, { width: 1200, height: 760 }); validateScheduling(raw.scheduling, stalls); assert.deepEqual(row.errors, []); row.verdict = 'VALID'; }
       catch (error) { row.error = String(error); }
       row.accounting = deliverySummary(raw); row.scheduling = { opening: raw.scheduling.opening, closing: raw.scheduling.closing, rafIntervalsMs: distribution(raw.scheduling.raf.map(value => value[2])), tasks: raw.scheduling.tasks, stimuli: raw.scheduling.stimuli };
       console.log(JSON.stringify({ kind, verdict: row.verdict, accounting: row.accounting, scheduling: row.scheduling }));
