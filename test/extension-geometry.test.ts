@@ -162,6 +162,16 @@ describe('inspectGeometry', () => {
     captionStyle.zIndex = '3'; expect(setup.inspect()).toMatchObject({ ok: true });
   });
 
+  it('rejects inherited ancestor zoom even when rounded clip rectangles coincide', () => {
+    const setup = fixture(); const outer = { ...setup.parent, parentElement: null, parentNode: setup.document };
+    const outerStyle = { ...setup.parentStyle, zoom: '2' };
+    Object.assign(setup.parent, { parentElement: outer, parentNode: outer });
+    Object.assign(setup.parentStyle, { position: 'relative', overflowX: 'hidden', overflowY: 'hidden',
+      borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' });
+    setup.view.getComputedStyle.mockImplementation(element => element === setup.video ? setup.videoStyle : element === outer ? outerStyle : setup.parentStyle);
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+  });
+
   it('returns viewport coordinates, a low stack level and an immediate after-video placement without writes', () => {
     const setup = fixture();
     const result = setup.inspect();

@@ -281,12 +281,14 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   let borderRadius = uniformRadius(computed, scaleX, scaleY);
   if (borderRadius === null) return reject('unsupported-geometry', 'Only uniform pixel or percentage corner radii are supported.');
   let verifyPlacement = false;
+  let unresolvedZoom = false;
   let containingBlockOutside = computed.position === 'fixed' ? 'fixed' : computed.position === 'absolute' ? 'absolute' : null;
   let clip = intersect(rect, { left: 0, top: 0,
     width: video.ownerDocument.documentElement.clientWidth,
     height: video.ownerDocument.documentElement.clientHeight });
   for (let element: Element | null = video; element; element = composedParent(element)) {
     const style = element === video ? computed : view.getComputedStyle(element);
+    if (style.zoom && !['1', 'normal'].includes(style.zoom)) unresolvedZoom = true;
     if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse'
       || style.contentVisibility === 'hidden') return reject('offscreen', 'Video or ancestor is hidden.');
     if (element === video) continue;
@@ -339,6 +341,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     if (containingBlockOutside !== 'fixed' && (style.position === 'absolute' || style.position === 'fixed')) containingBlockOutside = style.position;
   }
   if (clip.width <= 0 || clip.height <= 0) return reject('offscreen', 'Video is outside the viewport or ancestor clip.');
+  if (verifyPlacement && unresolvedZoom) return reject('unsupported-geometry', 'New clipping/container cases require an unzoomed ancestor chain.');
   if (paintOrderRisk(video, computed, view)) {
     return reject('unsupported-controls', 'Preceding sibling paint order cannot be preserved.');
   }
