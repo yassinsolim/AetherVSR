@@ -182,8 +182,8 @@ afterEach(() => {
 });
 
 describe('VideoAttachment', () => {
-  it('hides immediately on pause or seeking with pending geometry and preserves controller policy until fresh output', async () => {
-    for (const event of ['pause', 'seeking'] as const) {
+  it('hides immediately on pause with pending geometry and preserves controller policy until fresh output', async () => {
+    for (const event of ['pause'] as const) {
       const { attachment, video, document, canvas, pipeline, frame, failure } = harness({ mode: 'neural' });
       await attachment.start();
       for (let index = 0; index < 31; index++) { vi.advanceTimersByTime(1000 / 60); frame(); }
@@ -196,8 +196,7 @@ describe('VideoAttachment', () => {
       video.dispatchEvent(new Event(event));
       expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
       expect(pipeline.running).toBe(false);
-      expect(attachment.snapshot()).toMatchObject({ ready: false,
-        suspendedReason: event === 'pause' ? 'video-paused' : 'video-seeking', mode: 'neural' });
+      expect(attachment.snapshot()).toMatchObject({ ready: false, suspendedReason: 'video-paused', mode: 'neural' });
       document.flush();
       vi.advanceTimersByTime(60000);
       expect(driver.snapshot().controller).toMatchObject({ activeMs: before.controller.activeMs,
@@ -217,6 +216,28 @@ describe('VideoAttachment', () => {
       expect(failure).not.toHaveBeenCalled();
       attachment.destroy();
     }
+  });
+
+  it('keeps playing seek time active while hiding pixels until a fresh completed seek frame', async () => {
+    const { attachment, video, document, canvas, pipeline, frame } = harness();
+    await attachment.start();
+    frame();
+    const before = attachment.driver!.snapshot();
+    video.seeking = true;
+    video.dispatchEvent(new Event('seeking'));
+    document.flush();
+    expect(pipeline.running).toBe(true);
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    vi.advanceTimersByTime(100);
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    expect(attachment.driver!.snapshot().session.activeMs).toBe(before.session.activeMs + 100);
+    video.seeking = false;
+    video.dispatchEvent(new Event('seeked'));
+    document.flush();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
   });
 
   it('allows paused attachment and paused seeking but keeps the original visible until playing produces a new frame', async () => {

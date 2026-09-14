@@ -138,7 +138,7 @@ export class VideoAttachment {
       driver.onFrame = () => {
         if (this.disposed || this.failSource()) return;
         if (this.videoPipeline?.error) { this.failExecution(this.videoPipeline.error); return; }
-        if (!this.visible() || !this.videoPipeline?.running || this.outputReady) return;
+        if (this.video.seeking || !this.visible() || !this.videoPipeline?.running || this.outputReady) return;
         this.outputReady = true;
         this.style('visibility', 'visible');
       };
@@ -163,6 +163,7 @@ export class VideoAttachment {
     if (this.disposed) return;
     this.infrastructure.refreshCalls++;
     if (this.failSource()) return;
+    if (this.video.seeking) this.hide();
     const reason = this.unavailableReason();
     if (reason !== null) this.suspend(reason);
     if (this.geometryFrame !== null || this.disposed) return;
@@ -180,7 +181,6 @@ export class VideoAttachment {
     if (!this.video.isConnected || this.video.readyState < 2 || this.video.videoWidth <= 0 || this.video.videoHeight <= 0) {
       return 'video-not-ready';
     }
-    if (this.video.seeking) return 'video-seeking';
     if (this.video.paused) return 'video-paused';
     if (document.visibilityState !== 'visible') return 'document-hidden';
     if (document.pictureInPictureElement === this.video) return 'picture-in-picture';
