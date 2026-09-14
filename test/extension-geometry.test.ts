@@ -47,7 +47,7 @@ function fixture() {
     transform: 'none', translate: 'none', rotate: 'none', scale: 'none',
     filter: 'none', backdropFilter: 'none', perspective: 'none', clipPath: 'none',
     clip: 'auto', maskImage: 'none', mixBlendMode: 'normal', contain: 'none',
-    willChange: 'auto', contentVisibility: 'visible', containerType: 'normal',
+    willChange: 'auto', contentVisibility: 'visible', containerType: 'normal', zoom: '1',
     overflowX: 'visible', overflowY: 'visible', overflowClipMargin: '0px',
     borderTopWidth: '0px', borderRightWidth: '0px', borderBottomWidth: '0px', borderLeftWidth: '0px',
     paddingTop: '0px', paddingRight: '0px', paddingBottom: '0px', paddingLeft: '0px',
@@ -89,6 +89,79 @@ function fixture() {
 }
 
 describe('inspectGeometry', () => {
+  it.each(['size', 'inline-size'])('admits a %s query container only with post-placement verification', containerType => {
+    const setup = fixture(); setup.parentStyle.containerType = containerType;
+    expect(setup.inspect()).toMatchObject({ ok: true, verifyPlacement: true });
+    setup.parentStyle.transform = 'matrix(1, 0, 0, 1, 0, 0)';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+    setup.parentStyle.transform = 'none'; setup.parentStyle.contain = 'layout';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+  });
+
+  it.each(['hidden', 'clip'])('reproduces coincident rounded %s on the full video box, not the viewport crop', overflow => {
+    const setup = fixture();
+    Object.assign(setup.parentStyle, { overflowX: overflow, overflowY: overflow,
+      borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' });
+    setup.video.getBoundingClientRect.mockReturnValue({ left: -40, top: 20, width: 320, height: 180 });
+    setup.parent.getBoundingClientRect.mockReturnValue({ left: -40, top: 20, width: 320, height: 180 });
+    expect(setup.inspect()).toMatchObject({ ok: true, borderRadius: '12px', verifyPlacement: true,
+      style: { left: '-40px', 'border-radius': '12px', 'clip-path': 'inset(0px 0px 0px 40px)' } });
+  });
+
+  it.each(['offset', 'padding', 'percent', 'different', 'fixed', 'outside', 'image-sized', 'zoom'])('rejects unsafe rounded case %s', kind => {
+    const setup = fixture();
+    Object.assign(setup.parentStyle, { overflowX: 'hidden', overflowY: 'hidden',
+      borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' });
+    if (kind === 'offset') setup.parent.getBoundingClientRect.mockReturnValue({ left: 11, top: 20, width: 320, height: 180 });
+    if (kind === 'padding') setup.parentStyle.paddingTop = '1px';
+    if (kind === 'percent') Object.assign(setup.parentStyle, { borderTopLeftRadius: '10%', borderTopRightRadius: '10%', borderBottomLeftRadius: '10%', borderBottomRightRadius: '10%' });
+    if (kind === 'different') Object.assign(setup.videoStyle, { borderTopLeftRadius: '6px', borderTopRightRadius: '6px', borderBottomLeftRadius: '6px', borderBottomRightRadius: '6px' });
+    if (kind === 'fixed') setup.videoStyle.position = 'fixed';
+    if (kind === 'outside') setup.videoStyle.position = 'absolute';
+    if (kind === 'image-sized') setup.videoStyle.objectFit = 'none';
+    if (kind === 'zoom') setup.parentStyle.zoom = '2';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+  });
+
+  it('allows only strictly higher positioned control branches outside a positioned video wrapper', () => {
+    const setup = fixture(); const outer = { nodeType: 1, parentElement: null, getRootNode: () => setup.document };
+    Object.assign(setup.parent, { parentElement: outer, parentNode: outer });
+    Object.assign(setup.control, { parentElement: outer, parentNode: outer });
+    setup.parentStyle.position = 'relative'; setup.videoStyle.position = 'absolute';
+    setup.controlStyle.zIndex = '3';
+    setup.document.elementsFromPoint.mockReturnValue([setup.control, setup.video, setup.parent]);
+    expect(setup.inspect().ok).toBe(true);
+    setup.controlStyle.zIndex = 'auto'; expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+    setup.controlStyle.zIndex = '3'; setup.videoStyle.zIndex = '4';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+  });
+
+  it.each([false, true])('preserves unresolved fixed containment through an absolute wrapper with overflow=%s', overflow => {
+    const setup = fixture();
+    const outer = { ...setup.parent, parentElement: null, parentNode: setup.document };
+    const outerStyle = { ...setup.parentStyle, position: 'relative', overflowX: 'hidden', overflowY: 'hidden',
+      borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' };
+    Object.assign(setup.parent, { parentElement: outer, parentNode: outer });
+    setup.videoStyle.position = 'fixed'; setup.parentStyle.position = 'absolute';
+    if (overflow) Object.assign(setup.parentStyle, { overflowX: 'hidden', overflowY: 'hidden' });
+    setup.view.getComputedStyle.mockImplementation(element => element === setup.video ? setup.videoStyle : element === outer ? outerStyle : setup.parentStyle);
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+    setup.videoStyle.position = 'static'; setup.parentStyle.position = 'fixed';
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
+  });
+
+  it('rejects preceding passive outer captions hidden from hit testing unless independently stacked above', () => {
+    const setup = fixture();
+    const caption = { previousElementSibling: null };
+    Object.assign(setup.parent, { previousElementSibling: caption });
+    Object.assign(setup.parentStyle, { overflowX: 'hidden', overflowY: 'hidden',
+      borderTopLeftRadius: '12px', borderTopRightRadius: '12px', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' });
+    const captionStyle = { ...setup.controlStyle, pointerEvents: 'none', zIndex: 'auto' };
+    setup.view.getComputedStyle.mockImplementation(element => element === setup.video ? setup.videoStyle : element === caption ? captionStyle : setup.parentStyle);
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-controls' });
+    captionStyle.zIndex = '3'; expect(setup.inspect()).toMatchObject({ ok: true });
+  });
+
   it('returns viewport coordinates, a low stack level and an immediate after-video placement without writes', () => {
     const setup = fixture();
     const result = setup.inspect();

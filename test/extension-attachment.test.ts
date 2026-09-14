@@ -182,6 +182,41 @@ afterEach(() => {
 });
 
 describe('VideoAttachment', () => {
+  it.each([false, true])('rejects actual canvas coordinate mismatch after runtime start=%s', async afterStart => {
+    const { attachment, canvas, parent, video, next, device, failure, document } = harness();
+    const inspect = vi.mocked(inspectGeometry).getMockImplementation()!;
+    vi.mocked(inspectGeometry).mockImplementation(source => {
+      const geometry = inspect(source);
+      return geometry.ok ? { ...geometry, verifyPlacement: true, style: { ...geometry.style, left: '10px', top: '20px' } } : geometry;
+    });
+    const measure = vi.fn(() => ({ left: afterStart ? 10 : 90, top: 20, width: 640, height: 360 }));
+    Object.assign(canvas, { getBoundingClientRect: measure });
+    await attachment.start();
+    if (afterStart) {
+      measure.mockReturnValue({ left: 90, top: 20, width: 640, height: 360 });
+      attachment.refresh(); document.flush();
+      expect(device.destroy).toHaveBeenCalledTimes(1);
+    } else expect(acquireGpu).not.toHaveBeenCalled();
+    expect(failure).toHaveBeenCalledWith('unsupported-geometry', expect.stringContaining('placement'));
+    expect(parent.children).toEqual([video, next]);
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+  });
+
+  it('validates newly admitted placement before output without adding per-frame layout reads', async () => {
+    const { attachment, canvas, frame } = harness();
+    const inspect = vi.mocked(inspectGeometry).getMockImplementation()!;
+    vi.mocked(inspectGeometry).mockImplementation(source => {
+      const geometry = inspect(source);
+      return geometry.ok ? { ...geometry, verifyPlacement: true, style: { ...geometry.style, left: '10px', top: '20px' } } : geometry;
+    });
+    const measure = vi.fn(() => ({ left: 10, top: 20, width: 640, height: 360 }));
+    Object.assign(canvas, { getBoundingClientRect: measure });
+    await attachment.start(); const checks = measure.mock.calls.length;
+    expect(checks).toBeGreaterThan(0); expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    frame(); frame(); expect(measure).toHaveBeenCalledTimes(checks);
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+  });
+
   it('hides immediately on pause with pending geometry and preserves controller policy until fresh output', async () => {
     for (const event of ['pause'] as const) {
       const { attachment, video, document, canvas, pipeline, frame, failure } = harness({ mode: 'neural' });

@@ -11,6 +11,7 @@ button { min-height: 28px; } iframe { width: 740px; height: 480px; border: 0; }
 .cover video { object-fit: cover; } .clipped { width: 560px; height: 300px; overflow: hidden; }
 .radius video { border-radius: 24px; } .translated video { transform: translate(12px, 8px); }
 .rounded-ancestor, .rounded-offset, .round-inner { overflow: hidden; border-radius: 12px; }
+.rounded-ancestor, .rounded-offset { z-index: 0; }
 .round-inner { position: relative; width: 640px; height: 360px; }
 .rounded-ancestor video, .rounded-offset video { position: absolute; }
 .rounded-offset .round-inner { width: 620px; }
@@ -65,7 +66,7 @@ document.addEventListener('click', async event => {
       ?? document.querySelector('[data-open-shadow]')?.shadowRoot.querySelector('video');
     if (action === 'play') await video.play();
     if (action === 'pause') video.pause();
-    if (action === 'fullscreen') await video.parentElement.requestFullscreen();
+    if (action === 'fullscreen') await video.closest('.player').requestFullscreen();
     if (action === 'directfs') await video.requestFullscreen();
     if (action === 'pip') await video.requestPictureInPicture();
     if (action === 'insert') player();

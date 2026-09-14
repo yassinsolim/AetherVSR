@@ -246,10 +246,22 @@ export class VideoAttachment {
     this.style('pointer-events', 'none');
     this.style('animation', 'none');
     this.style('transition', 'none');
-    this.style('visibility', this.outputReady ? 'visible' : 'hidden');
-    if (this.videoPipeline && (this.canvas.parentNode !== geometry.placement.parent || this.video.nextSibling !== this.canvas)) {
+    if (geometry.verifyPlacement) this.style('visibility', 'hidden');
+    if ((this.videoPipeline || geometry.verifyPlacement) && (this.canvas.parentNode !== geometry.placement.parent || this.video.nextSibling !== this.canvas)) {
       geometry.placement.parent.insertBefore(this.canvas, geometry.placement.before);
     }
+    if (geometry.verifyPlacement) {
+      const actual = this.canvas.getBoundingClientRect();
+      const matches = (['left', 'top', 'width', 'height'] as const).every(key => {
+        const expected = Number.parseFloat(geometry.style[key] ?? '');
+        return Number.isFinite(expected) && Math.abs(actual[key] - expected) < 1 / 64;
+      });
+      if (!matches) {
+        this.fail('unsupported-geometry', 'Canvas placement differs from the verified viewport geometry.');
+        return;
+      }
+    }
+    this.style('visibility', this.outputReady ? 'visible' : 'hidden');
     this.eligible = true;
     this.suspendedReason = null;
     this.runtime?.syncActive();

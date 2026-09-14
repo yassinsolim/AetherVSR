@@ -265,12 +265,13 @@ export async function runJourneys(output, testBuild = false, only = null) {
       assert.equal(duplicate.owner, before.owner); assert.equal(duplicate.details.infrastructure.created, before.details.infrastructure.created); resourceCheck(duplicate); emit('duplicate-from-real-popup', duplicate);
       await disable(page, original);
     });
-    for (const fixture of ['custom', 'cors', 'contain', 'cover', 'clipped', 'radius', 'translated', 'mse', 'controls/captions', 'caption-after-auto-passive', 'caption-before-positive-passive']) {
+    for (const fixture of ['custom', 'cors', 'contain', 'cover', 'clipped', 'radius', 'translated', 'mse', 'controls/captions', 'caption-after-auto-passive', 'caption-before-positive-passive',
+      'rounded-ancestor', 'size-container', 'positioned-ancestor']) {
       await journey(`supported ${fixture}`, fixture, async (page, original) => {
         const id = await enable(page); await active(page, id);
         if (fixture === 'cors') assert.equal((await dom(page)).videos[0].crossorigin, 'anonymous');
         if (['contain', 'cover'].includes(fixture)) assert.equal((await dom(page)).canvases[0].objectFit, fixture);
-        if (fixture === 'controls/captions' || fixture.startsWith('caption-')) {
+        if (['controls/captions', 'rounded-ancestor', 'size-container'].includes(fixture) || fixture.startsWith('caption-')) {
           await controlsReachable(page);
           const caption = await page.locator('.caption').evaluate(element => ({ visible: element.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }), pointerEvents: getComputedStyle(element).pointerEvents, zIndex: getComputedStyle(element).zIndex }));
           assert.equal(caption.visible, true); assert.equal(caption.pointerEvents, 'none'); emit('passive-caption', { fixture, ...caption });
@@ -278,11 +279,22 @@ export async function runJourneys(output, testBuild = false, only = null) {
           assert.equal(pointer, 'pause'); await action(page, 'pause'); assert((await dom(page)).videos[0].paused);
           await action(page, 'play'); assert(!(await dom(page)).videos[0].paused);
         }
+        if (['rounded-ancestor', 'size-container'].includes(fixture)) {
+          const view = await dom(page); assert.equal(view.canvases[0].radius, fixture === 'rounded-ancestor' ? '12px' : '24px');
+          await page.evaluate(() => { document.body.style.minHeight = '1600px'; scrollTo(0, 80); });
+          await active(page, id); await controlsReachable(page); await screenshot(page, `${sequence}-${fixture}-scroll`);
+          await page.evaluate(() => { scrollTo(0, 0); document.body.style.minHeight = ''; });
+          await action(page, 'fullscreen');
+          assert(await page.locator('.controls').evaluate(element => document.fullscreenElement.contains(element)));
+          assert(await page.locator('.caption').evaluate(element => document.fullscreenElement.contains(element)));
+          await active(page, id); await controlsReachable(page); await screenshot(page, `${sequence}-${fixture}-fullscreen`);
+          await page.evaluate(() => document.exitFullscreen()); await active(page, id);
+        }
         await screenshot(page, `${sequence}-${fixture}-white`); await page.evaluate(() => { document.body.style.background = 'black'; }); await screenshot(page, `${sequence}-${fixture}-black`);
         await disable(page, original);
       });
     }
-    for (const [fixture, expected] of [['native', 'unsupported-controls'], ['nocors', 'cors-blocked'], ['iframe', 'unsupported-frame'], ['sameiframe', 'unsupported-frame'], ['caption-before-auto-passive', 'unsupported-controls']]) {
+    for (const [fixture, expected] of [['native', 'unsupported-controls'], ['nocors', 'cors-blocked'], ['iframe', 'unsupported-frame'], ['sameiframe', 'unsupported-frame'], ['caption-before-auto-passive', 'unsupported-controls'], ['rounded-offset', 'unsupported-geometry']]) {
       await journey(`explicit unsupported ${fixture}`, fixture, async (page, original) => {
         const id = await enable(page); const value = await status(id, item => item.code === expected); assert.equal(value.owner, null); assert.equal((await dom(page)).canvases.length, 0);
         if (fixture.includes('iframe')) {

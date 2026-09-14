@@ -14,6 +14,7 @@ export type GeometryResult = {
   objectFit: string;
   objectPosition: string;
   borderRadius: string;
+  verifyPlacement?: boolean;
   placement: { parent: Element | ShadowRoot; before: ChildNode | null };
   style: Record<string, string>;
 } | {
@@ -155,7 +156,7 @@ function inset(box: Rect, clip: Rect): string {
     + `${box.top + box.height - clip.top - clip.height}px ${clip.left - box.left}px`;
 }
 
-function paintOrderRisk(video: HTMLVideoElement, style: CSSStyleDeclaration, view: Window): boolean {
+function paintOrderRisk(video: Element, style: CSSStyleDeclaration, view: Window): boolean {
   if (style.position !== 'static' || style.zIndex !== 'auto'
     || [style.transform, style.translate, style.rotate, style.scale].some((value) => nonDefault(value))) return false;
   let remaining = 32;
@@ -195,6 +196,23 @@ function controlsRemainAbove(
         }
         let branch: Element | null = element;
         while (branch && branch.parentNode !== parent) branch = composedParent(branch);
+        if (!branch && parent.nodeType === 1) {
+          const container = parent as Element;
+          const outer = composedParent(container);
+          let outerBranch: Element | null = element;
+          while (outerBranch && outerBranch.parentNode !== outer) outerBranch = composedParent(outerBranch);
+          if (outer && outerBranch && outerBranch !== container) {
+            const containerStyle = view.getComputedStyle(container);
+            const outerStyle = view.getComputedStyle(outerBranch);
+            const containerZ = containerStyle.zIndex === 'auto' ? 0 : Number(containerStyle.zIndex);
+            const outerZ = outerStyle.zIndex === 'auto' ? 0 : Number(outerStyle.zIndex);
+            if (containerStyle.position !== 'static' && outerStyle.position !== 'static'
+              && Number.isFinite(containerZ) && Number.isFinite(outerZ) && outerZ > Math.max(videoZ, containerZ)) {
+              checked.set(element, true);
+              continue;
+            }
+          }
+        }
         if (!branch) return false;
         const branchStyle = view.getComputedStyle(branch);
         const branchZ = branchStyle.zIndex === 'auto' ? 0 : Number(branchStyle.zIndex);
@@ -260,8 +278,10 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   if ((computed.objectFit === 'contain' || computed.objectFit === 'cover') && Math.abs(scaleX - scaleY) > 0.001) {
     return reject('unsupported-geometry', 'Nonuniform scaling with contain/cover cannot preserve the fitted image.');
   }
-  const borderRadius = uniformRadius(computed, scaleX, scaleY);
+  let borderRadius = uniformRadius(computed, scaleX, scaleY);
   if (borderRadius === null) return reject('unsupported-geometry', 'Only uniform pixel or percentage corner radii are supported.');
+  let verifyPlacement = false;
+  let containingBlockOutside = computed.position === 'fixed' ? 'fixed' : computed.position === 'absolute' ? 'absolute' : null;
   let clip = intersect(rect, { left: 0, top: 0,
     width: video.ownerDocument.documentElement.clientWidth,
     height: video.ownerDocument.documentElement.clientHeight });
@@ -270,23 +290,44 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse'
       || style.contentVisibility === 'hidden') return reject('offscreen', 'Video or ancestor is hidden.');
     if (element === video) continue;
+    if (containingBlockOutside === 'absolute' && style.position !== 'static' && style.display !== 'contents') containingBlockOutside = null;
     if ([style.transform, style.translate, style.rotate, style.scale].some((value) => nonDefault(value))
       || unsupportedEffect(style) || /\b(?:layout|paint|strict|content)\b/.test(style.contain)
       || /\b(?:transform|translate|rotate|scale|filter|perspective|contain)\b/.test(style.willChange)
-      || nonDefault(style.contentVisibility, 'visible') || nonDefault(style.containerType, 'normal')
+      || nonDefault(style.contentVisibility, 'visible') || (style.containerType && !['normal', 'size', 'inline-size'].includes(style.containerType))
       || element.assignedSlot) {
       return reject('unsupported-geometry', 'An ancestor changes fixed positioning or has unsupported effects/slotting.');
     }
+    if (style.containerType === 'size' || style.containerType === 'inline-size') verifyPlacement = true;
     const clipsX = /^(?:hidden|clip|auto|scroll)$/.test(style.overflowX);
     const clipsY = /^(?:hidden|clip|auto|scroll)$/.test(style.overflowY);
-    if (!clipsX && !clipsY) continue;
-    if (uniformRadius(style, 1, 1) !== '0px'
-      || (nonDefault(style.overflowClipMargin, '0px') && (style.overflowX === 'clip' || style.overflowY === 'clip'))) {
+    if (!clipsX && !clipsY) {
+      if (containingBlockOutside !== 'fixed' && (style.position === 'absolute' || style.position === 'fixed')) containingBlockOutside = style.position;
+      continue;
+    }
+    if (nonDefault(style.overflowClipMargin, '0px') && (style.overflowX === 'clip' || style.overflowY === 'clip')) {
       return reject('unsupported-geometry', 'Only rectangular ancestor overflow clipping is supported.');
     }
     const ancestor = element as HTMLElement;
     const ancestorRect = ancestor.getBoundingClientRect();
     if (ancestor.offsetWidth <= 0 || ancestor.offsetHeight <= 0) return reject('offscreen', 'Clipping ancestor has no layout box.');
+    const radius = uniformRadius(style, 1, 1);
+    if (radius !== '0px') {
+      const plainBox = [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth,
+        style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft].every(value => Number.parseFloat(value) === 0);
+      const coincident = Math.abs(ancestorRect.left - rect.left) < 0.01 && Math.abs(ancestorRect.top - rect.top) < 0.01
+        && Math.abs(ancestorRect.width - rect.width) < 0.01 && Math.abs(ancestorRect.height - rect.height) < 0.01;
+      if (containingBlockOutside !== null || ['HTML', 'BODY'].includes(element.tagName)
+        || !plainBox || !coincident || !radius || !/^\d+(?:\.\d+)?px$/.test(radius)
+        || !['contain', 'cover', 'fill'].includes(computed.objectFit)
+        || !['hidden', 'clip'].includes(style.overflowX) || style.overflowX !== style.overflowY
+        || (style.zoom && !['1', 'normal'].includes(style.zoom))
+        || (borderRadius !== '0px' && borderRadius !== radius)) {
+        return reject('unsupported-geometry', 'Rounded ancestor clips require coincident undecorated boxes and matching circular pixel radii.');
+      }
+      borderRadius = radius;
+      verifyPlacement = true;
+    }
     const zoomX = ancestorRect.width / ancestor.offsetWidth;
     const zoomY = ancestorRect.height / ancestor.offsetHeight;
     clip = intersect(clip, {
@@ -295,10 +336,21 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
       width: clipsX ? ancestor.clientWidth * zoomX : clip.width,
       height: clipsY ? ancestor.clientHeight * zoomY : clip.height,
     });
+    if (containingBlockOutside !== 'fixed' && (style.position === 'absolute' || style.position === 'fixed')) containingBlockOutside = style.position;
   }
   if (clip.width <= 0 || clip.height <= 0) return reject('offscreen', 'Video is outside the viewport or ancestor clip.');
   if (paintOrderRisk(video, computed, view)) {
     return reject('unsupported-controls', 'Preceding sibling paint order cannot be preserved.');
+  }
+  if (verifyPlacement) {
+    for (let ancestor = composedParent(video); ancestor; ancestor = composedParent(ancestor)) {
+      const style = view.getComputedStyle(ancestor);
+      if (style.isolation === 'isolate' || Number(style.opacity) < 1
+        || (style.position !== 'static' && style.zIndex !== 'auto')) break;
+      if (paintOrderRisk(ancestor, style, view)) {
+        return reject('unsupported-controls', 'Preceding ancestor-branch paint order cannot be preserved.');
+      }
+    }
   }
   if (!controlsRemainAbove(video, parent, clip, computed, view)) {
     return reject('unsupported-controls', 'Sampled video visibility or control stacking cannot be preserved.');
@@ -326,6 +378,6 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     style.clip = `rect(${clip.top - canvas.top}px, ${clip.left + clip.width - canvas.left}px, `
       + `${clip.top + clip.height - canvas.top}px, ${clip.left - canvas.left}px)`;
   }
-  return { ok: true, rect, clip, objectFit, objectPosition, borderRadius,
+  return { ok: true, rect, clip, objectFit, objectPosition, borderRadius, verifyPlacement,
     placement: { parent, before: video.nextSibling }, style };
 }
