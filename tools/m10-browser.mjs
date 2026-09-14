@@ -8,26 +8,34 @@ import { ROOT, sha256 } from './m10-fixtures.mjs';
 
 const protocol = await transform(readFileSync(join(ROOT, 'src/extension/protocol.ts'), 'utf8'), { loader: 'ts', format: 'esm' });
 const { parseExtensionResponse, MODEL_SHA256, MODEL_BYTES } = await import(`data:text/javascript;base64,${Buffer.from(protocol.code).toString('base64')}`);
+export class Unverified extends Error {}
+export class OperationTimeout extends Unverified {}
 export function snapshotExtensionStatus(raw) {
   const parsed = parseExtensionResponse(raw);
   assert(parsed?.ok, `Invalid/failed extension response: ${JSON.stringify(raw)}`);
   return parsed.status;
 }
-async function bounded(operation, milliseconds) {
+export async function bounded(operation, milliseconds = 10000, label = 'Operation') {
   let timer;
-  try { return await Promise.race([operation, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Operation timed out')), milliseconds); })]); }
+  try { return await Promise.race([operation, new Promise((_, reject) => { timer = setTimeout(() => reject(new OperationTimeout(`${label} timed out after ${milliseconds}ms`)), milliseconds); })]); }
   finally { clearTimeout(timer); }
 }
-export async function until(read, accept = Boolean, timeout = 15000) {
+export async function until(read, accept = Boolean, timeout = 10000, signal) {
   const end = Date.now() + timeout;
   let last;
-  do { last = await bounded(Promise.resolve().then(read), Math.max(1, end - Date.now())); if (accept(last)) return last; await new Promise(done => setTimeout(done, 100)); } while (Date.now() < end);
+  do {
+    signal?.throwIfAborted();
+    last = await bounded(Promise.resolve().then(read), Math.max(1, end - Date.now()));
+    signal?.throwIfAborted();
+    if (accept(last)) return last;
+    await new Promise(done => setTimeout(done, 100));
+  } while (Date.now() < end);
   throw new Error(`Condition timed out: ${JSON.stringify(last)}`);
 }
 export function verifyBuild(testBuild = false, ignoredOutput) {
   const directory = join(ROOT, testBuild ? 'dist-extension-test' : 'dist-extension');
   const provenance = JSON.parse(readFileSync(join(directory, 'build-provenance.json'), 'utf8'));
-  const git = args => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
+  const git = args => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', timeout: 10000 }).trim();
   const dirty = git(['status', '--porcelain', '--untracked-files=normal', '--', '.', ...(ignoredOutput ? [`:(exclude)${relative(ROOT, ignoredOutput)}`] : [])]);
   assert.equal(dirty, '', `Root clean gate required; freeze/commit and build separately before running:\n${dirty}`);
   assert.equal(provenance.sourceDirty, false, 'Dirty-source builds cannot produce M10 evidence');
@@ -52,8 +60,9 @@ export function verifyBuild(testBuild = false, ignoredOutput) {
   return { directory, provenance, manifest, provenanceSha256: sha256(readFileSync(join(directory, 'build-provenance.json'))) };
 }
 
+const cdpSend = (session, method, params = {}, timeout = 5000) => bounded(session.send(method, params), timeout, `CDP ${method}`);
 async function attach(browserCDP, targetId) {
-  const { sessionId } = await browserCDP.send('Target.attachToTarget', { targetId, flatten: false });
+  const { sessionId } = await cdpSend(browserCDP, 'Target.attachToTarget', { targetId, flatten: false });
   let nextId = 0;
   const pending = new Map();
   const receive = event => {
@@ -67,8 +76,8 @@ async function attach(browserCDP, targetId) {
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const id = ++nextId;
     const fail = error => { clearTimeout(pending.get(id)?.timer); pending.delete(id); reject(error); };
-    pending.set(id, { resolve, reject, timer: setTimeout(() => fail(new Error(`CDP timeout: ${method}`)), 10000) });
-    browserCDP.send('Target.sendMessageToTarget', { sessionId, message: JSON.stringify({ id, method, params }) }).catch(fail);
+    pending.set(id, { resolve, reject, timer: setTimeout(() => fail(new OperationTimeout(`CDP timeout: ${method}`)), 10000) });
+    cdpSend(browserCDP, 'Target.sendMessageToTarget', { sessionId, message: JSON.stringify({ id, method, params }) }).catch(fail);
   });
   const evaluate = async expression => {
     const value = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
@@ -78,7 +87,7 @@ async function attach(browserCDP, targetId) {
   return { send, evaluate, async close() {
     browserCDP.off('Target.receivedMessageFromTarget', receive);
     for (const operation of pending.values()) { clearTimeout(operation.timer); operation.reject(new Error('CDP session closed')); }
-    pending.clear(); await browserCDP.send('Target.detachFromTarget', { sessionId }).catch(() => {});
+    pending.clear(); await cdpSend(browserCDP, 'Target.detachFromTarget', { sessionId }, 1000).catch(() => {});
   } };
 }
 
@@ -88,28 +97,27 @@ export async function openExtension(build, record = () => {}) {
   const native = await openNativeChrome(flags);
   try {
     const { browser, context } = native;
-    const browserCDP = await browser.newBrowserCDPSession();
-    const extensionId = await until(async () => (await browserCDP.send('Extensions.getExtensions')).extensions.find(item =>
+    const browserCDP = await bounded(browser.newBrowserCDPSession(), 3000, 'Browser CDP session');
+    const extensionId = await until(async () => (await cdpSend(browserCDP, 'Extensions.getExtensions')).extensions.find(item =>
       item.path && existsSync(item.path) && realpathSync(item.path) === realpathSync(build.directory))?.id);
     assert(extensionId, 'Exact unpacked build not installed');
     const workerURL = `chrome-extension://${extensionId}/service-worker.js`;
-    const targets = () => browserCDP.send('Target.getTargets', { filter: [{}] });
+    const targets = () => cdpSend(browserCDP, 'Target.getTargets', { filter: [{}] });
     const workerTarget = await until(async () => (await targets()).targetInfos.find(target => target.type === 'service_worker' && target.url === workerURL));
     const startup = await attach(browserCDP, workerTarget.targetId);
     try { await startup.send('Runtime.runIfWaitingForDebugger'); } finally { await startup.close(); }
     const worker = () => until(() => context.serviceWorkers().find(candidate => candidate.url() === workerURL));
-    const workerEval = async (fn, arg) => (await worker()).evaluate(fn, arg);
+    const workerEval = async (fn, arg) => bounded((await worker()).evaluate(fn, arg), 5000, 'Service-worker evaluation');
     const tabId = async page => {
-      await page.bringToFront();
+      await bounded(page.bringToFront(), 3000, 'Focus action tab');
       return workerEval(async () => { const tabs = await chrome.tabs.query({ active: true, currentWindow: true }); if (tabs.length !== 1) throw new Error('No unique active tab'); return tabs[0].id; });
     };
     const sessions = new Set();
     async function popup(page) {
-      await page.bringToFront();
-      const expectedTab = await tabId(page);
-      const outer = await until(async () => (await browserCDP.send('Target.getTargets', { filter: [{ type: 'tab', exclude: false }, { exclude: true }] })).targetInfos.find(target => target.url === page.url()));
+      await bounded(page.bringToFront(), 3000, 'Focus popup tab');
+      const outer = await until(async () => (await cdpSend(browserCDP, 'Target.getTargets', { filter: [{ type: 'tab', exclude: false }, { exclude: true }] })).targetInfos.find(target => target.url === page.url()));
       const before = new Set((await targets()).targetInfos.map(target => target.targetId));
-      await browserCDP.send('Extensions.triggerAction', { id: extensionId, targetId: outer.targetId });
+      await cdpSend(browserCDP, 'Extensions.triggerAction', { id: extensionId, targetId: outer.targetId });
       const popupURL = `chrome-extension://${extensionId}/popup.html`;
       const target = await until(async () => (await targets()).targetInfos.find(candidate => !before.has(candidate.targetId) &&
         (candidate.url === popupURL || (candidate.type === 'other' && candidate.url === ''))));
@@ -117,8 +125,10 @@ export async function openExtension(build, record = () => {}) {
       try {
         await connection.send('Runtime.runIfWaitingForDebugger');
         await until(() => connection.evaluate(`document.readyState !== 'loading' && location.href === ${JSON.stringify(popupURL)} && document.body.getAttribute('aria-busy') === 'false'`));
-        const id = await connection.evaluate('(async () => (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id)()');
-        assert.equal(id, expectedTab, 'Native popup targets a different tab');
+        const tabs = await connection.evaluate('chrome.tabs.query({ active: true, currentWindow: true })');
+        assert.equal(tabs.length, 1, 'Native popup has no unique active tab');
+        assert.equal(tabs[0].url, page.url(), 'Native popup targets a different page');
+        const id = tabs[0].id;
         record('native-action', { method: 'Extensions.triggerAction', outerTargetId: outer.targetId, popupTargetId: target.targetId, popupURL, tabId: id });
         const request = async type => snapshotExtensionStatus(await connection.evaluate(`chrome.runtime.sendMessage(${JSON.stringify({ type, tabId: id })})`));
         const click = async selector => {
@@ -129,7 +139,16 @@ export async function openExtension(build, record = () => {}) {
           record('native-popup-click', { selector, tabId: id, ui: await connection.evaluate(`Object.fromEntries(['state', 'message', 'source'].map(id => [id, document.getElementById(id).textContent]))`) });
           return request('m10.status');
         };
-        return { ...connection, tabId: id, request, click, async dismiss() { await page.bringToFront(); await connection.close(); sessions.delete(connection); } };
+        return { ...connection, tabId: id, request, click, async dismiss() {
+          const started = Date.now();
+          try {
+            const result = await bounded(browserCDP.send('Target.closeTarget', { targetId: target.targetId }), 5000, 'Close native popup');
+            assert.equal(result.success, true, 'Native popup target did not close');
+            await until(async () => (await targets()).targetInfos.every(candidate => candidate.targetId !== target.targetId), Boolean, 3000);
+            await bounded(page.bringToFront(), 3000, 'Focus page after popup dismissal');
+            record('native-popup-dismissed', { popupTargetId: target.targetId, method: 'Target.closeTarget', elapsedMs: Date.now() - started });
+          } finally { await bounded(connection.close(), 1500, 'Detach popup session'); sessions.delete(connection); }
+        } };
       } catch (error) { await connection.close(); sessions.delete(connection); throw error; }
     }
     const inspect = async id => snapshotExtensionStatus(await workerEval(async tab => {
@@ -138,38 +157,72 @@ export async function openExtension(build, record = () => {}) {
       return chrome.tabs.sendMessage(tab, { type: 'm10.inspect' }, { frameId: 0, documentId: record.documentId });
     }, id));
     const isolated = async (page, fn, arg) => {
-      const session = await context.newCDPSession(page); const worlds = [];
+      const session = await bounded(context.newCDPSession(page), 3000, 'Isolated-world session'); const worlds = [];
       session.on('Runtime.executionContextCreated', event => worlds.push(event.context));
       try {
-        const { frameTree } = await session.send('Page.getFrameTree'); await session.send('Runtime.enable');
+        const { frameTree } = await cdpSend(session, 'Page.getFrameTree'); await cdpSend(session, 'Runtime.enable');
         const world = await until(async () => {
           for (const candidate of worlds.filter(item => item.auxData?.frameId === frameTree.frame.id && item.auxData?.isDefault === false)) {
-            const identity = await session.send('Runtime.evaluate', { contextId: candidate.id,
+            const identity = await cdpSend(session, 'Runtime.evaluate', { contextId: candidate.id,
               expression: `typeof chrome !== 'undefined' && chrome.runtime?.id === ${JSON.stringify(extensionId)}`, returnByValue: true });
             if (identity.result?.value === true) return candidate;
           }
           return null;
         });
-        const result = await session.send('Runtime.evaluate', { contextId: world.id, expression: `(${fn.toString()})(${JSON.stringify(arg ?? null)})`, returnByValue: true, awaitPromise: true });
+        const result = await cdpSend(session, 'Runtime.evaluate', { contextId: world.id, expression: `(${fn.toString()})(${JSON.stringify(arg ?? null)})`, returnByValue: true, awaitPromise: true });
         if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails));
         return result.result.value;
-      } finally { await session.detach(); }
+      } finally { await bounded(session.detach(), 1000, 'Detach isolated-world session'); }
     };
     const stopWorker = async page => {
-      const session = await context.newCDPSession(page); const versions = new Map();
+      const started = Date.now();
+      const target = (await targets()).targetInfos.find(item => item.type === 'service_worker' && item.url === workerURL);
+      if (!target) throw new Unverified('No running extension worker to stop');
+      const session = await bounded(context.newCDPSession(page), 3000, 'Worker-stop observer'); const versions = new Map();
       session.on('ServiceWorker.workerVersionUpdated', event => event.versions.forEach(version => versions.set(version.versionId, version)));
       try {
-        await session.send('ServiceWorker.enable');
-        const version = await until(() => [...versions.values()].find(item => item.scriptURL === workerURL && item.runningStatus === 'running'));
-        await session.send('ServiceWorker.stopWorker', { versionId: version.versionId });
-        await until(() => versions.get(version.versionId), item => item.runningStatus === 'stopped');
-        record('worker-stopped', { workerURL, versionId: version.versionId }); return version;
-      } finally { await session.detach(); }
+        await cdpSend(session, 'ServiceWorker.enable', {}, 2000);
+        const result = await cdpSend(browserCDP, 'Target.closeTarget', { targetId: target.targetId }, 3000);
+        record('worker-stop-request', { method: 'Target.closeTarget', workerURL, targetId: target.targetId, result });
+        if (!result.success) {
+          const version = await until(() => [...versions.values()].find(item => item.scriptURL === workerURL && item.runningStatus === 'running'), Boolean, 2000);
+          record('worker-stop-request', { method: 'ServiceWorker.stopWorker', workerURL, versionId: version.versionId });
+          await cdpSend(session, 'ServiceWorker.stopWorker', { versionId: version.versionId }, 3000);
+        }
+        await until(async () => (await targets()).targetInfos.every(item => item.type !== 'service_worker' || item.url !== workerURL), Boolean, 3000);
+        const evidence = { workerURL, targetId: target.targetId, elapsedMs: Date.now() - started,
+          versions: [...versions.values()].filter(item => item.scriptURL === workerURL), targetAbsent: true };
+        record('worker-stopped', evidence); return evidence;
+      } catch (error) {
+        record('worker-stop-unverified', { workerURL, targetId: target.targetId, elapsedMs: Date.now() - started, error: String(error) });
+        if (error instanceof OperationTimeout) throw error;
+        throw new Unverified(`Actual service-worker shutdown unverified: ${error}`);
+      } finally { await bounded(session.detach(), 1000, 'Detach worker-stop observer').catch(() => {}); }
     };
-    record('browser', { version: await browserCDP.send('Browser.getVersion'), executable: native.executable,
+    const captureFullscreenWindow = async (page, path) => {
+      const target = (await targets()).targetInfos.find(item => item.type === 'page' && item.url === page.url());
+      assert(target, 'Fullscreen page target missing');
+      const window = await cdpSend(browserCDP, 'Browser.getWindowForTarget', { targetId: target.targetId });
+      record('native-fullscreen-window', window);
+      if (window.bounds.windowState !== 'fullscreen') throw new Unverified('Chrome window is not in native fullscreen');
+      if (process.platform !== 'darwin') throw new Unverified('Native-window screenshot capture is not implemented for this OS');
+      assert(!existsSync(path), 'Never overwrite native-window evidence');
+      const { left, top, width, height } = window.bounds;
+      try { execFileSync('screencapture', ['-x', '-R', `${left},${top},${width},${height}`, path], { timeout: 3000 }); }
+      catch (error) { throw new Unverified(`Native-window screenshot unavailable; check normal OS screen-recording permission: ${error}`); }
+      const after = await cdpSend(browserCDP, 'Browser.getWindowForTarget', { targetId: target.targetId });
+      const fullscreen = await bounded(page.evaluate(() => document.fullscreenElement?.tagName ?? null), 3000, 'Fullscreen after native screenshot');
+      const evidence = { path: relative(ROOT, path), sha256: sha256(readFileSync(path)), window, after, fullscreen,
+        scope: 'macOS screen capture of Chrome window bounds; manual visual review UNVERIFIED' };
+      record('native-fullscreen-screenshot', evidence);
+      if (after.bounds.windowState !== 'fullscreen' || !fullscreen) throw new Unverified('Fullscreen exited during native-window capture');
+      return evidence;
+    };
+    record('browser', { version: await cdpSend(browserCDP, 'Browser.getVersion'), executable: native.executable,
       executableSha256: sha256(readFileSync(native.executable)), flags, extensionId, workerURL, launch: 'Native Chrome; default context; noDefaults:true; no focus emulation' });
-    return { ...native, extensionId, workerEval, tabId, popup, inspect, isolated, stopWorker,
+    let closing;
+    return { ...native, extensionId, workerEval, tabId, popup, inspect, isolated, stopWorker, captureFullscreenWindow,
       workerRunning: async () => (await targets()).targetInfos.some(target => target.type === 'service_worker' && target.url === workerURL),
-      async close() { try { for (const session of sessions) await bounded(session.close(), 1500).catch(() => {}); } finally { await native.close(); } } };
+      close() { return closing ??= (async () => { try { await Promise.all([...sessions].map(session => bounded(session.close(), 1500).catch(() => {}))); } finally { await native.close(); } })(); } };
   } catch (error) { await native.close(); throw error; }
 }

@@ -184,6 +184,7 @@ describe('inspectGeometry', () => {
 
   it('uses transformed bounds once and scales pixel radii independently on each axis', () => {
     const setup = fixture();
+    setup.videoStyle.objectFit = 'fill';
     setup.videoStyle.transform = 'matrix(2, 0, 0, 1.5, 30, 40)';
     setup.video.getBoundingClientRect.mockReturnValue({ left: 40, top: 60, width: 640, height: 270 });
     Object.assign(setup.videoStyle, { borderTopLeftRadius: '10px', borderTopRightRadius: '10px',
@@ -191,6 +192,14 @@ describe('inspectGeometry', () => {
     expect(setup.inspect()).toMatchObject({ ok: true, borderRadius: '20px / 15px',
       style: { left: '40px', top: '60px', width: '640px', height: '270px', 'border-radius': '20px / 15px' } });
     expect(setup.video.getBoundingClientRect).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['contain', 'cover'])('rejects nonuniform scaling that changes %s image fitting', fit => {
+    const setup = fixture();
+    setup.videoStyle.objectFit = fit;
+    setup.videoStyle.transform = 'matrix(2, 0, 0, 1, 0, 0)';
+    setup.video.getBoundingClientRect.mockReturnValue({ left: 10, top: 20, width: 640, height: 180 });
+    expect(setup.inspect()).toMatchObject({ ok: false, code: 'unsupported-geometry' });
   });
 
   it.each(['matrix(1, 1, 0, 1, 0, 0)', 'matrix(1, 0, 1, 1, 0, 0)',

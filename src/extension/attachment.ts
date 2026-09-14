@@ -119,8 +119,9 @@ export class VideoAttachment {
         return;
       }
       this.context = gpu;
+      if (this.failSource()) return;
       const unwatch = watchDeviceFailures(gpu.device, message => {
-        if (this.video.mediaKeys || this.videoPipeline?.error) this.failExecution(this.videoPipeline?.error ?? message);
+        if (this.video.mediaKeys || this.video.error || this.videoPipeline?.error) this.failExecution(this.videoPipeline?.error ?? message);
         else this.fail('device-lost', message);
       });
       if (this.disposed) { unwatch(); return; }
@@ -131,10 +132,12 @@ export class VideoAttachment {
         this.mode, () => this.visible());
       this.runtime = driver;
       driver.onChange = state => {
-        if (this.disposed) return;
+        if (this.disposed || this.failSource()) return;
         if (state.state === 'failed') this.failExecution(this.videoPipeline?.error ?? state.reason);
       };
       driver.onFrame = () => {
+        if (this.disposed || this.failSource()) return;
+        if (this.videoPipeline?.error) { this.failExecution(this.videoPipeline.error); return; }
         if (!this.visible() || !this.videoPipeline?.running || this.outputReady) return;
         this.outputReady = true;
         this.style('visibility', 'visible');
@@ -151,7 +154,7 @@ export class VideoAttachment {
   }
 
   setMode(mode: RuntimeMode): void {
-    if (this.disposed) return;
+    if (this.disposed || this.failSource()) return;
     this.mode = mode;
     try { this.runtime?.setMode(mode); } catch (error) { this.failExecution(error); }
   }
@@ -159,7 +162,7 @@ export class VideoAttachment {
   refresh(): void {
     if (this.disposed) return;
     this.infrastructure.refreshCalls++;
-    if (this.video.mediaKeys) { this.fail('protected-media', 'Encrypted media cannot be enhanced.'); return; }
+    if (this.failSource()) return;
     const reason = this.unavailableReason();
     if (reason !== null) this.suspend(reason);
     if (this.geometryFrame !== null || this.disposed) return;
@@ -177,6 +180,8 @@ export class VideoAttachment {
     if (!this.video.isConnected || this.video.readyState < 2 || this.video.videoWidth <= 0 || this.video.videoHeight <= 0) {
       return 'video-not-ready';
     }
+    if (this.video.seeking) return 'video-seeking';
+    if (this.video.paused) return 'video-paused';
     if (document.visibilityState !== 'visible') return 'document-hidden';
     if (document.pictureInPictureElement === this.video) return 'picture-in-picture';
     const fullscreen = document.fullscreenElement;
@@ -186,7 +191,7 @@ export class VideoAttachment {
   }
 
   private visible(): boolean {
-    return !this.disposed && this.eligible && !this.video.mediaKeys && this.unavailableReason() === null;
+    return !this.disposed && this.eligible && !this.video.mediaKeys && !this.video.error && this.unavailableReason() === null;
   }
 
   private style(name: string, value: string): void {
@@ -209,7 +214,7 @@ export class VideoAttachment {
 
   private checkGeometry(): void {
     if (this.disposed) return;
-    if (this.video.mediaKeys) { this.fail('protected-media', 'Encrypted media cannot be enhanced.'); return; }
+    if (this.failSource()) return;
     this.observeParent();
     const reason = this.unavailableReason();
     if (reason !== null) { this.suspend(reason); return; }
@@ -264,7 +269,13 @@ export class VideoAttachment {
     for (const type of ['resize', 'loadeddata', 'loadstart', 'emptied']) {
       this.listen(this.video, type, () => { this.suspend('video-not-ready'); this.refresh(); });
     }
+    for (const type of ['pause', 'seeking', 'playing', 'seeked']) this.listen(this.video, type, () => this.refresh());
+    const tracks = this.video.textTracks;
+    if (typeof tracks?.addEventListener === 'function') {
+      for (const type of ['change', 'addtrack', 'removetrack']) this.listen(tracks, type, () => this.refresh());
+    }
     for (const type of ['enterpictureinpicture', 'leavepictureinpicture']) this.listen(this.video, type, () => this.refresh());
+    this.listen(this.video, 'error', () => { this.failSource(); });
     this.listen(this.video, 'encrypted', () => this.fail('protected-media', 'Encrypted media cannot be enhanced.'));
   }
 
@@ -278,13 +289,34 @@ export class VideoAttachment {
   }
 
   private message(error: unknown): string {
-    return (error instanceof Error ? error.message : String(error)).slice(0, 2048);
+    return (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
+      ? error.message : String(error)).slice(0, 2048);
+  }
+
+  private failSource(): boolean {
+    if (this.video.mediaKeys) {
+      this.fail('protected-media', 'Encrypted media cannot be enhanced.');
+      return true;
+    }
+    const error = this.video.error;
+    if (!error) return false;
+    const reasons: Record<number, [string, string]> = {
+      1: ['MEDIA_ERR_ABORTED', 'Video loading was aborted.'],
+      2: ['MEDIA_ERR_NETWORK', 'A network error interrupted video loading.'],
+      3: ['MEDIA_ERR_DECODE', 'The video could not be decoded.'],
+      4: ['MEDIA_ERR_SRC_NOT_SUPPORTED', 'The video source is not supported.'],
+    };
+    const [name, fallback] = reasons[error.code] ?? [`Media error (code ${error.code})`, 'The video failed.'];
+    const detail = typeof error.message === 'string' && error.message.trim() ? error.message : fallback;
+    this.fail('unsupported-media', `${name}: ${detail}`);
+    return true;
   }
 
   private failExecution(error: unknown): void {
+    if (this.failSource()) return;
     const actual = this.videoPipeline?.error ?? error;
     const security = typeof actual === 'object' && actual !== null && 'name' in actual && actual.name === 'SecurityError';
-    this.fail(this.video.mediaKeys ? 'protected-media' : security ? 'cors-blocked' : 'error', this.message(actual));
+    this.fail(security ? 'cors-blocked' : 'error', this.message(actual));
   }
 
   private fail(code: StatusCode, message: string): void {

@@ -5,15 +5,73 @@ import { fileURLToPath } from 'node:url';
 import { hostname, platform, release, arch, cpus } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { ROOT, sha256, startFixtures } from './m10-fixtures.mjs';
-import { openExtension, snapshotExtensionStatus, until, verifyBuild } from './m10-browser.mjs';
+import { bounded, openExtension, OperationTimeout, snapshotExtensionStatus, until, verifyBuild, Unverified } from './m10-browser.mjs';
 
-class Unverified extends Error {}
+export async function withJourneyWatchdog(body, shutdown, milliseconds = 60000) {
+  const controller = new AbortController();
+  const task = Promise.resolve().then(() => body(controller.signal));
+  try { return await bounded(task, milliseconds, 'Journey watchdog'); }
+  catch (error) {
+    if (error instanceof OperationTimeout) {
+      controller.abort(error);
+      try { await shutdown(); }
+      finally { await bounded(task.catch(() => {}), 10000, 'Drain cancelled journey after browser shutdown'); }
+    }
+    throw error;
+  }
+}
+export function assertPageErrors(errors, fixture, observedCodes) {
+  const taintedVideo = "SecurityError: Failed to execute 'importExternalTexture' on 'GPUDevice': Video element is tainted by cross-origin data and may not be loaded.";
+  const classified = errors.map(error => ({ error, expected: fixture === 'nocors' && observedCodes.has('cors-blocked') && error === taintedVideo }));
+  assert.deepEqual(classified.filter(item => !item.expected), [], 'Unexpected page errors');
+  return classified;
+}
+export async function pageOwnedAction(page, name, optional = false, emit = () => {}) {
+  const started = Date.now();
+  await bounded(page.evaluate(() => {
+    const key = Symbol.for('aethervsr.m10.actions');
+    if (globalThis[key]) return;
+    const events = globalThis[key] = [];
+    const record = event => {
+      events.push({ type: event.type, at: performance.now(), trusted: event.isTrusted,
+        action: event.target.closest?.('[data-action]')?.dataset.action ?? null,
+        activation: navigator.userActivation.isActive, focused: document.hasFocus(), visibility: document.visibilityState,
+        fullscreen: document.fullscreenElement?.tagName ?? null, pip: !!document.pictureInPictureElement,
+        pipWindow: event.pictureInPictureWindow ? { width: event.pictureInPictureWindow.width, height: event.pictureInPictureWindow.height } : null });
+      if (events.length > 100) events.shift();
+    };
+    for (const type of ['click', 'fullscreenchange', 'fullscreenerror', 'enterpictureinpicture', 'leavepictureinpicture', 'visibilitychange']) document.addEventListener(type, record, true);
+    for (const type of ['focus', 'blur']) window.addEventListener(type, record);
+  }), 3000, 'Install page action diagnostics');
+  let failure;
+  try {
+    await page.locator(`[data-action="${name}"]`).first().click({ timeout: 5000 });
+    await page.waitForFunction(name => {
+      const result = document.querySelector('#result');
+      return result.dataset.action === name && ['done', 'error'].includes(result.dataset.state);
+    }, name, { timeout: 5000 });
+  } catch (error) { failure = error; }
+  const value = await bounded(page.evaluate(() => {
+    const element = document.querySelector('#result');
+    return { state: element.dataset.state, action: element.dataset.action, message: element.textContent,
+      events: globalThis[Symbol.for('aethervsr.m10.actions')], fullscreen: document.fullscreenElement?.tagName ?? null,
+      pip: !!document.pictureInPictureElement, focused: document.hasFocus(), visibility: document.visibilityState };
+  }), 3000, 'Read page action diagnostics');
+  emit('page-owned-action', { ...value, elapsedMs: Date.now() - started,
+    timingScope: 'Wall clock from diagnostic setup through trusted click and fixture result; not GPU timing', error: failure ? String(failure) : null });
+  if (failure) throw failure;
+  assert.equal(value.action, name);
+  if (value.state === 'error') { if (optional) throw new Unverified(value.message); throw new Error(value.message); }
+  if (['fullscreen', 'directfs'].includes(name) && value.fullscreen === null) throw new Unverified('Fullscreen request fulfilled but fullscreen is no longer active; inspect page-owned-action events');
+  return value;
+}
 function pageSnapshot(extensionId) {
   const rect = element => { const bounds = element.getBoundingClientRect(); return { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }; };
   const main = document.querySelector('main').cloneNode(true); main.querySelectorAll('canvas').forEach(canvas => canvas.remove());
   return { href: location.href, visibility: document.visibilityState, focused: document.hasFocus(), originalHTML: main.innerHTML,
     mainTestHook: typeof globalThis.__AETHERVSR_EXTENSION_TEST__, mainSingleton: typeof globalThis[Symbol.for(`aethervsr.m10.document.${extensionId}`)],
     fullscreen: document.fullscreenElement?.tagName ?? null, pip: !!document.pictureInPictureElement,
+    actionEvents: globalThis[Symbol.for('aethervsr.m10.actions')] ?? [],
     persisted: document.documentElement.dataset.pageshowPersisted ?? null,
     videos: [...document.querySelectorAll('video')].map(video => ({ src: video.getAttribute('src'), currentSrc: video.currentSrc, crossorigin: video.getAttribute('crossorigin'),
       paused: video.paused, controls: video.controls, mediaKeys: !!video.mediaKeys, width: video.videoWidth, height: video.videoHeight, readyState: video.readyState, rect: rect(video) })),
@@ -38,47 +96,47 @@ function resourceCheck(status, stopped = false) {
 
 export async function runJourneys(output, testBuild = false) {
   output = resolve(output); assert(!existsSync(output), 'Never overwrite raw evidence');
-  const report = { schemaVersion: 1, started: new Date().toISOString(), testBuild, performance: 'not measured',
+  const report = { schemaVersion: 1, started: new Date().toISOString(), verdict: 'UNVERIFIED', completion: 'RUNNING', testBuild, performance: 'not measured',
     scope: 'Native unpacked-extension lifecycle assertions. Popup focus interrupts visibility; status timing counters are diagnostic snapshots, not benchmarks. No pixel readback or parity claim.',
     manual: { visual: 'UNVERIFIED: review local screenshots for object-fit, clipping, radii and caption stacking', encryptedStream: 'UNVERIFIED: ClearKey test attaches MediaKeys to clear media only', displayRefreshRate: 'not measured' },
     machine: { hostname: hostname(), os: platform(), release: release(), arch: arch(), cpu: cpus()[0]?.model ?? 'not measured',
-      osVersion: platform() === 'darwin' ? execFileSync('sw_vers', ['-productVersion'], { encoding: 'utf8' }).trim() : release() }, journeys: [], events: [] };
-  let descriptor, native, fixtures, watchdog;
+      osVersion: platform() === 'darwin' ? execFileSync('sw_vers', ['-productVersion'], { encoding: 'utf8', timeout: 3000 }).trim() : release() }, journeys: [], events: [] };
+  let descriptor, native, fixtures;
   const save = () => { if (descriptor === undefined) return; const bytes = Buffer.from(`${JSON.stringify(report)}\n`); writeSync(descriptor, bytes, 0, bytes.length, 0); ftruncateSync(descriptor, bytes.length); };
   const emit = (name, data) => { report.events.push({ name, at: new Date().toISOString(), data }); save(); };
   const cleanup = async () => { try { await native?.close(); } finally { await fixtures?.close(); } };
-  const abort = async signal => { report.fatal = `Interrupted: ${signal}`; save(); const timer = setTimeout(() => process.exit(2), 10000); try { await cleanup(); } finally { clearTimeout(timer); process.exit(2); } };
+  const abort = async signal => {
+    report.fatal = `Interrupted: ${signal}`; report.verdict = 'UNVERIFIED'; report.completion = 'INTERRUPTED';
+    for (const item of report.journeys.filter(item => item.verdict === 'RUNNING')) { item.verdict = 'UNVERIFIED'; item.error = report.fatal; }
+    save(); const timer = setTimeout(() => process.exit(2), 10000);
+    try { await cleanup(); } finally { clearTimeout(timer); process.exit(2); }
+  };
   const interrupted = () => { void abort('signal'); };
   try {
-    report.build = verifyBuild(testBuild);
     mkdirSync(dirname(output), { recursive: true }); descriptor = openSync(output, 'wx'); save();
+    process.once('SIGINT', interrupted); process.once('SIGTERM', interrupted);
+    report.build = verifyBuild(testBuild, relative(ROOT, output).startsWith('..') ? undefined : output);
     report.harness = Object.fromEntries(['tools/m10-journeys.mjs', 'tools/m10-browser.mjs', 'tools/m10-fixtures.mjs', 'tools/m10-fixtures/index.html', 'tools/m9-browser.mjs']
       .map(name => [name, sha256(readFileSync(join(ROOT, name)))]));
-    process.once('SIGINT', interrupted); process.once('SIGTERM', interrupted);
-    watchdog = setTimeout(() => { void abort('15 minute watchdog'); }, 900000);
     fixtures = await startFixtures(); report.media = fixtures.evidence;
-    native = await openExtension(report.build, emit); native.context.setDefaultTimeout(10000); native.context.setDefaultNavigationTimeout(15000);
+    native = await openExtension(report.build, emit); native.context.setDefaultTimeout(10000); native.context.setDefaultNavigationTimeout(10000);
     const screenshots = join(ROOT, '.cache/m10/screenshots', `${Date.now()}-${sha256(output).slice(0, 8)}`); mkdirSync(screenshots, { recursive: true });
-    const dom = page => page.evaluate(pageSnapshot, native.extensionId);
+    let journeySignal;
+    let observedCodes;
+    const dom = page => bounded(page.evaluate(pageSnapshot, native.extensionId), 3000, 'Page snapshot');
     const ready = page => page.waitForFunction(() => [...document.querySelectorAll('video')].every(video => video.readyState >= 2 && video.videoWidth > 0));
     const popup = async (page, fn) => { const panel = await native.popup(page); try { return await fn(panel); } finally { await panel.dismiss(); } };
     const enable = page => popup(page, async panel => { const status = await panel.click('#enable'); assert(status.enabled, status.message); return panel.tabId; });
     const status = async (id, accept = value => value.code === 'active') => {
-      const value = await until(() => native.inspect(id), accept, 20000); resourceCheck(value); emit('status', value); return value;
+      const value = await until(() => native.inspect(id), accept, 10000, journeySignal); observedCodes.add(value.code); resourceCheck(value); emit('status', value); return value;
     };
     const disable = async (page, original) => {
       const value = await popup(page, panel => panel.click('#disable')); resourceCheck(value, true);
       const restored = await dom(page); assert.equal(restored.canvases.length, 0); assert.equal(restored.originalHTML, original.originalHTML, 'Page DOM/styles changed');
       emit('disabled-restored', { status: value, dom: restored }); return value;
     };
-    const action = async (page, name, optional = false) => {
-      await page.locator(`[data-action="${name}"]`).first().click();
-      await page.waitForFunction(() => ['done', 'error'].includes(document.querySelector('#result').dataset.state));
-      const value = await page.locator('#result').evaluate(element => ({ state: element.dataset.state, action: element.dataset.action, message: element.textContent }));
-      emit('page-owned-action', value); assert.equal(value.action, name);
-      if (value.state === 'error') { if (optional) throw new Unverified(value.message); throw new Error(value.message); }
-    };
-    const screenshot = async (page, name) => { const path = join(screenshots, `${name.replaceAll('/', '-')}.png`); await page.screenshot({ path }); emit('screenshot', { path: relative(ROOT, path), sha256: sha256(readFileSync(path)), verdict: 'UNVERIFIED manual pixels' }); };
+    const action = (page, name, optional = false) => pageOwnedAction(page, name, optional, emit);
+    const screenshot = async (page, name) => { const path = join(screenshots, `${name.replaceAll('/', '-')}.png`); await page.screenshot({ path, timeout: 3000 }); emit('screenshot', { path: relative(ROOT, path), sha256: sha256(readFileSync(path)), verdict: 'UNVERIFIED manual pixels' }); };
     const isolatedStatus = async page => snapshotExtensionStatus({ ok: true, status: await native.isolated(page, () => globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)].status()) });
     const active = async (page, id) => {
       const value = await status(id); const view = await dom(page);
@@ -93,16 +151,36 @@ export async function runJourneys(output, testBuild = false) {
     let sequence = 0;
     const journey = async (name, fixture, body) => {
       const item = { name, fixture, verdict: 'RUNNING', started: new Date().toISOString() }; report.journeys.push(item); save();
-      const page = await native.context.newPage(); page.on('pageerror', error => emit('page-error', { name, error: String(error) }));
+      let page;
+      const errors = []; observedCodes = new Set();
       try {
-        await page.goto(`${fixtures.url}?case=${encodeURIComponent(fixture)}&journey=${++sequence}`); await page.bringToFront(); await ready(page);
-        const original = await dom(page); assert.equal(original.canvases.length, 0); emit('journey-before', { name, dom: original });
-        await body(page, original); item.verdict = 'PASS';
+        await withJourneyWatchdog(async signal => {
+          journeySignal = signal;
+          page = await bounded(native.context.newPage(), 5000, 'Create journey page'); signal.throwIfAborted();
+          page.on('pageerror', error => { errors.push(String(error)); emit('page-error', { name, error: String(error) }); });
+          await page.goto(`${fixtures.url}?case=${encodeURIComponent(fixture)}&journey=${++sequence}`); await bounded(page.bringToFront(), 3000, 'Focus journey'); await ready(page);
+          signal.throwIfAborted();
+          const original = await dom(page); assert.equal(original.canvases.length, 0); emit('journey-before', { name, dom: original });
+          await body(page, original); signal.throwIfAborted();
+        }, async () => {
+          report.aborted = `Timed-out journey: ${name}; remaining journeys not run`;
+          item.verdict = 'UNVERIFIED'; emit('journey-shutdown', { name, reason: report.aborted });
+          await native.close();
+        });
+        item.verdict = 'PASS';
       } catch (error) {
         item.verdict = error instanceof Unverified ? 'UNVERIFIED' : 'FAIL'; item.error = String(error);
-        try { emit('failure-dom', { name, dom: await dom(page) }); await screenshot(page, `${sequence}-failure`); } catch (captureError) { item.captureError = String(captureError); }
-      } finally { await page.close().catch(error => { item.cleanupError = String(error); item.verdict = 'FAIL'; }); item.finished = new Date().toISOString(); save(); }
+        if (page && !page.isClosed()) try { emit('failure-dom', { name, dom: await dom(page) }); await screenshot(page, `${sequence}-failure`); } catch (captureError) { item.captureError = String(captureError); }
+      } finally {
+        try { if (page) await bounded(page.close(), 3000, 'Close journey page'); }
+        catch (error) { item.cleanupError = String(error); item.verdict = 'FAIL'; report.aborted = `Journey page cleanup failed: ${name}`; await native.close(); }
+        item.pageErrors = errors;
+        try { item.pageErrors = assertPageErrors(errors, fixture, observedCodes); }
+        catch (error) { item.verdict = 'FAIL'; item.error = [item.error, String(error)].filter(Boolean).join('\n'); }
+        item.finished = new Date().toISOString(); save();
+      }
       console.log(`${item.verdict} ${name}`);
+      if (report.aborted) throw new Unverified(report.aborted);
     };
     const accessDenied = async page => {
       const id = await native.tabId(page);
@@ -169,7 +247,9 @@ export async function runJourneys(output, testBuild = false) {
     });
     for (const kind of ['fullscreen', 'directfs', 'pip']) await journey(`page-owned ${kind}`, kind === 'pip' ? 'pip' : 'fullscreen', async (page, original) => {
       const id = await enable(page); await active(page, id); await action(page, kind, true);
-      await page.waitForFunction(kind => kind === 'pip' ? !!document.pictureInPictureElement : !!document.fullscreenElement, kind);
+      try { await page.waitForFunction(kind => kind === 'pip' ? !!document.pictureInPictureElement : !!document.fullscreenElement, kind, { timeout: 3000 }); }
+      catch (error) { throw new Unverified(`Native ${kind} did not remain active: ${error}`); }
+      if (kind !== 'pip') await native.captureFullscreenWindow(page, join(screenshots, `${sequence}-${kind}-native-window.png`));
       if (kind === 'fullscreen') { await active(page, id); assert(await page.evaluate(() => document.fullscreenElement.contains(document.querySelector('canvas[data-aethervsr-m10]')))); }
       else { const reason = kind === 'pip' ? 'picture-in-picture' : 'video-fullscreen'; await status(id, item => item.code === 'suspended' && item.details.attachment?.suspendedReason === reason); assert.equal((await dom(page)).canvases[0].visibility, 'hidden'); }
       await screenshot(page, `${sequence}-${kind}`);
@@ -216,12 +296,12 @@ export async function runJourneys(output, testBuild = false) {
     });
     const finalBuild = verifyBuild(testBuild, relative(ROOT, output).startsWith('..') ? undefined : output);
     assert.equal(finalBuild.provenanceSha256, report.build.provenanceSha256);
-  } catch (error) { report.fatal = String(error); }
+  } catch (error) { report.fatal = String(error); report.fatalVerdict = error instanceof Unverified ? 'UNVERIFIED' : 'FAIL'; }
   finally {
-    clearTimeout(watchdog); process.off('SIGINT', interrupted); process.off('SIGTERM', interrupted);
+    process.off('SIGINT', interrupted); process.off('SIGTERM', interrupted);
     try { await cleanup(); } catch (error) { report.cleanupError = String(error); }
-    report.requests = fixtures?.requests ?? []; report.finished = new Date().toISOString();
-    report.verdict = report.fatal || report.cleanupError || report.journeys.some(item => item.verdict === 'FAIL') ? 'FAIL' : report.journeys.some(item => item.verdict === 'UNVERIFIED') ? 'UNVERIFIED' : 'PASS_LIFECYCLE_ONLY';
+    report.requests = fixtures?.requests ?? []; report.finished = new Date().toISOString(); report.completion = report.fatal ? 'INTERRUPTED' : 'FINISHED';
+    report.verdict = report.fatalVerdict === 'FAIL' || report.cleanupError || report.journeys.some(item => item.verdict === 'FAIL') ? 'FAIL' : report.fatal || report.journeys.some(item => item.verdict === 'UNVERIFIED') ? 'UNVERIFIED' : 'PASS_LIFECYCLE_ONLY';
     if (descriptor === undefined) { mkdirSync(dirname(output), { recursive: true }); descriptor = openSync(output, 'wx'); }
     save(); closeSync(descriptor);
   }

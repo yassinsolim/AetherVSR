@@ -242,6 +242,9 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   }
   const scaleX = rect.width / layoutWidth;
   const scaleY = rect.height / layoutHeight;
+  if ((computed.objectFit === 'contain' || computed.objectFit === 'cover') && Math.abs(scaleX - scaleY) > 0.001) {
+    return reject('unsupported-geometry', 'Nonuniform scaling with contain/cover cannot preserve the fitted image.');
+  }
   const borderRadius = uniformRadius(computed, scaleX, scaleY);
   if (borderRadius === null) return reject('unsupported-geometry', 'Only uniform pixel or percentage corner radii are supported.');
   let clip = intersect(rect, { left: 0, top: 0,
