@@ -110,6 +110,7 @@ export function installRuntimeRecorder(options) {
   const previous = driver ? { onSample: driver.onSample, onFrame: driver.onFrame, onChange: driver.onChange, onConfigure: driver.onConfigure } : {};
   const previousPipelineFrame = pipeline?.onFrame;
   let started = null, ended = null, finishing = false, lastState = null, timer, deadline;
+  const activityListeners = [];
   let inPipelineFrame = false, ownedCallbackMs = null, pendingState = null, pendingConfiguration = null;
   const push = (rows, row) => { if (rows.length < 160000) rows.push(row); else record.overflow = true; };
   const snapshot = () => ({ at: performance.now(), runtime: driver?.snapshot() ?? null,
@@ -171,6 +172,8 @@ export function installRuntimeRecorder(options) {
   const finish = async error => {
     if (finishing) return;
     finishing = true; clearTimeout(timer); clearTimeout(deadline);
+    for (const [target, type, listener] of activityListeners) target.removeEventListener(type, listener);
+    activityListeners.length = 0;
     try {
       ended = performance.now(); record.ended = ended;
       record.closing = snapshot();
@@ -208,6 +211,19 @@ export function installRuntimeRecorder(options) {
       timer = setTimeout(() => { void finish(); }, options.durationMs);
     } catch (error) { void finish(error); }
   };
+  for (const [target, types] of [[window, ['blur', 'pagehide']], [document, ['visibilitychange']],
+    [video, ['pause', 'play', 'loadstart', 'error', 'ratechange']]]) {
+    for (const type of types) {
+      const listener = () => {
+        if (started !== null && ended === null) {
+          console.info(`M10 performance: integrity event ${type}; ending invalid capture`);
+          queueMicrotask(() => { void finish(new Error(`Playback/foreground integrity event: ${type}`)); });
+        }
+      };
+      target.addEventListener(type, listener);
+      activityListeners.push([target, type, listener]);
+    }
+  }
   timer = setTimeout(begin, options.warmupMs);
   deadline = setTimeout(() => { void finish(new Error('Capture deadline exceeded')); }, options.warmupMs + options.durationMs + 10000);
   return { installed: true, runtime: !!driver };
@@ -444,6 +460,13 @@ export async function runPerformance(casesPath, outputPrefix) {
         page.on('console', message => {
           if (message.type() === 'error' && result.errors.length < 100) result.errors.push(message.text());
           if (message.text().startsWith('M10 performance:')) console.log(`${item.id}: ${message.text()}`);
+          if (process.platform === 'darwin' && message.text().includes('integrity event')) {
+            try {
+              result.frontmostAtInvalidation = JSON.parse(execFileSync('osascript', ['-l', 'JavaScript', '-e',
+                'ObjC.import("AppKit"); JSON.stringify({bundleId: $.NSWorkspace.sharedWorkspace.frontmostApplication.bundleIdentifier.js, name: $.NSWorkspace.sharedWorkspace.frontmostApplication.localizedName.js})'],
+              { encoding: 'utf8', timeout: 3000 }));
+            } catch (error) { result.frontmostAtInvalidation = { error: String(error) }; }
+          }
         });
         await page.addInitScript(installVideoObserver);
         const readyStarted = Date.now();

@@ -20,6 +20,7 @@ const fixture = `
   const target = () => {
     const listeners = new Map();
     return { addEventListener(type, callback) { const list = listeners.get(type) ?? []; list.push(callback); listeners.set(type, list); },
+      removeEventListener(type, callback) { listeners.set(type, (listeners.get(type) ?? []).filter(value => value !== callback)); },
       dispatchEvent(event) { for (const callback of listeners.get(event.type) ?? []) callback(event); } };
   };
   const video = Object.assign(target(), { paused: false, playbackRate: 1, videoWidth: 1280, videoHeight: 720, currentSrc: 'http://127.0.0.1:5183/media/same.mp4',
@@ -59,7 +60,7 @@ const fixture = `
   const window = target();
   const context = createContext({ document, window, console: { info() {} }, performance: { now: () => clock },
     innerWidth: 1200, innerHeight: 820, devicePixelRatio: 2, chrome: { runtime: { id: 'production' } },
-    Event: class { constructor(type) { this.type = type; } },
+    Event: class { constructor(type) { this.type = type; } }, queueMicrotask,
     setTimeout(callback, delay) { timers.set(++nextTimer, { callback, at: clock + delay }); return nextTimer; },
     clearTimeout(handle) { timers.delete(handle); }, setInterval() { return -1; }, clearInterval() {} });
   context.manager = manager;
@@ -220,6 +221,25 @@ describe('M10 performance protocol helpers (no browser)', () => {
     assert.throws(() => validateCapture(raw, item), /active time/);
     record.closing.runtime.session.activeMs = NaN;
     assert.throws(() => validateCapture(raw, item), /active time/);
+  `));
+
+  it('ends a long capture immediately after real focus loss without counting the remaining deadline', () => check(fixture + `
+    const record = install('extension-auto', 600000);
+    await advance(5000); await advance(10000); nativeFrame(11); runtimeFrame();
+    const invalidAt = clock;
+    document.hasFocus = () => false;
+    window.dispatchEvent({type:'blur'});
+    await advance(invalidAt);
+    assert.equal(record.ended, invalidAt); assert.equal(stoppedAt, invalidAt);
+    drainResolve(); await advance(invalidAt); await observer.done;
+    assert.match(record.error, /integrity event: blur/);
+    assert.equal(record.ended - record.started, invalidAt - 5000);
+    assert.equal(observer.events.length, 1);
+    assert.equal(observer.events[0].type, 'blur');
+    assert.throws(() => validateCapture({runtime:record,video:observer}, {kind:'extension-auto',durationMs:600000}), /integrity/);
+    const completedAt = record.completedAt;
+    window.dispatchEvent({type:'blur'}); await advance(605000);
+    assert.equal(record.completedAt, completedAt);
   `));
 
   it.each(['pause', 'play'])('rejects an observed %s even when both boundaries are playing', event => check(fixture + `
