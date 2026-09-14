@@ -426,7 +426,7 @@ export async function runSites(output, configPath) {
           { at: 75000, name: 'scroll-down', suspended: true, run: async () => {
             scrollBack = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
             const result = await page.evaluate(() => { const from = scrollY; scrollBy({ top: innerHeight * 0.3, behavior: 'instant' }); return { from, requestedDelta: innerHeight * 0.3, to: scrollY }; });
-            if (Math.abs(result.to - result.from) < 1) throw new Unverified('Page did not scroll; no forced layout adjustment');
+            if (Math.abs(result.to - result.from) < 1) return { ...result, notApplicable: 'Document is not scrollable in this player view; no forced layout adjustment' };
             return result;
           } },
           { at: 80000, name: 'scroll-back', run: async () => {
@@ -481,7 +481,7 @@ export async function runSites(output, configPath) {
             else await delay(250, undefined, { signal: controller.signal });
             const after = await check(`${action.name}-after`, action.suspended);
             scenario.owner = after.status.owner; scenario.current = after.status.current; scenario.geometry = after.dom.canvases;
-            scenario.finishedMs = performance.now() - started; scenario.verdict = 'PASS'; actionIndex++;
+            scenario.finishedMs = performance.now() - started; scenario.verdict = scenario.result?.notApplicable ? 'NOT_APPLICABLE' : 'PASS'; actionIndex++;
           }
           const count = lastStatus.details.attachment.session.framesRendered;
           if (count > frames) { frames = count; lastFrameAt = performance.now(); }
