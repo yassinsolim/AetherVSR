@@ -204,7 +204,7 @@ export async function openExtension(build, record = () => {}) {
         throw new Unverified(`Actual service-worker shutdown unverified: ${error}`);
       } finally { await bounded(session.detach(), 1000, 'Detach worker-stop observer').catch(() => {}); }
     };
-    const reloadExtension = async (page, signal) => {
+    const reloadExtension = async (page, signal, mechanism = 'ui') => {
       const started = Date.now(); const deadline = started + 20000;
       const remaining = maximum => Math.max(1, Math.min(maximum, deadline - Date.now()));
       let previousWorker; let closed = false;
@@ -218,13 +218,24 @@ export async function openExtension(build, record = () => {}) {
           return matching.length === 1 && workers.length === 1 ? { target: matching[0], worker: workers[0] } : null;
         }, Boolean, remaining(4000), signal);
         previousWorker = previous.worker; previousWorker.once('close', onClose);
-        record('extension-reload-request', { method: 'chrome.runtime.reload', extensionId, previousTargetId: previous.target.targetId, workerURL });
-        const scheduled = await bounded(previousWorker.evaluate(expected => {
-          if (chrome.runtime.id !== expected || typeof chrome.runtime.reload !== 'function') throw new Error('Exact extension runtime reload unavailable');
-          setTimeout(() => chrome.runtime.reload(), 0);
-          return { extensionId: chrome.runtime.id, workerURL: location.href };
-        }, extensionId), remaining(3000), 'Schedule native extension reload');
-        assert.deepEqual(scheduled, { extensionId, workerURL });
+        assert(['runtime', 'ui'].includes(mechanism));
+        record('extension-reload-request', { method: mechanism === 'ui' ? 'Chrome extensions-page Reload control' : 'chrome.runtime.reload', extensionId, previousTargetId: previous.target.targetId, workerURL });
+        if (mechanism === 'runtime') {
+          const scheduled = await bounded(previousWorker.evaluate(expected => {
+            if (chrome.runtime.id !== expected || typeof chrome.runtime.reload !== 'function') throw new Error('Exact extension runtime reload unavailable');
+            setTimeout(() => chrome.runtime.reload(), 0);
+            return { extensionId: chrome.runtime.id, workerURL: location.href };
+          }, extensionId), remaining(3000), 'Schedule native extension reload');
+          assert.deepEqual(scheduled, { extensionId, workerURL });
+        } else {
+          const extensions = await context.newPage();
+          try {
+            await extensions.goto('chrome://extensions/', { timeout: remaining(5000) });
+            const developer = extensions.locator('extensions-toolbar #devMode');
+            if (await developer.getAttribute('aria-pressed') === 'false') await developer.click({ timeout: remaining(3000) });
+            await extensions.locator(`extensions-item[id="${extensionId}"] #dev-reload-button`).click({ timeout: remaining(5000) });
+          } finally { await extensions.close(); await page.bringToFront(); }
+        }
         await until(async () => closed && (await targets()).targetInfos.every(target => target.targetId !== previous.target.targetId), Boolean, remaining(5000), signal);
         const fresh = await until(async () => (await targets()).targetInfos.find(target => target.type === 'service_worker' && target.url === workerURL && target.targetId !== previous.target.targetId), Boolean, remaining(5000), signal);
         const startup = await attach(browserCDP, fresh.targetId);
@@ -249,8 +260,8 @@ export async function openExtension(build, record = () => {}) {
         const installed = await cdpSend(browserCDP, 'Extensions.getExtensions', {}, remaining(3000));
         const exact = installed.extensions.find(item => item.id === extensionId);
         assert(exact?.path && existsSync(exact.path) && realpathSync(exact.path) === realpathSync(build.directory), 'Reload changed the installed build identity');
-        const evidence = { ...identity, previousTargetId: previous.target.targetId, freshTargetId: fresh.targetId, oldWorkerClosed: closed, freshWorkerHandle: nextWorker !== previousWorker,
-          elapsedMs: Date.now() - started, scope: 'Runtime reload request through old-worker closure, fresh exact-ID worker and installed-path verification; no page reactivation claim' };
+        const evidence = { ...identity, mechanism, previousTargetId: previous.target.targetId, freshTargetId: fresh.targetId, oldWorkerClosed: closed, freshWorkerHandle: nextWorker !== previousWorker,
+          elapsedMs: Date.now() - started, scope: 'Explicit recorded package-reload mechanism through old-worker closure, fresh exact-ID worker and installed-path verification; no page reactivation claim' };
         record('extension-reloaded', evidence); return evidence;
       } catch (error) {
         record('extension-reload-unverified', { extensionId, workerURL, elapsedMs: Date.now() - started, error: String(error) });

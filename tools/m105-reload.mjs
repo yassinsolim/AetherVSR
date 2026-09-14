@@ -6,6 +6,19 @@ import { ROOT, startFixtures, sha256 } from './m10-fixtures.mjs';
 import { attach, bounded, openExtension, until, verifyBuild } from './m10-browser.mjs';
 import { pageSnapshot } from './m10-journeys.mjs';
 
+export function validateOldShutdown(cleanup, privilege) {
+  assert.equal(privilege?.privileged, false, 'Old privilege denial not observed');
+  assert.equal(cleanup?.status?.enabled, false, 'Old manager shutdown not observed');
+  assert.equal(cleanup.status.details.discoveryActive, false);
+  assert.equal(cleanup.status.details.timerCount, 0);
+  const infrastructure = cleanup.status.details.infrastructure;
+  assert.equal(infrastructure.created, infrastructure.destroyed);
+  for (const key of ['device', 'pipeline', 'canvas', 'resizeObservers', 'listeners', 'geometryFrame', 'frameCallback']) {
+    assert.equal(cleanup.resources?.[key], 0, `Old ${key} cleanup not observed`);
+    assert.equal(cleanup.status.details.lastTeardown?.[key], 0);
+  }
+}
+
 export async function runReload(output, mechanism, earlyResume) {
   output = resolve(output);
   assert(['runtime', 'ui'].includes(mechanism), 'Use runtime or ui reload');
@@ -89,7 +102,7 @@ export async function runReload(output, mechanism, earlyResume) {
     for (const target of await targets()) resume(target);
     report.oldCleanup = await until(() => oldEvaluate(`(()=>{const old=globalThis[Symbol.for('aethervsr.m105.old')];return {runtimeId:chrome.runtime?.id??null,status:old.manager.status(),resources:old.attachment?.snapshot().resources??null};})()`), value => value.unavailable || value.exception || value.status?.enabled === false, 5000).catch(error => ({ error: String(error) }));
     report.oldPrivilege = await oldEvaluate(`(async()=>{try{const result=await chrome.runtime.sendMessage({type:'m10.model'});return {privileged:result?.ok===true};}catch(error){return {privileged:false,error:String(error)};}})()`);
-    assert.notEqual(report.oldPrivilege?.privileged, true, 'Old world retained model privilege');
+    validateOldShutdown(report.oldCleanup, report.oldPrivilege);
     report.afterReload = await page.evaluate(pageSnapshot, native.extensionId);
     const freshWorker = await until(async () => (await targets()).find(target => target.type === 'service_worker' && target.url === workerURL && target.targetId !== oldTarget.targetId), Boolean, 10000);
     resume(freshWorker);
@@ -126,7 +139,7 @@ export async function runReload(output, mechanism, earlyResume) {
       }; });
       assert(report.identity.sameVideo && report.identity.oldCanvasDetached && report.identity.spoofPreserved && report.identity.newCanvas && !report.identity.paused);
       assert(report.identity.quality > report.original.videos[0].decodedFrames);
-      if (report.oldCleanup.resources) assert(Object.values(report.oldCleanup.resources).every(count => count === 0));
+      assert.equal((await page.evaluate(pageSnapshot, native.extensionId)).videos[0].currentSrc, report.original.videos[0].currentSrc);
     }
     const disable = await native.popup(page);
     try { report.disabled = await disable.click('#disable'); } finally { await disable.dismiss(); }
@@ -134,9 +147,9 @@ export async function runReload(output, mechanism, earlyResume) {
     assert(Object.values(report.disabled.details.lastTeardown).every(count => count === 0));
     report.afterDisable = await page.evaluate(pageSnapshot, native.extensionId);
     if (report.recovery === 'same-document') assert.equal(report.afterDisable.originalHTML, report.original.originalHTML);
-    report.verdict = report.recovery === 'same-document' ? 'PASS' : 'PASS_REFRESH_REQUIRED';
     assert.deepEqual(verifyBuild(false), report.build);
-  } catch (error) { report.error = String(error); }
+    report.verdict = report.recovery === 'same-document' ? 'PASS' : 'PASS_REFRESH_REQUIRED';
+  } catch (error) { report.verdict = 'UNVERIFIED'; report.error = String(error); }
   finally {
     stopped = true;
     await bounded(Promise.allSettled([...pending.values()]), 4000, 'Resume task cleanup').catch(error => emit('resume-cleanup', String(error)));

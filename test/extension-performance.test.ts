@@ -11,6 +11,7 @@ function check(source: string): void {
     import { parsePlan, ARMS } from './tools/m105-compare.mjs';
     import { summarizeTrace } from './tools/m105-trace.mjs';
     import { playerCommand } from './tools/m10-sites.mjs';
+    import { validateOldShutdown } from './tools/m105-reload.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -93,6 +94,16 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('requires observed privilege denial and complete old-world teardown rather than missing-data success', () => check(`
+    const resources={device:0,pipeline:0,canvas:0,resizeObservers:0,listeners:0,geometryFrame:0,frameCallback:0};
+    const cleanup={resources,status:{enabled:false,details:{discoveryActive:false,timerCount:0,infrastructure:{created:1,destroyed:1},lastTeardown:{...resources}}}};
+    validateOldShutdown(cleanup,{privileged:false});
+    assert.throws(()=>validateOldShutdown(cleanup,{unavailable:'timeout'}));
+    assert.throws(()=>validateOldShutdown({...cleanup,resources:undefined},{privileged:false}));
+    assert.throws(()=>validateOldShutdown({...cleanup,resources:{...resources,listeners:1}},{privileged:false}));
+    assert.throws(()=>validateOldShutdown(cleanup,{privileged:true}));
+  `));
+
   it('recognizes original player command labels with media titles without matching unrelated actions', () => check(`
     assert(playerCommand('play').test('Play, View From A Blue Moon'));
     assert(playerCommand('pause').test('Pause, Sample clip'));
