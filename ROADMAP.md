@@ -377,19 +377,51 @@ Verification evidence and scope limits are in [docs/M9-STATUS.md](docs/M9-STATUS
 
 ---
 
-## Milestone 10 — Chrome/Chromium extension
+## Milestone 10 - Chrome/Chromium extension [PARTIAL]
 
-Package the pipeline as an MV3 extension that attaches to video elements on
-third-party pages: injection, lifecycle, per-site controls, and the security
-and performance implications of running on pages we do not control.
+**Verdict: EXTENSION MVP PARTIAL. Not complete or READY.** The load-unpacked MV3
+adapter and standalone harness reuse `RuntimeDriver`, `RuntimeController` and
+`VideoPipeline`. Production remains the same 6,291-parameter C16D2 model; no new
+model, training or inference policy was introduced.
+
+| Acceptance surface | Closure evidence |
+|---|---|
+| Native production journeys | 40 PASS |
+| Diagnostic journeys | 44 PASS; separate from native production acceptance |
+| Whole extension reload | UNVERIFIED: native action timeout |
+| Public Shaka clear-content player | PASS over 180.026923 s: seek, pause, resizes and container fullscreen; scroll down/back N/A because there was no scroll extent |
+| Public Plyr / Video.js | NEGATIVE geometry; only one successful public player, so PARTIAL ceiling |
+| Harness/extension pixel parity | 3/3 production external + 3/3 test sampled cases: exact input/output RGBA hashes within each route; paused instrumented replay, not quality or real-time timing |
+| Long active duration / rates | PASS: 600001.5 active ms; 58.3515888645 rendered / 59.811586918 presented fps |
+| Long absolute combined loss | FAIL: 876 skips + 847 decoder drops / 35,887 presented frames = 4.8011814863%, above 1% |
+| Long runtime stability | All neural; zero tier changes, owner changes or errors; 299 rewarm state records are not fallbacks |
+| Relative GPU overhead | PASS against frozen 0.6 ms p50 / 1.3 ms p95 allowances; does not waive the absolute loss gate |
+
+Activation is per document via the native action's **Enable current page**;
+mode persists per origin. Permissions are only `activeTab`, `scripting` and
+`storage`, with no permanent hosts, web-accessible resources or MAIN-world
+execution. Ownership covers the top document and accessible open shadow roots,
+not iframes or closed shadow roots. Native controls and showing native tracks
+are unsupported; PiP/direct-video fullscreen show the original. Page-owned
+video, controls, DOM and styles remain authoritative and unmodified beneath
+an extension-owned canvas.
+
+The measured production payload is 263,008 bytes. Installation is documented in
+[README.md](README.md). The separate M10 environment, measurement scopes and
+failed gates are in [BENCHMARKS.md](BENCHMARKS.md), governed by
+[docs/M10-PREREGISTRATION.md](docs/M10-PREREGISTRATION.md) and the frozen
+[docs/M10-CALIBRATION-PLAN.md](docs/M10-CALIBRATION-PLAN.md). M9's historical
+passing long window and failed short windows are retained, not substituted for
+M10 acceptance.
 
 ---
 
 ## Milestone 11 — Cross-vendor validation
 
-Verify on NVIDIA, AMD and Intel GPUs across Windows and Linux. Everything
-measured so far is one Apple Silicon machine; nothing here should be assumed to
-transfer.
+Recommended only after M10's absolute-loss and whole-extension-reload gaps are
+closed; no M11 implementation is included. Then verify on NVIDIA, AMD and Intel
+GPUs across Windows and Linux. Everything measured so far is one Apple Silicon
+machine; nothing here should be assumed to transfer.
 
 ---
 

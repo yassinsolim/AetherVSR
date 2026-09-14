@@ -8,12 +8,27 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine â
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: Milestone 9 complete; runtime controller replaced, weights retained.** The
-production 6,291-parameter C16D2 weights are unchanged. Auto performance selects
+**Status: M10 EXTENSION MVP PARTIAL, not complete or READY.** The MV3 extension
+has 40 passing native production journeys and 44 passing diagnostic journeys.
+The public Shaka clear-content player passed 180.026923 seconds of integration
+including seek, pause, resize and container fullscreen; scroll down/back was
+N/A because the page had no scroll extent. Plyr and Video.js were negative on
+geometry, leaving one successful public player and a PARTIAL ceiling. Whole
+extension reload is **UNVERIFIED** after a native action timeout.
+
+The M10 ten-minute run retained neural at 58.3515888645 rendered fps and
+59.811586918 presented fps, but **4.8011814863% combined callback/decoder loss
+failed the absolute 1% gate**. Passing relative GPU overhead does not waive
+that failure. See the separate M10 environment, results and measurement scopes
+in [BENCHMARKS.md](BENCHMARKS.md) and the full
+[M10 report](docs/M10-REPORT.md).
+
+**M9 history: complete; runtime controller replaced, weights retained.** The
+production 6,291-parameter C16D2 weights remain unchanged in M10. Auto performance selects
 neural or Catmull-Rom from runtime evidence, with hysteresis and real neural
 recovery probes; Baseline mode never probes. This does not predict scene quality.
 
-On the M5, a ten-minute constant-frame-rate 720p60 run retained neural with
+In M9 on the M5, a ten-minute constant-frame-rate 720p60 run retained neural with
 59.61 rendered fps, 0.876% combined callback/decoder loss, and no fallbacks or
 errors. Neural GPU p50/p95 were 6.31/9.89 ms. Some short normal rows exceeded
 the 1% loss reference, including the original irregular-cadence clip; this is
@@ -77,7 +92,11 @@ and what was rerun because of them.
 
 ## What works today
 
-- Local video decoded into an `HTMLVideoElement`, never displayed directly.
+- Standalone harness: local video decoded into an `HTMLVideoElement`, never
+  displayed directly. The extension instead keeps the original page video
+  under an owned canvas and reveals it whenever enhancement is unsupported.
+- Both consumers reuse `RuntimeDriver`, `RuntimeController` and `VideoPipeline`;
+  the extension does not introduce a second inference or runtime policy path.
 - `requestVideoFrameCallback()` as the frame clock, so work is synchronised to
   presented video frames rather than to display refresh.
 - `GPUDevice.importExternalTexture()` for the frame import, with a
@@ -126,6 +145,42 @@ picker to load any local video instead (it never leaves your machine).
 `requestVideoFrameCallback` and clamps timers, and every number becomes
 meaningless.
 
+### Install the unpacked extension
+
+Run these commands separately from the repository root:
+
+```bash
+npm ci
+npm run build:extension
+```
+
+The build generates `dist-extension`. In Chrome, open `chrome://extensions`,
+turn on **Developer mode**, select **Load unpacked**, and choose that directory.
+On an HTTP(S) page, open the native extension action and select **Enable current
+page**. Mode is saved per origin; activation is per document, not a persistent
+site grant. Navigation to a new document requires explicit activation again.
+
+M10 was tested with Chrome for Testing 153.0.8010.12 on an Apple M5. Its three
+permissions are `activeTab`, `scripting` and `storage`: no permanent host access,
+web-accessible resources (WAR), or MAIN-world execution. Model delivery is
+extension-owned; page scripts receive no privileged bridge.
+
+**Supported scope:** the top document and accessible open shadow roots, with
+supported visible geometry. Iframes and closed shadow roots are outside scope.
+Native video controls and showing native text tracks are unsupported. Native
+PiP and direct-video fullscreen reveal the original video; supported container
+fullscreen can retain enhancement. Unsupported geometry or media security
+also leaves original playback available. The page remains authoritative for
+playback, audio, source, seeking and controls: no page-owned node, style or media
+attribute is modified, replaced or reparented; only extension-owned DOM is added
+and removed.
+
+The measured production payload is **263,008 bytes**. Its SHA256 is
+`724507ec7d3e7a8c9a4ce7bf0fc772f2d2de9f56c1218693db52d6cba195258a`.
+The unchanged 6,291-parameter C16D2 model SHA256 is
+`d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
+This is a load-unpacked MVP, not store publication or broad player compatibility.
+
 ### Commands
 
 Each of these is a separate command; run them individually.
@@ -147,6 +202,7 @@ npm run build
 | `npm run lint` | ESLint (type-aware) |
 | `npm run test` | Vitest unit tests (`npm test` is equivalent) |
 | `npm run build` | Typecheck and production build |
+| `npm run build:extension` | Generate the load-unpacked MV3 extension in `dist-extension` |
 
 ### Reproducible runs
 
@@ -224,9 +280,14 @@ not a rendering test: it pins a contract whose violation fails at pipeline
 creation inside a browser, where no unit test can reach it. Whether pixels are
 correct is established by running the harness and looking.
 
-GPU and video behaviour is verified by running the harness and reading the
-overlay; the procedure is in `BENCHMARKS.md`. There are deliberately no mocked
-WebGPU tests â€” a mock would assert that our mock works.
+Resource-lifetime and control contracts use mocked WebGPU objects in unit tests.
+Those tests check allocation, ownership and control flow, not hardware pixel
+correctness or performance. Real browser/GPU evidence is separate: M10 passed
+3/3 production external-import and 3/3 test sampled-import parity cases with
+exact input and output RGBA hashes against the same harness within each route.
+These were paused, instrumented replays, not SR-quality or real-time performance
+measurements. Native extension journeys and live timing runs supply different
+evidence; their scopes and unresolved gates are in [BENCHMARKS.md](BENCHMARKS.md).
 
 ## Repository layout
 

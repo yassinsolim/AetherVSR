@@ -13,6 +13,13 @@ ONNX Runtime Web probe, a device roofline probe and a temporal-behaviour
 harness — which are reachable only from `bench.html` and never from the
 video path.
 
+The standalone harness and M10 MV3 extension reuse `RuntimeDriver`,
+`RuntimeController` and `VideoPipeline`, including the same production upscalers.
+M10's verdict is **EXTENSION MVP PARTIAL**, not complete or READY: integration
+works within a bounded scope, but the absolute loss gate failed and whole
+extension reload remains unverified. See the M10 section of
+[BENCHMARKS.md](BENCHMARKS.md); M9 measurements remain separate historical evidence.
+
 **What Milestone 3 settled about the neural stage, and Milestone 4 built.** Its
 kernels are hand-written WGSL rather than a third-party runtime, and they took
 the shape `src/bench/conv-blocked.wgsl.ts` established - see
@@ -32,7 +39,7 @@ is rejected on measurement and on availability (ADR-0017).
 
 ```mermaid
 flowchart TD
-    V["HTMLVideoElement<br/>(decode target, never displayed)"]
+    V["HTMLVideoElement<br/>hidden in harness; authoritative original in extension"]
     S["VideoFrameSource<br/>requestVideoFrameCallback"]
     I["FrameImporter<br/>importExternalTexture / copyExternalImageToTexture"]
     U{"Upscaler interface"}
@@ -58,6 +65,11 @@ flowchart TD
 Every path shown is implemented. `U` dispatches to exactly one of `B` or `N` per
 frame; the runtime controller decides which. Dotted edges are observation, not data
 flow.
+
+The hidden decode target is a harness choice, not a pipeline requirement. The
+extension keeps the original page video beneath its owned canvas. Playback,
+audio, seeking, source selection and page controls remain page-authoritative;
+unsupported or suspended enhancement reveals the original instead of changing it.
 
 ## Stages
 
@@ -252,6 +264,55 @@ statistics; tier/source switches do not erase the session. The original
 BudgetGuard remains available for regression and frozen-source trace comparison.
 ADR-0043 records these boundaries. Measurement scopes, failed short-run loss
 checks and hardware limits are in [docs/M9-REPORT.md](docs/M9-REPORT.md).
+
+## M10 extension adapter
+
+The MV3 service worker owns validated activation, origin-keyed mode storage and
+fixed packaged-model delivery. It owns no video, GPU resources or frame timer.
+An ISOLATED-world content adapter discovers candidates, owns at most one video
+runtime per tab, maintains geometry and calls the shared driver. The standalone
+harness remains a separate consumer, not an extension-only entry point.
+[DECISIONS.md](DECISIONS.md) ADR-0045 records the existing architecture decision.
+
+The only permissions are `activeTab`, `scripting` and `storage`. Explicit native
+action activation applies to the current document; a remembered origin mode
+does not authorize injection or persistent activation. There are no permanent
+host permissions, web-accessible resources (WAR), or MAIN-world bridge. The
+worker supplies only the fixed packaged model, not arbitrary page-requested
+resources. There is no per-frame worker messaging. Media-security rejection
+does not trigger another import route to bypass the restriction.
+
+Discovery covers the top document and accessible open shadow roots, not iframes
+or closed shadow roots. Mutation and geometry observations are batched outside
+the frame callback; there is no frame-rate DOM scan. Source x2 backing dimensions
+remain distinct from the video's CSS display geometry. Generation fencing
+prevents stale asynchronous attachment work from acquiring a newer owner's
+resources. Disable/disposal stops owned callbacks, observers and GPU resources
+and removes only owned DOM; worker lifetime is not the content runtime's lease.
+
+The adapter adds an owned, aria-hidden, pointer-transparent canvas. It does not
+modify styles or attributes of page-owned nodes, or replace, clone, reload or
+reparent the video. Original playback remains authoritative and unmodified.
+Visibility of page controls and captions must be established, not inferred from
+pointer passthrough. Native video controls and showing native text tracks are
+unsupported. Unhandled geometry preserves original presentation. Native PiP
+and direct-video fullscreen suspend enhancement and show the original;
+supported container fullscreen can retain the overlay.
+
+The production C16D2 graph and 6,291 parameters are unchanged, with model SHA256
+`d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
+The extension preserves the prepared sampled-view import contract and all
+no-await/no-pixel-readback/no-preallocatable-GPU-allocation hot-path rules.
+Mocked resource/control contracts are unit-test evidence only. The separate
+3/3 production external and 3/3 test sampled exact-RGBA parity checks used
+paused instrumented replay against the same harness within each import route;
+they are neither quality scores nor live performance measurements.
+
+Forty native production journeys and 44 diagnostic journeys passed, but whole
+extension reload is **UNVERIFIED** after a native action timeout. One successful
+public player (Shaka clear content) and negative Plyr/Video.js geometry findings
+bound player compatibility. Neither those functional results nor passing relative
+GPU overhead overrides the failed ten-minute absolute loss gate.
 
 ## What a further backend would need
 
