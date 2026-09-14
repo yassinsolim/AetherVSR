@@ -111,6 +111,8 @@ export async function runComparison(casesPath, prefix) {
           : `${m10.origin}/m105?consumer=${item.arm === 'matched-harness' ? 'harness' : 'none'}`,
       preparePage: async (page, native, item) => {
         const placement = await nativeWindow(page, native.context);
+        placement.failedRequests = [];
+        page.on('response', response => { if (response.status() >= 400 && placement.failedRequests.length < 20) placement.failedRequests.push({ url: response.url(), status: response.status() }); });
         if (item.diagnostics === 'legacy') {
           await page.setViewportSize({ width: 1200, height: 820 });
           placement.deviceMetricsOverride = true; placement.scope = 'M10 viewport-emulated 1200x820 protocol; native window pinned to built-in display. Screen API is not physical screen geometry.';
