@@ -105,7 +105,7 @@ describe('inspectGeometry', () => {
     setup.video.getBoundingClientRect.mockReturnValue({ left: -40, top: 20, width: 320, height: 180 });
     setup.parent.getBoundingClientRect.mockReturnValue({ left: -40, top: 20, width: 320, height: 180 });
     expect(setup.inspect()).toMatchObject({ ok: true, borderRadius: '12px', verifyPlacement: true,
-      style: { left: '-40px', 'border-radius': '12px', 'clip-path': 'inset(0px 0px 0px 40px)' } });
+      style: { left: '-40px', 'border-radius': '12px', 'clip-path': 'inset(0px round 12px)', clip: 'rect(0px, 320px, 180px, 40px)' } });
   });
 
   it.each(['offset', 'padding', 'percent', 'different', 'fixed', 'outside', 'image-sized', 'zoom'])('rejects unsafe rounded case %s', kind => {

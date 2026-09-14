@@ -365,6 +365,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     width: image.width * scaleX, height: image.height * scaleY,
   } : rect;
   const clipRadius = imageSized ? uniformRadius(computed, scaleX, scaleY, rect)! : borderRadius;
+  const roundedMask = !imageSized && borderRadius !== '0px';
   const style: Record<string, string> = {
     all: 'initial', position: 'fixed', display: 'block',
     left: `${canvas.left}px`, top: `${canvas.top}px`, width: `${canvas.width}px`, height: `${canvas.height}px`,
@@ -372,9 +373,10 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     'pointer-events': 'none', 'z-index': computed.zIndex,
     'object-fit': imageSized ? 'fill' : objectFit, 'object-position': objectPosition,
     'border-radius': imageSized ? '0px' : borderRadius,
-    'clip-path': imageSized ? `inset(${inset(canvas, rect)} round ${clipRadius})` : `inset(${inset(rect, clip)})`,
+    'clip-path': imageSized ? `inset(${inset(canvas, rect)} round ${clipRadius})`
+      : roundedMask ? `inset(0px round ${borderRadius})` : `inset(${inset(rect, clip)})`,
   };
-  if (imageSized) {
+  if (imageSized || roundedMask) {
     style.clip = `rect(${clip.top - canvas.top}px, ${clip.left + clip.width - canvas.left}px, `
       + `${clip.top + clip.height - canvas.top}px, ${clip.left - canvas.left}px)`;
   }
