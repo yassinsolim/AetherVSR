@@ -12,6 +12,7 @@ function check(source: string): void {
     import { summarizeTrace } from './tools/m105-trace.mjs';
     import { playerCommand } from './tools/m10-sites.mjs';
     import { validateOldShutdown } from './tools/m105-reload.mjs';
+    import { parseFinalCases, deliveryGates } from './tools/m105-final.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -94,6 +95,24 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('keeps the 1% final loss and sustained58fps gates exact with no missing-data or rounding pass', () => check(`
+    const summary={activeMs:600000,durationMs:600000,renderedFps:58,runtimePresentedFps:58,windowStats:{last120s:{renderedFps:58,runtimePresentedFps:58}}};
+    const metrics={m10CombinedPercent:1,submissionDeficit:0};
+    assert(Object.values(deliveryGates(summary,metrics)).every(Boolean));
+    assert.equal(deliveryGates({...summary,activeMs:599999.99},metrics).duration,false);
+    assert.equal(deliveryGates(summary,{...metrics,m10CombinedPercent:1.000001}).combinedLoss,false);
+    assert.equal(deliveryGates({...summary,windowStats:{last120s:{renderedFps:57.999,runtimePresentedFps:59}}},metrics).lastRenderedFps,false);
+    assert.equal(deliveryGates(summary,{m10CombinedPercent:null,submissionDeficit:null}).combinedLoss,false);
+    assert.equal(deliveryGates({...summary,renderedFps:Infinity},metrics).renderedFps,false);
+  `));
+
+  it('fixes final candidate duration and mode without reusing short or baseline trials', () => check(`
+    assert.equal(parseFinalCases([{id:'final-1',kind:'extension-auto',durationMs:600000,warmupMs:5000}]).length,1);
+    assert.throws(()=>parseFinalCases([{id:'short',kind:'extension-auto',durationMs:30000}]));
+    assert.throws(()=>parseFinalCases([{id:'other',kind:'harness',durationMs:30000}]));
+    assert.throws(()=>parseFinalCases([{id:'warm',kind:'extension-auto',durationMs:600000,warmupMs:10000}]));
+  `));
+
   it('requires observed privilege denial and complete old-world teardown rather than missing-data success', () => check(`
     const resources={device:0,pipeline:0,canvas:0,resizeObservers:0,listeners:0,geometryFrame:0,frameCallback:0};
     const cleanup={resources,status:{enabled:false,details:{discoveryActive:false,timerCount:0,infrastructure:{created:1,destroyed:1},lastTeardown:{...resources}}}};
