@@ -249,7 +249,13 @@ export async function runJourneys(output, testBuild = false) {
       const id = await enable(page); await active(page, id); await action(page, kind, true);
       try { await page.waitForFunction(kind => kind === 'pip' ? !!document.pictureInPictureElement : !!document.fullscreenElement, kind, { timeout: 3000 }); }
       catch (error) { throw new Unverified(`Native ${kind} did not remain active: ${error}`); }
-      if (kind !== 'pip') await native.captureFullscreenWindow(page, join(screenshots, `${sequence}-${kind}-native-window.png`));
+      if (kind !== 'pip') {
+        try { await native.captureFullscreenWindow(page, join(screenshots, `${sequence}-${kind}-native-window.png`)); }
+        catch (error) {
+          report.manual.nativeFullscreenCapture = `UNVERIFIED: native OS capture unavailable; DOM/fullscreen assertions and browser raster are separate evidence. ${String(error)}`;
+          emit('native-capture-unavailable', { kind, reason: String(error) });
+        }
+      }
       if (kind === 'fullscreen') { await active(page, id); assert(await page.evaluate(() => document.fullscreenElement.contains(document.querySelector('canvas[data-aethervsr-m10]')))); }
       else { const reason = kind === 'pip' ? 'picture-in-picture' : 'video-fullscreen'; await status(id, item => item.code === 'suspended' && item.details.attachment?.suspendedReason === reason); assert.equal((await dom(page)).canvases[0].visibility, 'hidden'); }
       await screenshot(page, `${sequence}-${kind}`);
@@ -279,7 +285,7 @@ export async function runJourneys(output, testBuild = false) {
     await journey('disabled back navigation preserves only mode', 'custom', async (page, original) => {
       const id = await enable(page); await active(page, id); await popup(page, panel => panel.click('input[value="baseline"]')); await disable(page, original);
       await page.goto('http://localhost:5183/fixture?case=custom&origin-change=1'); await ready(page); await accessDenied(page);
-      await page.goBack(); await ready(page); const restored = await dom(page); assert.equal(restored.canvases.length, 0);
+      await page.goBack({ waitUntil: 'commit' }); await ready(page); const restored = await dom(page); assert.equal(restored.canvases.length, 0);
       const value = await popup(page, panel => panel.request('m10.status')); assert.equal(value.enabled, false); assert.equal(value.mode, 'baseline');
       emit('back-navigation', { status: value, dom: restored, bfcache: restored.persisted === 'true' ? 'observed persisted pageshow' : 'UNVERIFIED: browser did not restore BFCache' });
     });
