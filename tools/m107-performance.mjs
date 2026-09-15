@@ -59,15 +59,18 @@ export function profileLiveProof() {
   });
 }
 
-export async function runProofProfile(prefix,{trace=false,instrumented=false}={}) {
+export async function runProofProfile(prefix,{trace=false,instrumented=false,observers=false}={}) {
   prefix=resolve(prefix);assert(prefix.startsWith(join(ROOT,'.cache/m107/'))&&!existsSync(`${prefix}.json`));mkdirSync(dirname(prefix),{recursive:true});
   const build=verifyBuild(true),report={phase:'READ_PROFILE_NO_ACCEPTANCE',build,environment:presentationEnvironment(),started:new Date().toISOString()};
   let native,server;
   try{
     server=await presentationServer();native=await openExtension(build,(name,data)=>{if(name==='browser')report.browser=data;});
-    const page=await native.context.newPage();report.placement=await nativeWindow(page,native.context);await page.goto(server.url);await page.bringToFront();
+    const page=await native.context.newPage();report.placement=await nativeWindow(page,native.context);
+    if(observers)await page.addInitScript(installNativeObserver,{mode:'lean'});
+    await page.goto(server.url);await page.bringToFront();
     const panel=await native.popup(page);let tabId;
     try{tabId=panel.tabId;await native.workerEval(async tab=>chrome.scripting.executeScript({target:{tabId:tab,frameIds:[0]},world:'ISOLATED',files:['content.js']}),tabId);
+      if(observers)await native.isolated(page,installMutationCosts);
       await native.isolated(page,()=>globalThis.__AETHERVSR_EXTENSION_TEST__.configure({presentationWatchdog:true}));
       await panel.click(`input[value="${trace?'auto':'baseline'}"]`);await panel.click('#enable');}finally{await panel.dismiss();}
     await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready&&(!trace||state.current==='neural'&&state.details.attachment.controllerState==='stable'),15000);
@@ -76,14 +79,14 @@ export async function runProofProfile(prefix,{trace=false,instrumented=false}={}
       try{
         if(instrumented)await native.isolated(page,installPresentationCosts);
         await session.send('Profiler.enable');await session.send('Profiler.setSamplingInterval',{interval:100});await session.send('Profiler.start');
-        if(instrumented)await page.evaluate(()=>window.dispatchEvent(new Event('aethervsr:m106:start')));
+        if(instrumented)await page.evaluate(withObservers=>withObservers?globalThis[Symbol.for('aethervsr.m106.native')].start(12000):window.dispatchEvent(new Event('aethervsr:m106:start')),observers);
         await page.evaluate(()=>new Promise(done=>setTimeout(done,12000)));
         if(instrumented){
-          await page.evaluate(()=>window.dispatchEvent(new Event('aethervsr:m106:end')));
+          await page.evaluate(withObservers=>withObservers?globalThis[Symbol.for('aethervsr.m106.native')].done:window.dispatchEvent(new Event('aethervsr:m106:end')),observers);
           const data=await native.isolated(page,()=>globalThis[Symbol.for('aethervsr.m107.cost')]);
           const bytes=gzipSync(JSON.stringify(data)),path=`${prefix}.cost.json.gz`;writeFileSync(path,bytes,{flag:'wx'});
           report.cost={path:relative(ROOT,path),sha256:sha256(bytes),bytes:bytes.length,guard:distribution(data.guard.map(row=>row[1])),
-            scope:'Same cost wrapper during intrusive CPU profiling, no native observer or mutation wrapper. Diagnostic only, not a registered performance window.'};
+            observers,scope:'Same cost wrapper during intrusive CPU profiling; observers flag records the common lean native and mutation wrappers. Diagnostic only, not a registered performance window.'};
         }
         const {profile}=await session.send('Profiler.stop');
         const packed=gzipSync(JSON.stringify(profile)),path=`${prefix}.cpuprofile.gz`;writeFileSync(path,packed,{flag:'wx'});
