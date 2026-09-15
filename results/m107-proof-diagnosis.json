@@ -49,6 +49,24 @@
       "guardSamples": 6452, "guardP95Ms": 0.20000001788139343, "guardMaxMs": 0.6000000238418579, "geometryGuardMsPerSecond": 11.619651406283179, "visibleFraction": 0.9889874579382074},
     "decision": "Not qualified. All28 pilot cases passed, but the single60s probe still showed11.62ms/s total geometry/guard work. Its p95 was just above the exact0.2ms threshold under timer quantization; no rounding-based pass or paired inference. Owner requested continued investigation within all existing gates, not threshold relaxation."
   },
+  "staticAccessorFollowup": {
+    "sourceCommit": "8ea8b1ec4001c07bc4249f1ca7bb969fee46e593",
+    "candidateBundleSha256": "8e4927349fad976914f71d502ea5177a7fbf48b3feee7d41e134461274b7450c",
+    "cost": {"path": ".cache/m107/static-cost-probe-01.json", "sha256": "03105307dce6acd5b1bd91ba4833cb463d01a6db3b17dcbb688405159dcc6fd0", "bytes": 13603,
+      "guardSamples": 6582, "guardP95Ms": 0.20000001788139343, "guardMaxMs": 0.800000011920929,
+      "guardMeanMs": 0.10161045287398718, "geometryGuardMsPerSecond": 11.538160273047701, "visibleFraction": 0.9907545481658216},
+    "decision": "Not qualified. Static accessors retained every captured value but did not close the cost gap. The conditional28-case pilot was not run after this failed cost probe. No rounding waiver, subtraction or new acceptance reference."
+  },
+  "diagnosticProfiles": [
+    {"path": ".cache/m107/proof-read-profile-01.json", "sha256": "070aa06ff2f3d6233549d8394220203f98d781419c1fc920f8396796dab7d2e0", "bytes": 15272},
+    {"path": ".cache/m107/proof-read-profile-02.json", "sha256": "5a1ff596a877113d7fb131ffe596a5a6e910df98e327e7a5fb9c1917904190eb", "bytes": 37699},
+    {"path": ".cache/m107/proof-read-profile-03.json", "sha256": "7c98be7588b277f2b3007eb06652cb820c61a0b41f8d9ae543b4f249b8d003ce", "bytes": 40180},
+    {"path": ".cache/m107/proof-cpu-profile-01.json", "sha256": "4f0e9e65b8457db18c29d30000be63edacfc82563c55a23e307b436867795f69", "bytes": 6415},
+    {"path": ".cache/m107/proof-cpu-profile-02.json", "sha256": "19710d5c7368f58194ac79799720b1cda16d4ef6db962b68bea386f3e30a520f", "bytes": 6916},
+    {"path": ".cache/m107/proof-cpu-profile-03.json", "sha256": "aab5f4e837ba42d0a04ef08ed77b115cc9283926df91eacb89f3b45375a34dc5", "bytes": 6966}
+  ],
+  "profileScope": "Bounded read profiles, alternating intrusive120-call attribution and12s V8 sampling were diagnostic only. Cached named reads had no consistent advantage; Typed OM was slower in the observed comparison and was not adopted. Profiles01/02 have broader boundaries than the cost bracket; profile02 also included cost export before stop, corrected before profile03. Neither CPU occupancy nor observed short-profile lower wall time justifies discounting registered60s costs. All profile reports retain separate raw hashes.",
+  "closure": "Owner explicitly selected Finish FAIL closure after continued investigation. No S2 production selection. Candidate-dependent final matrices, paired study, confirmations and public acceptance are gated, not passed. Complete independent lifecycle/parity/build/clone/CI closure. Presentation synchronization FAIL; overall extension PARTIAL; M11 GATED.",
   "overallExtension": "PARTIAL",
   "m11": "GATED"
 }
