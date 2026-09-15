@@ -7,7 +7,7 @@ function check(source: string): void {
     import { createHash, webcrypto } from 'node:crypto';
     import { createContext, Script } from 'node:vm';
     import { normalizeRgba8, summarizeRgba8, compareCaptures, parseArgs, TIMES,
-      captureTask, runtimeState } from './tools/m10-output-parity.mjs';
+      captureTask, runtimeState, seekPaused } from './tools/m10-output-parity.mjs';
     const hash = bytes => createHash('sha256').update(bytes).digest('hex');
     ${source}
     console.log('checked without browser');
@@ -93,6 +93,27 @@ const replayFixture = `
 `;
 
 describe('M10 output parity offline helpers (no browser evidence)', () => {
+  it('waits for the requested paused frame when an earlier rVFC callback is delivered first', () => check(`
+    const callbacks=new Map(),timers=new Map();let next=0,listenerCount=0;
+    class Video extends EventTarget {
+      paused=true;seeking=false;readyState=4;currentTime=0;currentSrc='local';
+      requestVideoFrameCallback(callback){const handle=++next;callbacks.set(handle,callback);return handle;}
+      cancelVideoFrameCallback(handle){callbacks.delete(handle);}
+      addEventListener(...args){listenerCount++;super.addEventListener(...args);}
+      removeEventListener(...args){listenerCount--;super.removeEventListener(...args);}
+    }
+    const video=new Video();
+    const sandbox=createContext({document:{querySelectorAll:()=>[video]},setTimeout(callback){const handle=++next;timers.set(handle,callback);return handle;},clearTimeout(handle){timers.delete(handle);}});
+    const pending=new Script('('+seekPaused.toString()+')({time:1})').runInContext(sandbox);
+    const deliver=mediaTime=>{const [handle,callback]=callbacks.entries().next().value;callbacks.delete(handle);callback(10,{mediaTime,presentedFrames:60,width:1280,height:720});};
+    deliver(.75);video.dispatchEvent(new Event('seeked'));assert.equal(callbacks.size,1);deliver(1);
+    const result=await pending;assert.equal(result.metadata.mediaTime,1);assert.equal(result.discardedMetadataCallbacks,1);
+    assert.equal(callbacks.size,0);assert.equal(timers.size,0);assert.equal(listenerCount,0);
+    const failed=new Script('('+seekPaused.toString()+')({time:2})').runInContext(sandbox);
+    deliver(1);video.dispatchEvent(new Event('seeked'));[...timers.values()][0]();
+    await assert.rejects(failed,/deadline/);assert.equal(callbacks.size,0);assert.equal(timers.size,0);assert.equal(listenerCount,0);
+  `));
+
   it('strips aligned row padding and explicitly normalizes BGRA to RGBA', () => check(`
     const raw = new Uint8Array(512).fill(99);
     raw.set([3, 2, 1, 255, 6, 5, 4, 255]); raw.set([9, 8, 7, 255, 12, 11, 10, 255], 256);

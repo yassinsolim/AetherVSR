@@ -130,7 +130,7 @@ export async function seekPaused({ time }) {
   const video = videos[0];
   if (!video.paused || !video.requestVideoFrameCallback) throw new Error('Paused native video with rVFC required');
   return new Promise((done, reject) => {
-    let metadata = null, sought = false, handle;
+    let metadata = null, sought = false, handle, discardedMetadataCallbacks = 0;
     const finish = error => {
       if (!error && (!metadata || !sought)) return;
       clearTimeout(timer); video.cancelVideoFrameCallback(handle);
@@ -139,14 +139,20 @@ export async function seekPaused({ time }) {
       else if (!video.paused || video.seeking || video.readyState < 2 || Math.abs(video.currentTime - time) > 1e-6 ||
         !Number.isFinite(metadata.mediaTime) || Math.abs(metadata.mediaTime - time) > 1 / 60 || metadata.width !== 1280 || metadata.height !== 720)
         reject(new Error('Paused seek/rVFC integrity failed'));
-      else done({ requestedTime: time, currentTime: video.currentTime, metadata, source: video.currentSrc });
+      else done({ requestedTime: time, currentTime: video.currentTime, metadata, source: video.currentSrc, discardedMetadataCallbacks });
     };
     const seeked = () => { sought = true; finish(); };
     const failure = () => finish(new Error(video.error?.message ?? 'Video error'));
     const timer = setTimeout(() => finish(new Error('Paused seek/rVFC deadline')), 3000);
     video.addEventListener('seeked', seeked); video.addEventListener('error', failure);
-    handle = video.requestVideoFrameCallback((now, value) => { metadata = { now, mediaTime: value.mediaTime,
-      presentedFrames: value.presentedFrames, width: value.width, height: value.height }; finish(); });
+    const frame = (now, value) => {
+      if (!Number.isFinite(value.mediaTime) || Math.abs(value.mediaTime - time) > 1 / 60 || value.width !== 1280 || value.height !== 720) {
+        discardedMetadataCallbacks++; handle = video.requestVideoFrameCallback(frame); return;
+      }
+      metadata = { now, mediaTime: value.mediaTime, presentedFrames: value.presentedFrames, width: value.width, height: value.height };
+      finish();
+    };
+    handle = video.requestVideoFrameCallback(frame);
     try { video.currentTime = time; } catch (error) { finish(error); }
   });
 }
