@@ -18,8 +18,11 @@ export function profileProofReads() {
   const rows=[];
   for(const [ordinal,entry]of entries.entries()){
     const names=entry.keys.map(key=>String(key).replace(/[A-Z]/g,value=>`-${value.toLowerCase()}`));
+    const typed=entry.element.computedStyleMap?.();
+    const typedValues=typed?names.map(name=>String(typed.get(name))):null;
     const methods={property:()=>entry.keys.every((key,index)=>entry.style[key]===entry.values[index]),
       named:()=>names.every((name,index)=>entry.style.getPropertyValue(name)===entry.values[index])};
+    if(typed)methods.typed=()=>names.every((name,index)=>String(typed.get(name))===typedValues[index]);
     const timing={};
     for(const [method,read]of Object.entries(methods)){
       const samples=[];let equal=true;
