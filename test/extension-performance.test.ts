@@ -13,7 +13,7 @@ function check(source: string): void {
     import { playerCommand } from './tools/m10-sites.mjs';
     import { validateOldShutdown } from './tools/m105-reload.mjs';
     import { parseFinalCases, deliveryGates } from './tools/m105-final.mjs';
-    import { COST_ORDER, compareCosts, costBounds, costCases } from './tools/m107-performance.mjs';
+    import { COST_ORDER, compareCosts, costBounds, costCases, profileProofReads } from './tools/m107-performance.mjs';
     import { transitionVerdict, summarizePresentation, geometryOracleSource, installGeometryOracle, TRANSITIONS } from './tools/m107-presentation.mjs';
     ${source}
     console.log('checked without browser');
@@ -97,6 +97,16 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('bounds the proof read profile and preserves equivalent property operands', () => check(`
+    let reads=0;const style={objectFit:'contain',getPropertyValue(name){reads++;return name==='object-fit'?this.objectFit:'';}};
+    const element={},entry={element,style,keys:['objectFit'],values:['contain'],names:[]};
+    const context=createContext({chrome:{runtime:{id:'test'}},performance:{now:()=>0},entries:[entry],element});
+    new Script('globalThis[Symbol.for("aethervsr.m10.document.test")]={attachment:{video:element,checkedGeometry:{proof:{styles:entries}}}}').runInContext(context);
+    const result=new Script('('+profileProofReads.toString()+')()').runInContext(context);
+    assert.equal(result.rows.length,1);assert.equal(result.rows[0].timing.property.equal,true);assert.equal(result.rows[0].timing.named.equal,true);
+    assert.equal(result.rows[0].timing.named.batchMs.length,12);assert.equal(reads,12*64);assert.equal(style.objectFit,'contain');
+  `));
+
   it('keeps a single-run cost probe separate from fixed comparison and confirmation windows', () => check(`
     assert.deepEqual(costCases(),COST_ORDER);assert.equal(costCases().length,18);
     assert.deepEqual(costCases({probe:true}),[{block:1,strategy:2,durationMs:60000}]);

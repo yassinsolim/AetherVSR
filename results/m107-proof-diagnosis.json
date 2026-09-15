@@ -40,6 +40,15 @@
   },
   "decision": "Do not qualify this candidate. Guard p95 exceeds the registered0.2ms per-run bound; total geometry/guard work is12.22ms/s. This single probe has no paired non-regression verdict and is not pooled with either full study.",
   "nextScopedExperiment": "Flat retained-property snapshots and direct property reads, checking exactly the same geometry inputs. Repeat all28 pilot cases and one60s cost probe before considering a new full matrix. No criterion, controller policy, model or production strategy change.",
+  "flatSnapshotFollowup": {
+    "sourceCommit": "5cabf5ac47fdfcb99570174873007dc7b4e4cd8a",
+    "candidateBundleSha256": "b5c1e06c768b067ee7b16425c839a4723b1fe0d789ef7a5565887bdf110ca13c",
+    "pilot": {"path": ".cache/m107/flat-pilot-s2-01.json", "sha256": "8600e98aab5710cee26555ce70b343939ef49147b413c14aefe748ccd5770b82", "bytes": 348724, "cases": 28, "passed": 28, "postSubmitMismatchSamples": 0},
+    "cost": {"path": ".cache/m107/flat-cost-probe-01.json", "sha256": "2df1f19de4f687599f453ad5446c9c55e1cbb105faeb117f0a862faa5c5ecccf", "bytes": 13586,
+      "raw": {"path": ".cache/m107/flat-cost-probe-01.1.json.gz", "sha256": "3ba124e7a5378bece486da9f11a8a81ad49bff994180c1dc567444f2d90c7b4a", "bytes": 151663},
+      "guardSamples": 6452, "guardP95Ms": 0.20000001788139343, "guardMaxMs": 0.6000000238418579, "geometryGuardMsPerSecond": 11.619651406283179, "visibleFraction": 0.9889874579382074},
+    "decision": "Not qualified. All28 pilot cases passed, but the single60s probe still showed11.62ms/s total geometry/guard work. Its p95 was just above the exact0.2ms threshold under timer quantization; no rounding-based pass or paired inference. Owner requested continued investigation within all existing gates, not threshold relaxation."
+  },
   "overallExtension": "PARTIAL",
   "m11": "GATED"
 }

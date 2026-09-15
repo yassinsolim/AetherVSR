@@ -11,6 +11,46 @@ import {presentationServer,presentationEnvironment} from './m107-presentation.mj
 
 export const COST_ORDER=['012','120','201','021','210','102'].flatMap((block,index)=>[...block].map(value=>({block:index+1,strategy:Number(value),durationMs:60000})));
 
+export function profileProofReads() {
+  const attachment=globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)]?.attachment;
+  const entries=attachment?.checkedGeometry?.proof?.styles;
+  if(!entries?.length)throw new Error('A retained geometry proof is required');
+  const rows=[];
+  for(const [ordinal,entry]of entries.entries()){
+    const names=entry.keys.map(key=>String(key).replace(/[A-Z]/g,value=>`-${value.toLowerCase()}`));
+    const methods={property:()=>entry.keys.every((key,index)=>entry.style[key]===entry.values[index]),
+      named:()=>names.every((name,index)=>entry.style.getPropertyValue(name)===entry.values[index])};
+    const timing={};
+    for(const [method,read]of Object.entries(methods)){
+      const samples=[];let equal=true;
+      for(let batch=0;batch<12;batch++){
+        const started=performance.now();
+        for(let repetition=0;repetition<64;repetition++)equal=read()&&equal;
+        samples.push(performance.now()-started);
+      }
+      timing[method]={batchMs:samples,equal,readsPerBatch:entry.keys.length*64};
+    }
+    rows.push({ordinal,video:entry.element===attachment.video,keys:entry.keys,names:entry.names,timing});
+  }
+  return {rows,scope:'Diagnostic repeated reads of retained live computed styles, 12 batches of64 whole-entry scans per method. No frame/GPU/performance acceptance; cached-style microbenchmark does not represent one live frame or cold layout work.'};
+}
+
+export async function runProofProfile(prefix) {
+  prefix=resolve(prefix);assert(prefix.startsWith(join(ROOT,'.cache/m107/'))&&!existsSync(`${prefix}.json`));mkdirSync(dirname(prefix),{recursive:true});
+  const build=verifyBuild(true),report={phase:'READ_PROFILE_NO_ACCEPTANCE',build,environment:presentationEnvironment(),started:new Date().toISOString()};
+  let native,server;
+  try{
+    server=await presentationServer();native=await openExtension(build,(name,data)=>{if(name==='browser')report.browser=data;});
+    const page=await native.context.newPage();report.placement=await nativeWindow(page,native.context);await page.goto(server.url);await page.bringToFront();
+    const panel=await native.popup(page);let tabId;
+    try{tabId=panel.tabId;await panel.click('input[value="baseline"]');await panel.click('#enable');}finally{await panel.dismiss();}
+    await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready,10000);
+    report.profile=await native.isolated(page,profileProofReads);
+    assert.deepEqual(verifyBuild(true),build);
+  }finally{await native?.close();await server?.close();report.finished=new Date().toISOString();writeFileSync(`${prefix}.json`,JSON.stringify(report,null,2),{flag:'wx'});}
+  return report;
+}
+
 export function installMutationCosts() {
   const key=Symbol.for('aethervsr.m107.mutation-cost');
   if(globalThis[key])throw new Error('Duplicate mutation collector');
