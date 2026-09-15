@@ -49,9 +49,9 @@ export function installPresentationObserver({ diagnostic = false } = {}) {
     const visible = getComputedStyle(canvas).visibility === 'visible' && canvas.isConnected;
     const geometry = inspect(video);
     const expected = geometry.ok ? Object.fromEntries(['left','top','width','height'].map(name=>[name,Number.parseFloat(geometry.style[name])])) : null;
+    normalizer.cssText = '';
+    if(geometry.ok)for(const [name,value]of Object.entries(geometry.style))normalizer.setProperty(name,value,'important');
     const styleMismatches = geometry.ok ? ['object-fit','object-position','border-radius','clip-path','clip','z-index'].filter(name=>{
-      normalizer.removeProperty(name);
-      if(geometry.style[name]!==undefined)normalizer.setProperty(name,geometry.style[name]);
       return normalizer.getPropertyValue(name)!==canvas.style.getPropertyValue(name);
     }) : [];
     const mismatch = visible && (!expected || styleMismatches.length>0 || ['left','top','width','height'].some(name => Math.abs(actual[name] - expected[name]) > 0.5));
