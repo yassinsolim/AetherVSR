@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "phase": "PROOF_GUARD_DIAGNOSIS_NOT_ACCEPTANCE",
+  "candidateBundleSha256": "414c8cfee42253ef394738869c1b9410db65985c5b29f0626ab088e128e52aef",
+  "correctnessPilot": {
+    "path": ".cache/m107/corrected-pilot-s2-02.json",
+    "sha256": "58f134d2da21edf7ffa743f5bc8e21bfe95ac1865ea93cab181380027fe2e09c",
+    "bytes": 349137,
+    "sourceCommit": "011edde563c0c76880053be9ee693df6683ff836",
+    "cases": 28,
+    "repeats": 1,
+    "passed": 28,
+    "postSubmitMismatchSamples": 0,
+    "cleanup": true,
+    "scope": "One diagnostic pilot only, not the three-repeat strategy or final-production qualification. Three warming cases verified paused, unready and zero processed frames before action. Fresh current-DOM geometry query includes CSS reset normalization."
+  },
+  "costProbe": {
+    "path": ".cache/m107/corrected-cost-probe-01.json",
+    "sha256": "5a629986fa25b02e6a0f9292eab2140313eb1877c5e4d2f0bd8c266e980682a4",
+    "bytes": 13602,
+    "sourceCommit": "c9e8c5c0017a707ac33f7fbaa0cc9350ad2e5089",
+    "raw": {
+      "path": ".cache/m107/corrected-cost-probe-01.1.json.gz",
+      "sha256": "7000ce358a4fc9eec0f4580f4e6398364e027f9cb6029df0923abd2b258f5e54",
+      "bytes": 150230
+    },
+    "valid": true,
+    "durationMs": 60000.90000000596,
+    "guardSamples": 6394,
+    "guardP95Ms": 0.29999998211860657,
+    "guardMaxMs": 0.800000011920929,
+    "guardMeanMs": 0.11113543960408266,
+    "geometryGuardMsPerSecond": 12.216483430341516,
+    "visibleFraction": 0.9895769466584917,
+    "actualNeuralStable": true,
+    "probes": 0,
+    "submissionDeficit": 0,
+    "error": null,
+    "scope": "M5 Mac17,2/24GB, macOS26.6.2, Chrome153.0.8010.12, AC, native1200x760/DPR2, exact720p60 CFR. Report retains full environment/placement/source hashes. Five-second warmup then one60s window, no dense geometry oracle. CPU timer quantization retained. Guard and full reconciliation calls are non-nested; driver timing nests the guard and is not added. GPU histogram is cumulative session scope; layout/style attribution is not measured."
+  },
+  "decision": "Do not qualify this candidate. Guard p95 exceeds the registered0.2ms per-run bound; total geometry/guard work is12.22ms/s. This single probe has no paired non-regression verdict and is not pooled with either full study.",
+  "nextScopedExperiment": "Flat retained-property snapshots and direct property reads, checking exactly the same geometry inputs. Repeat all28 pilot cases and one60s cost probe before considering a new full matrix. No criterion, controller policy, model or production strategy change.",
+  "overallExtension": "PARTIAL",
+  "m11": "GATED"
+}

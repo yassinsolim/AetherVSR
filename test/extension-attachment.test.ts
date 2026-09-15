@@ -248,7 +248,7 @@ describe('VideoAttachment', () => {
     const { attachment, next, parent, mutationObserver, mutate, frame, canvas } = harness();
     const originalInspect = vi.mocked(inspectGeometry).getMockImplementation()!;
     vi.mocked(inspectGeometry).mockImplementation(element => ({...originalInspect(element),proof:{styles:[{
-      element:next as unknown as Element,parent:parent as unknown as Node,style:{} as CSSStyleDeclaration,values:new Map(),named:new Map(),
+      element:next as unknown as Element,parent:parent as unknown as Node,style:{} as CSSStyleDeclaration,keys:[],values:[],names:[],namedValues:[],
     }],clips:[],viewport:null}}));
     await attachment.start(); frame();
     expect(mutationObserver.observe).toHaveBeenCalledWith(next,expect.objectContaining({attributes:true,childList:true}));

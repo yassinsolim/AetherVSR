@@ -9,7 +9,7 @@ export type ObjectFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 
 interface GeometryProof {
   styles: { element: Element; parent: Node | null; style: CSSStyleDeclaration;
-    values: Map<PropertyKey, unknown>; named: Map<string, string> }[];
+    keys: PropertyKey[]; values: unknown[]; names: string[]; namedValues: string[] }[];
   clips: { element: HTMLElement; rect: Rect; layout: number[] }[];
   viewport: { element: HTMLElement; width: number; height: number } | null;
 }
@@ -36,8 +36,9 @@ export function geometryProofCurrent(geometry: GeometryResult): boolean {
   if (proof.viewport && (proof.viewport.element.clientWidth !== proof.viewport.width || proof.viewport.element.clientHeight !== proof.viewport.height)) return false;
   for (const entry of proof.styles) {
     if (entry.element.parentNode !== entry.parent) return false;
-    for (const [key, value] of entry.values) if (Reflect.get(entry.style, key, entry.style) !== value) return false;
-    for (const [key, value] of entry.named) if (entry.style.getPropertyValue(key) !== value) return false;
+    const style = entry.style as unknown as Record<PropertyKey, unknown>;
+    for (let index = 0; index < entry.keys.length; index++) if (style[entry.keys[index]!] !== entry.values[index]) return false;
+    for (let index = 0; index < entry.names.length; index++) if (entry.style.getPropertyValue(entry.names[index]!) !== entry.namedValues[index]) return false;
   }
   for (const entry of proof.clips) {
     const bounds = entry.element.getBoundingClientRect();
@@ -280,15 +281,22 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     if (cached) return cached;
     const style = view.getComputedStyle(element);
     if (styles.size >= 256) { overflow = true; return style; }
-    const values = new Map<PropertyKey, unknown>(), named = new Map<string, string>();
+    const keys: PropertyKey[] = [], values: unknown[] = [], names: string[] = [], namedValues: string[] = [];
+    const indices = new Map<PropertyKey, number>(), namedIndices = new Map<string, number>();
     const tracked = new Proxy(style, { get(target, key) {
       if (key === 'getPropertyValue') return (name: string) => {
-        const value = target.getPropertyValue(name); named.set(name, value); return value;
+        const value = target.getPropertyValue(name), index = namedIndices.get(name) ?? names.length;
+        if (index === names.length) { namedIndices.set(name, index); names.push(name); }
+        namedValues[index] = value;
+        return value;
       };
-      const value: unknown = Reflect.get(target, key, target); values.set(key, value); return value;
+      const value: unknown = Reflect.get(target, key, target), index = indices.get(key) ?? keys.length;
+      if (index === keys.length) { indices.set(key, index); keys.push(key); }
+      values[index] = value;
+      return value;
     } });
     styles.set(element, tracked);
-    proof.styles.push({ element, parent: element.parentNode, style, values, named });
+    proof.styles.push({ element, parent: element.parentNode, style, keys, values, names, namedValues });
     return tracked;
   };
   const computed = readStyle(video);
