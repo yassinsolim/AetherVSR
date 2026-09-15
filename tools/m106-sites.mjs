@@ -125,6 +125,7 @@ export function installPublicObserver() {
     return { at: performance.now(), currentTime: video.currentTime, qualityTotal: quality?.totalVideoFrames ?? null,
       qualityDrops: quality?.droppedVideoFrames ?? null, readyState: video.readyState, networkState: video.networkState,
       width:video.videoWidth,height:video.videoHeight,
+      duration:Number.isFinite(video.duration)?video.duration:null,
       paused: video.paused, ended: video.ended, seeking: video.seeking, rate: video.playbackRate,
       visibility: document.visibilityState, focused: document.hasFocus(), sameVideo: video === document.querySelector('video'),
       sameSource: source === video.currentSrc, error: video.error?.code ?? null, action: data.action };
@@ -330,8 +331,13 @@ export async function runVideojs(prefix, referencePath, resumePath) {
             const button=await visibleButton(player,/^(Enter )?Full\s*screen(?: mode)?$/i);assert(button,'Original fullscreen control unavailable');
             await button.click();
             try{await page.waitForFunction(()=>!!document.fullscreenElement,undefined,{timeout:4000});await check('original-fullscreen');await delay(2000);}
-            finally{if(await page.evaluate(()=>!!document.fullscreenElement)){await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.fullscreenElement,undefined,{timeout:5000});}}
-            return {originalControl:true,holdMs:2000,exit:'Escape'};
+            finally{if(await page.evaluate(()=>!!document.fullscreenElement)){
+              await player.hover();
+              const exit=await visibleButton(player,/^(Exit|Leave) Full\s*screen(?: mode)?$/i);
+              if(exit)await exit.click();else await page.keyboard.press('Escape');
+              await page.waitForFunction(()=>!document.fullscreenElement,undefined,{timeout:5000});
+            }}
+            return {originalControl:true,holdMs:2000,exit:'Original Exit Fullscreen button when present; otherwise Escape'};
           }],
         ];
         console.log(`${item.id}: recording 180s public controls`);
@@ -349,7 +355,7 @@ export async function runVideojs(prefix, referencePath, resumePath) {
         result.observedMs=raw.closing.at-raw.opening.at;result.closingIdentity=await publicIdentity(page,manifests);
         assert.equal(raw.invalid,null);assert.equal(raw.overflow,false);assert(result.observedMs>=item.durationMs&&result.observedMs<=item.durationMs+5000);
         assert(raw.rows.every(row=>row.sameVideo&&row.sameSource&&row.rate===1),'Original media identity/rate changed');
-        assert(samePublicIdentity(result.closingIdentity,reference),'Closing reference identity changed');
+        assert(samePublicIdentity(result.closingIdentity,reference,'closing'),'Closing reference identity changed');
         assert.equal(result.closingIdentity.urlSha256,result.identity.urlSha256,'Session-local blob identity changed');
         result.comparable=!result.bindingFailure&&result.actions.some(value=>value.name==='prescribed-seek'&&value.pass===true);
         result.stalls=targetStalls(raw.rows,result.actions,raw.closing.at);
@@ -396,7 +402,8 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
     await runVideojs(process.argv[3],resolve(process.argv[4]),process.argv[5]?resolve(process.argv[5]):undefined);}
 }
 
-export function samePublicIdentity(actual, reference) {
+export function samePublicIdentity(actual, reference, phase='opening') {
+  assert(['opening','closing'].includes(phase),'Unknown identity phase');
   const digest=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
   const hls=reference?.hls;
   let sameSource=actual?.urlSha256===reference?.urlSha256;
@@ -419,8 +426,9 @@ export function samePublicIdentity(actual, reference) {
   }
   return digest(actual?.urlSha256) && sameSource && actual.origin === reference?.origin
     && sameDimensions
-    && Number.isFinite(actual.duration) && Math.abs(actual.duration - VIDEOJS_DURATION) <= 0.01
-    && Number.isFinite(reference.duration) && Math.abs(actual.duration - reference.duration) <= 0.01;
+    && Number.isFinite(reference.duration) && Math.abs(reference.duration-VIDEOJS_DURATION)<=0.01
+    && (phase==='closing' || Number.isFinite(actual.duration) && Math.abs(actual.duration - VIDEOJS_DURATION) <= 0.01
+      && Math.abs(actual.duration - reference.duration) <= 0.01);
 }
 
 export function targetStalls(rows, interventions, closingAt) {

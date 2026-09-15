@@ -80,6 +80,9 @@ describe('native browser delivery floor accounting', () => {
     const reference={urlSha256:'a'.repeat(64),origin:'https://example.test',duration:35.963044,width:1280,height:720};
     assert.equal(samePublicIdentity(reference,reference),true);
     for(const changed of[{duration:36},{width:1920},{urlSha256:'b'.repeat(64)},{duration:null}])assert.equal(samePublicIdentity({...reference,...changed},reference),false);
+    assert.equal(samePublicIdentity({...reference,duration:35.925333},reference,'closing'),true);
+    assert.equal(samePublicIdentity({...reference,urlSha256:'b'.repeat(64)},reference,'closing'),false);
+    assert.throws(()=>samePublicIdentity(reference,reference,'seek'));
   `));
   it('compares stable HLS identities without equating ephemeral blob URLs across sessions', () => check(`
     const master=manifestIdentity('https://stream.example.test/asset.m3u8','application/x-mpegURL',200);
