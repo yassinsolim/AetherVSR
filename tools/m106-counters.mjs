@@ -154,7 +154,7 @@ export function summarizeNative(raw) {
   const rate = count => count !== null && durationMs > 0 ? count * 1000 / durationMs : null;
   const window = (start, end) => {
     const rows = data.rows.filter(row => row[0] >= start && row[0] < end);
-    const frames = runtime?.frames.filter(row => row[0] >= start && row[0] < end) ?? null;
+    const frames = runtime?.opening?.runtime ? runtime.frames.filter(row => row[0] >= start && row[0] < end) : null;
     const milliseconds = end - start;
     return { durationMs: milliseconds, callbacks: rows.length, presented: rows.reduce((sum, row) => sum + row[6], 0),
       nativeCallbackFps: rows.length * 1000 / milliseconds, nativePresentedFps: rows.reduce((sum, row) => sum + row[6], 0) * 1000 / milliseconds,

@@ -160,6 +160,16 @@ describe('native browser delivery floor accounting', () => {
     const summary=validateNative(raw,1000);assert.equal(summary.nativeCombinedPercent,null);assert.equal(summary.callbacks,null);
     assert.equal(summary.qualityDrops,1);assert.equal(summary.qualityTotal,60);
   `));
+  it('leaves infrastructure-only runtime slice rates unavailable instead of inventing zero submissions', () => check(fixture + `
+    raw.native.closing.at=600000;
+    raw.runtime={opening:{runtime:null,attempts:null},closing:{runtime:null,attempts:null},frames:[]};
+    const summary=summarizeNative(raw);
+    for(const slice of[summary.first120,summary.last120]){
+      assert.equal(slice.submitted,null);assert.equal(slice.renderedFps,null);assert.equal(slice.runtimePresentedFps,null);
+      assert(Number.isFinite(slice.nativeCallbackFps));
+    }
+    assert.equal(summary.submitted,null);assert.equal(summary.renderedFps,null);
+  `));
   it('reports real runtime counter mismatches separately from the common native analogue', () => check(fixture + `
     raw.runtime={overflow:false,opening:{attempts:0,runtime:{session:{framesRendered:0,framesPresented:0,framesSkipped:0}}},
       closing:{attempts:2,pipelineError:null,sameAttachment:true,runtime:{session:{framesRendered:2,framesPresented:4,framesSkipped:2}}},frames:[[100,2,1],[500,2,1]]};
