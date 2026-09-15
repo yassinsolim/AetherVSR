@@ -1,0 +1,887 @@
+{
+  "schemaVersion": 3,
+  "phase": "METADATA_ONLY",
+  "completion": "PINNED",
+  "outcome": "not measured",
+  "amendment": "docs/M10.6-PUBLIC-IDENTITY.md",
+  "supersedes": [
+    "results/m106-public-identity.json",
+    "results/m106-public-identity-v2.json"
+  ],
+  "ownerApproval": "Explicit full-advertised-catalog amendment approval; original ABR unchanged; paired seek dimensions must match",
+  "apparatusCommit": "73bef8e3eb139ec3854486695812b0641f77194e",
+  "browser": {
+    "version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/153.0.8010.12",
+      "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "jsVersion": "15.3.76.4"
+    },
+    "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+  },
+  "placement": {
+    "bounds": {
+      "bounds": {
+        "left": 40,
+        "top": 40,
+        "width": 1200,
+        "height": 903,
+        "windowState": "normal"
+      }
+    },
+    "nativeScreen": {
+      "width": 1512,
+      "height": 982,
+      "dpr": 2,
+      "x": 40,
+      "y": 40
+    },
+    "deviceMetricsOverride": false,
+    "scope": "Native window at desktop (40,40), actual 1200x760 content fits built-in display; no forced focus during capture; Screen API is observable geometry, not measured physical refresh"
+  },
+  "identity": {
+    "scheme": "blob:",
+    "origin": "https://videojs.org",
+    "urlSha256": "0c090166b0b06e996283db3056a019ca07480d11caa3a12af09c966a07a80a24",
+    "duration": 35.95354,
+    "width": 960,
+    "height": 540,
+    "manifests": {
+      "records": [
+        {
+          "origin": "https://stream.mux.com",
+          "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2",
+          "pathSha256": "3580b36944bb3af3d1b3b04216a01756953af2d2f214c379475560ea5966f1e4",
+          "queryKeys": [],
+          "status": 200,
+          "pendingCatalogReads": 0,
+          "catalog": {
+            "entries": [
+              {
+                "kind": "audio",
+                "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+                "width": null,
+                "height": null,
+                "bandwidth": null,
+                "frameRate": null,
+                "codecs": null
+              },
+              {
+                "kind": "audio",
+                "pathSha256": "853a57c5422dd2beb873f0f9e501a05825b94d765bdca09b962224a714e94879",
+                "width": null,
+                "height": null,
+                "bandwidth": null,
+                "frameRate": null,
+                "codecs": null
+              },
+              {
+                "kind": "audio",
+                "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+                "width": null,
+                "height": null,
+                "bandwidth": null,
+                "frameRate": null,
+                "codecs": null
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "2bfd33da50231a04aa0a316f537f8f97c121f81cfff2ab65216320a590d2a15a",
+                "width": 1920,
+                "height": 1080,
+                "bandwidth": 8598700,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.64002a"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "4604b9a406018e3bfa46ee8b52929626a393afdef7d3330d314d24de19043469",
+                "width": 640,
+                "height": 360,
+                "bandwidth": 1483900,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.64001f"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+                "width": 1920,
+                "height": 1080,
+                "bandwidth": 11465300,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.64002a"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+                "width": 960,
+                "height": 540,
+                "bandwidth": 2836900,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640020"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "91bb41a41dc5440ce3318f04eac7ccf3a9f8a94013316801791f49395ed48317",
+                "width": 3840,
+                "height": 2160,
+                "bandwidth": 28018100,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640034"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "a9c43f6ffa98f257174b6d9327d2df6a16831f3371fd9032cc03fe64aa110004",
+                "width": 1280,
+                "height": 720,
+                "bandwidth": 4494600,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640020"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "af77c89d891e928351bb14fa1a290f2ceec313c8bfc8443c5215e03c60932d08",
+                "width": 2560,
+                "height": 1440,
+                "bandwidth": 16810200,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640033"
+              }
+            ],
+            "sha256": "6e79b04a158e67992a6c49e0f2211a8465ee3b3ad2e200bb9197dc5f8917788e",
+            "scope": "Advertised rendition paths, codecs, bandwidth and dimensions; not media-byte equality. Signed query values and CDN host selection excluded."
+          },
+          "catalogReads": 1
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "7215f97d4d55a9a3ffe0595bc3471b2047db01b495ad55e5408486ab31bad8d8",
+          "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "4f94de3699142584bfddd6a37e9f7558dbee3f33bff135ee283bc7abb51ff6bf",
+          "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "9060993721ba51d9d26d97d3e2934ed99d3effed9b473cfd55e0f15bf6823531",
+          "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "f8b3b1c93e86d347979f3e5df1a9876473059cb292eb79db3973531935223ffa",
+          "pathSha256": "af77c89d891e928351bb14fa1a290f2ceec313c8bfc8443c5215e03c60932d08",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        }
+      ],
+      "overflow": false
+    },
+    "hls": {
+      "master": {
+        "origin": "https://stream.mux.com",
+        "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2"
+      },
+      "catalog": {
+        "entries": [
+          {
+            "kind": "audio",
+            "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+            "width": null,
+            "height": null,
+            "bandwidth": null,
+            "frameRate": null,
+            "codecs": null
+          },
+          {
+            "kind": "audio",
+            "pathSha256": "853a57c5422dd2beb873f0f9e501a05825b94d765bdca09b962224a714e94879",
+            "width": null,
+            "height": null,
+            "bandwidth": null,
+            "frameRate": null,
+            "codecs": null
+          },
+          {
+            "kind": "audio",
+            "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+            "width": null,
+            "height": null,
+            "bandwidth": null,
+            "frameRate": null,
+            "codecs": null
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "2bfd33da50231a04aa0a316f537f8f97c121f81cfff2ab65216320a590d2a15a",
+            "width": 1920,
+            "height": 1080,
+            "bandwidth": 8598700,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.64002a"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "4604b9a406018e3bfa46ee8b52929626a393afdef7d3330d314d24de19043469",
+            "width": 640,
+            "height": 360,
+            "bandwidth": 1483900,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.64001f"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+            "width": 1920,
+            "height": 1080,
+            "bandwidth": 11465300,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.64002a"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+            "width": 960,
+            "height": 540,
+            "bandwidth": 2836900,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640020"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "91bb41a41dc5440ce3318f04eac7ccf3a9f8a94013316801791f49395ed48317",
+            "width": 3840,
+            "height": 2160,
+            "bandwidth": 28018100,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640034"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "a9c43f6ffa98f257174b6d9327d2df6a16831f3371fd9032cc03fe64aa110004",
+            "width": 1280,
+            "height": 720,
+            "bandwidth": 4494600,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640020"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "af77c89d891e928351bb14fa1a290f2ceec313c8bfc8443c5215e03c60932d08",
+            "width": 2560,
+            "height": 1440,
+            "bandwidth": 16810200,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640033"
+          }
+        ],
+        "sha256": "6e79b04a158e67992a6c49e0f2211a8465ee3b3ad2e200bb9197dc5f8917788e",
+        "scope": "Advertised rendition paths, codecs, bandwidth and dimensions; not media-byte equality. Signed query values and CDN host selection excluded."
+      }
+    }
+  },
+  "confirmation": {
+    "scheme": "blob:",
+    "origin": "https://videojs.org",
+    "urlSha256": "c431997332ad747a424bb81ddcfcff869b8251b1e2f2e5bf22701f98a3d78180",
+    "duration": 35.95354,
+    "width": 960,
+    "height": 540,
+    "manifests": {
+      "records": [
+        {
+          "origin": "https://stream.mux.com",
+          "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2",
+          "pathSha256": "3580b36944bb3af3d1b3b04216a01756953af2d2f214c379475560ea5966f1e4",
+          "queryKeys": [],
+          "status": 200,
+          "pendingCatalogReads": 0,
+          "catalog": {
+            "entries": [
+              {
+                "kind": "audio",
+                "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+                "width": null,
+                "height": null,
+                "bandwidth": null,
+                "frameRate": null,
+                "codecs": null
+              },
+              {
+                "kind": "audio",
+                "pathSha256": "853a57c5422dd2beb873f0f9e501a05825b94d765bdca09b962224a714e94879",
+                "width": null,
+                "height": null,
+                "bandwidth": null,
+                "frameRate": null,
+                "codecs": null
+              },
+              {
+                "kind": "audio",
+                "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+                "width": null,
+                "height": null,
+                "bandwidth": null,
+                "frameRate": null,
+                "codecs": null
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "2bfd33da50231a04aa0a316f537f8f97c121f81cfff2ab65216320a590d2a15a",
+                "width": 1920,
+                "height": 1080,
+                "bandwidth": 8598700,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.64002a"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "4604b9a406018e3bfa46ee8b52929626a393afdef7d3330d314d24de19043469",
+                "width": 640,
+                "height": 360,
+                "bandwidth": 1483900,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.64001f"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+                "width": 1920,
+                "height": 1080,
+                "bandwidth": 11465300,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.64002a"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+                "width": 960,
+                "height": 540,
+                "bandwidth": 2836900,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640020"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "91bb41a41dc5440ce3318f04eac7ccf3a9f8a94013316801791f49395ed48317",
+                "width": 3840,
+                "height": 2160,
+                "bandwidth": 28018100,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640034"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "a9c43f6ffa98f257174b6d9327d2df6a16831f3371fd9032cc03fe64aa110004",
+                "width": 1280,
+                "height": 720,
+                "bandwidth": 4494600,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640020"
+              },
+              {
+                "kind": "variant",
+                "pathSha256": "af77c89d891e928351bb14fa1a290f2ceec313c8bfc8443c5215e03c60932d08",
+                "width": 2560,
+                "height": 1440,
+                "bandwidth": 16810200,
+                "frameRate": null,
+                "codecs": "mp4a.40.2,avc1.640033"
+              }
+            ],
+            "sha256": "6e79b04a158e67992a6c49e0f2211a8465ee3b3ad2e200bb9197dc5f8917788e",
+            "scope": "Advertised rendition paths, codecs, bandwidth and dimensions; not media-byte equality. Signed query values and CDN host selection excluded."
+          },
+          "catalogReads": 1
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "380e0759225404d40b54553bdbb882d0f1bfdf0af71418e466e7acaca99c6fdb",
+          "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "6cfb729a78da109c2e520bb8c28cd5992bbc7140121260e52b469a0a6aee9306",
+          "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "7b82cb17cfe483ffa74cb6d205f614ffc30017675024e55de14ea495d6fd3e5a",
+          "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "9a271fbf2372eede63ee71c89aa6ebdd290ce9020e03573edc7d50adab0a02b8",
+          "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        }
+      ],
+      "overflow": false
+    },
+    "hls": {
+      "master": {
+        "origin": "https://stream.mux.com",
+        "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2"
+      },
+      "catalog": {
+        "entries": [
+          {
+            "kind": "audio",
+            "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+            "width": null,
+            "height": null,
+            "bandwidth": null,
+            "frameRate": null,
+            "codecs": null
+          },
+          {
+            "kind": "audio",
+            "pathSha256": "853a57c5422dd2beb873f0f9e501a05825b94d765bdca09b962224a714e94879",
+            "width": null,
+            "height": null,
+            "bandwidth": null,
+            "frameRate": null,
+            "codecs": null
+          },
+          {
+            "kind": "audio",
+            "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+            "width": null,
+            "height": null,
+            "bandwidth": null,
+            "frameRate": null,
+            "codecs": null
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "2bfd33da50231a04aa0a316f537f8f97c121f81cfff2ab65216320a590d2a15a",
+            "width": 1920,
+            "height": 1080,
+            "bandwidth": 8598700,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.64002a"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "4604b9a406018e3bfa46ee8b52929626a393afdef7d3330d314d24de19043469",
+            "width": 640,
+            "height": 360,
+            "bandwidth": 1483900,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.64001f"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+            "width": 1920,
+            "height": 1080,
+            "bandwidth": 11465300,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.64002a"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+            "width": 960,
+            "height": 540,
+            "bandwidth": 2836900,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640020"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "91bb41a41dc5440ce3318f04eac7ccf3a9f8a94013316801791f49395ed48317",
+            "width": 3840,
+            "height": 2160,
+            "bandwidth": 28018100,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640034"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "a9c43f6ffa98f257174b6d9327d2df6a16831f3371fd9032cc03fe64aa110004",
+            "width": 1280,
+            "height": 720,
+            "bandwidth": 4494600,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640020"
+          },
+          {
+            "kind": "variant",
+            "pathSha256": "af77c89d891e928351bb14fa1a290f2ceec313c8bfc8443c5215e03c60932d08",
+            "width": 2560,
+            "height": 1440,
+            "bandwidth": 16810200,
+            "frameRate": null,
+            "codecs": "mp4a.40.2,avc1.640033"
+          }
+        ],
+        "sha256": "6e79b04a158e67992a6c49e0f2211a8465ee3b3ad2e200bb9197dc5f8917788e",
+        "scope": "Advertised rendition paths, codecs, bandwidth and dimensions; not media-byte equality. Signed query values and CDN host selection excluded."
+      }
+    }
+  },
+  "pins": [
+    {
+      "path": ".cache/m106/videojs-catalog-pin-01.json",
+      "sha256": "ada954eeabbcc45dafa6bf8365e51c4c2e16647c1114889a05ee8f0c4184693f"
+    },
+    {
+      "path": ".cache/m106/videojs-catalog-pin-02.json",
+      "sha256": "2a802d7e27349fe95f3109f1abbd2c25e774d4295c701fa0eb37a7997e5d37e9"
+    }
+  ],
+  "excludedAttempts": [
+    {
+      "path": ".cache/m106/videojs-01.json",
+      "sha256": "234b3cbfb1fcfe9039683be2eed6a5c62a6b59417692d5fb23a907dd07d01ef7",
+      "completion": "UNVERIFIED",
+      "error": "AssertionError [ERR_ASSERTION]: Reference asset changed; no substitute seek",
+      "observedMs": null,
+      "identity": {
+        "origin": "https://videojs.org",
+        "urlSha256": "ded6bd9edb87527afe8488a9e9a2ae2f2a8681cfcef3723bced3b9ce096c4124",
+        "duration": 35.95354,
+        "width": 960,
+        "height": 540
+      },
+      "closingIdentity": null,
+      "actions": [],
+      "raw": {
+        "path": ".cache/m106/videojs-01.videojs-1-P.json.gz",
+        "sha256": "c6e1a877b392289aead7b00aa7f717bf4a47477ab839c4c6fa88332d64b27ce9",
+        "bytes": 258
+      },
+      "scope": "Excluded identity qualification attempt, retained without promotion to PASS or causal pooling."
+    },
+    {
+      "path": ".cache/m106/videojs-02.json",
+      "sha256": "2ac635c08e996414c749cfc3acc583ecf8dc4b886b91a45d47b92c1c6e6daf1e",
+      "completion": "UNVERIFIED",
+      "error": "AssertionError [ERR_ASSERTION]: Closing reference identity changed",
+      "observedMs": 180012,
+      "identity": {
+        "scheme": "blob:",
+        "origin": "https://videojs.org",
+        "urlSha256": "f0edacd851e57c8843d3912e6242d2d9eb36cb1d5e7572d6bba417b7688f4fb3",
+        "duration": 35.95354,
+        "width": 960,
+        "height": 540,
+        "manifests": {
+          "records": [
+            {
+              "origin": "https://stream.mux.com",
+              "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2",
+              "pathSha256": "3580b36944bb3af3d1b3b04216a01756953af2d2f214c379475560ea5966f1e4",
+              "queryKeys": [],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "8a19050a3337837c64a140b8a8dbea70fa3cf607822745c228547cc94f7a1a54",
+              "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "db83a621ec6d54214a5902570d122c068188176b533d740e93f18b7a371db230",
+              "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "99ea254bdeac485be8af2f4931f79d217e9d2408bf3bdc10d32af29d2e13d07c",
+              "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "4bc8fdd9a1e60227afa45669b4c28ae9670ff5d30f108d27238b3b3a617e7642",
+              "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            }
+          ],
+          "overflow": false
+        }
+      },
+      "closingIdentity": {
+        "scheme": "blob:",
+        "origin": "https://videojs.org",
+        "urlSha256": "f0edacd851e57c8843d3912e6242d2d9eb36cb1d5e7572d6bba417b7688f4fb3",
+        "duration": 35.963044,
+        "width": 2560,
+        "height": 1440,
+        "manifests": {
+          "records": [
+            {
+              "origin": "https://stream.mux.com",
+              "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2",
+              "pathSha256": "3580b36944bb3af3d1b3b04216a01756953af2d2f214c379475560ea5966f1e4",
+              "queryKeys": [],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "8a19050a3337837c64a140b8a8dbea70fa3cf607822745c228547cc94f7a1a54",
+              "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "db83a621ec6d54214a5902570d122c068188176b533d740e93f18b7a371db230",
+              "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "99ea254bdeac485be8af2f4931f79d217e9d2408bf3bdc10d32af29d2e13d07c",
+              "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "4bc8fdd9a1e60227afa45669b4c28ae9670ff5d30f108d27238b3b3a617e7642",
+              "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            },
+            {
+              "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+              "urlSha256": "ad6ecb5b05f69f128780ffb862f9f73345e741127c6077e1e6b8451a716fe24d",
+              "pathSha256": "af77c89d891e928351bb14fa1a290f2ceec313c8bfc8443c5215e03c60932d08",
+              "queryKeys": [
+                "cdn",
+                "expires",
+                "signature",
+                "skid"
+              ],
+              "status": 200
+            }
+          ],
+          "overflow": false
+        }
+      },
+      "actions": [
+        {
+          "name": "prescribed-seek",
+          "scheduledMs": 30000,
+          "at": 37375.79999998212,
+          "pass": true,
+          "result": {
+            "from": 32.329386,
+            "target": 34.963044,
+            "method": "Original currentTime within seekable range"
+          },
+          "notApplicable": false,
+          "finishedAt": 37380.90000000596
+        },
+        {
+          "name": "original-pause-resume",
+          "scheduledMs": 50000,
+          "at": 57615,
+          "pass": false,
+          "error": "Error: Condition timed out: false",
+          "finishedAt": 63331.40000000596
+        },
+        {
+          "name": "original-ended-replay",
+          "scheduledMs": null,
+          "at": 63340.09999999404,
+          "pass": true,
+          "result": {
+            "genuinelyEnded": true,
+            "originalControl": true
+          },
+          "notApplicable": false,
+          "finishedAt": 63440.19999998808
+        },
+        {
+          "name": "scroll-down",
+          "scheduledMs": 75000,
+          "at": 82639.19999998808,
+          "pass": true,
+          "result": {
+            "from": 0,
+            "to": 228,
+            "notApplicable": false
+          },
+          "notApplicable": false,
+          "finishedAt": 82655.19999998808
+        },
+        {
+          "name": "scroll-back",
+          "scheduledMs": 80000,
+          "at": 87728.69999998808,
+          "pass": true,
+          "result": {
+            "x": 0,
+            "y": 0,
+            "restored": true
+          },
+          "notApplicable": false,
+          "finishedAt": 87730.69999998808
+        },
+        {
+          "name": "resize-1024",
+          "scheduledMs": 100000,
+          "at": 107955.40000000596,
+          "pass": true,
+          "result": {
+            "windowId": 1217251756,
+            "bounds": {
+              "left": 40,
+              "top": 40,
+              "width": 1024,
+              "height": 900,
+              "windowState": "normal"
+            }
+          },
+          "notApplicable": false,
+          "finishedAt": 107991.59999999404
+        },
+        {
+          "name": "resize-1200",
+          "scheduledMs": 115000,
+          "at": 122171.90000000596,
+          "pass": true,
+          "result": {
+            "windowId": 1217251756,
+            "bounds": {
+              "left": 40,
+              "top": 40,
+              "width": 1200,
+              "height": 900,
+              "windowState": "normal"
+            }
+          },
+          "notApplicable": false,
+          "finishedAt": 122200.29999998212
+        },
+        {
+          "name": "original-fullscreen",
+          "scheduledMs": 145000,
+          "at": 152495.90000000596,
+          "pass": false,
+          "error": "TimeoutError: page.waitForFunction: Timeout 5000ms exceeded.",
+          "finishedAt": 159773.59999999404
+        }
+      ],
+      "raw": {
+        "path": ".cache/m106/videojs-02.videojs-1-P.json.gz",
+        "sha256": "97efe0416be9009b17f9c25ecfe5f54b692b88ccba461d6ce81efe5446cab82f",
+        "bytes": 32232
+      },
+      "scope": "Excluded identity qualification attempt, retained without promotion to PASS or causal pooling."
+    }
+  ],
+  "parser": {
+    "name": "m3u8-parser",
+    "version": "7.2.0",
+    "license": "Apache-2.0",
+    "role": "Test-only advertised HLS catalog; not shipped",
+    "advisoryCheck": "No known CVEs returned for seven newly resolved packages; pre-existing two moderate npm advisories unchanged"
+  },
+  "scope": "Full advertised catalog/master fingerprint; queried CDN hosts and signed values excluded. Every requested child path must be advertised. Original adaptive dimensions may change, but paired seek-time dimensions/duration must match. Neither immutable media-byte identity nor historical M10.5 asset identity is established. No public frames or full media URLs retained."
+}
