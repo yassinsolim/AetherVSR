@@ -34,6 +34,7 @@ class Style {
 }
 
 class FakeElement extends EventTarget {
+  nodeType = 1;
   style = new Style();
   parentNode: FakeElement | null = null;
   parentElement: FakeElement | null = null;
@@ -43,6 +44,9 @@ class FakeElement extends EventTarget {
   width = 0;
   height = 0;
   setAttribute = vi.fn();
+  getAttribute = vi.fn((): string | null => null);
+  getBoundingClientRect() { return { left: Number.parseFloat(this.style.getPropertyValue('left')) || 10, top: Number.parseFloat(this.style.getPropertyValue('top')) || 20,
+    width: Number.parseFloat(this.style.getPropertyValue('width')) || 640, height: Number.parseFloat(this.style.getPropertyValue('height')) || 360 } as DOMRect; }
   insertBefore = vi.fn((child: FakeElement, before: FakeElement | null) => {
     child.remove();
     const index = before === null ? this.children.length : this.children.indexOf(before);
@@ -130,6 +134,9 @@ function harness(options: Partial<AttachmentOptions> = {}) {
   const observer = { observe: vi.fn(), unobserve: vi.fn(), disconnect: vi.fn() };
   let resize: ResizeObserverCallback | null = null;
   vi.stubGlobal('ResizeObserver', vi.fn(function (callback: ResizeObserverCallback) { resize = callback; return observer; }));
+  const mutationObserver = { observe: vi.fn(), disconnect: vi.fn() };
+  let mutation: MutationCallback | null = null;
+  vi.stubGlobal('MutationObserver', vi.fn(function (callback: MutationCallback) { mutation = callback; return mutationObserver; }));
   const device = { destroy: vi.fn(), features: new Set(['timestamp-query', 'shader-f16']) };
   const gpu = { device, capabilities: { timestampQuery: true } } as unknown as GpuContext;
   vi.mocked(acquireGpu).mockResolvedValue(gpu);
@@ -140,7 +147,7 @@ function harness(options: Partial<AttachmentOptions> = {}) {
     clip: { left: 10, top: 20, width: 640, height: 360 },
     objectFit: 'contain', objectPosition: '50% 50%', borderRadius: '0px',
     placement: { parent: video.parentNode as unknown as Element, before: video.nextSibling as unknown as ChildNode | null },
-    style: { all: 'initial', position: 'fixed', width: '640px', height: '360px', 'pointer-events': 'none' },
+    style: { all: 'initial', position: 'fixed', left: '10px', top: '20px', width: '640px', height: '360px', 'pointer-events': 'none' },
   }));
   const pipeline = {
     currentUpscaler: upscaler(false), running: false, error: null as unknown, timingGeneration: 0,
@@ -158,13 +165,16 @@ function harness(options: Partial<AttachmentOptions> = {}) {
   attachments.push(attachment);
   const frame = () => {
     video.quality.totalVideoFrames++;
+    attachment.canvas.width = video.videoWidth * 2;
+    attachment.canvas.height = video.videoHeight * 2;
     pipeline.onFrame?.({ now: performance.now(), mediaTime: video.quality.totalVideoFrames / 60,
       presentationTime: performance.now() - 1, expectedDisplayTime: performance.now() + 1,
       presentedDelta: 1, size: { width: video.videoWidth, height: video.videoHeight }, decodeLatencyMs: null });
   };
   return { attachment, canvas: attachment.canvas as unknown as FakeElement,
     document, video, parent, next, observer, device, gpu, unwatch, failure, pipeline, frame, listeners,
-    resize: () => resize?.([], observer) };
+    resize: () => resize?.([], observer), mutationObserver,
+    mutate: (records: MutationRecord[]) => mutation?.(records, mutationObserver as unknown as MutationObserver) };
 }
 
 beforeEach(() => {
@@ -182,12 +192,55 @@ afterEach(() => {
 });
 
 describe('VideoAttachment', () => {
-  it.fails('hides synchronously when visible geometry is invalidated before the next reconciliation', async () => {
-    const { attachment, canvas, frame } = harness();
+  it('does not re-show old-size output before a current-source frame and geometry proof', async () => {
+    const { attachment, canvas, video, frame, document, pipeline } = harness();
+    await attachment.start(); frame();
+    video.videoWidth = 960; video.videoHeight = 540;
+    video.dispatchEvent(new Event('resize'));
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    document.flush();
+    pipeline.onFrame?.({ now: performance.now(), mediaTime: 1, presentedDelta: 1, size: {width:640,height:360},
+      presentationTime: 0, expectedDisplayTime: 1, decodeLatencyMs: null });
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    frame(); expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+    expect([canvas.width,canvas.height]).toEqual([1920,1080]);
+  });
+
+  it('bounds ancestor observation, invalidates mutations and disconnects on teardown', async () => {
+    const { attachment, frame, canvas, parent, mutationObserver, mutate } = harness();
+    await attachment.start(); frame();
+    expect(mutationObserver.observe.mock.calls.every(call => !(call[1] as MutationObserverInit).subtree)).toBe(true);
+    mutate([{type:'attributes',target:parent} as unknown as MutationRecord]);
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    attachment.destroy();expect(mutationObserver.disconnect).toHaveBeenCalled();
+    expect(attachment.snapshot().resources.mutationObservers).toBe(0);
+  });
+
+  it('ignores unchanged ancestor attributes but fails closed for page-owned canvas movement', async () => {
+    const {attachment,frame,canvas,parent,mutate,failure}=harness();await attachment.start();frame();
+    parent.getAttribute.mockReturnValue('same');
+    mutate([{type:'attributes',target:parent,attributeName:'class',oldValue:'same'} as unknown as MutationRecord]);
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+    canvas.remove();
+    mutate([{type:'childList',target:parent,addedNodes:[],removedNodes:[canvas]} as unknown as MutationRecord]);
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    expect(failure).toHaveBeenCalledWith('unsupported-geometry',expect.stringContaining('moved or removed'));
+  });
+
+  it('hides synchronously and cannot reveal before the current geometry reconciliation', async () => {
+    const { attachment, canvas, frame, document } = harness();
     await attachment.start(); frame();
     expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
     attachment.refresh();
     expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    attachment.refresh();
+    expect(document.frames.size).toBe(1);
+    document.flush();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
   });
 
   it('keeps diagnostic ownership and geometry live without acquiring a GPU or constructing frame processing', async () => {
@@ -476,7 +529,7 @@ describe('VideoAttachment', () => {
     const stopped = attachment.snapshot();
     expect(stopped.session.framesRendered).toBe(1);
     expect(stopped.resources).toEqual({ device: 0, pipeline: 0, canvas: 0, resizeObservers: 0,
-      listeners: 0, geometryFrame: 0, frameCallback: 0 });
+      listeners: 0, geometryFrame: 0, frameCallback: 0, mutationObservers: 0, presentationFrame: 0 });
     attachment.destroy();
     attachment.refresh();
     attachment.setMode('neural');
@@ -780,7 +833,7 @@ describe('VideoAttachment', () => {
   it('releases event registrations before a manager disables from inside onFailure', async () => {
     const notify = vi.fn(() => {
       expect(attachment.snapshot().resources).toEqual({ device: 0, pipeline: 0, canvas: 0,
-        resizeObservers: 0, listeners: 0, geometryFrame: 0, frameCallback: 0 });
+        resizeObservers: 0, listeners: 0, geometryFrame: 0, frameCallback: 0, mutationObservers: 0, presentationFrame: 0 });
       attachment.destroy();
       attachment.setMode('neural');
       attachment.refresh();

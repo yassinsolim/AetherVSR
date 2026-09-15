@@ -5,7 +5,7 @@ import { BaselineScaler } from '../core/upscale/baseline-scaler.js';
 import { NeuralUpscaler, NEURAL_OPTIONAL_FEATURES, type NeuralMemoryReport } from '../core/upscale/neural-upscaler.js';
 import type { RuntimeMode, RuntimeState, RuntimeTier } from '../core/upscale/runtime-controller.js';
 import { RuntimeDriver } from '../runtime.js';
-import { inspectGeometry, type Rect } from './geometry.js';
+import { inspectGeometry, type GeometryResult, type Rect } from './geometry.js';
 import type { StatusCode } from './protocol.js';
 
 declare const __AETHERVSR_TEST__: boolean;
@@ -17,6 +17,7 @@ export interface AttachmentOptions {
   forceCopy?: boolean;
   withheldFeatures?: GPUFeatureName[];
   processingDisabled?: boolean;
+  presentationWatchdog?: boolean;
 }
 
 export interface AttachmentSnapshot {
@@ -43,6 +44,7 @@ export interface AttachmentSnapshot {
   resources: {
     device: 0 | 1; pipeline: 0 | 1; canvas: 0 | 1; resizeObservers: 0 | 1;
     listeners: number; geometryFrame: 0 | 1; frameCallback: 0 | 1;
+    mutationObservers: 0 | 1; presentationFrame: 0 | 1;
   };
   memory: NeuralMemoryReport | null;
   features: { timestampQuery: boolean; shaderF16: boolean };
@@ -61,15 +63,31 @@ export class VideoAttachment {
   private readonly forceCopy: boolean;
   private readonly withheldFeatures: GPUFeatureName[];
   declare private readonly processingDisabled: boolean;
+  declare private readonly presentationWatchdog: boolean;
   private mode: RuntimeMode;
   private disposed = false;
   private generation = 0;
+  private geometryGeneration = 0;
+  private appliedGeometryGeneration = -1;
+  private sourceGeneration = 0;
+  private outputGeneration = -1;
+  private outputGeometryGeneration = -1;
+  private sourceWidth = 0;
+  private sourceHeight = 0;
+  private sourceUrl = '';
+  private appliedGeometry: Extract<GeometryResult, { ok: true }> | null = null;
+  private appliedVideoRect: Rect | null = null;
+  private appliedCanvasRect: Rect | null = null;
+  private appliedFullscreen: Element | null = null;
   private starting: Promise<void> | null = null;
   private eligible = false;
   private outputReady = false;
   private suspendedReason: string | null = 'starting';
   private cssRect: Rect | null = null;
   private observer: ResizeObserver | null = null;
+  private mutations: MutationObserver | null = null;
+  private ancestors: Node[] = [];
+  private presentationFrame: number | null = null;
   private observedParent: Element | null = null;
   private geometryFrame: number | null = null;
   private unwatch: (() => void) | null = null;
@@ -87,6 +105,7 @@ export class VideoAttachment {
     this.forceCopy = options.forceCopy ?? false;
     this.withheldFeatures = [...(options.withheldFeatures ?? [])];
     if (typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__) this.processingDisabled = options.processingDisabled === true;
+    if (typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__) this.presentationWatchdog = options.presentationWatchdog === true;
     this.canvas = video.ownerDocument.createElement('canvas');
     this.canvas.width = 0;
     this.canvas.height = 0;
@@ -141,10 +160,18 @@ export class VideoAttachment {
         if (this.disposed || this.failSource()) return;
         if (state.state === 'failed') this.failExecution(this.videoPipeline?.error ?? state.reason);
       };
-      driver.onFrame = () => {
+      driver.onConfigure = () => { if (this.sourceChanged()) this.refresh(); };
+      driver.onFrame = tick => {
         if (this.disposed || this.failSource()) return;
         if (this.videoPipeline?.error) { this.failExecution(this.videoPipeline.error); return; }
-        if (this.video.seeking || this.video.readyState < 2 || !this.visible() || !this.videoPipeline?.running || this.outputReady) return;
+        if (this.sourceChanged()) { this.refresh(); return; }
+        if (tick.size.width !== this.sourceWidth || tick.size.height !== this.sourceHeight ||
+          this.canvas.width !== this.sourceWidth * 2 || this.canvas.height !== this.sourceHeight * 2) { this.hide(); return; }
+        if (this.watchdogEnabled() && !this.checkPresentation()) return;
+        if (this.geometryGeneration !== this.appliedGeometryGeneration || this.geometryFrame !== null ||
+          this.video.seeking || this.video.readyState < 2 || !this.visible() || !this.videoPipeline?.running || this.outputReady) return;
+        this.outputGeneration = this.sourceGeneration;
+        this.outputGeometryGeneration = this.geometryGeneration;
         this.outputReady = true;
         this.style('visibility', 'visible');
       };
@@ -168,6 +195,9 @@ export class VideoAttachment {
   refresh(): void {
     if (this.disposed) return;
     this.infrastructure.refreshCalls++;
+    this.geometryGeneration++;
+    this.hide();
+    this.sourceChanged();
     if (this.failSource()) return;
     if (this.video.seeking || this.video.readyState < 2) this.hide();
     const reason = this.unavailableReason();
@@ -208,7 +238,61 @@ export class VideoAttachment {
 
   private hide(): void {
     this.outputReady = false;
+    this.outputGeneration = -1;
+    this.outputGeometryGeneration = -1;
     this.style('visibility', 'hidden');
+  }
+
+  private currentOutput(): boolean {
+    return !this.disposed && this.outputReady && this.outputGeneration === this.sourceGeneration &&
+      this.outputGeometryGeneration === this.geometryGeneration && this.appliedGeometryGeneration === this.geometryGeneration;
+  }
+
+  private sourceChanged(): boolean {
+    if (this.video.videoWidth === this.sourceWidth && this.video.videoHeight === this.sourceHeight && this.video.currentSrc === this.sourceUrl) return false;
+    this.sourceWidth = this.video.videoWidth;
+    this.sourceHeight = this.video.videoHeight;
+    this.sourceUrl = this.video.currentSrc;
+    this.sourceGeneration++;
+    this.hide();
+    return true;
+  }
+
+  private watchdogEnabled(): boolean {
+    return typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__ && this.presentationWatchdog;
+  }
+
+  private checkPresentation(): boolean {
+    if (this.disposed) return false;
+    const sourceChanged = this.sourceChanged();
+    const geometry = this.appliedGeometry, videoRect = this.appliedVideoRect, canvasRect = this.appliedCanvasRect;
+    const current = this.video.getBoundingClientRect(), actual = this.canvas.getBoundingClientRect();
+    const sameRect = (left: Rect, right: Rect) => (['left','top','width','height'] as const).every(key => Math.abs(left[key] - right[key]) <= 0.5);
+    const parent = this.video.parentNode;
+    const intact = !sourceChanged && geometry !== null && videoRect !== null && canvasRect !== null && this.video.isConnected &&
+      this.canvas.parentNode === parent && this.video.nextSibling === this.canvas && parent === geometry.placement.parent &&
+      this.video.ownerDocument.fullscreenElement === this.appliedFullscreen && sameRect(current, videoRect) && sameRect(actual, canvasRect);
+    if (!intact) {
+      if (this.geometryFrame === null) this.refresh(); else this.hide();
+      return false;
+    }
+    return this.geometryGeneration === this.appliedGeometryGeneration && this.geometryFrame === null;
+  }
+
+  private observeAncestors(): void {
+    if (!this.mutations) return;
+    const chain: Node[] = [];
+    let node: Node | null = this.video;
+    while (node && chain.length <= 32) {
+      chain.push(node);
+      node = node.parentNode ?? ('host' in node ? (node as ShadowRoot).host : null);
+    }
+    if (node || chain.length > 32) { this.fail('unsupported-geometry', 'Presentation ancestor chain exceeds its bounded limit.'); return; }
+    if (chain.length === this.ancestors.length && chain.every((value,index) => value === this.ancestors[index])) return;
+    this.mutations.disconnect();
+    this.ancestors = chain;
+    for (const ancestor of chain) this.mutations.observe(ancestor, { attributes: true, attributeOldValue: true, childList: true,
+      attributeFilter: ['class','style','hidden','width','height','controls'] });
   }
 
   private suspend(reason: string): void {
@@ -221,6 +305,9 @@ export class VideoAttachment {
   private checkGeometry(): void {
     if (this.disposed) return;
     if (this.failSource()) return;
+    this.sourceChanged();
+    this.observeAncestors();
+    if (this.disposed) return;
     this.observeParent();
     const reason = this.unavailableReason();
     if (reason !== null) { this.suspend(reason); return; }
@@ -257,19 +344,25 @@ export class VideoAttachment {
       && (this.canvas.parentNode !== geometry.placement.parent || this.video.nextSibling !== this.canvas)) {
       geometry.placement.parent.insertBefore(this.canvas, geometry.placement.before);
     }
-    if (geometry.verifyPlacement) {
+    if (geometry.verifyPlacement || this.videoPipeline) {
       const actual = this.canvas.getBoundingClientRect();
       const matches = (['left', 'top', 'width', 'height'] as const).every(key => {
         const expected = Number.parseFloat(geometry.style[key] ?? '');
-        return Number.isFinite(expected) && Math.abs(actual[key] - expected) < 1 / 64;
+        return Number.isFinite(expected) && Math.abs(actual[key] - expected) < (geometry.verifyPlacement ? 1 / 64 : 0.5);
       });
       if (!matches) {
         this.fail('unsupported-geometry', 'Canvas placement differs from the verified viewport geometry.');
         return;
       }
     }
-    this.style('visibility', this.outputReady ? 'visible' : 'hidden');
+    this.style('visibility', this.currentOutput() ? 'visible' : 'hidden');
+    this.appliedGeometry = geometry;
+    this.appliedCanvasRect = {left:Number.parseFloat(geometry.style.left!),top:Number.parseFloat(geometry.style.top!),
+      width:Number.parseFloat(geometry.style.width!),height:Number.parseFloat(geometry.style.height!)};
+    this.appliedVideoRect = this.video.getBoundingClientRect();
+    this.appliedFullscreen = this.video.ownerDocument.fullscreenElement;
     this.eligible = true;
+    this.appliedGeometryGeneration = this.geometryGeneration;
     this.suspendedReason = null;
     if (typeof __AETHERVSR_TEST__ !== 'undefined' && __AETHERVSR_TEST__ && this.processingDisabled) {
       this.suspendedReason = 'diagnostic-processing-disabled';
@@ -288,13 +381,37 @@ export class VideoAttachment {
     const view = document.defaultView;
     if (!view) throw new Error('The video document has no window.');
     this.observer = new ResizeObserver(() => this.refresh());
+    this.mutations = new MutationObserver(records => {
+      if (records.length > 256) { this.fail('unsupported-geometry', 'Presentation mutation batch exceeds its bounded limit.'); return; }
+      if (records.every(record => record.target === this.canvas || record.type === 'childList' &&
+        [...record.addedNodes,...record.removedNodes].every(node => node === this.canvas))) {
+        if (this.appliedGeometry && this.videoPipeline && (this.canvas.parentNode !== this.video.parentNode || this.video.nextSibling !== this.canvas)) {
+          this.fail('unsupported-geometry', 'The page moved or removed the owned presentation output.');
+        }
+        return;
+      }
+      if (records.every(record => record.type === 'attributes' && record.attributeName !== null && record.attributeName !== undefined &&
+        record.oldValue === (record.target as Element).getAttribute(record.attributeName))) return;
+      this.refresh();
+    });
+    this.observeAncestors();
+    if (this.disposed) return;
+    if (this.watchdogEnabled()) {
+      const guard = () => {
+        this.presentationFrame = null;
+        if (this.disposed) return;
+        try { this.checkPresentation(); } catch (error) { this.failExecution(error); }
+        if (!this.disposed) this.presentationFrame = view.requestAnimationFrame(guard);
+      };
+      this.presentationFrame = view.requestAnimationFrame(guard);
+    }
     this.observer.observe(this.video);
     this.observeParent();
     this.listen(view, 'scroll', () => this.refresh(), true);
     this.listen(view, 'resize', () => this.refresh());
     for (const type of ['fullscreenchange', 'visibilitychange']) this.listen(document, type, () => this.refresh());
     for (const type of ['resize', 'loadeddata', 'loadstart', 'emptied']) {
-      this.listen(this.video, type, () => { this.hide(); this.refresh(); });
+      this.listen(this.video, type, () => { if (type === 'loadstart' || type === 'emptied') this.sourceGeneration++; this.hide(); this.refresh(); });
     }
     for (const type of ['pause', 'seeking', 'playing', 'seeked']) this.listen(this.video, type, () => this.refresh());
     const tracks = this.video.textTracks;
@@ -362,7 +479,7 @@ export class VideoAttachment {
     const gpu = current === null ? null : session?.gpu[current];
     const stage = this.videoPipeline?.currentUpscaler === this.stage ? this.stage : null;
     return {
-      active: !this.disposed && (state?.running ?? false), ready: !this.disposed && this.outputReady,
+      active: !this.disposed && (state?.running ?? false), ready: this.currentOutput(),
       suspendedReason: this.suspendedReason,
       source: { w: this.video.videoWidth, h: this.video.videoHeight },
       backing: { w: this.canvas.width, h: this.canvas.height },
@@ -396,6 +513,7 @@ export class VideoAttachment {
       device: this.context ? 1 : 0, pipeline: this.videoPipeline ? 1 : 0, canvas: this.disposed ? 0 : 1,
       resizeObservers: this.observer ? 1 : 0, listeners: this.listeners.length + (this.unwatch ? 1 : 0),
       geometryFrame: this.geometryFrame === null ? 0 : 1, frameCallback: this.videoPipeline?.running ? 1 : 0,
+      mutationObservers: this.mutations ? 1 : 0, presentationFrame: this.presentationFrame === null ? 0 : 1,
     };
   }
 
@@ -419,6 +537,8 @@ export class VideoAttachment {
       if (this.geometryFrame !== null) this.video.ownerDocument.defaultView?.cancelAnimationFrame(this.geometryFrame);
     });
     cleanup(() => this.observer?.disconnect());
+    cleanup(() => this.mutations?.disconnect());
+    cleanup(() => { if (this.presentationFrame !== null) this.video.ownerDocument.defaultView?.cancelAnimationFrame(this.presentationFrame); });
     for (const [target, type, listener, capture] of this.listeners.splice(0)) {
       cleanup(() => target.removeEventListener(type, listener, capture));
     }
@@ -430,6 +550,12 @@ export class VideoAttachment {
     this.model = null;
     this.failure = null;
     this.observer = null;
+    this.mutations = null;
+    this.ancestors = [];
+    this.appliedGeometry = null;
+    this.appliedVideoRect = null;
+    this.appliedCanvasRect = null;
+    this.presentationFrame = null;
     this.observedParent = null;
     this.unwatch = null;
     this.geometryFrame = null;

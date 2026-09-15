@@ -31,7 +31,7 @@ class DocumentAdapter {
   private readonly counters = { discoveryCalls: 0, discoveryMs: 0, geometryCalls: 0, geometryMs: 0,
     mutationBatches: 0, ownerChanges: 0, created: 0, destroyed: 0, maximumConcurrent: 0 };
   readonly transitions: { at: number; owner: string | null; reason: string }[] = [];
-  private testing: { forceCopy?: boolean; withheldFeatures?: GPUFeatureName[]; processingDisabled?: boolean } = {};
+  private testing: { forceCopy?: boolean; withheldFeatures?: GPUFeatureName[]; processingDisabled?: boolean; presentationWatchdog?: boolean } = {};
 
   private id(video: HTMLVideoElement): number {
     let id = this.ids.get(video);

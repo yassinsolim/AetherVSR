@@ -31,7 +31,12 @@ export function installPresentationObserver({ diagnostic = false } = {}) {
     const snapshot = attachment.snapshot();
     const current = rect(video), actual = rect(canvas);
     const visible = getComputedStyle(canvas).visibility === 'visible' && canvas.isConnected;
-    const expected = current;
+    const imageSized = ['none','scale-down'].includes(attachment.appliedGeometry?.objectFit);
+    const expected = imageSized && attachment.appliedCanvasRect && attachment.appliedVideoRect ? {
+      ...attachment.appliedCanvasRect,
+      left:attachment.appliedCanvasRect.left+current.left-attachment.appliedVideoRect.left,
+      top:attachment.appliedCanvasRect.top+current.top-attachment.appliedVideoRect.top,
+    } : current;
     const mismatch = visible && ['left','top','width','height'].some(name => Math.abs(actual[name] - expected[name]) > 0.5);
     data.rows.push({ at: performance.now(), reason, operation: data.operation, videoRect: current, canvasRect: actual,
       expectedRect: expected, appliedRect: snapshot.cssRect, clipRect: attachment.appliedGeometry?.clip ?? null,
@@ -44,6 +49,7 @@ export function installPresentationObserver({ diagnostic = false } = {}) {
       outputGeneration: attachment.outputGeneration ?? null, outputGeometryGeneration: attachment.outputGeometryGeneration ?? null,
       eligible: attachment.eligible, suspendedReason: snapshot.suspendedReason, ready: snapshot.ready,
       refreshScheduled: attachment.geometryFrame !== null, current: snapshot.current, resources: snapshot.resources,
+      verifyPlacement:attachment.appliedCanvasRect ? ['left','top','width','height'].every(name=>Math.abs(actual[name]-attachment.appliedCanvasRect[name])<=0.5):null,
       ownerCurrent: manager.attachment === attachment, originalConnected: video.isConnected });
   };
   const on = (target, type, listener, capture = false) => { target.addEventListener(type,listener,capture);listeners.push([target,type,listener,capture]); };
@@ -78,7 +84,8 @@ export function summarizePresentation(trace) {
   const visible=trace.rows.filter(row=>row.canvasVisible);
   const mismatches=visible.filter(row=>row.mismatch);
   const knownDirty=visible.filter(row=>Number.isInteger(row.geometryGeneration)&&row.geometryGeneration!==row.appliedGeometryGeneration);
-  return {samples:trace.rows.length,visibleSamples:visible.length,mismatches:mismatches.length,knownDirtyVisible:knownDirty.length,
+  return {samples:trace.rows.length,visibleSamples:visible.length,mismatches:mismatches.length,
+    knownDirtyVisible:trace.rows.some(row=>Number.isInteger(row.geometryGeneration))?knownDirty.length:null,
     firstMismatch:mismatches[0]??null,lastMismatch:mismatches.at(-1)??null,
     maximumComponentError:Math.max(0,...mismatches.flatMap(row=>['left','top','width','height'].map(name=>Math.abs(row.videoRect[name]-row.canvasRect[name])))),
     byReason:Object.fromEntries([...new Set(mismatches.map(row=>row.reason))].map(reason=>[reason,mismatches.filter(row=>row.reason===reason).length])),
@@ -122,6 +129,109 @@ export function prepareTransitionMedia() {
   const path=join(directory,'config.json');if(!existsSync(path))writeFileSync(path,JSON.stringify(metadata,null,2),{flag:'wx'});
   else assert.deepEqual(JSON.parse(readFileSync(path)),metadata);
   return metadata;
+}
+
+export const TRANSITIONS = [
+  {name:'scroll-one',actions:['scroll-1']}, {name:'scroll-228',actions:['scroll-228']},
+  {name:'scroll-large',actions:['scroll-900','scroll-0']}, {name:'continuous-smooth',actions:['smooth','scroll-0']},
+  {name:'nested-scroll',prepare:'nested-scroll',actions:['nested']},
+  {name:'size-container',prepare:'size-container',actions:['scroll-228','class-shift']},
+  {name:'ancestor-position',actions:['ancestor-shift']}, {name:'class-position',actions:['class-shift']},
+  {name:'style-position',actions:['style-shift']}, {name:'equivalent-reparent',actions:['reparent']},
+  {name:'fullscreen',actions:['fullscreen','exit']},
+  {name:'fullscreen-scrolled',actions:['scroll-228','fullscreen','resize-fullscreen','exit']},
+  {name:'source-resize',prepare:'intrinsic-resize',actions:['source-high','source-low']},
+  {name:'fullscreen-source',prepare:'intrinsic-resize',actions:['fullscreen','source-high','exit']},
+  {name:'scroll-source',prepare:'intrinsic-resize',actions:['scroll-1','source-high','scroll-228','source-low']},
+  {name:'warming-scroll',actions:['scroll-228'],warming:true},
+  {name:'effect-rejection',actions:['unsupported-effect'],negative:true},
+];
+
+export function transitionVerdict(trace, actions, negative=false) {
+  assert.equal(trace.overflow,false);
+  const rows=trace.rows;
+  const known=rows.some(row=>Number.isInteger(row.geometryGeneration));
+  const boundary=row=>row.reason==='animation'||row.reason==='submitted:after'||row.reason==='refresh:end'||row.reason.startsWith('event:');
+  const dirty=known?rows.filter(row=>boundary(row)&&row.canvasVisible&&row.geometryGeneration!==row.appliedGeometryGeneration):null;
+  const processed=rows.filter(row=>row.reason==='submitted:after'&&row.mismatch);
+  const outcomes=actions.map(action=>{
+    const settled=rows.filter(row=>row.at>=action.finishedAt+500&&row.at<action.finishedAt+1000);
+    const detected=rows.filter(row=>row.at>=action.startedAt&&row.at<=action.finishedAt+1000);
+    const guardBoundary=detected.find(row=>row.reason==='animation'||row.reason==='submitted:after');
+    const persistent=detected.filter(row=>row.mismatch&&guardBoundary&&row.at>guardBoundary.at&&row.reason==='animation');
+    const restored=settled.some(row=>row.canvasVisible&&!row.mismatch);
+    return {...action,settledSamples:settled.length,visibleRecovery:restored,lateMismatches:persistent.length,
+      pass:!action.error&&persistent.length===0&&(negative||action.name==='scroll-900'?settled.every(row=>!row.canvasVisible||!row.mismatch):restored)};
+  });
+  return {...summarizePresentation(trace),pass:known&&dirty.length===0&&processed.length===0&&outcomes.every(row=>row.pass),knownDirtyVisible:dirty?.length??null,
+    postSubmitMismatches:processed.length,actions:outcomes};
+}
+
+export async function runTransitions(prefix,{strategy=1,repeats=3,only=null,production=false}={}) {
+  prefix=resolve(prefix);assert(!existsSync(`${prefix}.json`));assert(prefix.startsWith(join(ROOT,'.cache/m107/')));mkdirSync(dirname(prefix),{recursive:true});
+  const current=verifyBuild(!production);
+  let build=current;
+  if(strategy===0){
+    const directory=join(ROOT,'.cache/m107/frozen-s0');const provenance=JSON.parse(readFileSync(join(directory,'build-provenance.json')));
+    for(const [name,value]of Object.entries(provenance.files))assert.equal(sha256(readFileSync(join(directory,name))),value.sha256);
+    assert.equal(provenance.bundleSha256,'ef2e17d32009d1c7bb18a1fc0449d64723b7df763ca43d10b63737edb8e977c7');
+    build={directory,provenance};
+  }
+  const cases=only?TRANSITIONS.filter(item=>only.includes(item.name)):TRANSITIONS;
+  const report={phase:'TRANSITIONS',strategy,production,repeats,build,apparatus:current.provenance.sourceCommit,started:new Date().toISOString(),results:[],verdict:'UNVERIFIED'};
+  let native,server;
+  try{
+    server=await presentationServer();native=await openExtension(build);report.fixtureSha256=server.htmlSha256;
+    for(let repetition=1;repetition<=repeats;repetition++)for(const item of cases){
+      const result={name:item.name,repetition,actions:[],verdict:'UNVERIFIED'};report.results.push(result);
+      const page=await native.context.newPage();let tabId;
+      try{
+        await nativeWindow(page,native.context);await page.goto(server.url);await page.bringToFront();
+        if(item.prepare)await page.evaluate(name=>globalThis.__M107_FIXTURE__.prepare(name),item.prepare);
+        await page.waitForFunction(()=>{const video=document.querySelector('video');return video.readyState>=2&&!video.paused;});
+        const panel=await native.popup(page);
+        try{
+          tabId=panel.tabId;
+          if(strategy>0&&!production){await native.workerEval(async tab=>chrome.scripting.executeScript({target:{tabId:tab,frameIds:[0]},world:'ISOLATED',files:['content.js']}),tabId);
+            await native.isolated(page,options=>globalThis.__AETHERVSR_EXTENSION_TEST__.configure(options),{presentationWatchdog:strategy===2});}
+          await panel.click('input[value="baseline"]');await panel.click('#enable');
+        }finally{await panel.dismiss();}
+        await until(()=>native.inspect(tabId),state=>!!state.owner&&!!state.details?.attachment,10000);
+        if(!item.warming)await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready,10000);
+        await native.isolated(page,installPresentationObserver,{diagnostic:!production});
+        if(!item.warming)await page.evaluate(()=>new Promise(done=>setTimeout(done,250)));
+        for(const name of item.actions){
+          const action={name,startedAt:await page.evaluate(()=>performance.now())};result.actions.push(action);
+          try{
+            if(name==='fullscreen'){
+              await page.evaluate(()=>window.dispatchEvent(new CustomEvent('aethervsr:m107:operation',{detail:'fullscreen:begin'})));
+              await page.locator('#fullscreen').click();await page.waitForFunction(()=>!!document.fullscreenElement,undefined,{timeout:3000});
+            }else if(name==='exit'){
+              await page.evaluate(async()=>{window.dispatchEvent(new CustomEvent('aethervsr:m107:operation',{detail:'exit:begin'}));await document.exitFullscreen();});
+              await page.waitForFunction(()=>!document.fullscreenElement,undefined,{timeout:3000});
+            }else if(name==='resize-fullscreen')await page.evaluate(()=>{window.dispatchEvent(new CustomEvent('aethervsr:m107:operation',{detail:'resize-fullscreen:begin'}));document.getElementById('player').style.height='85%';});
+            else await page.evaluate(action=>globalThis.__M107_FIXTURE__.action(action),name);
+            if(name==='smooth')await page.evaluate(()=>new Promise(done=>setTimeout(done,2000)));
+            if(name.startsWith('source-'))await page.waitForFunction(width=>document.querySelector('video').videoWidth===width&&document.querySelector('video').readyState>=2,name==='source-high'?2560:960,{timeout:5000});
+          }catch(error){action.error=String(error);}
+          action.finishedAt=await page.evaluate(()=>performance.now());
+          await page.evaluate(()=>new Promise(done=>setTimeout(done,1100)));
+        }
+        const trace=await native.isolated(page,()=>{const {teardown,...value}=globalThis[Symbol.for('aethervsr.m107.observation')].stop();globalThis[Symbol.for('aethervsr.m107.teardown')]=teardown;return value;});
+        const packed=gzipSync(JSON.stringify(trace));const path=`${prefix}.${repetition}-${item.name}.json.gz`;writeFileSync(path,packed,{flag:'wx'});
+        result.raw={path:relative(ROOT,path),sha256:sha256(packed),bytes:packed.length};result.summary=transitionVerdict(trace,result.actions,item.negative);
+        result.integrity=trace.rows.every(row=>row.focused&&row.documentVisibility==='visible');
+        const disablePanel=await native.popup(page);try{result.disabled=await disablePanel.click('#disable');}finally{await disablePanel.dismiss();}
+        result.teardown=await native.isolated(page,()=>globalThis[Symbol.for('aethervsr.m107.teardown')]());
+        result.cleanup=Object.values(result.teardown.resources).every(value=>value===0)&&result.teardown.infrastructure.cleanupErrors===0;
+        result.verdict=result.summary.pass&&result.cleanup&&result.integrity?'PASS':'FAIL';
+      }catch(error){result.error=String(error);}
+      finally{await page.close();}
+      console.log(JSON.stringify({strategy,repetition,case:item.name,verdict:result.verdict,mismatches:result.summary?.mismatches,processed:result.summary?.postSubmitMismatches,recovery:result.summary?.actions.map(action=>[action.name,action.pass])}));
+    }
+    assert.deepEqual(verifyBuild(!production),current);report.verdict=report.results.every(row=>row.verdict==='PASS')?'PASS':'FAIL';
+  }finally{await native?.close();await server?.close();report.finished=new Date().toISOString();writeFileSync(`${prefix}.json`,JSON.stringify(report,null,2),{flag:'wx'});}
+  return report;
 }
 
 export async function diagnoseScroll(prefix) {

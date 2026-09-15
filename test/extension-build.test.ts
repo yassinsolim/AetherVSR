@@ -119,6 +119,7 @@ describe('built MV3 extension', () => {
     expect(content).not.toContain('__AETHERVSR_EXTENSION_TEST__');
     expect(content).not.toContain('diagnostic-processing-disabled');
     expect(content).not.toContain('processingDisabled');
+    expect(content).not.toContain('presentationWatchdog');
     for (const name of ['content.js', 'service-worker.js', 'popup.js']) {
       const source = read(production, name).toString();
       for (const forbidden of ['sourceMappingURL', 'import.meta', '__AETHERVSR_TEST__', 'runtime-bench',
