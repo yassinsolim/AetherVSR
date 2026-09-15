@@ -59,7 +59,7 @@ export function profileLiveProof() {
   });
 }
 
-export async function runProofProfile(prefix,{trace=false}={}) {
+export async function runProofProfile(prefix,{trace=false,instrumented=false}={}) {
   prefix=resolve(prefix);assert(prefix.startsWith(join(ROOT,'.cache/m107/'))&&!existsSync(`${prefix}.json`));mkdirSync(dirname(prefix),{recursive:true});
   const build=verifyBuild(true),report={phase:'READ_PROFILE_NO_ACCEPTANCE',build,environment:presentationEnvironment(),started:new Date().toISOString()};
   let native,server;
@@ -74,8 +74,17 @@ export async function runProofProfile(prefix,{trace=false}={}) {
     if(trace){
       const session=await native.context.newCDPSession(page);
       try{
+        if(instrumented)await native.isolated(page,installPresentationCosts);
         await session.send('Profiler.enable');await session.send('Profiler.setSamplingInterval',{interval:100});await session.send('Profiler.start');
+        if(instrumented)await page.evaluate(()=>window.dispatchEvent(new Event('aethervsr:m106:start')));
         await page.evaluate(()=>new Promise(done=>setTimeout(done,12000)));
+        if(instrumented){
+          await page.evaluate(()=>window.dispatchEvent(new Event('aethervsr:m106:end')));
+          const data=await native.isolated(page,()=>globalThis[Symbol.for('aethervsr.m107.cost')]);
+          const bytes=gzipSync(JSON.stringify(data)),path=`${prefix}.cost.json.gz`;writeFileSync(path,bytes,{flag:'wx'});
+          report.cost={path:relative(ROOT,path),sha256:sha256(bytes),bytes:bytes.length,guard:distribution(data.guard.map(row=>row[1])),
+            scope:'Same cost wrapper during intrusive CPU profiling, no native observer or mutation wrapper. Diagnostic only, not a registered performance window.'};
+        }
         const {profile}=await session.send('Profiler.stop');
         const packed=gzipSync(JSON.stringify(profile)),path=`${prefix}.cpuprofile.gz`;writeFileSync(path,packed,{flag:'wx'});
         report.profile={path:relative(ROOT,path),sha256:sha256(packed),bytes:packed.length,samples:profile.samples?.length??0,
