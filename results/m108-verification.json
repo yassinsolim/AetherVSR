@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "scope": "M10.8 local no-selection closure, not architecture qualification",
+  "selection": "NO ARCHITECTURE QUALIFIED",
+  "sourceCommit": "b3f0cf6f60f546ca787c2bd424d2f7010d359d1c",
+  "workspace": {
+    "npmCi": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS after new test uses existing assertion helper",
+    "test": {"files": 35, "passed": 735},
+    "build": "PASS",
+    "buildExtension": "PASS",
+    "python": {"passed": 308},
+    "preexistingModerateNpmAdvisories": 2
+  },
+  "clone": {
+    "path": ".cache/m108/closure-clone",
+    "method": "git clone --no-hardlinks --single-branch --branch main",
+    "sourceCommit": "b3f0cf6f60f546ca787c2bd424d2f7010d359d1c",
+    "ownNpmInstall": true,
+    "npmCi": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "test": {"files": 35, "passed": 735},
+    "build": "PASS",
+    "buildExtension": "PASS",
+    "python": {"passed": 308, "environment": "workspace .cache/m8-venv reused; cloned source tests"},
+    "raw": {"path": ".cache/m108/reproducibility-checks.json", "bytes": 832, "sha256": "7d3afab7f2975b2192ecab3e259f0d9b3c2b6fe4ca30f60e94eb42ebb1d11a45"}
+  },
+  "packages": [
+    {"name": "s1", "totalBytes": 274684, "filesVerified": 7, "bundleSha256": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551", "repeatedCloneProvenanceIdentical": true, "workspacePackageIdentical": true, "frozenPayloadIdentical": true},
+    {"name": "s2", "totalBytes": 275230, "filesVerified": 7, "bundleSha256": "8e4927349fad976914f71d502ea5177a7fbf48b3feee7d41e134461274b7450c", "repeatedCloneProvenanceIdentical": true, "workspacePackageIdentical": true, "frozenPayloadIdentical": true}
+  ],
+  "frozenSource": "b1a87a1ec96062d551994b5257cb48e586b3ece6",
+  "unchangedPaths": ["src", "public/models", "package.json", "package-lock.json"],
+  "review": {
+    "preregistration": "PASS after seven clarifications before data",
+    "anchorOwnership": "PASS for scoped rejection",
+    "observability": "PASS for bounded diagnostic evidence, not full coverage",
+    "counterexamples": "PASS for A/D rejection; no blocking counterexample defect",
+    "designScorecardAdr": "PASS for no-selection closure",
+    "evidenceReport": "PASS after cleanup field and early-probe provenance corrections",
+    "cloneMetadata": "PASS"
+  },
+  "evidenceCommitCi": {
+    "sourceCommit": "b3f0cf6f60f546ca787c2bd424d2f7010d359d1c",
+    "runId": 35024033590,
+    "url": "https://github.com/yassinsolim/AetherVSR/actions/runs/35024033590",
+    "conclusion": "success",
+    "gate": "success",
+    "fusion": "success",
+    "scope": "evidence commit only; closing documentation commit requires its own exact-HEAD CI"
+  },
+  "cost": "NOT RUN: no safety/restoration survivor",
+  "nativeFinalQualification": "NOT RUN; local falsification only",
+  "publicAcceptance": "NOT RUN",
+  "productionIntegration": "NOT IMPLEMENTED",
+  "trackedResultCommitBytes": 52291047,
+  "trackedCapBytes": 52428800,
+  "trackedResultCommitHeadroom": 137753
+}
