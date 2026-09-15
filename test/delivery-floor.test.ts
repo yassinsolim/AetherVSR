@@ -155,6 +155,11 @@ describe('native browser delivery floor accounting', () => {
     assert.equal(targetStalls(rows,[],51000).length,0);
     assert.equal(targetStalls(rows.map(row=>({...row,qualityTotal:null})),commands,51000).length,0);
     assert.equal(targetStalls(rows,[...commands,{name:'original-ended-replay',at:30250,pass:true}],51000).length,0);
+    const endedRows=rows.map((row,index)=>({...row,ended:index===80}));
+    const endedCommands=[commands[0],{name:'original-pause-resume',at:49900,pass:false}];
+    const endedEpisodes=targetStalls(endedRows,endedCommands,51000);
+    assert.equal(endedEpisodes.length,1);assert.equal(endedEpisodes[0].censoredAt,49900);
+    assert.equal(endedEpisodes[0].reason,'scheduled:original-pause-resume');
   `));
   it('retains a real submission when the original post-submit callback throws', () => check(`
     let submitted=0;const window=new EventTarget();

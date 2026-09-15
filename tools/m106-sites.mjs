@@ -473,9 +473,9 @@ export function targetStalls(rows, interventions, closingAt) {
   };
   for (const row of rows) {
     if (row.at < seek.at) continue;
-    if (row.at >= attributionEnd) break;
-    const intervened = candidate && commands.find(value => value.at > candidate.lastAt && value.at <= row.at && value.name !== 'prescribed-seek');
+    const intervened = candidate && commands.find(value => value.at > candidate.lastAt && value.at <= Math.min(row.at,attributionEnd) && value.name !== 'prescribed-seek');
     if (intervened) close(`scheduled:${intervened.name}`, intervened.at);
+    if (row.at >= attributionEnd) break;
     const eligible = Number.isFinite(row.currentTime) && Number.isFinite(row.qualityTotal) && row.qualityTotal >= 0
       && row.paused === false && row.ended === false && Math.abs(row.currentTime - VIDEOJS_DURATION) <= 0.15;
     if (!eligible) { close(row.paused ? 'paused' : row.ended ? 'ended' : 'progress', row.at); continue; }
