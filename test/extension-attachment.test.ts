@@ -182,6 +182,14 @@ afterEach(() => {
 });
 
 describe('VideoAttachment', () => {
+  it.fails('hides synchronously when visible geometry is invalidated before the next reconciliation', async () => {
+    const { attachment, canvas, frame } = harness();
+    await attachment.start(); frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+    attachment.refresh();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+  });
+
   it('keeps diagnostic ownership and geometry live without acquiring a GPU or constructing frame processing', async () => {
     vi.stubGlobal('__AETHERVSR_TEST__', true);
     const { attachment, canvas, video, parent, next, observer, document, failure } = harness({ processingDisabled: true });

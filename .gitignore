@@ -4,6 +4,7 @@ dist/
 /dist-extension-test/
 /.cache/m105/
 /.cache/m106/
+/.cache/m107/
 .DS_Store
 *.local
 .vite/
