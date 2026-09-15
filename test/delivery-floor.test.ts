@@ -6,7 +6,7 @@ function check(source: string): void {
     import assert from 'node:assert/strict';
     import { installNativeObserver, installRuntimeCounters, summarizeNative, validateNative, pairedBounds, floorDecision, observerComparison } from './tools/m106-counters.mjs';
     import { activeSafety, parseFloorPlan, PRIMARY_ORDER, qualifiesDisabledGeometry, resumePrefix, floorCases, bindingNativeFailure } from './tools/m106-floor.mjs';
-    import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure, manifestIdentity, observeManifests } from './tools/m106-sites.mjs';
+    import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure, manifestIdentity, observeManifests, advertisedCatalog, pairedSeekConditions, PUBLIC_ORDER } from './tools/m106-sites.mjs';
     import { runInNewContext } from 'node:vm';
     ${source}
     console.log('checked');
@@ -39,12 +39,12 @@ const observerFixture = `
 
 describe('native browser delivery floor accounting', () => {
   it('keeps native public-stall reproduction distinct from a safe public-scope pass', () => check(`
-    const results=['P','Q','R','S'].flatMap(arm=>Array.from({length:3},()=>({case:{arm},completion:'CAPTURED',observedMs:180000,comparable:true,actions:[{name:'prescribed-seek',pass:true}],stalls:[{}],safetyPass:true,journeyPass:false,recoveryComparison:'UNRESOLVED'})));
+    const results=PUBLIC_ORDER.map(arm=>({case:{arm},completion:'CAPTURED',observedMs:180000,comparable:true,actions:[{name:'prescribed-seek',pass:true,result:{width:2560,height:1440,duration:35.963044}}],stalls:[{}],safetyPass:true,journeyPass:false,recoveryComparison:'UNRESOLVED'}));
     assert.equal(publicCausality(results).verdict,'PLAYER/SOURCE REPRODUCED WITHOUT AETHERVSR');
     assert.equal(publicCausality(results).videojsScopePass,false);
     for(const result of results)result.recoveryComparison='NO_OBSERVED_WORSENING';
     assert.equal(publicCausality(results).videojsScopePass,true);
-    results[6].safetyPass=false;assert.equal(publicCausality(results).videojsScopePass,false);
+    results.find(result=>result.case.arm==='S').safetyPass=false;assert.equal(publicCausality(results).videojsScopePass,false);
     for(const result of results.filter(value=>['P','Q'].includes(value.case.arm)))result.stalls=[];
     assert.equal(publicCausality(results).verdict,'EXTENSION-ASSOCIATED');
     results[0].actions[0].pass=false;assert.equal(publicCausality(results).verdict,'UNRESOLVED');results[0].actions[0].pass=true;
@@ -103,6 +103,35 @@ describe('native browser delivery floor accounting', () => {
     responseHandler(response(503));responseHandler(response(200));
     assert.equal(observer.snapshot().records[0].status,503);
     observer.stop();assert.equal(removed,true);
+  `));
+  it('pins advertised variants while allowing original ABR selection within that catalog', () => check(`
+    const address='https://stream.example.test/master.m3u8';
+    const text='#EXTM3U\\n#EXT-X-STREAM-INF:BANDWIDTH=1000,RESOLUTION=960x540,CODECS="avc1.test,mp4a.40.2"\\nlow.m3u8?signature=one\\n#EXT-X-STREAM-INF:BANDWIDTH=3000,RESOLUTION=2560x1440,CODECS="avc1.test,mp4a.40.2"\\nhigh.m3u8?signature=one\\n';
+    const catalog=advertisedCatalog(text,address),master={...manifestIdentity(address,'application/x-mpegURL',200),catalog,pendingCatalogReads:0};
+    assert.deepEqual(advertisedCatalog(text.replaceAll('signature=one','signature=two'),address),catalog);
+    const reference={scheme:'blob:',urlSha256:'a'.repeat(64),origin:'https://example.test',duration:35.95354,width:960,height:540,
+      hls:{master:{origin:master.origin,urlSha256:master.urlSha256},catalog},manifests:{overflow:false,records:[master]}};
+    const actual={...reference,width:2560,height:1440,urlSha256:'b'.repeat(64),manifests:{overflow:false,records:[master,manifestIdentity('https://cdn.example.test/high.m3u8?signature=two','application/x-mpegURL',200)]}};
+    assert.equal(samePublicIdentity(actual,reference),true);actual.width=1920;assert.equal(samePublicIdentity(actual,reference),false);
+    actual.width=2560;actual.manifests.records.push(manifestIdentity('https://cdn.example.test/unknown.m3u8?signature=two','application/x-mpegURL',200));assert.equal(samePublicIdentity(actual,reference),false);
+    assert.throws(()=>advertisedCatalog('x'.repeat(131073),address));
+    const results=PUBLIC_ORDER.map(arm=>({case:{arm},actions:[{name:'prescribed-seek',pass:true,result:{width:2560,height:1440,duration:35.963044}}]}));
+    assert.equal(pairedSeekConditions(results).pass,true);results[2].actions[0].result.width=960;assert.equal(pairedSeekConditions(results).pass,false);
+    results[2].actions[0].result.width=2560;
+    results[0].actions[0].result.duration=35.9531;results[1].actions[0].result.duration=35.9634;
+    assert.equal(pairedSeekConditions(results).pass,false);assert.equal(publicCausality(results).verdict,'UNRESOLVED');
+  `));
+  it('retains catalog drift across repeated successful master responses', () => check(`
+    let handle,bodyReads=0;
+    const page={on(type,callback){handle=callback;},off(){}};
+    const observer=observeManifests(page);
+    const response=bandwidth=>({url:()=> 'https://stream.example.test/master.m3u8',headers:()=>({'content-type':'application/x-mpegURL'}),status:()=>200,
+      body:async()=>{bodyReads++;return Buffer.from('#EXTM3U\\n#EXT-X-STREAM-INF:BANDWIDTH='+bandwidth+',RESOLUTION=960x540\\nlow.m3u8?signature=1\\n');}});
+    handle(response(1000));await observer.settled();assert.equal(observer.snapshot().records[0].catalogError,undefined);
+    handle(response(2000));await observer.settled();
+    assert.equal(bodyReads,2);assert.equal(observer.snapshot().records[0].catalogError,'Advertised master catalog changed');
+    handle(response(1000));await observer.settled();assert.equal(observer.snapshot().records[0].catalogError,'Advertised master catalog changed');
+    assert.equal(observer.snapshot().records[0].pendingCatalogReads,0);observer.stop();
   `));
   it('retains qualifying near-end stalls and censors recovery at scheduled actions', () => check(`
     const rows=Array.from({length:81},(_,index)=>({at:30000+index*250,currentTime:35.8852,qualityTotal:844,paused:false,ended:false,readyState:2,networkState:2}));

@@ -348,6 +348,12 @@ reviewed, and the GitHub API reported `license: null`.** We treated it as
 unlicensed for this project and copied nothing from it; anyone reusing it
 should verify the current state themselves.
 
+M10.6 public-test tooling uses `m3u8-parser` 7.2.0 (Apache-2.0), verified from
+the installed package's LICENSE. It parses already observed HLS master responses
+for catalog identity only. It is a development dependency, excluded from the
+production extension and shared frame-processing path; upstream notices remain
+in the installed package. No third-party implementation source was copied.
+
 Selected references:
 
 - `requestVideoFrameCallback` — https://wicg.github.io/video-rvfc/

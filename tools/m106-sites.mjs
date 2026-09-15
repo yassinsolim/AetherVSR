@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
+import { Parser } from 'm3u8-parser';
 import { ROOT, sha256 } from './m10-fixtures.mjs';
 import { openNativeChrome } from './m9-browser.mjs';
 import { openExtension, verifyBuild, until, bounded, OperationTimeout } from './m10-browser.mjs';
@@ -55,17 +56,50 @@ export function manifestIdentity(address, contentType, status) {
     queryKeys:[...new Set(source.searchParams.keys())].sort(),status};
 }
 
+export function advertisedCatalog(text, address) {
+  assert(typeof text==='string'&&Buffer.byteLength(text)<=131072,'Bounded HLS master required');
+  const parser=new Parser();parser.push(text);parser.end();
+  const manifest=parser.manifest,entries=[];
+  const add=(uri,kind,attributes={})=>{
+    const source=new URL(uri,address);assert.equal(source.protocol,'https:');
+    entries.push({kind,pathSha256:sha256(source.pathname),width:attributes.RESOLUTION?.width??null,
+      height:attributes.RESOLUTION?.height??null,bandwidth:attributes.BANDWIDTH??null,
+      frameRate:attributes['FRAME-RATE']??null,codecs:attributes.CODECS??null});
+  };
+  assert(Array.isArray(manifest.playlists)&&manifest.playlists.length>0,'Advertised variant catalog unavailable');
+  for(const playlist of manifest.playlists)add(playlist.uri,'variant',playlist.attributes);
+  for(const [kind,groups]of Object.entries(manifest.mediaGroups??{}))for(const group of Object.values(groups)){
+    for(const rendition of Object.values(group))if(rendition.uri)add(rendition.uri,kind.toLowerCase());
+  }
+  assert(entries.length<=128&&entries.some(entry=>Number.isInteger(entry.width)&&entry.width>0&&entry.height>0),'Invalid catalog extent');
+  const ordered=entries.toSorted((left,right)=>JSON.stringify(left).localeCompare(JSON.stringify(right)));
+  return {entries:ordered,sha256:sha256(JSON.stringify(ordered)),scope:'Advertised rendition paths, codecs, bandwidth and dimensions; not media-byte equality. Signed query values and CDN host selection excluded.'};
+}
+
 export function observeManifests(page) {
-  const records=new Map();let overflow=false;
+  const records=new Map(),pending=[];let overflow=false;
   const observe=response=>{
-    const record=manifestIdentity(response.url(),response.headers()['content-type']??'',response.status());
-    if(!record)return;
-    if(records.size>=256&&!records.has(record.urlSha256)){overflow=true;return;}
-    if(records.has(record.urlSha256)&&records.get(record.urlSha256).status!==200)return;
+    const incoming=manifestIdentity(response.url(),response.headers()['content-type']??'',response.status());
+    if(!incoming)return;
+    if(records.size>=256&&!records.has(incoming.urlSha256)){overflow=true;return;}
+    const previous=records.get(incoming.urlSha256);
+    if(previous&&previous.status!==200)return;
+    const record=previous??incoming;record.status=incoming.status;
     records.set(record.urlSha256,record);
+    if(record.queryKeys.length===0&&record.status===200){
+      record.pendingCatalogReads=(record.pendingCatalogReads??0)+1;
+      pending.push(bounded(response.body(),5000,'HLS master response body').then(bytes=>{
+        assert(bytes.length<=131072,'Bounded HLS master required');
+        const catalog=advertisedCatalog(bytes.toString('utf8'),response.url());
+        if(record.catalog&&record.catalog.sha256!==catalog.sha256)record.catalogError='Advertised master catalog changed';
+        else record.catalog=catalog;
+        record.catalogReads=(record.catalogReads??0)+1;
+      }).catch(()=>{record.catalogError='Advertised master catalog unavailable or invalid';})
+        .finally(()=>{record.pendingCatalogReads--;}));
+    }
   };
   page.on('response',observe);
-  return {snapshot:()=>({records:[...records.values()],overflow}),stop:()=>page.off('response',observe)};
+  return {snapshot:()=>({records:[...records.values()],overflow}),settled:()=>Promise.all(pending),stop:()=>page.off('response',observe)};
 }
 
 export async function publicIdentity(page, manifests) {
@@ -90,6 +124,7 @@ export function installPublicObserver() {
     const quality = video.getVideoPlaybackQuality?.();
     return { at: performance.now(), currentTime: video.currentTime, qualityTotal: quality?.totalVideoFrames ?? null,
       qualityDrops: quality?.droppedVideoFrames ?? null, readyState: video.readyState, networkState: video.networkState,
+      width:video.videoWidth,height:video.videoHeight,
       paused: video.paused, ended: video.ended, seeking: video.seeking, rate: video.playbackRate,
       visibility: document.visibilityState, focused: document.hasFocus(), sameVideo: video === document.querySelector('video'),
       sameSource: source === video.currentSrc, error: video.error?.code ?? null, action: data.action };
@@ -151,17 +186,24 @@ export async function pinVideojsIdentity(prefix) {
   const native = await openNativeChrome();
   const record = { schemaVersion: 1, phase: 'METADATA_ONLY', started: new Date().toISOString(), build, origin: new URL(SITES.videojs.url).origin,
     outcome: 'not measured', scope: 'No Play command, callback-loss observation, or journey outcome. Full media URL and frames are not retained.' };
+  let manifests;
   try {
     const page = await native.context.newPage();
     record.placement = await nativeWindow(page,native.context); record.browser = await browserIdentity(native,page);
+    manifests=observeManifests(page);
     const response = await page.goto(SITES.videojs.url,{waitUntil:'domcontentloaded',timeout:30000});
     assert(response?.ok()); await consent(page,()=>{});
     await page.waitForFunction(()=>{const video=document.querySelector('video');return video?.readyState>=1&&video.videoWidth>0&&video.currentSrc;},undefined,{timeout:45000});
-    record.identity = await publicIdentity(page);
+    await page.waitForFunction(()=>document.querySelector('video')?.readyState>=2,undefined,{timeout:45000});
+    await manifests.settled();
+    const metadata=await publicIdentity(page,manifests);
+    const masters=metadata.manifests.records.filter(value=>value.queryKeys.length===0);
+    assert.equal(masters.length,1);assert(masters[0].catalog&&!masters[0].catalogError);
+    record.identity={...metadata,hls:{master:{origin:masters[0].origin,urlSha256:masters[0].urlSha256},catalog:masters[0].catalog}};
     assert(samePublicIdentity(record.identity,record.identity),'Historical asset duration changed; prospective revision required');
     assert.deepEqual(verifyBuild(false),build); record.completion = 'PINNED';
   } catch(error) { record.completion='UNVERIFIED';record.error=safeEvidence(String(error));throw error; }
-  finally { await native.close();writeFileSync(`${prefix}.json`,JSON.stringify(record,null,2),{flag:'wx'}); }
+  finally { manifests?.stop();await native.close();writeFileSync(`${prefix}.json`,JSON.stringify(record,null,2),{flag:'wx'}); }
   return record;
 }
 
@@ -266,7 +308,8 @@ export async function runVideojs(prefix, referencePath, resumePath) {
         const schedule=[
           [30000,'prescribed-seek',async()=>page.locator('video').first().evaluate((video,target)=>{
             if(Math.abs(video.duration-35.963044)>0.01||!Array.from({length:video.seekable.length},(_,index)=>[video.seekable.start(index),video.seekable.end(index)]).some(([start,end])=>start<=target&&end>=target))throw new Error('Prescribed seek unavailable');
-            const from=video.currentTime;video.currentTime=target;return {from,target,method:'Original currentTime within seekable range'};
+            const from=video.currentTime,width=video.videoWidth,height=video.videoHeight,duration=video.duration;
+            video.currentTime=target;return {from,target,width,height,duration,method:'Original currentTime within seekable range'};
           },SEEK_TARGET)],
           [50000,'original-pause-resume',async()=>{
             await playerButton(page,SITES.videojs,'pause');await until(()=>page.locator('video').first().evaluate(video=>video.paused),Boolean,4000);
@@ -357,18 +400,25 @@ export function samePublicIdentity(actual, reference) {
   const digest=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
   const hls=reference?.hls;
   let sameSource=actual?.urlSha256===reference?.urlSha256;
+  let sameDimensions=actual?.width===reference?.width&&actual?.height===reference?.height;
   if(hls){
     const records=actual?.manifests?.records;
     const masters=records?.filter(record=>record.queryKeys.length===0)??[];
     const renditions=[...new Set(records?.filter(record=>record.queryKeys.length>0).map(record=>record.pathSha256)??[])].sort();
+    const catalog=hls.catalog;
+    const renditionMatch=catalog?digest(catalog.sha256)&&catalog.sha256===sha256(JSON.stringify(catalog.entries))
+      &&masters[0]?.catalog?.sha256===catalog.sha256&&!masters[0]?.catalogError&&masters[0]?.pendingCatalogReads===0
+      &&renditions.every(path=>catalog.entries.some(entry=>entry.pathSha256===path))
+      :Array.isArray(hls.renditionPathSha256)&&hls.renditionPathSha256.length>0&&hls.renditionPathSha256.every(digest)
+        &&JSON.stringify(renditions)===JSON.stringify([...hls.renditionPathSha256].sort());
+    if(catalog)sameDimensions=catalog.entries.some(entry=>entry.kind==='variant'&&entry.width===actual?.width&&entry.height===actual?.height);
     sameSource=actual?.scheme==='blob:'&&actual?.manifests?.overflow===false&&masters.length===1
       &&masters[0].origin===hls.master.origin&&masters[0].urlSha256===hls.master.urlSha256
       &&records.every(record=>record.status===200)&&digest(hls.master.urlSha256)
-      &&Array.isArray(hls.renditionPathSha256)&&hls.renditionPathSha256.length>0&&hls.renditionPathSha256.every(digest)
-      &&JSON.stringify(renditions)===JSON.stringify([...hls.renditionPathSha256].sort());
+      &&renditionMatch;
   }
   return digest(actual?.urlSha256) && sameSource && actual.origin === reference?.origin
-    && actual.width === reference.width && actual.height === reference.height
+    && sameDimensions
     && Number.isFinite(actual.duration) && Math.abs(actual.duration - VIDEOJS_DURATION) <= 0.01
     && Number.isFinite(reference.duration) && Math.abs(actual.duration - reference.duration) <= 0.01;
 }
@@ -411,9 +461,26 @@ export function targetStalls(rows, interventions, closingAt) {
   return episodes;
 }
 
+export function pairedSeekConditions(results) {
+  if(results.length!==12)return {pass:false,blocks:[]};
+  const blocks=[];
+  for(let index=0;index<3;index++){
+    const conditions=results.slice(index*4,index*4+4).map(result=>({arm:result.case.arm,
+      seek:result.actions?.find(action=>action.name==='prescribed-seek'&&action.pass===true)?.result??null}));
+    const first=conditions[0].seek;
+    const pass=first&&Number.isInteger(first.width)&&first.width>0&&Number.isInteger(first.height)&&first.height>0
+      &&conditions.every(value=>value.seek?.width===first.width&&value.seek?.height===first.height
+        &&Number.isFinite(value.seek.duration)&&Math.abs(value.seek.duration-VIDEOJS_DURATION)<=0.01)
+      &&Math.max(...conditions.map(value=>value.seek.duration))-Math.min(...conditions.map(value=>value.seek.duration))<=0.01;
+    blocks.push({block:index+1,conditions,pass:!!pass});
+  }
+  return {pass:blocks.every(block=>block.pass),blocks};
+}
+
 export function publicCausality(results) {
   const groups = Object.fromEntries(['P','Q','R','S'].map(arm => [arm, results.filter(result => result.case.arm === arm)]));
-  const complete = Object.values(groups).every(group => group.length === 3 && group.every(result => result.completion === 'CAPTURED' && result.comparable === true
+  const seekConditions=pairedSeekConditions(results);
+  const complete = seekConditions.pass&&Object.values(groups).every(group => group.length === 3 && group.every(result => result.completion === 'CAPTURED' && result.comparable === true
     &&result.observedMs>=180000&&result.actions?.some(action=>action.name==='prescribed-seek'&&action.pass===true)));
   const counts = Object.fromEntries(Object.entries(groups).map(([arm, group]) => [arm, group.filter(result => result.stalls?.length > 0).length]));
   const native = complete && counts.P >= 2 && counts.Q >= 2;
@@ -424,7 +491,7 @@ export function publicCausality(results) {
   const safety = complete && active.every(result => result.safetyPass === true);
   const recovery = complete && active.every(result => result.recoveryComparison === 'NO_OBSERVED_WORSENING');
   return { verdict: native && frequency ? 'PLAYER/SOURCE REPRODUCED WITHOUT AETHERVSR' : associated ? 'EXTENSION-ASSOCIATED' : 'UNRESOLVED',
-    counts, complete, safety, allActivePass, recoveryComparable: recovery,
+    counts, complete, seekConditions, safety, allActivePass, recoveryComparable: recovery,
     videojsScopePass: allActivePass || (native && frequency && safety && recovery),
     scope: 'Three sessions/arm; descriptive reproduction or association, not statistical equivalence, prevalence, or network-cause proof. A matching stall does not waive control, presentation, ownership, cleanup, or recovery failures.' };
 }

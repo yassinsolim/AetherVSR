@@ -24,6 +24,7 @@
     "@webgpu/types": "^0.1.71",
     "esbuild": "0.28.2",
     "eslint": "^9.39.0",
+    "m3u8-parser": "7.2.0",
     "onnxruntime-web": "^1.29.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.0",
