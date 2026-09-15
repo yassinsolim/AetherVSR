@@ -59,7 +59,7 @@ export function profileLiveProof() {
   });
 }
 
-export async function runProofProfile(prefix) {
+export async function runProofProfile(prefix,{trace=false}={}) {
   prefix=resolve(prefix);assert(prefix.startsWith(join(ROOT,'.cache/m107/'))&&!existsSync(`${prefix}.json`));mkdirSync(dirname(prefix),{recursive:true});
   const build=verifyBuild(true),report={phase:'READ_PROFILE_NO_ACCEPTANCE',build,environment:presentationEnvironment(),started:new Date().toISOString()};
   let native,server;
@@ -69,10 +69,22 @@ export async function runProofProfile(prefix) {
     const panel=await native.popup(page);let tabId;
     try{tabId=panel.tabId;await native.workerEval(async tab=>chrome.scripting.executeScript({target:{tabId:tab,frameIds:[0]},world:'ISOLATED',files:['content.js']}),tabId);
       await native.isolated(page,()=>globalThis.__AETHERVSR_EXTENSION_TEST__.configure({presentationWatchdog:true}));
-      await panel.click('input[value="baseline"]');await panel.click('#enable');}finally{await panel.dismiss();}
-    await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready,10000);
-    report.profile=await native.isolated(page,profileProofReads);
-    report.live=await native.isolated(page,profileLiveProof);
+      await panel.click(`input[value="${trace?'auto':'baseline'}"]`);await panel.click('#enable');}finally{await panel.dismiss();}
+    await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready&&(!trace||state.current==='neural'&&state.details.attachment.controllerState==='stable'),15000);
+    if(trace){
+      const session=await native.context.newCDPSession(page);
+      try{
+        await session.send('Profiler.enable');await session.send('Profiler.setSamplingInterval',{interval:100});await session.send('Profiler.start');
+        await page.evaluate(()=>new Promise(done=>setTimeout(done,12000)));
+        const {profile}=await session.send('Profiler.stop');
+        const packed=gzipSync(JSON.stringify(profile)),path=`${prefix}.cpuprofile.gz`;writeFileSync(path,packed,{flag:'wx'});
+        report.profile={path:relative(ROOT,path),sha256:sha256(packed),bytes:packed.length,samples:profile.samples?.length??0,
+          intervalUs:100,scope:'Separate12s intrusive native V8 CPU sampling of stable-start Auto. Not GPU, qualifying cadence or precise function wall time; overhead and sampling error apply.'};
+      }finally{await session.detach();}
+    }else{
+      report.profile=await native.isolated(page,profileProofReads);
+      report.live=await native.isolated(page,profileLiveProof);
+    }
     assert.deepEqual(verifyBuild(true),build);
   }finally{await native?.close();await server?.close();report.finished=new Date().toISOString();writeFileSync(`${prefix}.json`,JSON.stringify(report,null,2),{flag:'wx'});}
   return report;
