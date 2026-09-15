@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "ab6686bb187274629fb7eb837b68a3bce3d81dd6",
+  "clone": ".cache/m107/closure-clone",
+  "cloneMethod": "Local git clone --no-hardlinks; own npm ci with a distinct node_modules directory",
+  "gates": [
+    {"command": "npm ci", "outcome": "PASS"},
+    {"command": "npm run typecheck", "outcome": "PASS"},
+    {"command": "npm run lint", "outcome": "PASS"},
+    {"command": "npm run test -- --reporter=dot", "outcome": "PASS", "tests": 729, "files": 34},
+    {"command": "npm run build", "outcome": "PASS"},
+    {"command": "npm run build:extension", "outcome": "PASS"},
+    {"command": "../../m8-venv/bin/python -m pytest tools/test_*.py -q", "outcome": "PASS", "tests": 308}
+  ],
+  "environment": {
+    "node": "v26.5.0",
+    "python": "Python 3.12.13",
+    "pythonEnvironmentReused": true,
+    "lockfileSha256": "f6d76547b76a4c91f6a9320584427dca7b8f78e1a468041eff3476f96ce8444e"
+  },
+  "trackedBytes": 51925009,
+  "trackedCapBytes": 52428800,
+  "builds": [
+    {
+      "kind": "production",
+      "sourceCommit": "ab6686bb187274629fb7eb837b68a3bce3d81dd6",
+      "sourceDirty": false,
+      "totalBytes": 274684,
+      "bundleSha256": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551",
+      "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "provenanceSha256": "4a8def1016c24c6782db6cf35373e84a7d7ae2bd899295ec86100ad3c7a36dc7",
+      "byteIdenticalIncludingProvenance": true,
+      "workspaceByteIdentical": true
+    },
+    {
+      "kind": "test",
+      "sourceCommit": "ab6686bb187274629fb7eb837b68a3bce3d81dd6",
+      "sourceDirty": false,
+      "totalBytes": 275230,
+      "bundleSha256": "8e4927349fad976914f71d502ea5177a7fbf48b3feee7d41e134461274b7450c",
+      "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "provenanceSha256": "b20c6eaa6bc905f3f60f638b36c43cd1af03a96cb8fa8a2d01e87c3515949d8e",
+      "byteIdenticalIncludingProvenance": true,
+      "workspaceByteIdentical": true
+    }
+  ],
+  "clean": true,
+  "raw": {
+    "path": ".cache/m107/reproducibility-checks.json",
+    "sha256": "9e393ea7e46429e91f1dee77e8460395fe51ad7c11afea16210fb5121c1569be",
+    "bytes": 5274
+  },
+  "scope": "Seven separate clone gates. Source/tests and npm dependencies independent; only the Python environment reused. Raw record includes every repeated file hash/size, including provenance, and workspace comparison. No native measurement is inferred. Closing documentation may advance HEAD without changing runtime payloads; exact-final-HEAD CI is separately verified at publication.",
+  "presentationSynchronization": "FAIL",
+  "overallExtension": "PARTIAL",
+  "m11": "GATED"
+}
