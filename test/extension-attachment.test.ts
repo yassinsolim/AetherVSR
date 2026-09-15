@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VideoAttachment, type AttachmentOptions } from '../src/extension/attachment.js';
-import { inspectGeometry } from '../src/extension/geometry.js';
+import { geometryProofCurrent, inspectGeometry } from '../src/extension/geometry.js';
 import { inactiveStatus, parseExtensionStatus } from '../src/extension/protocol.js';
 import { acquireGpu, watchDeviceFailures, type GpuContext } from '../src/core/gpu/device.js';
 import { VideoPipeline } from '../src/core/pipeline.js';
@@ -9,7 +9,7 @@ import type { Upscaler } from '../src/core/types.js';
 import { RuntimeDriver } from '../src/runtime.js';
 import { NeuralUpscaler } from '../src/core/upscale/neural-upscaler.js';
 
-vi.mock('../src/extension/geometry.js', () => ({ inspectGeometry: vi.fn() }));
+vi.mock('../src/extension/geometry.js', () => ({ inspectGeometry: vi.fn(), geometryProofCurrent: vi.fn() }));
 vi.mock('../src/core/gpu/device.js', () => ({ acquireGpu: vi.fn(), watchDeviceFailures: vi.fn() }));
 vi.mock('../src/core/pipeline.js', () => ({ VideoPipeline: vi.fn() }));
 vi.mock('../src/core/upscale/baseline-scaler.js', () => ({
@@ -142,6 +142,7 @@ function harness(options: Partial<AttachmentOptions> = {}) {
   vi.mocked(acquireGpu).mockResolvedValue(gpu);
   const unwatch = vi.fn();
   vi.mocked(watchDeviceFailures).mockReturnValue(unwatch);
+  vi.mocked(geometryProofCurrent).mockReturnValue(true);
   vi.mocked(inspectGeometry).mockImplementation(() => ({
     ok: true, rect: { left: 10, top: 20, width: 640, height: 360 },
     clip: { left: 10, top: 20, width: 640, height: 360 },
@@ -192,6 +193,154 @@ afterEach(() => {
 });
 
 describe('VideoAttachment', () => {
+  it('invalidates changed video inputs before fractional clipping edges can compound', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, video, canvas, frame } = harness({presentationWatchdog:true});
+    await attachment.start(); frame();
+    const rect = video.getBoundingClientRect();
+    video.getBoundingClientRect = () => ({...rect,left:rect.left+0.32,width:rect.width+0.32});
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+  });
+
+  it('retains the stricter container placement tolerance in the watchdog', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, canvas, frame } = harness({presentationWatchdog:true});
+    const originalInspect = vi.mocked(inspectGeometry).getMockImplementation()!;
+    vi.mocked(inspectGeometry).mockImplementation(element => ({...originalInspect(element),verifyPlacement:true}));
+    await attachment.start(); frame();
+    const rect = canvas.getBoundingClientRect();
+    canvas.getBoundingClientRect = () => ({...rect,left:rect.left+1/64});
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+  });
+
+  it('hides a stale style proof before submission without performing full inspection in the frame', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, canvas, frame, document } = harness({presentationWatchdog:true});
+    await attachment.start(); frame();
+    const calls = vi.mocked(inspectGeometry).mock.calls.length;
+    vi.mocked(geometryProofCurrent).mockReturnValue(false);
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    expect(inspectGeometry).toHaveBeenCalledTimes(calls);
+    vi.mocked(geometryProofCurrent).mockReturnValue(true);
+    document.flush(); frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+  });
+
+  it('bounds image-sized canvas error independently of the smaller video box error', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, canvas, video, frame } = harness({presentationWatchdog:true});
+    const originalInspect = vi.mocked(inspectGeometry).getMockImplementation()!;
+    vi.mocked(inspectGeometry).mockImplementation(element => {
+      const geometry = originalInspect(element);
+      return geometry.ok ? {...geometry,objectFit:'none',style:{...geometry.style,width:'1280px'}} : geometry;
+    });
+    await attachment.start(); frame();
+    const rect = video.getBoundingClientRect();
+    video.getBoundingClientRect = () => ({...rect,width:rect.width + 0.32});
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+  });
+
+  it('observes bounded control dependencies identified by geometry inspection', async () => {
+    const { attachment, next, parent, mutationObserver, mutate, frame, canvas } = harness();
+    const originalInspect = vi.mocked(inspectGeometry).getMockImplementation()!;
+    vi.mocked(inspectGeometry).mockImplementation(element => ({...originalInspect(element),proof:{styles:[{
+      element:next as unknown as Element,parent:parent as unknown as Node,style:{} as CSSStyleDeclaration,values:new Map(),named:new Map(),
+    }],clips:[],viewport:null}}));
+    await attachment.start(); frame();
+    expect(mutationObserver.observe).toHaveBeenCalledWith(next,expect.objectContaining({attributes:true,childList:true}));
+    mutate([{type:'attributes',target:next,attributeName:'style',oldValue:'old'} as unknown as MutationRecord]);
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+  });
+
+  it('does not repeat full inspection for an unchanged offscreen layout and notices its return', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, video, frame, document, canvas } = harness({presentationWatchdog:true});
+    await attachment.start(); frame();
+    const originalInspect = vi.mocked(inspectGeometry).getMockImplementation()!;
+    const rect = video.getBoundingClientRect();
+    video.getBoundingClientRect = () => ({...rect,top:-1000});
+    vi.mocked(inspectGeometry).mockReturnValue({ok:false,code:'offscreen',reason:'outside viewport'});
+    attachment.refresh(); document.flush();
+    const calls = vi.mocked(inspectGeometry).mock.calls.length;
+    for (let iteration = 0; iteration < 3; iteration++) document.flush();
+    expect(inspectGeometry).toHaveBeenCalledTimes(calls);
+    video.getBoundingClientRect = () => rect;
+    vi.mocked(inspectGeometry).mockImplementation(originalInspect);
+    document.flush(); document.flush(); frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+  });
+
+  it.each([32, 33])('enforces the %s-node ancestor startup boundary without leaked handles', async count => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, parent, failure, document } = harness({presentationWatchdog:true});
+    let outer = parent;
+    for (let depth = 2; depth < count; depth++) {
+      const ancestor = new FakeElement(); ancestor.insertBefore(outer,null); outer = ancestor;
+    }
+    await attachment.start();
+    if (count === 32) expect(failure).not.toHaveBeenCalled();
+    else {
+      expect(failure).toHaveBeenCalledWith('unsupported-geometry',expect.stringContaining('bounded limit'));
+      expect(acquireGpu).not.toHaveBeenCalled();
+    }
+    attachment.destroy();
+    expect(document.frames.size).toBe(0);
+    expect(Object.values(attachment.snapshot().resources).every(value => value === 0)).toBe(true);
+  });
+
+  it('reconciles layout changed by canvas insertion before accepting its geometry', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, video, canvas, frame, document, next } = harness({presentationWatchdog:true});
+    next.remove();
+    const originalRect = video.getBoundingClientRect();
+    video.getBoundingClientRect = () => ({...originalRect, top:video.nextSibling === canvas ? 20 : 40});
+    const originalInspect = vi.mocked(inspectGeometry).getMockImplementation()!;
+    vi.mocked(inspectGeometry).mockImplementation(element => {
+      const geometry = originalInspect(element);
+      if (!geometry.ok) return geometry;
+      const rect = video.getBoundingClientRect();
+      return {...geometry,rect,clip:rect,style:{...geometry.style,top:`${rect.top}px`}};
+    });
+    await attachment.start(); frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    document.flush(); frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+    expect(canvas.style.getPropertyValue('top')).toBe('20px');
+  });
+
+  it.each(['seeking', 'paused'] as const)('hides when a submitted frame observes %s before its event', async state => {
+    const { attachment, video, canvas, frame } = harness();
+    await attachment.start(); frame();
+    expect(attachment.snapshot().ready).toBe(true);
+    video[state] = true;
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    expect(attachment.snapshot().ready).toBe(false);
+  });
+
+  it('hides when a submitted frame observes unavailable decoded pixels before an event', async () => {
+    const { attachment, video, canvas, frame } = harness();
+    await attachment.start(); frame();
+    video.readyState = 1;
+    frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    expect(attachment.snapshot().ready).toBe(false);
+  });
+
+  it('hides on the watchdog when media pauses before its event or another submission', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, video, canvas, frame, document } = harness({presentationWatchdog:true});
+    await attachment.start(); frame();
+    video.paused = true;
+    document.flush();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    expect(attachment.snapshot().ready).toBe(false);
+  });
+
   it('watchdog hides unannounced movement before a processed frame can reveal stale placement', async () => {
     vi.stubGlobal('__AETHERVSR_TEST__', true);
     const { attachment, canvas, video, frame, document } = harness({presentationWatchdog:true});
@@ -205,7 +354,7 @@ describe('VideoAttachment', () => {
     expect(Object.values(attachment.snapshot().resources).every(value=>value===0)).toBe(true);
   });
 
-  it('bounds mutation overload and ancestor-limit startup without leaving a watchdog', async () => {
+  it('bounds mutation overload without leaving a watchdog', async () => {
     vi.stubGlobal('__AETHERVSR_TEST__', true);
     const {attachment,mutate,failure,document}=harness({presentationWatchdog:true});
     await attachment.start();

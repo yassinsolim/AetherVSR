@@ -14,7 +14,7 @@ function check(source: string): void {
     import { validateOldShutdown } from './tools/m105-reload.mjs';
     import { parseFinalCases, deliveryGates } from './tools/m105-final.mjs';
     import { COST_ORDER, compareCosts, costBounds } from './tools/m107-performance.mjs';
-    import { transitionVerdict } from './tools/m107-presentation.mjs';
+    import { transitionVerdict, summarizePresentation, geometryOracleSource, installGeometryOracle, TRANSITIONS } from './tools/m107-presentation.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -97,6 +97,19 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('installs a fresh geometry query and keeps unavailable expected rectangles unmeasured', () => check(`
+    const context=createContext({}),oracle=geometryOracleSource();
+    const native={isolated:async(page,install)=>new Script('('+install.toString()+')()').runInContext(context)};
+    assert.equal((await installGeometryOracle(native,null,oracle)).sha256,oracle.sha256);
+    assert.equal(new Script('typeof globalThis[Symbol.for("aethervsr.m107.geometry-oracle")]').runInContext(context),'function');
+    const rect={left:0,top:0,width:100,height:100};
+    assert.equal(summarizePresentation({overflow:false,rows:[{canvasVisible:true,mismatch:true,expectedRect:null,canvasRect:rect}]}).maximumComponentError,null);
+    assert.equal(summarizePresentation({overflow:false,rows:[{canvasVisible:true,mismatch:false,expectedRect:rect,canvasRect:rect}]}).maximumComponentError,0);
+    assert.equal(TRANSITIONS.length,28);
+    assert(TRANSITIONS.filter(row=>row.warming).every(row=>row.prepare.includes('paused')));
+    assert(TRANSITIONS.some(row=>row.actions.includes('source-high-scroll')));
+  `));
+
   it('requires measured M10.7 watchdog costs and a valid neural reference', () => check(`
     const make=()=>COST_ORDER.map(item=>({case:item,valid:true,summary:{nativeCallbackFps:59,renderedFps:59,core:{p95:.1},driver:{p95:.1},geometryGuardMsPerSecond:1,
       tierStable:true,probes:0,transitions:0,ownerStable:true,error:null,deficit:0,visibleFraction:1,guard:{count:100,p95:.1,max:.2}}}));
@@ -105,7 +118,8 @@ describe('M10 performance protocol helpers (no browser)', () => {
     rows=make();rows[0].summary.tierStable=false;assert.equal(compareCosts(rows)[2].pass,false);
     rows=make();rows[0].summary.probes=1;assert.equal(compareCosts(rows)[2].pass,false);
     rows=make();delete rows.find(row=>row.case.strategy===2).summary.probes;assert.equal(compareCosts(rows)[2].pass,false);
-    rows=make();rows.find(row=>row.case.strategy===1).summary.transitions=1;assert.equal(compareCosts(rows)[1].pass,false);
+    rows=make();for(const row of rows)row.summary.transitions=30;assert.equal(compareCosts(rows)[2].pass,true);
+    rows.find(row=>row.case.strategy===2).summary.tierStable=false;assert.equal(compareCosts(rows)[2].pass,false);
     assert.equal(costBounds([0,0,0,0,0,0]).upper95,0);assert.throws(()=>costBounds([0,0]));
   `));
 

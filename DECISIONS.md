@@ -1502,3 +1502,39 @@ raw traces, Chrome traces, native screenshots and worktrees stay local under
 the ignored .cache/m105 directory. No historical evidence is deleted, no history
 is rewritten and M10's registered PARTIAL result is not revised. The executable
 repository-size test enforces the newly approved aggregate cap.
+
+## ADR-0047 - Current geometry and output proofs authorize canvas visibility
+
+**Status:** accepted safety design; production watchdog selection remains gated
+on the M10.7 preregistered native correctness and cost evidence.
+
+This extends ADR-0045 without changing acquisition, inference, presentation GPU
+resources, model bytes or RuntimeController policy. The original video is still
+authoritative. An attachment owns separate geometry, source and output epochs.
+Known invalidation hides its canvas synchronously; a geometry reconciliation
+alone cannot revive old output and a submitted frame cannot override dirty
+geometry. Media state observed before its event also invalidates visibility.
+
+Geometry inspection records the inputs it actually reads: live resolved style
+properties, clipping boxes/client metrics and the viewport. A local read-only
+proxy records accesses during inspection; it does not patch page objects or run
+in the frame path. The retained live CSSStyleDeclarations let the diagnostic S2
+watchdog detect CSSOM changes without a full hit-test walk on every frame.
+Changed geometric inputs invalidate exactly, preventing small input changes from
+compounding beyond the output tolerance. Actual canvas placement still observes
+the registered 0.5 CSS-pixel bound and existing stricter container checks.
+
+The current video/ancestor chain is bounded at 32 nodes. Recorded control/style
+dependencies join the same filtered, non-subtree MutationObserver, with at most
+256 observed nodes and 256 records per callback; excess fails closed. A single
+presentation rAF and a coalesced reconciliation rAF are owned by the attachment.
+Stable rejected offscreen geometry does not repeatedly request full inspection.
+Canvas insertion must not bless a pre-insertion layout; fullscreen paint-order
+proofs stop at the top-layer boundary. Teardown releases every observer, rAF,
+style proof and node reference.
+
+The watchdog is still a measured candidate, not an unconditional performance
+claim. The initial candidate failed the cadence non-regression gate and had
+additional reviewed correctness gaps; its raw evidence is retained separately.
+Revised guards need fresh evidence. Neither this ADR nor an eventual presentation
+verdict changes historical delivery acceptance, overall PARTIAL or the M11 gate.

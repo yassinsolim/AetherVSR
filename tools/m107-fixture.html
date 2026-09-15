@@ -28,6 +28,9 @@
   document.getElementById('exit').onclick = () => document.exitFullscreen();
   const video = document.querySelector('video');
   const parent = document.getElementById('parent');
+  const player = document.getElementById('player');
+  const sheet = document.styleSheets[0];
+  const rule = (selector, declarations) => sheet.insertRule(`${selector} { ${declarations} }`, sheet.cssRules.length);
   let sourceBuffer, mediaSource, mediaUrl;
   const append = bytes => new Promise((done, reject) => {
     const end = () => { cleanup(); done(); };
@@ -40,7 +43,16 @@
     async prepare(name) {
       if (name === 'nested-scroll') parent.classList.add('nested');
       if (name === 'size-container') parent.classList.add('sized');
-      if (name === 'intrinsic-resize' || name === 'fullscreen-abr' || name === 'scroll-abr') {
+      if (name.startsWith('fit-')) { rule('#player video', `object-fit:${name.slice(4)}`); rule('#player','height:400px'); }
+      if (name === 'paused-last-child') rule('#player > video:last-child','transform:translateY(20px)');
+      if (name === 'outer-clip') rule('#parent','overflow:hidden;height:360px');
+      if (name === 'passive-caption' || name === 'outer-caption') {
+        const caption = document.createElement('span'); caption.id = 'caption'; caption.textContent = 'Caption';
+        caption.style.cssText = `position:absolute;left:0;top:${name === 'outer-caption' ? '-20px' : '0'};width:100px;height:20px;pointer-events:none;z-index:1`;
+        if (name === 'passive-caption') player.insertBefore(caption,video);
+        else { caption.style.zIndex = '0'; parent.insertBefore(caption,player); rule('#player:fullscreen','container-type:size'); }
+      }
+      if (name === 'intrinsic-resize' || name === 'intrinsic-resize-paused' || name === 'fullscreen-abr' || name === 'scroll-abr') {
         const low = await fetch('/m107-media/low.mp4').then(response => response.arrayBuffer());
         const config = await fetch('/m107-media/config.json').then(response => response.json());
         mediaSource = new MediaSource(); mediaUrl = URL.createObjectURL(mediaSource); video.src = mediaUrl;
@@ -48,7 +60,24 @@
         sourceBuffer = mediaSource.addSourceBuffer(config.mime); sourceBuffer.mode = 'sequence';
         await append(low); await video.play();
       }
+      if (name === 'paused-output' || name === 'paused-last-child' || name === 'intrinsic-resize-paused') {
+        await video.play(); await new Promise(done => video.requestVideoFrameCallback(done)); video.pause();
+      }
       return { name, source: { width: video.videoWidth, height: video.videoHeight } };
+    },
+    settle(name) {
+      return new Promise((done, reject) => {
+        let previous, stable = 0, handle;
+        const timeout = setTimeout(() => { cancelAnimationFrame(handle); reject(new Error('Fixture layout did not settle')); },3000);
+        const sample = () => {
+          const rect = video.getBoundingClientRect(), bounds = parent.getBoundingClientRect();
+          const current = [rect.left,rect.top,rect.width,rect.height,bounds.left,bounds.top,bounds.width,bounds.height,innerWidth,innerHeight,scrollX,scrollY,video.videoWidth,video.videoHeight].join(',');
+          stable = current === previous && (name !== 'smooth' || scrollY === 228) ? stable + 1 : 0; previous = current;
+          if (stable >= 1) { clearTimeout(timeout); done({at:performance.now(),source:{width:video.videoWidth,height:video.videoHeight}}); }
+          else handle = requestAnimationFrame(sample);
+        };
+        handle = requestAnimationFrame(sample);
+      });
     },
     async action(name) {
       window.dispatchEvent(new CustomEvent('aethervsr:m107:operation', { detail: `${name}:begin` }));
@@ -58,16 +87,24 @@
       else if (name === 'ancestor-shift') document.getElementById('shift').style.height = '317px';
       else if (name === 'class-shift') parent.classList.toggle('moved');
       else if (name === 'style-shift') parent.style.left = '23px';
+      else if (name === 'resume-scroll') { const playing = video.play(); scrollTo({top:228,behavior:'instant'}); await playing; }
+      else if (name === 'cssom-position') rule('#player video','object-position:0% 0%');
+      else if (name === 'cssom-scale') rule('#player video','transform:scale(1.0005);transform-origin:0 0');
+      else if (name === 'caption-z') document.getElementById('caption').style.zIndex = '0';
+      else if (name === 'cssom-caption-z') rule('#caption','z-index:0!important');
+      else if (name === 'cssom-effect') rule('#player video','filter:blur(1px)');
+      else if (name === 'cssom-clip') rule('#parent','width:600px');
       else if (name === 'reparent') {
         const destination = document.getElementById('destination');
         destination.style.cssText = 'position:absolute;top:280px;height:360px';
         destination.append(video);
-      } else if (name === 'source-high' || name === 'source-low') {
+      } else if (name.startsWith('source-high') || name.startsWith('source-low')) {
         if (!sourceBuffer) throw new Error('Prepare intrinsic-resize first');
         const at = sourceBuffer.buffered.end(sourceBuffer.buffered.length - 1);
         video.loop = false;
-        await append(await fetch(`/m107-media/${name === 'source-high' ? 'high' : 'low'}.mp4`).then(response => response.arrayBuffer()));
+        await append(await fetch(`/m107-media/${name.startsWith('source-high') ? 'high' : 'low'}.mp4`).then(response => response.arrayBuffer()));
         video.currentTime = at + 0.1;
+        if (name.endsWith('-scroll')) scrollTo({top:name.startsWith('source-high') ? 228 : 1,behavior:'instant'});
         await video.play();
       } else if (name === 'unsupported-effect') parent.style.filter = 'blur(1px)';
       else throw new Error(`Unknown fixture action: ${name}`);

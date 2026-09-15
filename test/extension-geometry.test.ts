@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { calculateImageRect, inspectGeometry } from '../src/extension/geometry.js';
+import { calculateImageRect, geometryProofCurrent, inspectGeometry } from '../src/extension/geometry.js';
 import type { ObjectFit } from '../src/extension/geometry.js';
 
 describe('calculateImageRect', () => {
@@ -89,6 +89,65 @@ function fixture() {
 }
 
 describe('inspectGeometry', () => {
+  it.each(['none', 'scale-down'])('invalidates changed %s fitted-image inputs without another hit test', fit => {
+    const setup = fixture(); setup.videoStyle.objectFit = fit;
+    const geometry = setup.inspect();
+    expect(geometry.ok).toBe(true);
+    const calls = setup.document.elementsFromPoint.mock.calls.length;
+    expect(geometryProofCurrent(geometry)).toBe(true);
+    setup.videoStyle.objectPosition = '0% 50%';
+    expect(geometryProofCurrent(geometry)).toBe(false);
+    expect(setup.document.elementsFromPoint).toHaveBeenCalledTimes(calls);
+  });
+
+  it('invalidates a preceding passive caption style and records the branch for observation', () => {
+    const setup = fixture();
+    setup.video.previousElementSibling = setup.control;
+    setup.controlStyle.zIndex = '1';
+    const geometry = setup.inspect();
+    expect(geometry.ok).toBe(true);
+    expect(geometry.proof?.styles.some(entry => entry.element === setup.control as unknown as Element)).toBe(true);
+    expect(geometryProofCurrent(geometry)).toBe(true);
+    setup.controlStyle.zIndex = '0';
+    expect(geometryProofCurrent(geometry)).toBe(false);
+    expect(setup.inspect()).toMatchObject({ok:false,code:'unsupported-controls'});
+  });
+
+  it('invalidates clipping movement even when the video and styles stay unchanged', () => {
+    const setup = fixture(); setup.parentStyle.overflowX = 'hidden';
+    const geometry = setup.inspect();
+    expect(geometry.ok).toBe(true);
+    expect(geometryProofCurrent(geometry)).toBe(true);
+    setup.parent.getBoundingClientRect.mockReturnValue({left:11,top:20,width:320,height:180});
+    expect(geometryProofCurrent(geometry)).toBe(false);
+  });
+
+  it('does not let subpixel clipping inputs compound beyond the output tolerance', () => {
+    const setup = fixture(); setup.parentStyle.overflowX = 'hidden';
+    Object.assign(setup.parent, {clientWidth:100,offsetWidth:100});
+    setup.video.getBoundingClientRect.mockReturnValue({left:0,top:20,width:320,height:180});
+    setup.parent.getBoundingClientRect.mockReturnValue({left:-10,top:20,width:100,height:180});
+    const geometry = setup.inspect();
+    expect(geometry).toMatchObject({ok:true,clip:{width:90}});
+    setup.parent.getBoundingClientRect.mockReturnValue({left:-9.625,top:20,width:100.375,height:180});
+    const changed = setup.inspect();
+    expect(changed.ok).toBe(true);
+    if (geometry.ok && changed.ok) {
+      expect(changed.clip.width).toBeCloseTo(90.75,12);
+      expect(changed.clip.width - geometry.clip.width).toBeGreaterThan(0.5);
+    }
+    expect(geometryProofCurrent(geometry)).toBe(false);
+  });
+
+  it('stops both clipping and passive-caption paint-order checks at the fullscreen boundary', () => {
+    const setup = fixture();
+    Object.assign(setup.parent, {previousElementSibling:setup.control});
+    setup.parentStyle.containerType = 'size'; setup.controlStyle.zIndex = '0';
+    expect(setup.inspect()).toMatchObject({ok:false,code:'unsupported-controls'});
+    setup.document.fullscreenElement = setup.parent;
+    expect(setup.inspect()).toMatchObject({ok:true,verifyPlacement:true});
+  });
+
   it.each(['size', 'inline-size'])('admits a %s query container only with post-placement verification', containerType => {
     const setup = fixture(); setup.parentStyle.containerType = containerType;
     expect(setup.inspect()).toMatchObject({ ok: true, verifyPlacement: true });

@@ -7,7 +7,14 @@ export interface Rect {
 
 export type ObjectFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 
-export type GeometryResult = {
+interface GeometryProof {
+  styles: { element: Element; parent: Node | null; style: CSSStyleDeclaration;
+    values: Map<PropertyKey, unknown>; named: Map<string, string> }[];
+  clips: { element: HTMLElement; rect: Rect; layout: number[] }[];
+  viewport: { element: HTMLElement; width: number; height: number } | null;
+}
+
+export type GeometryResult = ({
   ok: true;
   rect: Rect;
   clip: Rect;
@@ -21,7 +28,28 @@ export type GeometryResult = {
   ok: false;
   reason: string;
   code: 'unsupported-geometry' | 'video-not-ready' | 'offscreen' | 'unsupported-controls';
-};
+}) & { proof?: GeometryProof };
+
+export function geometryProofCurrent(geometry: GeometryResult): boolean {
+  const proof = geometry.proof;
+  if (!proof) return false;
+  if (proof.viewport && (proof.viewport.element.clientWidth !== proof.viewport.width || proof.viewport.element.clientHeight !== proof.viewport.height)) return false;
+  for (const entry of proof.styles) {
+    if (entry.element.parentNode !== entry.parent) return false;
+    for (const [key, value] of entry.values) if (Reflect.get(entry.style, key, entry.style) !== value) return false;
+    for (const [key, value] of entry.named) if (entry.style.getPropertyValue(key) !== value) return false;
+  }
+  for (const entry of proof.clips) {
+    const bounds = entry.element.getBoundingClientRect();
+    if ((['left', 'top', 'width', 'height'] as const).some(key => bounds[key] !== entry.rect[key])) return false;
+    const current = [entry.element.clientLeft, entry.element.clientTop, entry.element.clientWidth, entry.element.clientHeight,
+      entry.element.offsetWidth, entry.element.offsetHeight];
+    if (current.some((value, index) => value !== entry.layout[index])) return false;
+  }
+  return true;
+}
+
+type ReadStyle = (element: Element) => CSSStyleDeclaration;
 
 export function calculateImageRect(
   source: { width: number; height: number },
@@ -156,13 +184,13 @@ function inset(box: Rect, clip: Rect): string {
     + `${box.top + box.height - clip.top - clip.height}px ${clip.left - box.left}px`;
 }
 
-function paintOrderRisk(video: Element, style: CSSStyleDeclaration, view: Window): boolean {
+function paintOrderRisk(video: Element, style: CSSStyleDeclaration, readStyle: ReadStyle): boolean {
   if (style.position !== 'static' || style.zIndex !== 'auto'
     || [style.transform, style.translate, style.rotate, style.scale].some((value) => nonDefault(value))) return false;
   let remaining = 32;
   for (let sibling = video.previousElementSibling; sibling; sibling = sibling.previousElementSibling) {
     if (remaining-- === 0) return true;
-    const siblingStyle = view.getComputedStyle(sibling);
+    const siblingStyle = readStyle(sibling);
     if (siblingStyle.display === 'none') continue;
     const siblingZ = Number(siblingStyle.zIndex);
     if (siblingStyle.position !== 'static' && Number.isFinite(siblingZ) && siblingZ !== 0) continue;
@@ -176,7 +204,7 @@ function controlsRemainAbove(
   parent: Element | ShadowRoot,
   clip: Rect,
   style: CSSStyleDeclaration,
-  view: Window,
+  readStyle: ReadStyle,
 ): boolean {
   const root = video.getRootNode() as Document | ShadowRoot;
   if (typeof root.elementsFromPoint !== 'function') return false;
@@ -202,8 +230,8 @@ function controlsRemainAbove(
           let outerBranch: Element | null = element;
           while (outerBranch && outerBranch.parentNode !== outer) outerBranch = composedParent(outerBranch);
           if (outer && outerBranch && outerBranch !== container) {
-            const containerStyle = view.getComputedStyle(container);
-            const outerStyle = view.getComputedStyle(outerBranch);
+            const containerStyle = readStyle(container);
+            const outerStyle = readStyle(outerBranch);
             const containerZ = containerStyle.zIndex === 'auto' ? 0 : Number(containerStyle.zIndex);
             const outerZ = outerStyle.zIndex === 'auto' ? 0 : Number(outerStyle.zIndex);
             if (containerStyle.position !== 'static' && outerStyle.position !== 'static'
@@ -214,7 +242,7 @@ function controlsRemainAbove(
           }
         }
         if (!branch) return false;
-        const branchStyle = view.getComputedStyle(branch);
+        const branchStyle = readStyle(branch);
         const branchZ = branchStyle.zIndex === 'auto' ? 0 : Number(branchStyle.zIndex);
         const follows = !!(video.compareDocumentPosition(branch) & 4);
         const above = branchStyle.position !== 'static'
@@ -228,8 +256,9 @@ function controlsRemainAbove(
 }
 
 export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
+  const proof: GeometryProof = { styles: [], clips: [], viewport: null };
   const reject = (code: Extract<GeometryResult, { ok: false }>['code'], reason: string): GeometryResult =>
-    ({ ok: false, code, reason });
+    ({ ok: false, code, reason, proof });
   if (!video.isConnected || video.readyState < 2 || video.videoWidth <= 0 || video.videoHeight <= 0) {
     return reject('video-not-ready', 'Video must be connected with decoded pixels.');
   }
@@ -244,7 +273,25 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   if (video.ownerDocument.fullscreenElement === video) {
     return reject('unsupported-geometry', 'Direct-video fullscreen cannot contain a sibling canvas.');
   }
-  const computed = view.getComputedStyle(video);
+  const styles = new Map<Element, CSSStyleDeclaration>();
+  let overflow = false;
+  const readStyle: ReadStyle = element => {
+    const cached = styles.get(element);
+    if (cached) return cached;
+    const style = view.getComputedStyle(element);
+    if (styles.size >= 256) { overflow = true; return style; }
+    const values = new Map<PropertyKey, unknown>(), named = new Map<string, string>();
+    const tracked = new Proxy(style, { get(target, key) {
+      if (key === 'getPropertyValue') return (name: string) => {
+        const value = target.getPropertyValue(name); named.set(name, value); return value;
+      };
+      const value: unknown = Reflect.get(target, key, target); values.set(key, value); return value;
+    } });
+    styles.set(element, tracked);
+    proof.styles.push({ element, parent: element.parentNode, style, values, named });
+    return tracked;
+  };
+  const computed = readStyle(video);
   const position = parsePosition(computed.objectPosition);
   const fits: readonly string[] = ['contain', 'cover', 'fill', 'none', 'scale-down'];
   if (!position || !fits.includes(computed.objectFit)) {
@@ -260,7 +307,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     return reject('unsupported-geometry', 'Video transforms must be positive axis-aligned 2D scale/translation without effects.');
   }
   if (computed.position === 'static' && computed.zIndex !== 'auto'
-    && !/^(?:inline-)?(?:flex|grid)$/.test(view.getComputedStyle(composedParent(video)!).display)) {
+    && !/^(?:inline-)?(?:flex|grid)$/.test(readStyle(composedParent(video)!).display)) {
     return reject('unsupported-geometry', 'An inactive video z-index cannot be copied to a fixed canvas.');
   }
   const bounds = video.getBoundingClientRect();
@@ -285,11 +332,13 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   let unresolvedOverflow = false;
   let ancestorRadius: string | null = null;
   let containingBlockOutside = computed.position === 'fixed' ? 'fixed' : computed.position === 'absolute' ? 'absolute' : null;
+  proof.viewport = { element: video.ownerDocument.documentElement, width: video.ownerDocument.documentElement.clientWidth,
+    height: video.ownerDocument.documentElement.clientHeight };
   let clip = intersect(rect, { left: 0, top: 0,
     width: video.ownerDocument.documentElement.clientWidth,
     height: video.ownerDocument.documentElement.clientHeight });
   for (let element: Element | null = video; element; element = composedParent(element)) {
-    const style = element === video ? computed : view.getComputedStyle(element);
+    const style = element === video ? computed : readStyle(element);
     if (style.zoom && !['1', 'normal'].includes(style.zoom)) unresolvedZoom = true;
     if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse'
       || style.contentVisibility === 'hidden') return reject('offscreen', 'Video or ancestor is hidden.');
@@ -316,6 +365,8 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     }
     const ancestor = element as HTMLElement;
     const ancestorRect = ancestor.getBoundingClientRect();
+    proof.clips.push({ element: ancestor, rect: { left: ancestorRect.left, top: ancestorRect.top, width: ancestorRect.width, height: ancestorRect.height },
+      layout: [ancestor.clientLeft, ancestor.clientTop, ancestor.clientWidth, ancestor.clientHeight, ancestor.offsetWidth, ancestor.offsetHeight] });
     if (ancestor.offsetWidth <= 0 || ancestor.offsetHeight <= 0) return reject('offscreen', 'Clipping ancestor has no layout box.');
     const radius = uniformRadius(style, 1, 1);
     if (radius !== '0px') {
@@ -351,27 +402,28 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
   if (clip.width <= 0 || clip.height <= 0) return reject('offscreen', 'Video is outside the viewport or ancestor clip.');
   if (verifyPlacement && unresolvedZoom) return reject('unsupported-geometry', 'New clipping/container cases require an unzoomed ancestor chain.');
   if (verifyPlacement && unresolvedOverflow) return reject('unsupported-geometry', 'Overflow outside the containing-block chain is not supported for new clipping/container cases.');
-  if (paintOrderRisk(video, computed, view)) {
+  if (paintOrderRisk(video, computed, readStyle)) {
     return reject('unsupported-controls', 'Preceding sibling paint order cannot be preserved.');
   }
   if (verifyPlacement) {
     for (let ancestor = composedParent(video); ancestor; ancestor = composedParent(ancestor)) {
-      const style = view.getComputedStyle(ancestor);
+      if (ancestor === video.ownerDocument.fullscreenElement) break;
+      const style = readStyle(ancestor);
       if (style.position === 'static' && style.zIndex !== 'auto') {
         const parent = composedParent(ancestor);
-        if (!parent || !/^(?:inline-)?(?:flex|grid)$/.test(view.getComputedStyle(parent).display)) {
+        if (!parent || !/^(?:inline-)?(?:flex|grid)$/.test(readStyle(parent).display)) {
           return reject('unsupported-controls', 'An inactive ancestor z-index cannot prove caption paint order.');
         }
         break;
       }
       if (style.isolation === 'isolate' || Number(style.opacity) < 1
         || (style.position !== 'static' && style.zIndex !== 'auto')) break;
-      if (paintOrderRisk(ancestor, style, view)) {
+      if (paintOrderRisk(ancestor, style, readStyle)) {
         return reject('unsupported-controls', 'Preceding ancestor-branch paint order cannot be preserved.');
       }
     }
   }
-  if (!controlsRemainAbove(video, parent, clip, computed, view)) {
+  if (!controlsRemainAbove(video, parent, clip, computed, readStyle)) {
     return reject('unsupported-controls', 'Sampled video visibility or control stacking cannot be preserved.');
   }
   const objectFit = computed.objectFit as ObjectFit;
@@ -399,6 +451,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     style.clip = `rect(${clip.top - canvas.top}px, ${clip.left + clip.width - canvas.left}px, `
       + `${clip.top + clip.height - canvas.top}px, ${clip.left - canvas.left}px)`;
   }
+  if (overflow) return reject('unsupported-geometry', 'Geometry proof exceeds its bounded dependency limit.');
   return { ok: true, rect, clip, objectFit, objectPosition, borderRadius, verifyPlacement,
-    placement: { parent, before: video.nextSibling }, style };
+    placement: { parent, before: video.nextSibling }, style, proof };
 }

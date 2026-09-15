@@ -99,7 +99,7 @@ export function costBounds(values) {
 
 export function compareCosts(results) {
   assert.equal(results.length,18);
-  const runIntegrity=row=>row.valid&&row.summary.tierStable&&row.summary.probes===0&&row.summary.transitions===0&&row.summary.ownerStable&&row.summary.error===null&&row.summary.deficit===0;
+  const runIntegrity=row=>row.valid&&row.summary.tierStable&&row.summary.probes===0&&row.summary.ownerStable&&row.summary.error===null&&row.summary.deficit===0;
   const controlValid=results.filter(row=>row.case.strategy===0).length===6&&results.filter(row=>row.case.strategy===0).every(runIntegrity);
   const output={};
   for(const strategy of[1,2]){

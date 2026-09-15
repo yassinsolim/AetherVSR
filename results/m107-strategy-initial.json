@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "phase": "INITIAL_STRATEGY_COMPARISON",
+  "status": "SUPERSEDED_CANDIDATE_NOT_SELECTED",
+  "measurementSourceCommit": "8f7b48223abf52674e4f3a6e97a6b41a68cf7553",
+  "candidateBundleSha256": "4fb71be1e18bd13c64e10a900afd37ae70d88f3df6ead56a3d8ce3af671d517e",
+  "baselineBundleSha256": "ef2e17d32009d1c7bb18a1fc0449d64723b7df763ca43d10b63737edb8e977c7",
+  "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "environment": {
+    "machine": "Apple M5 Mac17,2, 24 GB",
+    "os": "macOS 26.6.2",
+    "browser": "Chrome for Testing 153.0.8010.12",
+    "window": "Native 1200x760 content viewport, DPR2, AC power; exact per-run placement and browser identity in raw reports",
+    "displayRefreshRate": "not measured",
+    "source": "H.264 1280x720, 60/1 CFR, 4.016667s loop, 640x360 CSS",
+    "sourceSha256": "8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a"
+  },
+  "transitions": [
+    {
+      "strategy": 0,
+      "path": ".cache/m107/strategy-s0-01.json",
+      "sha256": "b72c92637ae36c7d50caf91f47f4c9490a91347a704545ce6b84f79a8a2c8993",
+      "bytes": 532607,
+      "cases": 51,
+      "reportedPasses": 0,
+      "postSubmitMismatchSamples": 247,
+      "integrityAndCleanup": true
+    },
+    {
+      "strategy": 1,
+      "path": ".cache/m107/strategy-s1-01.json",
+      "sha256": "c20f676e02160a8653028da5955fff83deb8111bb2b2dc7ddc86f5ec2145b09f",
+      "bytes": 548877,
+      "cases": 51,
+      "reportedPasses": 48,
+      "postSubmitMismatchSamples": 26,
+      "integrityAndCleanup": true
+    },
+    {
+      "strategy": 2,
+      "path": ".cache/m107/strategy-s2-01.json",
+      "sha256": "25bf6ec61b4ffd6708022f6f2ec4ad86398e61fd3125c88f1211a533c48aba3e",
+      "bytes": 548640,
+      "cases": 51,
+      "reportedPasses": 51,
+      "postSubmitMismatchSamples": 0,
+      "integrityAndCleanup": true
+    }
+  ],
+  "transitionScope": [
+    "Seventeen initial cases, three repeats per strategy. S1 failed the unannounced ancestor-position shift in all three repeats.",
+    "S0 lacks geometry/source epochs, so its formal failure count is not a count of demonstrated defects. Source-resize alone had no observed mismatch.",
+    "The original sampler mainly compared rectangles and used cached fitted-image geometry. It did not establish same-rectangle style/clip/control freshness.",
+    "The initial warming case did not prove an unready opening, and sequential scroll/source actions did not prove overlap. Stronger fixtures and an independently timed current-DOM query are required.",
+    "Correlated diagnostic samples are not independent frames or continuous physical-display exposure. Initial S2 local passes do not qualify the revised implementation."
+  ],
+  "costReport": {
+    "path": ".cache/m107/cost-study-01.json",
+    "sha256": "9c85054986a4610d89b990efacf69182c8bb1b8b21d965bc684734b89711e5c7",
+    "bytes": 145357,
+    "runs": 18,
+    "warmupMs": 5000,
+    "observationMs": 60000,
+    "blockOrder": ["012", "120", "201", "021", "210", "102"],
+    "allCapturesValid": true,
+    "allActualNeural": true,
+    "allProbeDeltasZero": true,
+    "allOwnerStableErrorFreeDeficitZero": true,
+    "controllerStateTransitionsPerRun": 30,
+    "stateTransitionScope": "Natural loop rewarming/stable phases retained the neural tier. They are not tier changes or probes."
+  },
+  "correctedAnalysis": {
+    "toolSha256": "1289a8711bc5b81fba1e9b888a66cefdc8e174c55b233ce517069e519cf9f10c",
+    "correction": "Removed an accidentally stricter total-controller-transition-zero predicate. Preregistration forbids actual tier changes/probes, not same-neural phase transitions. Raw original false safety/control flags remain untouched. Numeric bounds and limits are unchanged.",
+    "method": "Six within-block run contrasts, sample SD, df5 one-sided critical 2.0150483733. Cadence penalty is S0 minus candidate; CPU/work penalty is candidate minus S0. No frame pseudoreplication.",
+    "strategies": {
+      "1": {
+        "controlValid": true,
+        "safety": true,
+        "pass": false,
+        "native": {"mean": -0.08634386674369073, "lower95": -0.8922877096301713, "upper95": 0.7195999761427898},
+        "rendered": {"mean": -0.08634386674368837, "lower95": -0.8922877096301701, "upper95": 0.7195999761427935},
+        "core": {"mean": 0, "lower95": 0, "upper95": 0},
+        "driver": {"mean": 0, "lower95": 0, "upper95": 0},
+        "geometry": {"mean": 0.15860914457565112, "lower95": 0.13259108505021147, "upper95": 0.18462720410109076}
+      },
+      "2": {
+        "controlValid": true,
+        "safety": true,
+        "pass": false,
+        "native": {"mean": 0.27186994947348947, "lower95": -0.3835860536020344, "upper95": 0.9273259525490134},
+        "rendered": {"mean": 0.27186994947349064, "lower95": -0.383586053602035, "upper95": 0.9273259525490163},
+        "core": {"mean": 0, "lower95": 0, "upper95": 0},
+        "driver": {"mean": 2.9802322387695312e-8, "lower95": 2.9802322387695312e-8, "upper95": 2.9802322387695312e-8},
+        "geometry": {"mean": 2.0432991936486813, "lower95": 1.9563449931369084, "upper95": 2.1302533941604542}
+      }
+    },
+    "limits": {"cadencePenaltyUpper95Fps": 0.5, "coreP95IncreaseMs": 0.25, "driverP95IncreaseMs": 0.25, "geometryGuardExtraMsPerSecond": 3, "guardP95Ms": 0.2, "guardMaxMs": 2, "visibleFraction": 0.95},
+    "verdict": "NON_REGRESSION_NOT_ESTABLISHED",
+    "scope": "Both cadence upper bounds exceed the allowance. This is failed acceptance, not proof of material regression. Default timer quantization accounts for identical measured p95s and floating-point-sized differences; zero contrasts are measured differences, not zero CPU work. GPU summaries in raw are cumulative session histograms, not window quantiles; layout/style attribution and physical scanout are not measured."
+  },
+  "review": "Independent read-only audit recomputed six-pair bounds and verified all 171 raw hashes/byte counts and summaries. Classification correction PASS; milestone acceptance not approved.",
+  "confirmationReference": "The original six S0 run-level values in cost-study-01.json remain the fixed arithmetic-mean reference for any later two production confirmations; no favorable replacement reference is selected.",
+  "overallExtension": "PARTIAL",
+  "m11": "GATED"
+}

@@ -5,11 +5,24 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'vite';
+import { buildSync } from 'esbuild';
 import { ROOT, sha256 } from './m10-fixtures.mjs';
 import { verifyBuild, openExtension, until } from './m10-browser.mjs';
 import { nativeWindow } from './m105-accounting.mjs';
 
 export const TOLERANCE = 0.5;
+
+export function geometryOracleSource() {
+  const result=buildSync({entryPoints:[join(ROOT,'src/extension/geometry.ts')],bundle:true,write:false,format:'iife',globalName:'M107Geometry',platform:'browser',target:'chrome106'});
+  const source=result.outputFiles[0].text;
+  return {source,sha256:sha256(source)};
+}
+
+export async function installGeometryOracle(native,page,oracle=geometryOracleSource()) {
+  const install=new Function(`${oracle.source}\nglobalThis[Symbol.for('aethervsr.m107.geometry-oracle')]=M107Geometry.inspectGeometry;return true;`);
+  assert.equal(await native.isolated(page,install),true);
+  return {sha256:oracle.sha256,scope:'External diagnostic CDP injection in the verified isolated world only. Fresh read-only geometry inspection shares the supported-geometry rules, never the attachment cache. Not an independent algorithm or pixel/scanout proof; absent from cost collection and packaged production.'};
+}
 
 export function installPresentationObserver({ diagnostic = false } = {}) {
   const key = Symbol.for('aethervsr.m107.observation');
@@ -19,6 +32,9 @@ export function installPresentationObserver({ diagnostic = false } = {}) {
   const attachment = manager?.attachment;
   if (!attachment) throw new Error('Selected authoritative attachment required');
   const video = attachment.video, canvas = attachment.canvas, pipeline = attachment.pipeline;
+  const inspect = globalThis[Symbol.for('aethervsr.m107.geometry-oracle')];
+  if(typeof inspect!=='function')throw new Error('Fresh geometry oracle required');
+  const normalizer = document.createElement('div').style;
   const data = { rows: [], overflow: false, operation: null, generation: 0, wrappers: false };
   let running = true, handle;
   const listeners = [], restores = [];
@@ -31,17 +47,20 @@ export function installPresentationObserver({ diagnostic = false } = {}) {
     const snapshot = attachment.snapshot();
     const current = rect(video), actual = rect(canvas);
     const visible = getComputedStyle(canvas).visibility === 'visible' && canvas.isConnected;
-    const imageSized = ['none','scale-down'].includes(attachment.appliedGeometry?.objectFit);
-    const expected = imageSized && attachment.appliedCanvasRect && attachment.appliedVideoRect ? {
-      ...attachment.appliedCanvasRect,
-      left:attachment.appliedCanvasRect.left+current.left-attachment.appliedVideoRect.left,
-      top:attachment.appliedCanvasRect.top+current.top-attachment.appliedVideoRect.top,
-    } : current;
-    const mismatch = visible && ['left','top','width','height'].some(name => Math.abs(actual[name] - expected[name]) > 0.5);
+    const geometry = inspect(video);
+    const expected = geometry.ok ? Object.fromEntries(['left','top','width','height'].map(name=>[name,Number.parseFloat(geometry.style[name])])) : null;
+    const styleMismatches = geometry.ok ? ['object-fit','object-position','border-radius','clip-path','clip','z-index'].filter(name=>{
+      normalizer.removeProperty(name);
+      if(geometry.style[name]!==undefined)normalizer.setProperty(name,geometry.style[name]);
+      return normalizer.getPropertyValue(name)!==canvas.style.getPropertyValue(name);
+    }) : [];
+    const mismatch = visible && (!expected || styleMismatches.length>0 || ['left','top','width','height'].some(name => Math.abs(actual[name] - expected[name]) > 0.5));
     data.rows.push({ at: performance.now(), reason, operation: data.operation, videoRect: current, canvasRect: actual,
-      expectedRect: expected, appliedRect: snapshot.cssRect, clipRect: attachment.appliedGeometry?.clip ?? null,
+      expectedRect: expected, appliedRect: snapshot.cssRect, clipRect: geometry.ok?geometry.clip:null,appliedClip:attachment.appliedGeometry?.clip??null,
+      geometrySupported:geometry.ok,geometryRejection:geometry.ok?null:geometry.code,styleMismatches,
       canvasVisible: visible, videoVisible: video.checkVisibility({checkOpacity:true,checkVisibilityCSS:true}), mismatch,
       intrinsic: {width:video.videoWidth,height:video.videoHeight}, backing: {width:canvas.width,height:canvas.height},
+      mediaReadyState:video.readyState,
       scroll: {x:scrollX,y:scrollY}, fullscreen: category(document.fullscreenElement), parent: category(canvas.parentNode),
       focused:document.hasFocus(),documentVisibility:document.visibilityState,
       geometryGeneration: attachment.geometryGeneration ?? null, appliedGeometryGeneration: attachment.appliedGeometryGeneration ?? null,
@@ -73,7 +92,7 @@ export function installPresentationObserver({ diagnostic = false } = {}) {
     sample('stop');running=false;cancelAnimationFrame(handle);
     for(const [target,type,listener,capture]of listeners)target.removeEventListener(type,listener,capture);
     for(const restore of restores)restore();
-    return {...data,teardown:()=>attachment.snapshot(),scope:'Diagnostic event/rAF/post-submit samples. Expected rect equals original fixture video box (fixed16:9 contain). Not continuous physical display; null generations mean absent in baseline.'};
+    return {...data,teardown:()=>attachment.snapshot(),scope:'Diagnostic event/rAF/post-submit samples use fresh geometry inspection, actual canvas bounds and canonical owned fit/mask/stack declarations. Shared geometry rules, not an independent implementation. Never performance/physical-display evidence; null generations mean absent in baseline.'};
   }};
   sample('installed');
   return {diagnostic,owner:manager.status().owner};
@@ -84,10 +103,12 @@ export function summarizePresentation(trace) {
   const visible=trace.rows.filter(row=>row.canvasVisible);
   const mismatches=visible.filter(row=>row.mismatch);
   const knownDirty=visible.filter(row=>Number.isInteger(row.geometryGeneration)&&row.geometryGeneration!==row.appliedGeometryGeneration);
+  const errors=visible.flatMap(row=>{const expected=row.expectedRect===undefined?row.videoRect:row.expectedRect;
+    return expected?['left','top','width','height'].map(name=>Math.abs(expected[name]-row.canvasRect[name])):[];});
   return {samples:trace.rows.length,visibleSamples:visible.length,mismatches:mismatches.length,
     knownDirtyVisible:trace.rows.some(row=>Number.isInteger(row.geometryGeneration))?knownDirty.length:null,
     firstMismatch:mismatches[0]??null,lastMismatch:mismatches.at(-1)??null,
-    maximumComponentError:Math.max(0,...mismatches.flatMap(row=>['left','top','width','height'].map(name=>Math.abs(row.videoRect[name]-row.canvasRect[name])))),
+    maximumComponentError:errors.length?Math.max(...errors):null,
     byReason:Object.fromEntries([...new Set(mismatches.map(row=>row.reason))].map(reason=>[reason,mismatches.filter(row=>row.reason===reason).length])),
     scope:'Counts are correlated diagnostic observations, not independent frames. First/last bounds do not prove continuous exposure.'};
 }
@@ -134,7 +155,7 @@ export function prepareTransitionMedia() {
 export function presentationEnvironment() {
   const hardware=JSON.parse(execFileSync('system_profiler',['SPHardwareDataType','-json'],{encoding:'utf8',timeout:15000})).SPHardwareDataType[0];
   const files=['tools/m107-presentation.mjs','tools/m107-performance.mjs','tools/m107-fixture.html','tools/m106-counters.mjs','tools/m105-accounting.mjs',
-    'tools/m10-performance.mjs','tools/m10-browser.mjs','tools/m9-browser.mjs','public/media/m9/720p60.mp4','public/models/aethersr-c16d2.json'];
+    'tools/m10-performance.mjs','tools/m10-browser.mjs','tools/m9-browser.mjs','src/extension/geometry.ts','public/media/m9/720p60.mp4','public/models/aethersr-c16d2.json'];
   const sourcePins=Object.fromEntries(files.map(path=>[path,sha256(readFileSync(join(ROOT,path)))]));
   assert.equal(sourcePins['public/media/m9/720p60.mp4'],'8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a');
   const power=execFileSync('pmset',['-g','batt'],{encoding:'utf8'}).trim();assert(power.includes('AC Power'));
@@ -155,8 +176,19 @@ export const TRANSITIONS = [
   {name:'source-resize',prepare:'intrinsic-resize',actions:['source-high','source-low']},
   {name:'fullscreen-source',prepare:'intrinsic-resize',actions:['fullscreen','source-high','exit']},
   {name:'scroll-source',prepare:'intrinsic-resize',actions:['scroll-1','source-high','scroll-228','source-low']},
-  {name:'warming-scroll',actions:['scroll-228'],warming:true},
+  {name:'warming-scroll',prepare:'paused-output',actions:['resume-scroll'],warming:true},
   {name:'effect-rejection',actions:['unsupported-effect'],negative:true},
+  {name:'insertion-layout',prepare:'paused-last-child',actions:['resume-scroll'],warming:true},
+  {name:'cssom-none-position',prepare:'fit-none',actions:['cssom-position']},
+  {name:'cssom-scale-down-position',prepare:'fit-scale-down',actions:['cssom-position']},
+  {name:'fractional-image-scale',prepare:'fit-none',actions:['cssom-scale']},
+  {name:'caption-mutation',prepare:'passive-caption',actions:['caption-z'],negative:true},
+  {name:'caption-cssom',prepare:'passive-caption',actions:['cssom-caption-z'],negative:true},
+  {name:'cssom-effect',actions:['cssom-effect'],negative:true},
+  {name:'clip-only-resize',prepare:'outer-clip',actions:['cssom-clip']},
+  {name:'fullscreen-outer-caption',prepare:'outer-caption',actions:['fullscreen','exit']},
+  {name:'overlapping-source-scroll',prepare:'intrinsic-resize',actions:['source-high-scroll','source-low-scroll']},
+  {name:'warming-source-scroll',prepare:'intrinsic-resize-paused',actions:['source-high-scroll','source-low'],warming:true},
 ];
 
 export function transitionVerdict(trace, actions, negative=false) {
@@ -198,6 +230,7 @@ export async function runTransitions(prefix,{strategy=1,repeats=3,only=null,prod
     build={directory,provenance};
   }
   const cases=only?TRANSITIONS.filter(item=>only.includes(item.name)):TRANSITIONS;
+  const oracle=geometryOracleSource();
   const report={phase:'TRANSITIONS',strategy,production,repeats,build,apparatus:current.provenance.sourceCommit,environment:presentationEnvironment(),started:new Date().toISOString(),results:[],verdict:'UNVERIFIED'};
   let native,server;
   try{
@@ -208,7 +241,7 @@ export async function runTransitions(prefix,{strategy=1,repeats=3,only=null,prod
       try{
         result.placement=await nativeWindow(page,native.context);await page.goto(server.url);await page.bringToFront();
         if(item.prepare)await page.evaluate(name=>globalThis.__M107_FIXTURE__.prepare(name),item.prepare);
-        await page.waitForFunction(()=>{const video=document.querySelector('video');return video.readyState>=2&&!video.paused;});
+        await page.waitForFunction(warming=>{const video=document.querySelector('video');return video.readyState>=2&&(warming||!video.paused);},!!item.warming);
         const panel=await native.popup(page);
         try{
           tabId=panel.tabId;
@@ -218,6 +251,13 @@ export async function runTransitions(prefix,{strategy=1,repeats=3,only=null,prod
         }finally{await panel.dismiss();}
         await until(()=>native.inspect(tabId),state=>!!state.owner&&!!state.details?.attachment,10000);
         if(!item.warming)await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready,10000);
+        else {
+          await until(()=>native.inspect(tabId),state=>state.details?.attachment?.resources?.pipeline===1,10000);
+          result.warming=await native.isolated(page,()=>{const attachment=globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)].attachment;
+            return {ready:attachment.snapshot().ready,paused:attachment.video.paused,framesRendered:attachment.driver.snapshot().session.framesRendered};});
+          assert.equal(result.warming.ready,false);assert.equal(result.warming.paused,true);assert.equal(result.warming.framesRendered,0);
+        }
+        result.oracle=await installGeometryOracle(native,page,oracle);
         await native.isolated(page,installPresentationObserver,{diagnostic:!production});
         if(!item.warming)await page.evaluate(()=>new Promise(done=>setTimeout(done,250)));
         for(const name of item.actions){
@@ -231,13 +271,21 @@ export async function runTransitions(prefix,{strategy=1,repeats=3,only=null,prod
               await page.waitForFunction(()=>!document.fullscreenElement,undefined,{timeout:3000});
             }else if(name==='resize-fullscreen')await page.evaluate(()=>{window.dispatchEvent(new CustomEvent('aethervsr:m107:operation',{detail:'resize-fullscreen:begin'}));document.getElementById('player').style.height='85%';});
             else await page.evaluate(action=>globalThis.__M107_FIXTURE__.action(action),name);
-            if(name==='smooth')await page.evaluate(()=>new Promise(done=>setTimeout(done,2000)));
-            if(name.startsWith('source-'))await page.waitForFunction(width=>document.querySelector('video').videoWidth===width&&document.querySelector('video').readyState>=2,name==='source-high'?2560:960,{timeout:5000});
+            if(name.startsWith('source-'))await page.waitForFunction(width=>document.querySelector('video').videoWidth===width&&document.querySelector('video').readyState>=2,name.startsWith('source-high')?2560:960,{timeout:5000});
+            action.settled=await page.evaluate(action=>globalThis.__M107_FIXTURE__.settle(action),name);
+            if(name==='smooth')await page.evaluate(start=>new Promise(done=>setTimeout(done,Math.max(0,start+2000-performance.now()))),action.startedAt);
           }catch(error){action.error=String(error);}
-          action.finishedAt=await page.evaluate(()=>performance.now());
+          action.actionCompletedAt=await page.evaluate(()=>performance.now());
+          action.finishedAt=action.settled?.at??action.actionCompletedAt;
           await page.evaluate(()=>new Promise(done=>setTimeout(done,1100)));
         }
         const trace=await native.isolated(page,()=>{const {teardown,...value}=globalThis[Symbol.for('aethervsr.m107.observation')].stop();globalThis[Symbol.for('aethervsr.m107.teardown')]=teardown;return value;});
+        for(const action of result.actions)if(action.name.startsWith('source-')){
+          const width=action.name.startsWith('source-high')?2560:960;
+          const decoded=trace.rows.find(row=>row.at>=action.startedAt&&row.intrinsic.width===width&&row.mediaReadyState>=2);
+          if(decoded){action.decodedAvailableAt=decoded.at;action.finishedAt=decoded.at;if(decoded.at-action.startedAt>5000)action.error='Decoded source startup exceeded 5s';}
+          else action.error??='Decoded source availability was not observed';
+        }
         const packed=gzipSync(JSON.stringify(trace));const path=`${prefix}.${repetition}-${item.name}.json.gz`;writeFileSync(path,packed,{flag:'wx'});
         result.raw={path:relative(ROOT,path),sha256:sha256(packed),bytes:packed.length};result.summary=transitionVerdict(trace,result.actions,item.negative);
         result.integrity=trace.rows.every(row=>row.focused&&row.documentVisibility==='visible');
@@ -267,6 +315,7 @@ export async function diagnoseScroll(prefix) {
     const popup=await native.popup(page);let tabId;
     try{tabId=popup.tabId;await popup.click('#enable');await popup.click('input[value="baseline"]');}finally{await popup.dismiss();}
     await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready&&state.current==='baseline',10000);
+    report.oracle=await installGeometryOracle(native,page);
     await native.isolated(page,installPresentationObserver,{diagnostic:true});
     await page.evaluate(()=>new Promise(done=>setTimeout(done,250)));
     await page.evaluate(()=>{window.dispatchEvent(new CustomEvent('aethervsr:m107:operation',{detail:'page-scroll-228:begin'}));scrollTo({top:228,behavior:'instant'});

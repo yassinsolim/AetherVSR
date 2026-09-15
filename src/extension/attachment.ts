@@ -5,7 +5,7 @@ import { BaselineScaler } from '../core/upscale/baseline-scaler.js';
 import { NeuralUpscaler, NEURAL_OPTIONAL_FEATURES, type NeuralMemoryReport } from '../core/upscale/neural-upscaler.js';
 import type { RuntimeMode, RuntimeState, RuntimeTier } from '../core/upscale/runtime-controller.js';
 import { RuntimeDriver } from '../runtime.js';
-import { inspectGeometry, type GeometryResult, type Rect } from './geometry.js';
+import { geometryProofCurrent, inspectGeometry, type GeometryResult, type Rect } from './geometry.js';
 import type { StatusCode } from './protocol.js';
 
 declare const __AETHERVSR_TEST__: boolean;
@@ -76,6 +76,8 @@ export class VideoAttachment {
   private sourceHeight = 0;
   private sourceUrl = '';
   private appliedGeometry: Extract<GeometryResult, { ok: true }> | null = null;
+  private checkedGeometry: GeometryResult | null = null;
+  private checkedVideoRect: Rect | null = null;
   private appliedVideoRect: Rect | null = null;
   private appliedCanvasRect: Rect | null = null;
   private appliedFullscreen: Element | null = null;
@@ -169,7 +171,8 @@ export class VideoAttachment {
           this.canvas.width !== this.sourceWidth * 2 || this.canvas.height !== this.sourceHeight * 2) { this.hide(); return; }
         if (this.watchdogEnabled() && !this.checkPresentation()) return;
         if (this.geometryGeneration !== this.appliedGeometryGeneration || this.geometryFrame !== null ||
-          this.video.seeking || this.video.readyState < 2 || !this.visible() || !this.videoPipeline?.running || this.outputReady) return;
+          this.video.seeking || this.video.readyState < 2 || !this.visible() || !this.videoPipeline?.running) { this.hide(); return; }
+        if (this.outputReady) return;
         this.outputGeneration = this.sourceGeneration;
         this.outputGeometryGeneration = this.geometryGeneration;
         this.outputReady = true;
@@ -263,15 +266,30 @@ export class VideoAttachment {
   }
 
   private checkPresentation(): boolean {
-    if (this.disposed) return false;
+    if (this.disposed || !this.videoPipeline) return false;
     const sourceChanged = this.sourceChanged();
+    if (sourceChanged) { this.refresh(); return false; }
+    if (this.video.seeking || this.video.readyState < 2 || this.unavailableReason() !== null) { this.hide(); return false; }
     const geometry = this.appliedGeometry, videoRect = this.appliedVideoRect, canvasRect = this.appliedCanvasRect;
     const current = this.video.getBoundingClientRect(), actual = this.canvas.getBoundingClientRect();
-    const sameRect = (left: Rect, right: Rect) => (['left','top','width','height'] as const).every(key => Math.abs(left[key] - right[key]) <= 0.5);
+    const sameRect = (left: Rect, right: Rect, tolerance = 0.5) => (['left','top','width','height'] as const).every(key => Math.abs(left[key] - right[key]) <= tolerance);
+    const proofCurrent = this.checkedGeometry !== null && geometryProofCurrent(this.checkedGeometry);
+    if (!this.eligible) {
+      if ((!this.checkedVideoRect || !sameRect(current, this.checkedVideoRect, 0) || !proofCurrent) && this.geometryFrame === null) this.refresh();
+      this.hide();
+      return false;
+    }
+    const expected = videoRect && canvasRect ? {
+      left: current.left + (canvasRect.left - videoRect.left) * current.width / videoRect.width,
+      top: current.top + (canvasRect.top - videoRect.top) * current.height / videoRect.height,
+      width: canvasRect.width * current.width / videoRect.width,
+      height: canvasRect.height * current.height / videoRect.height,
+    } : null;
     const parent = this.video.parentNode;
-    const intact = !sourceChanged && geometry !== null && videoRect !== null && canvasRect !== null && this.video.isConnected &&
+    const intact = proofCurrent && geometry !== null && videoRect !== null && expected !== null && this.video.isConnected &&
       this.canvas.parentNode === parent && this.video.nextSibling === this.canvas && parent === geometry.placement.parent &&
-      this.video.ownerDocument.fullscreenElement === this.appliedFullscreen && sameRect(current, videoRect) && sameRect(actual, canvasRect);
+      this.video.ownerDocument.fullscreenElement === this.appliedFullscreen && sameRect(current, videoRect, 0) &&
+      (geometry.verifyPlacement ? (['left','top','width','height'] as const).every(key => Math.abs(actual[key] - expected[key]) < 1 / 64) : sameRect(actual, expected));
     if (!intact) {
       if (this.geometryFrame === null) this.refresh(); else this.hide();
       return false;
@@ -288,10 +306,12 @@ export class VideoAttachment {
       node = node.parentNode ?? ('host' in node ? (node as ShadowRoot).host : null);
     }
     if (node || chain.length > 32) { this.fail('unsupported-geometry', 'Presentation ancestor chain exceeds its bounded limit.'); return; }
-    if (chain.length === this.ancestors.length && chain.every((value,index) => value === this.ancestors[index])) return;
+    const observed = [...new Set<Node>([...chain,...(this.checkedGeometry?.proof?.styles.map(entry => entry.element) ?? [])])];
+    if (observed.length > 256) { this.fail('unsupported-geometry', 'Presentation dependencies exceed their bounded limit.'); return; }
+    if (observed.length === this.ancestors.length && observed.every((value,index) => value === this.ancestors[index])) return;
     this.mutations.disconnect();
-    this.ancestors = chain;
-    for (const ancestor of chain) this.mutations.observe(ancestor, { attributes: true, attributeOldValue: true, childList: true,
+    this.ancestors = observed;
+    for (const ancestor of observed) this.mutations.observe(ancestor, { attributes: true, attributeOldValue: true, childList: true,
       attributeFilter: ['class','style','hidden','width','height','controls'] });
   }
 
@@ -325,6 +345,10 @@ export class VideoAttachment {
       this.infrastructure.geometryTotalMs += duration;
       this.infrastructure.geometryMaxMs = Math.max(this.infrastructure.geometryMaxMs ?? 0, duration);
     }
+    this.checkedGeometry = geometry;
+    this.checkedVideoRect = geometry.ok ? geometry.rect : this.video.getBoundingClientRect();
+    this.observeAncestors();
+    if (this.disposed) return;
     if (!geometry.ok) {
       if (geometry.code === 'offscreen' || geometry.code === 'video-not-ready') this.suspend(geometry.code);
       else this.fail(geometry.code, geometry.reason);
@@ -355,11 +379,16 @@ export class VideoAttachment {
         return;
       }
     }
+    const currentVideoRect = this.video.getBoundingClientRect();
+    if (!geometryProofCurrent(geometry) || (['left', 'top', 'width', 'height'] as const).some(key => currentVideoRect[key] !== geometry.rect[key])) {
+      this.refresh();
+      return;
+    }
     this.style('visibility', this.currentOutput() ? 'visible' : 'hidden');
     this.appliedGeometry = geometry;
     this.appliedCanvasRect = {left:Number.parseFloat(geometry.style.left!),top:Number.parseFloat(geometry.style.top!),
       width:Number.parseFloat(geometry.style.width!),height:Number.parseFloat(geometry.style.height!)};
-    this.appliedVideoRect = this.video.getBoundingClientRect();
+    this.appliedVideoRect = currentVideoRect;
     this.appliedFullscreen = this.video.ownerDocument.fullscreenElement;
     this.eligible = true;
     this.appliedGeometryGeneration = this.geometryGeneration;
@@ -553,6 +582,8 @@ export class VideoAttachment {
     this.mutations = null;
     this.ancestors = [];
     this.appliedGeometry = null;
+    this.checkedGeometry = null;
+    this.checkedVideoRect = null;
     this.appliedVideoRect = null;
     this.appliedCanvasRect = null;
     this.presentationFrame = null;
