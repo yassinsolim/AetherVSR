@@ -1,0 +1,2562 @@
+{
+  "schemaVersion": 1,
+  "extensionVerdict": "PARTIAL",
+  "scope": "Native regression outcomes, not new performance or visual-quality acceptance. Failed public/regression attempts remain retained.",
+  "lifecycle": [
+    {
+      "kind": "production",
+      "raw": {
+        "path": ".cache/m106/journeys-production-01.json",
+        "sha256": "51d3c255383ed3018a667cf8c795382ac911856371ea9a7bb7dca6838a97df52",
+        "bytes": 918172
+      },
+      "build": {
+        "sourceCommit": "d7e66deacd925b67377463286967280a4e1d2257",
+        "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "totalBytes": 265958,
+        "sourceDirty": false
+      },
+      "started": "2026-09-15T06:55:21.525Z",
+      "finished": "2026-09-15T06:57:22.270Z",
+      "verdict": "PASS_LIFECYCLE_ONLY",
+      "count": 45,
+      "journeys": [
+        {
+          "name": "installed but unactivated",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:22.177Z",
+          "finished": "2026-09-15T06:55:22.361Z"
+        },
+        {
+          "name": "actual activation, isolated model, duplicate enable",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:22.362Z",
+          "finished": "2026-09-15T06:55:23.880Z"
+        },
+        {
+          "name": "supported custom",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:23.881Z",
+          "finished": "2026-09-15T06:55:25.340Z"
+        },
+        {
+          "name": "supported cors",
+          "fixture": "cors",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:25.340Z",
+          "finished": "2026-09-15T06:55:26.804Z"
+        },
+        {
+          "name": "supported contain",
+          "fixture": "contain",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:26.804Z",
+          "finished": "2026-09-15T06:55:28.278Z"
+        },
+        {
+          "name": "supported cover",
+          "fixture": "cover",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:28.278Z",
+          "finished": "2026-09-15T06:55:29.722Z"
+        },
+        {
+          "name": "supported clipped",
+          "fixture": "clipped",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:29.722Z",
+          "finished": "2026-09-15T06:55:31.177Z"
+        },
+        {
+          "name": "supported radius",
+          "fixture": "radius",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:31.178Z",
+          "finished": "2026-09-15T06:55:32.627Z"
+        },
+        {
+          "name": "supported translated",
+          "fixture": "translated",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:32.628Z",
+          "finished": "2026-09-15T06:55:34.134Z"
+        },
+        {
+          "name": "supported mse",
+          "fixture": "mse",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:34.135Z",
+          "finished": "2026-09-15T06:55:35.667Z"
+        },
+        {
+          "name": "supported controls/captions",
+          "fixture": "controls/captions",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:35.668Z",
+          "finished": "2026-09-15T06:55:37.245Z"
+        },
+        {
+          "name": "supported caption-after-auto-passive",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:37.246Z",
+          "finished": "2026-09-15T06:55:38.835Z"
+        },
+        {
+          "name": "supported caption-before-positive-passive",
+          "fixture": "caption-before-positive-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:38.836Z",
+          "finished": "2026-09-15T06:55:40.402Z"
+        },
+        {
+          "name": "supported rounded-ancestor",
+          "fixture": "rounded-ancestor",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:40.403Z",
+          "finished": "2026-09-15T06:55:42.511Z"
+        },
+        {
+          "name": "supported size-container",
+          "fixture": "size-container",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:42.513Z",
+          "finished": "2026-09-15T06:55:44.535Z"
+        },
+        {
+          "name": "supported positioned-ancestor",
+          "fixture": "positioned-ancestor",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:44.536Z",
+          "finished": "2026-09-15T06:55:46.004Z"
+        },
+        {
+          "name": "explicit unsupported native",
+          "fixture": "native",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:46.006Z",
+          "finished": "2026-09-15T06:55:47.414Z"
+        },
+        {
+          "name": "explicit unsupported nocors",
+          "fixture": "nocors",
+          "verdict": "PASS",
+          "pageErrors": [
+            {
+              "error": "SecurityError: Failed to execute 'importExternalTexture' on 'GPUDevice': Video element is tainted by cross-origin data and may not be loaded.",
+              "expected": true
+            }
+          ],
+          "started": "2026-09-15T06:55:47.416Z",
+          "finished": "2026-09-15T06:55:48.705Z"
+        },
+        {
+          "name": "explicit unsupported iframe",
+          "fixture": "iframe",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:48.708Z",
+          "finished": "2026-09-15T06:55:50.139Z"
+        },
+        {
+          "name": "explicit unsupported sameiframe",
+          "fixture": "sameiframe",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:50.141Z",
+          "finished": "2026-09-15T06:55:51.560Z"
+        },
+        {
+          "name": "explicit unsupported caption-before-auto-passive",
+          "fixture": "caption-before-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:51.562Z",
+          "finished": "2026-09-15T06:55:54.971Z"
+        },
+        {
+          "name": "explicit unsupported rounded-offset",
+          "fixture": "rounded-offset",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:54.973Z",
+          "finished": "2026-09-15T06:55:56.369Z"
+        },
+        {
+          "name": "geometry guard style mutation",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:55:56.370Z",
+          "finished": "2026-09-15T06:56:00.008Z"
+        },
+        {
+          "name": "geometry guard z-index mutation",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:00.016Z",
+          "finished": "2026-09-15T06:56:03.594Z"
+        },
+        {
+          "name": "geometry guard passive-caption mutation",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:03.596Z",
+          "finished": "2026-09-15T06:56:07.145Z"
+        },
+        {
+          "name": "scroll, offscreen suspension, and native resize",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:07.147Z",
+          "finished": "2026-09-15T06:56:09.028Z"
+        },
+        {
+          "name": "multiple video single owner",
+          "fixture": "multiple",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:09.030Z",
+          "finished": "2026-09-15T06:56:10.209Z"
+        },
+        {
+          "name": "same-element removal and reinsertion",
+          "fixture": "reinsert",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:10.211Z",
+          "finished": "2026-09-15T06:56:15.810Z"
+        },
+        {
+          "name": "dynamic playback and size owner hysteresis",
+          "fixture": "multiple",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:15.812Z",
+          "finished": "2026-09-15T06:56:21.940Z"
+        },
+        {
+          "name": "video reparent and old-parent removal",
+          "fixture": "reinsert",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:21.942Z",
+          "finished": "2026-09-15T06:56:25.387Z"
+        },
+        {
+          "name": "late inserted video",
+          "fixture": "late",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:25.390Z",
+          "finished": "2026-09-15T06:56:26.890Z"
+        },
+        {
+          "name": "late-ready open-shadow media and listener teardown",
+          "fixture": "open-shadow-late",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:26.892Z",
+          "finished": "2026-09-15T06:56:30.669Z"
+        },
+        {
+          "name": "SPA replacement, authoritative source change, and back",
+          "fixture": "spa",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:30.672Z",
+          "finished": "2026-09-15T06:56:34.707Z"
+        },
+        {
+          "name": "ClearKey MediaKeys detection only",
+          "fixture": "drm",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:34.710Z",
+          "finished": "2026-09-15T06:56:35.992Z"
+        },
+        {
+          "name": "20 enable-disable resource and DOM cycles",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:35.996Z",
+          "finished": "2026-09-15T06:56:55.206Z"
+        },
+        {
+          "name": "hostile overlay removal stays bounded",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:55.210Z",
+          "finished": "2026-09-15T06:56:58.618Z"
+        },
+        {
+          "name": "page-owned fullscreen",
+          "fixture": "fullscreen",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:56:58.621Z",
+          "finished": "2026-09-15T06:57:00.351Z"
+        },
+        {
+          "name": "page-owned directfs",
+          "fixture": "fullscreen",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:00.355Z",
+          "finished": "2026-09-15T06:57:02.056Z"
+        },
+        {
+          "name": "page-owned pip",
+          "fixture": "pip",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:02.060Z",
+          "finished": "2026-09-15T06:57:03.637Z"
+        },
+        {
+          "name": "native service-worker stop and restart",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:03.640Z",
+          "finished": "2026-09-15T06:57:05.449Z"
+        },
+        {
+          "name": "unenabled second tab remains untouched",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:05.453Z",
+          "finished": "2026-09-15T06:57:06.966Z"
+        },
+        {
+          "name": "two enabled tabs with independent modes and suspension",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:06.971Z",
+          "finished": "2026-09-15T06:57:14.049Z"
+        },
+        {
+          "name": "active origin navigation revokes access",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:14.053Z",
+          "finished": "2026-09-15T06:57:14.793Z"
+        },
+        {
+          "name": "disabled back navigation preserves only mode",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:14.798Z",
+          "finished": "2026-09-15T06:57:17.016Z"
+        },
+        {
+          "name": "native extension reload and fresh popup reinjection",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:17.022Z",
+          "finished": "2026-09-15T06:57:22.105Z"
+        }
+      ],
+      "reload": [
+        {
+          "name": "extension-reload-request",
+          "at": "2026-09-15T06:57:17.722Z",
+          "data": {
+            "method": "Chrome extensions-page Reload control",
+            "extensionId": "jmloobfdfnfedcdacgoiakeejoibebkh",
+            "previousTargetId": "B47801CE5DA4EE6A0AA9F53A0BA57974",
+            "workerURL": "chrome-extension://jmloobfdfnfedcdacgoiakeejoibebkh/service-worker.js"
+          }
+        },
+        {
+          "name": "extension-reload-worker-ready",
+          "at": "2026-09-15T06:57:18.297Z",
+          "data": {
+            "targetId": "7E453BA6E6C69E08AB91C17981A2BD2E",
+            "extensionId": "jmloobfdfnfedcdacgoiakeejoibebkh",
+            "workerURL": "chrome-extension://jmloobfdfnfedcdacgoiakeejoibebkh/service-worker.js"
+          }
+        },
+        {
+          "name": "extension-reloaded",
+          "at": "2026-09-15T06:57:18.798Z",
+          "data": {
+            "extensionId": "jmloobfdfnfedcdacgoiakeejoibebkh",
+            "workerURL": "chrome-extension://jmloobfdfnfedcdacgoiakeejoibebkh/service-worker.js",
+            "mechanism": "ui",
+            "previousTargetId": "B47801CE5DA4EE6A0AA9F53A0BA57974",
+            "freshTargetId": "7E453BA6E6C69E08AB91C17981A2BD2E",
+            "oldWorkerClosed": true,
+            "freshWorkerHandle": true,
+            "elapsedMs": 1076,
+            "scope": "Explicit recorded package-reload mechanism through old-worker closure, fresh exact-ID worker and installed-path verification; no page reactivation claim"
+          }
+        }
+      ],
+      "performance": "not measured",
+      "limits": {
+        "visual": "UNVERIFIED: review local screenshots for object-fit, clipping, radii and caption stacking",
+        "encryptedStream": "UNVERIFIED: ClearKey test attaches MediaKeys to clear media only",
+        "displayRefreshRate": "not measured"
+      },
+      "machine": {
+        "hostname": "MBP-0569.lan",
+        "os": "darwin",
+        "release": "25.6.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "osVersion": "26.6.2"
+      }
+    },
+    {
+      "kind": "diagnostic",
+      "raw": {
+        "path": ".cache/m106/journeys-diagnostic-01.json",
+        "sha256": "45fa6d492c87a92a159889c0f69dd08c9436da53b3a5d860b795352fbbd1a4e8",
+        "bytes": 987813
+      },
+      "build": {
+        "sourceCommit": "d7e66deacd925b67377463286967280a4e1d2257",
+        "bundleSha256": "ef2e17d32009d1c7bb18a1fc0449d64723b7df763ca43d10b63737edb8e977c7",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "totalBytes": 266426,
+        "sourceDirty": false
+      },
+      "started": "2026-09-15T06:57:22.272Z",
+      "finished": "2026-09-15T06:59:34.048Z",
+      "verdict": "PASS_LIFECYCLE_ONLY",
+      "count": 49,
+      "journeys": [
+        {
+          "name": "installed but unactivated",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:22.913Z",
+          "finished": "2026-09-15T06:57:23.083Z"
+        },
+        {
+          "name": "actual activation, isolated model, duplicate enable",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:23.083Z",
+          "finished": "2026-09-15T06:57:24.604Z"
+        },
+        {
+          "name": "supported custom",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:24.605Z",
+          "finished": "2026-09-15T06:57:26.073Z"
+        },
+        {
+          "name": "supported cors",
+          "fixture": "cors",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:26.073Z",
+          "finished": "2026-09-15T06:57:27.575Z"
+        },
+        {
+          "name": "supported contain",
+          "fixture": "contain",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:27.576Z",
+          "finished": "2026-09-15T06:57:29.077Z"
+        },
+        {
+          "name": "supported cover",
+          "fixture": "cover",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:29.077Z",
+          "finished": "2026-09-15T06:57:30.569Z"
+        },
+        {
+          "name": "supported clipped",
+          "fixture": "clipped",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:30.569Z",
+          "finished": "2026-09-15T06:57:32.005Z"
+        },
+        {
+          "name": "supported radius",
+          "fixture": "radius",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:32.005Z",
+          "finished": "2026-09-15T06:57:33.479Z"
+        },
+        {
+          "name": "supported translated",
+          "fixture": "translated",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:33.480Z",
+          "finished": "2026-09-15T06:57:34.949Z"
+        },
+        {
+          "name": "supported mse",
+          "fixture": "mse",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:34.949Z",
+          "finished": "2026-09-15T06:57:36.512Z"
+        },
+        {
+          "name": "supported controls/captions",
+          "fixture": "controls/captions",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:36.513Z",
+          "finished": "2026-09-15T06:57:38.139Z"
+        },
+        {
+          "name": "supported caption-after-auto-passive",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:38.140Z",
+          "finished": "2026-09-15T06:57:39.738Z"
+        },
+        {
+          "name": "supported caption-before-positive-passive",
+          "fixture": "caption-before-positive-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:39.739Z",
+          "finished": "2026-09-15T06:57:41.352Z"
+        },
+        {
+          "name": "supported rounded-ancestor",
+          "fixture": "rounded-ancestor",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:41.353Z",
+          "finished": "2026-09-15T06:57:43.439Z"
+        },
+        {
+          "name": "supported size-container",
+          "fixture": "size-container",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:43.441Z",
+          "finished": "2026-09-15T06:57:45.481Z"
+        },
+        {
+          "name": "supported positioned-ancestor",
+          "fixture": "positioned-ancestor",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:45.483Z",
+          "finished": "2026-09-15T06:57:46.951Z"
+        },
+        {
+          "name": "explicit unsupported native",
+          "fixture": "native",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:46.952Z",
+          "finished": "2026-09-15T06:57:48.370Z"
+        },
+        {
+          "name": "explicit unsupported nocors",
+          "fixture": "nocors",
+          "verdict": "PASS",
+          "pageErrors": [
+            {
+              "error": "SecurityError: Failed to execute 'importExternalTexture' on 'GPUDevice': Video element is tainted by cross-origin data and may not be loaded.",
+              "expected": true
+            }
+          ],
+          "started": "2026-09-15T06:57:48.371Z",
+          "finished": "2026-09-15T06:57:49.773Z"
+        },
+        {
+          "name": "explicit unsupported iframe",
+          "fixture": "iframe",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:49.775Z",
+          "finished": "2026-09-15T06:57:51.207Z"
+        },
+        {
+          "name": "explicit unsupported sameiframe",
+          "fixture": "sameiframe",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:51.209Z",
+          "finished": "2026-09-15T06:57:52.649Z"
+        },
+        {
+          "name": "explicit unsupported caption-before-auto-passive",
+          "fixture": "caption-before-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:52.651Z",
+          "finished": "2026-09-15T06:57:55.990Z"
+        },
+        {
+          "name": "explicit unsupported rounded-offset",
+          "fixture": "rounded-offset",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:55.991Z",
+          "finished": "2026-09-15T06:57:57.443Z"
+        },
+        {
+          "name": "geometry guard style mutation",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:57:57.444Z",
+          "finished": "2026-09-15T06:58:01.083Z"
+        },
+        {
+          "name": "geometry guard z-index mutation",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:01.085Z",
+          "finished": "2026-09-15T06:58:04.681Z"
+        },
+        {
+          "name": "geometry guard passive-caption mutation",
+          "fixture": "caption-after-auto-passive",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:04.682Z",
+          "finished": "2026-09-15T06:58:08.264Z"
+        },
+        {
+          "name": "scroll, offscreen suspension, and native resize",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:08.266Z",
+          "finished": "2026-09-15T06:58:10.151Z"
+        },
+        {
+          "name": "multiple video single owner",
+          "fixture": "multiple",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:10.153Z",
+          "finished": "2026-09-15T06:58:11.321Z"
+        },
+        {
+          "name": "same-element removal and reinsertion",
+          "fixture": "reinsert",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:11.324Z",
+          "finished": "2026-09-15T06:58:16.914Z"
+        },
+        {
+          "name": "dynamic playback and size owner hysteresis",
+          "fixture": "multiple",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:16.916Z",
+          "finished": "2026-09-15T06:58:23.036Z"
+        },
+        {
+          "name": "video reparent and old-parent removal",
+          "fixture": "reinsert",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:23.039Z",
+          "finished": "2026-09-15T06:58:26.464Z"
+        },
+        {
+          "name": "late inserted video",
+          "fixture": "late",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:26.466Z",
+          "finished": "2026-09-15T06:58:28.028Z"
+        },
+        {
+          "name": "late-ready open-shadow media and listener teardown",
+          "fixture": "open-shadow-late",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:28.030Z",
+          "finished": "2026-09-15T06:58:31.838Z"
+        },
+        {
+          "name": "SPA replacement, authoritative source change, and back",
+          "fixture": "spa",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:31.841Z",
+          "finished": "2026-09-15T06:58:35.880Z"
+        },
+        {
+          "name": "ClearKey MediaKeys detection only",
+          "fixture": "drm",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:35.881Z",
+          "finished": "2026-09-15T06:58:37.146Z"
+        },
+        {
+          "name": "20 enable-disable resource and DOM cycles",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:37.149Z",
+          "finished": "2026-09-15T06:58:55.797Z"
+        },
+        {
+          "name": "hostile overlay removal stays bounded",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:55.800Z",
+          "finished": "2026-09-15T06:58:59.236Z"
+        },
+        {
+          "name": "page-owned fullscreen",
+          "fixture": "fullscreen",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:58:59.239Z",
+          "finished": "2026-09-15T06:59:00.983Z"
+        },
+        {
+          "name": "page-owned directfs",
+          "fixture": "fullscreen",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:00.986Z",
+          "finished": "2026-09-15T06:59:02.700Z"
+        },
+        {
+          "name": "page-owned pip",
+          "fixture": "pip",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:02.704Z",
+          "finished": "2026-09-15T06:59:04.277Z"
+        },
+        {
+          "name": "native service-worker stop and restart",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:04.281Z",
+          "finished": "2026-09-15T06:59:06.085Z"
+        },
+        {
+          "name": "unenabled second tab remains untouched",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:06.088Z",
+          "finished": "2026-09-15T06:59:07.575Z"
+        },
+        {
+          "name": "two enabled tabs with independent modes and suspension",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:07.579Z",
+          "finished": "2026-09-15T06:59:14.763Z"
+        },
+        {
+          "name": "active origin navigation revokes access",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:14.769Z",
+          "finished": "2026-09-15T06:59:15.505Z"
+        },
+        {
+          "name": "disabled back navigation preserves only mode",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:15.511Z",
+          "finished": "2026-09-15T06:59:17.732Z"
+        },
+        {
+          "name": "isolated diagnostics cors",
+          "fixture": "cors",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:17.737Z",
+          "finished": "2026-09-15T06:59:20.368Z"
+        },
+        {
+          "name": "isolated diagnostics nocors",
+          "fixture": "nocors",
+          "verdict": "PASS",
+          "pageErrors": [
+            {
+              "error": "SecurityError: Failed to execute 'importExternalTexture' on 'GPUDevice': Video element is tainted by cross-origin data and may not be loaded.",
+              "expected": true
+            },
+            {
+              "error": "SecurityError: Failed to execute 'copyExternalImageToTexture' on 'GPUQueue': Video element is tainted by cross-origin data and may not be loaded.",
+              "expected": true
+            }
+          ],
+          "started": "2026-09-15T06:59:20.374Z",
+          "finished": "2026-09-15T06:59:22.830Z"
+        },
+        {
+          "name": "isolated diagnostics custom",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:22.838Z",
+          "finished": "2026-09-15T06:59:25.369Z"
+        },
+        {
+          "name": "test-only actual GPU device loss stays terminal",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:25.381Z",
+          "finished": "2026-09-15T06:59:28.762Z"
+        },
+        {
+          "name": "native extension reload and fresh popup reinjection",
+          "fixture": "custom",
+          "verdict": "PASS",
+          "pageErrors": [],
+          "started": "2026-09-15T06:59:28.767Z",
+          "finished": "2026-09-15T06:59:33.877Z"
+        }
+      ],
+      "reload": [
+        {
+          "name": "extension-reload-request",
+          "at": "2026-09-15T06:59:29.462Z",
+          "data": {
+            "method": "Chrome extensions-page Reload control",
+            "extensionId": "ghkbbdpffllibhfgeeepcfblaajbmdjn",
+            "previousTargetId": "BD902EE16996DD637DDEDB43CFEB3D30",
+            "workerURL": "chrome-extension://ghkbbdpffllibhfgeeepcfblaajbmdjn/service-worker.js"
+          }
+        },
+        {
+          "name": "extension-reload-worker-ready",
+          "at": "2026-09-15T06:59:30.047Z",
+          "data": {
+            "targetId": "CD8861044E89649C33A36C8E60E079E8",
+            "extensionId": "ghkbbdpffllibhfgeeepcfblaajbmdjn",
+            "workerURL": "chrome-extension://ghkbbdpffllibhfgeeepcfblaajbmdjn/service-worker.js"
+          }
+        },
+        {
+          "name": "extension-reloaded",
+          "at": "2026-09-15T06:59:30.551Z",
+          "data": {
+            "extensionId": "ghkbbdpffllibhfgeeepcfblaajbmdjn",
+            "workerURL": "chrome-extension://ghkbbdpffllibhfgeeepcfblaajbmdjn/service-worker.js",
+            "mechanism": "ui",
+            "previousTargetId": "BD902EE16996DD637DDEDB43CFEB3D30",
+            "freshTargetId": "CD8861044E89649C33A36C8E60E079E8",
+            "oldWorkerClosed": true,
+            "freshWorkerHandle": true,
+            "elapsedMs": 1092,
+            "scope": "Explicit recorded package-reload mechanism through old-worker closure, fresh exact-ID worker and installed-path verification; no page reactivation claim"
+          }
+        }
+      ],
+      "performance": "not measured",
+      "limits": {
+        "visual": "UNVERIFIED: review local screenshots for object-fit, clipping, radii and caption stacking",
+        "encryptedStream": "UNVERIFIED: ClearKey test attaches MediaKeys to clear media only",
+        "displayRefreshRate": "not measured"
+      },
+      "machine": {
+        "hostname": "MBP-0569.lan",
+        "os": "darwin",
+        "release": "25.6.0",
+        "arch": "arm64",
+        "cpu": "Apple M5",
+        "osVersion": "26.6.2"
+      }
+    }
+  ],
+  "public": [
+    {
+      "name": "shaka",
+      "ordinal": 1,
+      "raw": {
+        "path": ".cache/m10/sites-m106-shaka-1.json",
+        "sha256": "116011bce88229598ffc6856142ea16f7ce2f4adc1753169c2559d68c711cbf9",
+        "bytes": 69817
+      },
+      "build": {
+        "sourceCommit": "d7e66deacd925b67377463286967280a4e1d2257",
+        "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "totalBytes": 265958,
+        "sourceDirty": false
+      },
+      "started": "2026-09-15T06:51:54.073Z",
+      "finished": "2026-09-15T06:52:00.615Z",
+      "verdict": "NEGATIVE",
+      "observedMs": null,
+      "error": "Actual extension rejection: unsupported-media",
+      "rejection": {
+        "code": "unsupported-media",
+        "message": "Video is outside the viewport or ancestor clip.",
+        "videos": [
+          {
+            "width": 834,
+            "height": 480,
+            "readyState": 4,
+            "networkState": 2,
+            "error": null,
+            "paused": false,
+            "ended": false
+          }
+        ]
+      },
+      "scenarios": [],
+      "fullscreen": "not measured: optional native-control scenario omitted",
+      "disabled": {
+        "schemaVersion": 1,
+        "enabled": false,
+        "code": "inactive",
+        "message": "Enhancement is disabled; original video is unchanged.",
+        "mode": "auto",
+        "current": null,
+        "candidates": 0,
+        "embeddedFrames": 0,
+        "owner": null,
+        "details": {
+          "attachment": null,
+          "lastTeardown": null,
+          "infrastructure": {
+            "discoveryCalls": 1,
+            "discoveryMs": 1.4000000059604645,
+            "geometryCalls": 1,
+            "geometryMs": 0.8999999761581421,
+            "mutationBatches": 0,
+            "ownerChanges": 0,
+            "created": 0,
+            "destroyed": 0,
+            "maximumConcurrent": 0
+          },
+          "discoveryActive": false,
+          "timerCount": 0,
+          "limitations": "Top-document video only; closed-shadow/iframe video cannot be inspected. Host permission does not override media origin-clean rules."
+        }
+      },
+      "errors": {
+        "counts": {
+          "third-party-page": 5
+        },
+        "samples": [
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          }
+        ],
+        "omittedSamples": 0,
+        "corsCorrelated": true
+      },
+      "finalRuntimeSession": "not measured",
+      "scope": "Original public player controls; session counters include startup/seeks/pauses and are not local 600s calibrated rates. No public pixel capture."
+    },
+    {
+      "name": "shaka",
+      "ordinal": 2,
+      "raw": {
+        "path": ".cache/m10/sites-m106-shaka-2.json",
+        "sha256": "a512cdfdee487d754ccdda47b378f2558833699254b0a3e2e053ba0f9a2d54dc",
+        "bytes": 2900126
+      },
+      "build": {
+        "sourceCommit": "d7e66deacd925b67377463286967280a4e1d2257",
+        "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "totalBytes": 265958,
+        "sourceDirty": false
+      },
+      "started": "2026-09-15T06:52:00.622Z",
+      "finished": "2026-09-15T06:55:06.947Z",
+      "verdict": "PASS",
+      "observedMs": 180045.138208,
+      "error": null,
+      "rejection": null,
+      "scenarios": [
+        {
+          "name": "relative-seek",
+          "scheduledMs": 30000,
+          "startedMs": 30352.161166,
+          "verdict": "PASS",
+          "result": {
+            "method": "Original HTMLVideoElement.currentTime, bounded by seekable range",
+            "from": 33.231795,
+            "target": 38.231795,
+            "observed": {
+              "seeking": false,
+              "time": 38.254611
+            }
+          },
+          "owner": "video-1",
+          "current": "neural",
+          "geometry": [
+            {
+              "uuid": "f1b9d474-49f2-470c-8e37-5183709c4fdb",
+              "rect": {
+                "left": 173,
+                "top": 78,
+                "width": 854,
+                "height": 491.1171875
+              },
+              "style": {
+                "display": "block",
+                "visibility": "visible",
+                "opacity": "1",
+                "position": "fixed",
+                "z-index": "auto",
+                "object-fit": "contain",
+                "object-position": "50% 50%",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "transform": "none",
+                "filter": "none",
+                "backdrop-filter": "none",
+                "perspective": "none",
+                "contain": "none",
+                "will-change": "auto",
+                "clip-path": "inset(0px)",
+                "mask-image": "none",
+                "border-radius": "0px",
+                "border-width": "0px",
+                "padding": "0px",
+                "mix-blend-mode": "normal",
+                "isolation": "auto",
+                "pointer-events": "none",
+                "content-visibility": "visible",
+                "container-type": "normal",
+                "overflow-clip-margin": "0px",
+                "translate": "none",
+                "rotate": "none",
+                "scale": "none",
+                "clip": "auto",
+                "-webkit-mask-image": "none",
+                "zoom": "1",
+                "border-top-left-radius": "0px",
+                "border-top-right-radius": "0px",
+                "border-bottom-right-radius": "0px",
+                "border-bottom-left-radius": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px"
+              },
+              "width": 2504,
+              "height": 1440,
+              "videoIndex": 0
+            }
+          ],
+          "finishedMs": 30611.173207999997
+        },
+        {
+          "name": "original-pause-resume",
+          "scheduledMs": 50000,
+          "startedMs": 50904.119915999996,
+          "verdict": "PASS",
+          "result": {
+            "method": "Visible original Pause and Play buttons",
+            "pausedFrames": 1602,
+            "holdMs": 1500
+          },
+          "owner": "video-1",
+          "current": "neural",
+          "geometry": [
+            {
+              "uuid": "f1b9d474-49f2-470c-8e37-5183709c4fdb",
+              "rect": {
+                "left": 173,
+                "top": 78,
+                "width": 854,
+                "height": 491.1171875
+              },
+              "style": {
+                "display": "block",
+                "visibility": "visible",
+                "opacity": "1",
+                "position": "fixed",
+                "z-index": "auto",
+                "object-fit": "contain",
+                "object-position": "50% 50%",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "transform": "none",
+                "filter": "none",
+                "backdrop-filter": "none",
+                "perspective": "none",
+                "contain": "none",
+                "will-change": "auto",
+                "clip-path": "inset(0px)",
+                "mask-image": "none",
+                "border-radius": "0px",
+                "border-width": "0px",
+                "padding": "0px",
+                "mix-blend-mode": "normal",
+                "isolation": "auto",
+                "pointer-events": "none",
+                "content-visibility": "visible",
+                "container-type": "normal",
+                "overflow-clip-margin": "0px",
+                "translate": "none",
+                "rotate": "none",
+                "scale": "none",
+                "clip": "auto",
+                "-webkit-mask-image": "none",
+                "zoom": "1",
+                "border-top-left-radius": "0px",
+                "border-top-right-radius": "0px",
+                "border-bottom-right-radius": "0px",
+                "border-bottom-left-radius": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px"
+              },
+              "width": 2504,
+              "height": 1440,
+              "videoIndex": 0
+            }
+          ],
+          "finishedMs": 52730.63037499999
+        },
+        {
+          "name": "scroll-down",
+          "scheduledMs": 75000,
+          "startedMs": 75114.390708,
+          "verdict": "NOT_APPLICABLE",
+          "result": {
+            "from": 0,
+            "requestedDelta": 227.1,
+            "to": 0,
+            "notApplicable": "Document is not scrollable in this player view; no forced layout adjustment"
+          },
+          "owner": "video-1",
+          "current": "neural",
+          "geometry": [
+            {
+              "uuid": "f1b9d474-49f2-470c-8e37-5183709c4fdb",
+              "rect": {
+                "left": 173,
+                "top": 78,
+                "width": 854,
+                "height": 491.1171875
+              },
+              "style": {
+                "display": "block",
+                "visibility": "visible",
+                "opacity": "1",
+                "position": "fixed",
+                "z-index": "auto",
+                "object-fit": "contain",
+                "object-position": "50% 50%",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "transform": "none",
+                "filter": "none",
+                "backdrop-filter": "none",
+                "perspective": "none",
+                "contain": "none",
+                "will-change": "auto",
+                "clip-path": "inset(0px)",
+                "mask-image": "none",
+                "border-radius": "0px",
+                "border-width": "0px",
+                "padding": "0px",
+                "mix-blend-mode": "normal",
+                "isolation": "auto",
+                "pointer-events": "none",
+                "content-visibility": "visible",
+                "container-type": "normal",
+                "overflow-clip-margin": "0px",
+                "translate": "none",
+                "rotate": "none",
+                "scale": "none",
+                "clip": "auto",
+                "-webkit-mask-image": "none",
+                "zoom": "1",
+                "border-top-left-radius": "0px",
+                "border-top-right-radius": "0px",
+                "border-bottom-right-radius": "0px",
+                "border-bottom-left-radius": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px"
+              },
+              "width": 2504,
+              "height": 1440,
+              "videoIndex": 0
+            }
+          ],
+          "finishedMs": 75408.9595
+        },
+        {
+          "name": "scroll-back",
+          "scheduledMs": 80000,
+          "startedMs": 80509.345166,
+          "verdict": "NOT_APPLICABLE",
+          "result": {
+            "notApplicable": "Document is not scrollable in this player view; no forced layout adjustment"
+          },
+          "owner": "video-1",
+          "current": "neural",
+          "geometry": [
+            {
+              "uuid": "f1b9d474-49f2-470c-8e37-5183709c4fdb",
+              "rect": {
+                "left": 173,
+                "top": 78,
+                "width": 854,
+                "height": 491.1171875
+              },
+              "style": {
+                "display": "block",
+                "visibility": "visible",
+                "opacity": "1",
+                "position": "fixed",
+                "z-index": "auto",
+                "object-fit": "contain",
+                "object-position": "50% 50%",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "transform": "none",
+                "filter": "none",
+                "backdrop-filter": "none",
+                "perspective": "none",
+                "contain": "none",
+                "will-change": "auto",
+                "clip-path": "inset(0px)",
+                "mask-image": "none",
+                "border-radius": "0px",
+                "border-width": "0px",
+                "padding": "0px",
+                "mix-blend-mode": "normal",
+                "isolation": "auto",
+                "pointer-events": "none",
+                "content-visibility": "visible",
+                "container-type": "normal",
+                "overflow-clip-margin": "0px",
+                "translate": "none",
+                "rotate": "none",
+                "scale": "none",
+                "clip": "auto",
+                "-webkit-mask-image": "none",
+                "zoom": "1",
+                "border-top-left-radius": "0px",
+                "border-top-right-radius": "0px",
+                "border-bottom-right-radius": "0px",
+                "border-bottom-left-radius": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px"
+              },
+              "width": 2504,
+              "height": 1440,
+              "videoIndex": 0
+            }
+          ],
+          "finishedMs": 80648.140958
+        },
+        {
+          "name": "resize-1024",
+          "scheduledMs": 100000,
+          "startedMs": 100039.465666,
+          "verdict": "PASS",
+          "result": {
+            "windowId": 1010192314,
+            "bounds": {
+              "left": 40,
+              "top": 40,
+              "width": 1024,
+              "height": 900,
+              "windowState": "normal"
+            }
+          },
+          "owner": "video-1",
+          "current": "neural",
+          "geometry": [
+            {
+              "uuid": "f1b9d474-49f2-470c-8e37-5183709c4fdb",
+              "rect": {
+                "left": 85,
+                "top": 70,
+                "width": 854,
+                "height": 491.1171875
+              },
+              "style": {
+                "display": "block",
+                "visibility": "visible",
+                "opacity": "1",
+                "position": "fixed",
+                "z-index": "auto",
+                "object-fit": "contain",
+                "object-position": "50% 50%",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "transform": "none",
+                "filter": "none",
+                "backdrop-filter": "none",
+                "perspective": "none",
+                "contain": "none",
+                "will-change": "auto",
+                "clip-path": "inset(0px)",
+                "mask-image": "none",
+                "border-radius": "0px",
+                "border-width": "0px",
+                "padding": "0px",
+                "mix-blend-mode": "normal",
+                "isolation": "auto",
+                "pointer-events": "none",
+                "content-visibility": "visible",
+                "container-type": "normal",
+                "overflow-clip-margin": "0px",
+                "translate": "none",
+                "rotate": "none",
+                "scale": "none",
+                "clip": "auto",
+                "-webkit-mask-image": "none",
+                "zoom": "1",
+                "border-top-left-radius": "0px",
+                "border-top-right-radius": "0px",
+                "border-bottom-right-radius": "0px",
+                "border-bottom-left-radius": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px"
+              },
+              "width": 2504,
+              "height": 1440,
+              "videoIndex": 0
+            }
+          ],
+          "finishedMs": 100201.733833
+        },
+        {
+          "name": "resize-1200",
+          "scheduledMs": 115000,
+          "startedMs": 115467.268916,
+          "verdict": "PASS",
+          "result": {
+            "windowId": 1010192314,
+            "bounds": {
+              "left": 40,
+              "top": 40,
+              "width": 1200,
+              "height": 900,
+              "windowState": "normal"
+            }
+          },
+          "owner": "video-1",
+          "current": "neural",
+          "geometry": [
+            {
+              "uuid": "f1b9d474-49f2-470c-8e37-5183709c4fdb",
+              "rect": {
+                "left": 173,
+                "top": 78,
+                "width": 854,
+                "height": 491.1171875
+              },
+              "style": {
+                "display": "block",
+                "visibility": "visible",
+                "opacity": "1",
+                "position": "fixed",
+                "z-index": "auto",
+                "object-fit": "contain",
+                "object-position": "50% 50%",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "transform": "none",
+                "filter": "none",
+                "backdrop-filter": "none",
+                "perspective": "none",
+                "contain": "none",
+                "will-change": "auto",
+                "clip-path": "inset(0px)",
+                "mask-image": "none",
+                "border-radius": "0px",
+                "border-width": "0px",
+                "padding": "0px",
+                "mix-blend-mode": "normal",
+                "isolation": "auto",
+                "pointer-events": "none",
+                "content-visibility": "visible",
+                "container-type": "normal",
+                "overflow-clip-margin": "0px",
+                "translate": "none",
+                "rotate": "none",
+                "scale": "none",
+                "clip": "auto",
+                "-webkit-mask-image": "none",
+                "zoom": "1",
+                "border-top-left-radius": "0px",
+                "border-top-right-radius": "0px",
+                "border-bottom-right-radius": "0px",
+                "border-bottom-left-radius": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px"
+              },
+              "width": 2504,
+              "height": 1440,
+              "videoIndex": 0
+            }
+          ],
+          "finishedMs": 115613.9895
+        },
+        {
+          "name": "original-fullscreen",
+          "scheduledMs": 145000,
+          "startedMs": 145182.968833,
+          "verdict": "PASS",
+          "result": {
+            "attempted": true,
+            "direct": false,
+            "owner": "video-1",
+            "fullscreen": "DIV"
+          },
+          "owner": "video-1",
+          "current": "neural",
+          "geometry": [
+            {
+              "uuid": "f1b9d474-49f2-470c-8e37-5183709c4fdb",
+              "rect": {
+                "left": 329,
+                "top": 78,
+                "width": 854,
+                "height": 491.1171875
+              },
+              "style": {
+                "display": "block",
+                "visibility": "visible",
+                "opacity": "1",
+                "position": "fixed",
+                "z-index": "auto",
+                "object-fit": "contain",
+                "object-position": "50% 50%",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "transform": "none",
+                "filter": "none",
+                "backdrop-filter": "none",
+                "perspective": "none",
+                "contain": "none",
+                "will-change": "auto",
+                "clip-path": "inset(0px)",
+                "mask-image": "none",
+                "border-radius": "0px",
+                "border-width": "0px",
+                "padding": "0px",
+                "mix-blend-mode": "normal",
+                "isolation": "auto",
+                "pointer-events": "none",
+                "content-visibility": "visible",
+                "container-type": "normal",
+                "overflow-clip-margin": "0px",
+                "translate": "none",
+                "rotate": "none",
+                "scale": "none",
+                "clip": "auto",
+                "-webkit-mask-image": "none",
+                "zoom": "1",
+                "border-top-left-radius": "0px",
+                "border-top-right-radius": "0px",
+                "border-bottom-right-radius": "0px",
+                "border-bottom-left-radius": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px"
+              },
+              "width": 2504,
+              "height": 1440,
+              "videoIndex": 0
+            }
+          ],
+          "finishedMs": 145666.83899999998
+        }
+      ],
+      "fullscreen": "PASS: original container fullscreen retains enhancement",
+      "disabled": {
+        "schemaVersion": 1,
+        "enabled": false,
+        "code": "inactive",
+        "message": "Enhancement is disabled; original video is unchanged.",
+        "mode": "auto",
+        "current": null,
+        "candidates": 0,
+        "embeddedFrames": 0,
+        "owner": null,
+        "details": {
+          "attachment": null,
+          "lastTeardown": {
+            "device": 0,
+            "pipeline": 0,
+            "canvas": 0,
+            "resizeObservers": 0,
+            "listeners": 0,
+            "geometryFrame": 0,
+            "frameCallback": 0
+          },
+          "infrastructure": {
+            "discoveryCalls": 41,
+            "discoveryMs": 55.899999886751175,
+            "geometryCalls": 41,
+            "geometryMs": 26.5,
+            "mutationBatches": 89,
+            "ownerChanges": 1,
+            "created": 1,
+            "destroyed": 1,
+            "maximumConcurrent": 1
+          },
+          "discoveryActive": false,
+          "timerCount": 0,
+          "limitations": "Top-document video only; closed-shadow/iframe video cannot be inspected. Host permission does not override media origin-clean rules."
+        }
+      },
+      "errors": {
+        "counts": {
+          "third-party-page": 5
+        },
+        "samples": [
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          },
+          {
+            "kind": "console-error",
+            "category": "third-party-page",
+            "origins": [
+              "https://shaka-project.github.io"
+            ],
+            "message": "Third-party script error; message and URL paths not retained"
+          }
+        ],
+        "omittedSamples": 0,
+        "corsCorrelated": true
+      },
+      "initialRuntimeSession": {
+        "scope": {
+          "session": "Since constructor/explicit reset; stage and source changes preserve totals.",
+          "activeTime": "Wall milliseconds from reset, stopped only by setActive(false); stalls count. Reset preserves active state; construction starts active.",
+          "frameRates": "All recordFrame calls divided by activeMs, including the opening frame; null at zero activeMs. Caller records successful renders.",
+          "decoder": "Observed monotonic load-counter deltas: reset/first exposure baselines current load; newer loads start at zero. Gaps are recovered when counters return, not imputed. Null until exposed; qualityAvailable describes the latest reading.",
+          "gpu": "All finite nonnegative raw durations received since reset, cold samples included, classified by sample.neural. No generation, age, warmup or controller filtering.",
+          "callbackLatency": "max(0, tick.now - tick.presentationTime), only with non-synthetic frame metadata; not GPU or decode time.",
+          "configuration": "All reported synchronous configureMs durations since reset; excludes first-submit/driver work.",
+          "cadence": "Median of 30 latest valid mediaDelta/presentedDelta/currentPlaybackRate intervals; no seek/loop/pause/rate-change crossing. Lower FPS requires 30 consecutive clean baseline-to-baseline intervals with exposed monotonic quality and no loss. Synthetic rAF metadata is excluded."
+        },
+        "active": true,
+        "activeMs": 2422.5999999940395,
+        "framesRendered": 73,
+        "framesPresented": 73,
+        "framesSkipped": 0,
+        "decoderDrops": 0,
+        "decoderFrames": 73,
+        "decoderCorrupted": 0,
+        "meanRenderedFps": 30.132915050020475,
+        "meanPresentedFps": 30.132915050020475,
+        "qualityAvailable": true,
+        "qualityObserved": true,
+        "qualitySamples": 73,
+        "qualityMissingSamples": 0,
+        "qualityRejectedSamples": 0,
+        "loadGeneration": 0,
+        "gpu": {
+          "neural": {
+            "count": 41,
+            "sum": 241.10694400000003,
+            "mean": 5.880657170731708,
+            "max": 8.388608,
+            "p50": 5.75,
+            "p90": 6.5,
+            "p95": 6.6,
+            "overflowCount": 0,
+            "rejectedCount": 0,
+            "units": "ms",
+            "binWidthMs": 0.05,
+            "ceilingMs": 200,
+            "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+          },
+          "baseline": {
+            "count": 30,
+            "sum": 70.385664,
+            "mean": 2.3461888,
+            "max": 3.538944,
+            "p50": 2.4,
+            "p90": 3.15,
+            "p95": 3.5,
+            "overflowCount": 0,
+            "rejectedCount": 0,
+            "units": "ms",
+            "binWidthMs": 0.05,
+            "ceilingMs": 200,
+            "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+          }
+        },
+        "callbackLatency": {
+          "count": 73,
+          "sum": 49.099999999999454,
+          "mean": 0.6726027397260199,
+          "max": 16.699999999999818,
+          "p50": 0.05,
+          "p90": 0.05,
+          "p95": 0.05,
+          "overflowCount": 0,
+          "rejectedCount": 0,
+          "units": "ms",
+          "binWidthMs": 0.05,
+          "ceilingMs": 200,
+          "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+        },
+        "configuration": {
+          "count": 2,
+          "sum": 4.000000029802322,
+          "mean": 2.000000014901161,
+          "max": 3.100000023841858,
+          "p50": 0.95,
+          "p90": 3.15,
+          "p95": 3.15,
+          "overflowCount": 0,
+          "rejectedCount": 0,
+          "units": "ms",
+          "binWidthMs": 0.05,
+          "ceilingMs": 200,
+          "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+        },
+        "configurationCount": 2,
+        "generation": 4,
+        "source": {
+          "width": 834,
+          "height": 480
+        },
+        "target": {
+          "width": 1668,
+          "height": 960
+        },
+        "sourceFpsEstimate": 30,
+        "cadence": {
+          "observations": 30,
+          "cleanBaselineIntervals": 0
+        }
+      },
+      "finalRuntimeSession": {
+        "scope": {
+          "session": "Since constructor/explicit reset; stage and source changes preserve totals.",
+          "activeTime": "Wall milliseconds from reset, stopped only by setActive(false); stalls count. Reset preserves active state; construction starts active.",
+          "frameRates": "All recordFrame calls divided by activeMs, including the opening frame; null at zero activeMs. Caller records successful renders.",
+          "decoder": "Observed monotonic load-counter deltas: reset/first exposure baselines current load; newer loads start at zero. Gaps are recovered when counters return, not imputed. Null until exposed; qualityAvailable describes the latest reading.",
+          "gpu": "All finite nonnegative raw durations received since reset, cold samples included, classified by sample.neural. No generation, age, warmup or controller filtering.",
+          "callbackLatency": "max(0, tick.now - tick.presentationTime), only with non-synthetic frame metadata; not GPU or decode time.",
+          "configuration": "All reported synchronous configureMs durations since reset; excludes first-submit/driver work.",
+          "cadence": "Median of 30 latest valid mediaDelta/presentedDelta/currentPlaybackRate intervals; no seek/loop/pause/rate-change crossing. Lower FPS requires 30 consecutive clean baseline-to-baseline intervals with exposed monotonic quality and no loss. Synthetic rAF metadata is excluded."
+        },
+        "active": true,
+        "activeMs": 180842.5,
+        "framesRendered": 5421,
+        "framesPresented": 5424,
+        "framesSkipped": 3,
+        "decoderDrops": 3,
+        "decoderFrames": 5494,
+        "decoderCorrupted": 0,
+        "meanRenderedFps": 29.976360645312912,
+        "meanPresentedFps": 29.992949666145957,
+        "qualityAvailable": true,
+        "qualityObserved": true,
+        "qualitySamples": 5421,
+        "qualityMissingSamples": 0,
+        "qualityRejectedSamples": 0,
+        "loadGeneration": 0,
+        "gpu": {
+          "neural": {
+            "count": 5357,
+            "sum": 37335.66259200027,
+            "mean": 6.969509537427715,
+            "max": 18.087936,
+            "p50": 6.9,
+            "p90": 7.95,
+            "p95": 8.2,
+            "overflowCount": 0,
+            "rejectedCount": 0,
+            "units": "ms",
+            "binWidthMs": 0.05,
+            "ceilingMs": 200,
+            "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+          },
+          "baseline": {
+            "count": 60,
+            "sum": 195.88710399999997,
+            "mean": 3.2647850666666662,
+            "max": 6.815744,
+            "p50": 3.05,
+            "p90": 4.85,
+            "p95": 4.95,
+            "overflowCount": 0,
+            "rejectedCount": 0,
+            "units": "ms",
+            "binWidthMs": 0.05,
+            "ceilingMs": 200,
+            "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+          }
+        },
+        "callbackLatency": {
+          "count": 5421,
+          "sum": 13974.89800000118,
+          "mean": 2.5779188341636563,
+          "max": 17.39999999999418,
+          "p50": 0.05,
+          "p90": 8.25,
+          "p95": 8.95,
+          "overflowCount": 0,
+          "rejectedCount": 0,
+          "units": "ms",
+          "binWidthMs": 0.05,
+          "ceilingMs": 200,
+          "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+        },
+        "configuration": {
+          "count": 5,
+          "sum": 6.000000059604645,
+          "mean": 1.2000000119209289,
+          "max": 3.100000023841858,
+          "p50": 0.95,
+          "p90": 3.15,
+          "p95": 3.15,
+          "overflowCount": 0,
+          "rejectedCount": 0,
+          "units": "ms",
+          "binWidthMs": 0.05,
+          "ceilingMs": 200,
+          "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+        },
+        "configurationCount": 5,
+        "generation": 8,
+        "source": {
+          "width": 1252,
+          "height": 720
+        },
+        "target": {
+          "width": 2504,
+          "height": 1440
+        },
+        "sourceFpsEstimate": 30,
+        "cadence": {
+          "observations": 30,
+          "cleanBaselineIntervals": 0
+        }
+      },
+      "scope": "Original public player controls; session counters include startup/seeks/pauses and are not local 600s calibrated rates. No public pixel capture."
+    },
+    {
+      "name": "plyr",
+      "ordinal": 1,
+      "raw": {
+        "path": ".cache/m10/sites-m106-plyr-1.json",
+        "sha256": "0a239a14a0c5b52858db444e17bb59afe06604968a0e88ddc317348e26edd67a",
+        "bytes": 298128
+      },
+      "build": {
+        "sourceCommit": "d7e66deacd925b67377463286967280a4e1d2257",
+        "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "totalBytes": 265958,
+        "sourceDirty": false
+      },
+      "started": "2026-09-15T06:55:06.970Z",
+      "finished": "2026-09-15T06:55:21.523Z",
+      "verdict": "NEGATIVE",
+      "observedMs": 6094.801915999997,
+      "error": "Actual extension rejection: unsupported-controls",
+      "rejection": {
+        "code": "unsupported-controls",
+        "message": "Sampled video visibility or control stacking cannot be preserved.",
+        "videos": [
+          {
+            "width": 1024,
+            "height": 576,
+            "readyState": 4,
+            "networkState": 1,
+            "error": null,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "width": 0,
+            "height": 0,
+            "readyState": 0,
+            "networkState": 0,
+            "error": null,
+            "paused": true,
+            "ended": false
+          }
+        ]
+      },
+      "scenarios": [],
+      "fullscreen": "not measured: optional native-control scenario omitted",
+      "disabled": {
+        "schemaVersion": 1,
+        "enabled": false,
+        "code": "inactive",
+        "message": "Enhancement is disabled; original video is unchanged.",
+        "mode": "auto",
+        "current": null,
+        "candidates": 0,
+        "embeddedFrames": 0,
+        "owner": null,
+        "details": {
+          "attachment": null,
+          "lastTeardown": {
+            "device": 0,
+            "pipeline": 0,
+            "canvas": 0,
+            "resizeObservers": 0,
+            "listeners": 0,
+            "geometryFrame": 0,
+            "frameCallback": 0
+          },
+          "infrastructure": {
+            "discoveryCalls": 40,
+            "discoveryMs": 5.100000023841858,
+            "geometryCalls": 80,
+            "geometryMs": 27.799999922513962,
+            "mutationBatches": 83,
+            "ownerChanges": 1,
+            "created": 1,
+            "destroyed": 1,
+            "maximumConcurrent": 1
+          },
+          "discoveryActive": false,
+          "timerCount": 0,
+          "limitations": "Top-document video only; closed-shadow/iframe video cannot be inspected. Host permission does not override media origin-clean rules."
+        }
+      },
+      "errors": {
+        "counts": {},
+        "samples": [],
+        "omittedSamples": 0,
+        "corsCorrelated": true
+      },
+      "initialRuntimeSession": {
+        "scope": {
+          "session": "Since constructor/explicit reset; stage and source changes preserve totals.",
+          "activeTime": "Wall milliseconds from reset, stopped only by setActive(false); stalls count. Reset preserves active state; construction starts active.",
+          "frameRates": "All recordFrame calls divided by activeMs, including the opening frame; null at zero activeMs. Caller records successful renders.",
+          "decoder": "Observed monotonic load-counter deltas: reset/first exposure baselines current load; newer loads start at zero. Gaps are recovered when counters return, not imputed. Null until exposed; qualityAvailable describes the latest reading.",
+          "gpu": "All finite nonnegative raw durations received since reset, cold samples included, classified by sample.neural. No generation, age, warmup or controller filtering.",
+          "callbackLatency": "max(0, tick.now - tick.presentationTime), only with non-synthetic frame metadata; not GPU or decode time.",
+          "configuration": "All reported synchronous configureMs durations since reset; excludes first-submit/driver work.",
+          "cadence": "Median of 30 latest valid mediaDelta/presentedDelta/currentPlaybackRate intervals; no seek/loop/pause/rate-change crossing. Lower FPS requires 30 consecutive clean baseline-to-baseline intervals with exposed monotonic quality and no loss. Synthetic rAF metadata is excluded."
+        },
+        "active": true,
+        "activeMs": 2938.399999976158,
+        "framesRendered": 70,
+        "framesPresented": 70,
+        "framesSkipped": 0,
+        "decoderDrops": 0,
+        "decoderFrames": 70,
+        "decoderCorrupted": 0,
+        "meanRenderedFps": 23.82248842927034,
+        "meanPresentedFps": 23.82248842927034,
+        "qualityAvailable": true,
+        "qualityObserved": true,
+        "qualitySamples": 70,
+        "qualityMissingSamples": 0,
+        "qualityRejectedSamples": 0,
+        "loadGeneration": 0,
+        "gpu": {
+          "neural": {
+            "count": 39,
+            "sum": 223.41222399999995,
+            "mean": 5.728518564102563,
+            "max": 11.010048,
+            "p50": 5.85,
+            "p90": 6.95,
+            "p95": 7.95,
+            "overflowCount": 0,
+            "rejectedCount": 0,
+            "units": "ms",
+            "binWidthMs": 0.05,
+            "ceilingMs": 200,
+            "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+          },
+          "baseline": {
+            "count": 30,
+            "sum": 95.55148799999998,
+            "mean": 3.1850495999999993,
+            "max": 5.308416,
+            "p50": 3.25,
+            "p90": 3.5,
+            "p95": 4.15,
+            "overflowCount": 0,
+            "rejectedCount": 0,
+            "units": "ms",
+            "binWidthMs": 0.05,
+            "ceilingMs": 200,
+            "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+          }
+        },
+        "callbackLatency": {
+          "count": 70,
+          "sum": 322.16599999999926,
+          "mean": 4.602371428571418,
+          "max": 16.5,
+          "p50": 7.45,
+          "p90": 9.1,
+          "p95": 9.3,
+          "overflowCount": 0,
+          "rejectedCount": 0,
+          "units": "ms",
+          "binWidthMs": 0.05,
+          "ceilingMs": 200,
+          "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+        },
+        "configuration": {
+          "count": 2,
+          "sum": 3.4000000059604645,
+          "mean": 1.7000000029802322,
+          "max": 3.199999988079071,
+          "p50": 0.25,
+          "p90": 3.2,
+          "p95": 3.2,
+          "overflowCount": 0,
+          "rejectedCount": 0,
+          "units": "ms",
+          "binWidthMs": 0.05,
+          "ceilingMs": 200,
+          "quantileScope": "Nearest-rank upper-bin boundary; +/-0.05 ms quantization within 0..200 ms. Null when empty or rank is in overflow (>200 ms). Count/sum/mean/max use raw samples."
+        },
+        "configurationCount": 2,
+        "generation": 4,
+        "source": {
+          "width": 720,
+          "height": 576
+        },
+        "target": {
+          "width": 1440,
+          "height": 1152
+        },
+        "sourceFpsEstimate": 24,
+        "cadence": {
+          "observations": 30,
+          "cleanBaselineIntervals": 0
+        }
+      },
+      "finalRuntimeSession": "not measured",
+      "scope": "Original public player controls; session counters include startup/seeks/pauses and are not local 600s calibrated rates. No public pixel capture."
+    }
+  ],
+  "parity": [
+    {
+      "route": "external",
+      "raw": {
+        "path": ".cache/m10/output-parity/m106-external-02/result.json",
+        "sha256": "8978e75c6ea95cd6056d1ccf26ad94f0b73842da961f7fc2c07f4e893b854771",
+        "bytes": 149387
+      },
+      "build": {
+        "sourceCommit": "d90ba79eed85a7ab282148d25d027d50e26a57b9",
+        "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "totalBytes": 265958,
+        "sourceDirty": false
+      },
+      "started": "2026-09-15T07:01:47.121Z",
+      "finished": "2026-09-15T07:01:51.208Z",
+      "verdict": "PASS",
+      "expected": {
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "sourceSha256": "8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a",
+        "modelJsonSha256": "af6c61394c114d8e8923bea69a0df20fa2ad8af3f145d44873b93587fb18d22d"
+      },
+      "cases": [
+        {
+          "time": 1,
+          "checks": {
+            "inputExtent": true,
+            "inputHash": true,
+            "inputNonuniformOpaque": true,
+            "outputExtent": true,
+            "outputHash": true,
+            "outputNonuniformOpaque": true,
+            "sourceExtent": true,
+            "outputExtent2x": true,
+            "requestedTime": true,
+            "currentTime": true,
+            "precision": true,
+            "importPath": true,
+            "upscalerId": true,
+            "canvasFormat": true,
+            "modelJsonSha256": true,
+            "packedWeightsSha256": true,
+            "stageOptions": true,
+            "pausedSingleSubmission": true
+          },
+          "decodedMediaTimeEqual": true,
+          "extension": {
+            "seek": {
+              "requestedTime": 1,
+              "currentTime": 1,
+              "metadata": {
+                "now": 1645.4,
+                "mediaTime": 1,
+                "presentedFrames": 94,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5183/media/same.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "75a51c669951d401f9111c8bca9a564627a9a82702f6ab2256430bcfb5f6d3e3",
+            "output": "da78f4183b42a14f13f4488f8f72402180370c3c712f8b042c108d683575d746",
+            "precision": "f16",
+            "importPath": "external"
+          },
+          "harness": {
+            "seek": {
+              "requestedTime": 1,
+              "currentTime": 1,
+              "metadata": {
+                "now": 718.8,
+                "mediaTime": 1,
+                "presentedFrames": 40,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5173/media/m9/720p60.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "75a51c669951d401f9111c8bca9a564627a9a82702f6ab2256430bcfb5f6d3e3",
+            "output": "da78f4183b42a14f13f4488f8f72402180370c3c712f8b042c108d683575d746",
+            "precision": "f16",
+            "importPath": "external"
+          }
+        },
+        {
+          "time": 2,
+          "checks": {
+            "inputExtent": true,
+            "inputHash": true,
+            "inputNonuniformOpaque": true,
+            "outputExtent": true,
+            "outputHash": true,
+            "outputNonuniformOpaque": true,
+            "sourceExtent": true,
+            "outputExtent2x": true,
+            "requestedTime": true,
+            "currentTime": true,
+            "precision": true,
+            "importPath": true,
+            "upscalerId": true,
+            "canvasFormat": true,
+            "modelJsonSha256": true,
+            "packedWeightsSha256": true,
+            "stageOptions": true,
+            "pausedSingleSubmission": true
+          },
+          "decodedMediaTimeEqual": true,
+          "extension": {
+            "seek": {
+              "requestedTime": 2,
+              "currentTime": 2,
+              "metadata": {
+                "now": 1758.2,
+                "mediaTime": 2,
+                "presentedFrames": 95,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5183/media/same.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "9fdee93a53dfb31e8e84b1b62c06ac5a47db8701e596d7ca5193b0fb2704e2f0",
+            "output": "ce3f707996d18570f3be48a3593a01aca5aa54ceece7f3049f9383e65b3cd9a4",
+            "precision": "f16",
+            "importPath": "external"
+          },
+          "harness": {
+            "seek": {
+              "requestedTime": 2,
+              "currentTime": 2,
+              "metadata": {
+                "now": 827.7,
+                "mediaTime": 2,
+                "presentedFrames": 41,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5173/media/m9/720p60.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "9fdee93a53dfb31e8e84b1b62c06ac5a47db8701e596d7ca5193b0fb2704e2f0",
+            "output": "ce3f707996d18570f3be48a3593a01aca5aa54ceece7f3049f9383e65b3cd9a4",
+            "precision": "f16",
+            "importPath": "external"
+          }
+        },
+        {
+          "time": 3,
+          "checks": {
+            "inputExtent": true,
+            "inputHash": true,
+            "inputNonuniformOpaque": true,
+            "outputExtent": true,
+            "outputHash": true,
+            "outputNonuniformOpaque": true,
+            "sourceExtent": true,
+            "outputExtent2x": true,
+            "requestedTime": true,
+            "currentTime": true,
+            "precision": true,
+            "importPath": true,
+            "upscalerId": true,
+            "canvasFormat": true,
+            "modelJsonSha256": true,
+            "packedWeightsSha256": true,
+            "stageOptions": true,
+            "pausedSingleSubmission": true
+          },
+          "decodedMediaTimeEqual": true,
+          "extension": {
+            "seek": {
+              "requestedTime": 3,
+              "currentTime": 3,
+              "metadata": {
+                "now": 1850,
+                "mediaTime": 3,
+                "presentedFrames": 96,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5183/media/same.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "eb42e56cb22943517d2e597377b126eb0ed5e8c02422b218411373b749930720",
+            "output": "626e6ae3300ce52e3979bdbe4f6cded218dfc606df1d53d2b126f7f1dbaca1ba",
+            "precision": "f16",
+            "importPath": "external"
+          },
+          "harness": {
+            "seek": {
+              "requestedTime": 3,
+              "currentTime": 3,
+              "metadata": {
+                "now": 910.9,
+                "mediaTime": 3,
+                "presentedFrames": 42,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5173/media/m9/720p60.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "eb42e56cb22943517d2e597377b126eb0ed5e8c02422b218411373b749930720",
+            "output": "626e6ae3300ce52e3979bdbe4f6cded218dfc606df1d53d2b126f7f1dbaca1ba",
+            "precision": "f16",
+            "importPath": "external"
+          }
+        }
+      ],
+      "apparatus": "Actual installed content singleton in its extension isolated world versus actual root index harness aethervsrRuntime.driver.pipeline. Original page videos paused at identical seeks; offline 2D sRGB input hashes. Already-configured importer/upscaler/presenter reused. Real GPUCanvasContext temporarily gains COPY_SRC, aligned staging buffer preallocated. start/onTick/stop synchronously replays one frame; scheduled acquisition cancelled before task ends. Pipeline callbacks temporarily suppressed (onFrame counted) so synthetic tick does not steer runtime. A second same-task GPU submission copies the actual presented texture, then mapAsync runs outside any frame callback. Restores callbacks/configuration and stops; destroys runtimes at side teardown. NOT an uninstrumented frame capture or a timing benchmark; no M9 parity substitution.",
+      "measurement": {
+        "performance": "not measured",
+        "byteDeltas": "not measured"
+      }
+    },
+    {
+      "route": "sampled",
+      "raw": {
+        "path": ".cache/m10/output-parity/m106-sampled-02/result.json",
+        "sha256": "c3502d76cb5fdf9028bcbd52f1df111746d4baa71d10757f7ecfea81a20ec3c8",
+        "bytes": 150411
+      },
+      "build": {
+        "sourceCommit": "d90ba79eed85a7ab282148d25d027d50e26a57b9",
+        "bundleSha256": "ef2e17d32009d1c7bb18a1fc0449d64723b7df763ca43d10b63737edb8e977c7",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "totalBytes": 266426,
+        "sourceDirty": false
+      },
+      "started": "2026-09-15T07:01:51.255Z",
+      "finished": "2026-09-15T07:01:55.858Z",
+      "verdict": "PASS",
+      "expected": {
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "sourceSha256": "8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a",
+        "modelJsonSha256": "af6c61394c114d8e8923bea69a0df20fa2ad8af3f145d44873b93587fb18d22d"
+      },
+      "cases": [
+        {
+          "time": 1,
+          "checks": {
+            "inputExtent": true,
+            "inputHash": true,
+            "inputNonuniformOpaque": true,
+            "outputExtent": true,
+            "outputHash": true,
+            "outputNonuniformOpaque": true,
+            "sourceExtent": true,
+            "outputExtent2x": true,
+            "requestedTime": true,
+            "currentTime": true,
+            "precision": true,
+            "importPath": true,
+            "upscalerId": true,
+            "canvasFormat": true,
+            "modelJsonSha256": true,
+            "packedWeightsSha256": true,
+            "stageOptions": true,
+            "pausedSingleSubmission": true
+          },
+          "decodedMediaTimeEqual": true,
+          "extension": {
+            "seek": {
+              "requestedTime": 1,
+              "currentTime": 1,
+              "metadata": {
+                "now": 2451.5,
+                "mediaTime": 1,
+                "presentedFrames": 140,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5183/media/same.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "75a51c669951d401f9111c8bca9a564627a9a82702f6ab2256430bcfb5f6d3e3",
+            "output": "a90b282743d86c4365a29b0f4598d4f5175882fbc8c59a6df0f254f70b63dc9c",
+            "precision": "f16",
+            "importPath": "sampled"
+          },
+          "harness": {
+            "seek": {
+              "requestedTime": 1,
+              "currentTime": 1,
+              "metadata": {
+                "now": 701.1,
+                "mediaTime": 1,
+                "presentedFrames": 40,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5173/media/m9/720p60.mp4",
+              "discardedMetadataCallbacks": 1
+            },
+            "input": "75a51c669951d401f9111c8bca9a564627a9a82702f6ab2256430bcfb5f6d3e3",
+            "output": "a90b282743d86c4365a29b0f4598d4f5175882fbc8c59a6df0f254f70b63dc9c",
+            "precision": "f16",
+            "importPath": "sampled"
+          }
+        },
+        {
+          "time": 2,
+          "checks": {
+            "inputExtent": true,
+            "inputHash": true,
+            "inputNonuniformOpaque": true,
+            "outputExtent": true,
+            "outputHash": true,
+            "outputNonuniformOpaque": true,
+            "sourceExtent": true,
+            "outputExtent2x": true,
+            "requestedTime": true,
+            "currentTime": true,
+            "precision": true,
+            "importPath": true,
+            "upscalerId": true,
+            "canvasFormat": true,
+            "modelJsonSha256": true,
+            "packedWeightsSha256": true,
+            "stageOptions": true,
+            "pausedSingleSubmission": true
+          },
+          "decodedMediaTimeEqual": true,
+          "extension": {
+            "seek": {
+              "requestedTime": 2,
+              "currentTime": 2,
+              "metadata": {
+                "now": 2561,
+                "mediaTime": 2,
+                "presentedFrames": 141,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5183/media/same.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "9fdee93a53dfb31e8e84b1b62c06ac5a47db8701e596d7ca5193b0fb2704e2f0",
+            "output": "6eae07b22875c467a492b196bc26323b26aa7435282f38d0d59cc20536b3b1ee",
+            "precision": "f16",
+            "importPath": "sampled"
+          },
+          "harness": {
+            "seek": {
+              "requestedTime": 2,
+              "currentTime": 2,
+              "metadata": {
+                "now": 811.3,
+                "mediaTime": 2,
+                "presentedFrames": 41,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5173/media/m9/720p60.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "9fdee93a53dfb31e8e84b1b62c06ac5a47db8701e596d7ca5193b0fb2704e2f0",
+            "output": "6eae07b22875c467a492b196bc26323b26aa7435282f38d0d59cc20536b3b1ee",
+            "precision": "f16",
+            "importPath": "sampled"
+          }
+        },
+        {
+          "time": 3,
+          "checks": {
+            "inputExtent": true,
+            "inputHash": true,
+            "inputNonuniformOpaque": true,
+            "outputExtent": true,
+            "outputHash": true,
+            "outputNonuniformOpaque": true,
+            "sourceExtent": true,
+            "outputExtent2x": true,
+            "requestedTime": true,
+            "currentTime": true,
+            "precision": true,
+            "importPath": true,
+            "upscalerId": true,
+            "canvasFormat": true,
+            "modelJsonSha256": true,
+            "packedWeightsSha256": true,
+            "stageOptions": true,
+            "pausedSingleSubmission": true
+          },
+          "decodedMediaTimeEqual": true,
+          "extension": {
+            "seek": {
+              "requestedTime": 3,
+              "currentTime": 3,
+              "metadata": {
+                "now": 2651.2,
+                "mediaTime": 3,
+                "presentedFrames": 142,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5183/media/same.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "eb42e56cb22943517d2e597377b126eb0ed5e8c02422b218411373b749930720",
+            "output": "2062ea2056959def648d17787765224af9e32bbd2228e75a176aea08dca98546",
+            "precision": "f16",
+            "importPath": "sampled"
+          },
+          "harness": {
+            "seek": {
+              "requestedTime": 3,
+              "currentTime": 3,
+              "metadata": {
+                "now": 893.7,
+                "mediaTime": 3,
+                "presentedFrames": 42,
+                "width": 1280,
+                "height": 720
+              },
+              "source": "http://127.0.0.1:5173/media/m9/720p60.mp4",
+              "discardedMetadataCallbacks": 0
+            },
+            "input": "eb42e56cb22943517d2e597377b126eb0ed5e8c02422b218411373b749930720",
+            "output": "2062ea2056959def648d17787765224af9e32bbd2228e75a176aea08dca98546",
+            "precision": "f16",
+            "importPath": "sampled"
+          }
+        }
+      ],
+      "apparatus": "Actual installed content singleton in its extension isolated world versus actual root index harness aethervsrRuntime.driver.pipeline. Original page videos paused at identical seeks; offline 2D sRGB input hashes. Already-configured importer/upscaler/presenter reused. Real GPUCanvasContext temporarily gains COPY_SRC, aligned staging buffer preallocated. start/onTick/stop synchronously replays one frame; scheduled acquisition cancelled before task ends. Pipeline callbacks temporarily suppressed (onFrame counted) so synthetic tick does not steer runtime. A second same-task GPU submission copies the actual presented texture, then mapAsync runs outside any frame callback. Restores callbacks/configuration and stops; destroys runtimes at side teardown. NOT an uninstrumented frame capture or a timing benchmark; no M9 parity substitution.",
+      "measurement": {
+        "performance": "not measured",
+        "byteDeltas": "not measured"
+      }
+    }
+  ],
+  "earlierParity": [
+    {
+      "route": "external",
+      "raw": {
+        "path": ".cache/m10/output-parity/m106-external-01/result.json",
+        "sha256": "9a8d2483225f049febe31c82d957b9da00f3983f2c11d18d122fdd722c4d2cb5",
+        "bytes": 98735
+      },
+      "verdict": "FAIL",
+      "errors": [
+        "Error: page.evaluate: Error: Paused seek/rVFC integrity failed\n    at finish (eval at evaluate (:311:30), <anonymous>:15:16)\n    at HTMLVideoElement.seeked (eval at evaluate (:311:30), <anonymous>:18:43)"
+      ],
+      "comparisonCount": 0,
+      "reason": "Stopped at harness first paused seek before comparisons; generic integrity failure. Seeker now counts/discards stale metadata within unchanged deadline; exact original failure cause not fully observable. New six-case verification retained separately."
+    },
+    {
+      "route": "sampled",
+      "raw": {
+        "path": ".cache/m10/output-parity/m106-sampled-01/result.json",
+        "sha256": "4758bebb88e7dbfb453819f3e300556738709e7e81ddd6e6bde0151db8dd2a71",
+        "bytes": 150400
+      },
+      "verdict": "PASS",
+      "errors": [],
+      "comparisonCount": 3,
+      "reason": "All three comparisons passed before parity synchronization hardening; repeated under final apparatus."
+    }
+  ],
+  "publicScope": {
+    "shakaPasses": 1,
+    "shakaAttempts": 2,
+    "requiredShakaPasses": 2,
+    "shakaCriterionMet": false,
+    "plyrSafeRejection": true,
+    "videojs": "UNRESOLVED; six active safety failures",
+    "verdict": "UNRESOLVED"
+  }
+}

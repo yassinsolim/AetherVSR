@@ -2764,6 +2764,100 @@ claims: [docs/M10.5-REPORT.md](docs/M10.5-REPORT.md),
 Raw long/Chrome traces stay local under the owner-approved50MiB policy; compact
 hashes/recipes are committed. A hash reference is not a redistributed raw trace.
 
+## Milestone 10.6: native delivery floor and public controls
+
+**PARTIAL, Case D. No normalized-readiness ADR.** Historical M10/M10.5 records
+above are unchanged. Four native600s controls all exceeded1% combined loss;
+that does not establish observer-free or physical-display loss.
+
+### Environment and boundaries
+
+Apple M5 Mac17,2/24GB, macOS26.6.2, Chrome for Testing153.0.8010.12 on AC.
+Native1200x760 content/DPR2, outer1200x903 at(40,40), fully on built-in1512x982
+logical display. Physical refresh/scanout, temperature, energy and GC: not measured.
+Same CFR1280x720 H.26460fps,4.016667s looping source SHA256
+`8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a`.
+Same6291-parameter C16D2 model SHA256
+`d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
+Measurement source `e102e11d2711c9181c35c4d783e8f139b739df78`; production265958-byte
+payload `0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d`.
+
+Preregistered ABDC / BCAD / CDBA / DACB; four600000ms sessions per arm with5s
+warmup and fresh profiles. A is native/no extension; B is a real diagnostic
+attachment without GPU/pipeline/controller; C is production Baseline; D is Auto
+stable neural at opening. Same original640x360 fixture. One41.2909s B blur attempt
+is retained and excluded; same ordinal repeated, preceding A retained unchanged.
+
+Common loss is `100*(native callback gaps + boundary quality drops)/native
+presented delta`; populations may overlap. Rates divide boundary count deltas by
+whole native wall windows, including natural loops/stalls. C/D historical capture
+and exact accumulated RuntimeSession metrics are separately preserved. Quality
+drop percentage uses quality-total denominator; it is not decoder-only. No
+unique-frame correction, pixel readback or guessed observer subtraction.
+
+### Long-run results
+
+| Arm / repetition | Combined % | Callback or submitted fps | Final120 same rate |
+|---|---:|---:|---:|
+| A1 native | 3.895490 | 57.581168 | 57.641667 |
+| B1 attached, no processing | 4.201798 | 57.389656 | 57.275000 |
+| D1 Auto | 3.927636 | 58.599883 | 58.491667 |
+| C1 Baseline | 5.886452 | 58.014807 | 58.358333 |
+| B2 | 5.726210 | 56.489878 | 56.100000 |
+| C2 | 5.277096 | 58.191531 | **57.941667 FAIL** |
+| A2 | 4.135014 | 57.424751 | 57.666667 |
+| D2 | 5.231472 | 58.213256 | 58.266667 |
+| C3 | 5.687613 | 58.079932 | 58.808333 |
+| D3 | 2.117700 | 59.148067 | 59.300000 |
+| B3 | 4.243419 | 57.376533 | 57.508333 |
+| A3 | 4.415939 | 57.259828 | 56.866667 |
+| D4 | 5.542706 | 58.119874 | 58.241667 |
+| A4 | 4.605281 | 57.148248 | 56.941667 |
+| C4 | 4.651876 | 58.383148 | 58.533333 |
+| B4 | 4.677630 | 57.106372 | 57.316667 |
+
+A/B rates are native callbacks; C/D are successful submissions. No processing
+rate is measured for A/B. First/last120s are half-open entry-time slices; the
+first summed presented delta can span before the slice. All eight active
+attempt deficits and native/runtime alignment residuals are zero; B qualification
+passes4/4. All active owner/tier/error/cleanup checks pass; C2 fails late rate.
+All16 loss values exceed1%. No valid low-performance run was replaced.
+
+| Treatment vs A | Mean loss penalty pp | One-sided95% upper pp | Mean cadence penalty fps | One-sided95% upper fps |
+|---|---:|---:|---:|---:|
+| B | +0.449333 | 1.374140 | +0.262889 | 0.810435 |
+| C | +1.112828 | 2.057615 | -0.813856 | -0.427100 |
+| D | -0.058053 | 1.783801 | -1.166771 | -0.588877 |
+
+Four run-level contrasts, df3 t bounds; frozen limits0.5pp/0.5fps. Negative
+cadence penalties favor treatment. Four of six upper bounds fail noninferiority;
+no active lower bound exceeds its margin, so Case B is not established. Native
+mean4.262931%, SD0.311978, one-sided95% lower3.895832%; two-sided95% interval
+[3.766504,4.759358]. Independence/normality assumptions and drift limit inference.
+Full actual contrasts, SD/ranges and intervals: [results/m106-floor.json](results/m106-floor.json).
+
+### Observer, public and regression limits
+
+Nine60s N/L/R observer trials show rich-minus-lean callback differences
+-0.400085,+1.781615,-0.749595fps. N has no callback metric. Observer-free
+distortion is unbounded, independently blocking Case C. Three12s visual proxies
+verify nonblank endpoint screenshots and rAF marker displacement, not physical
+scanout. Primary GPU histograms are cumulative attachment diagnostics, not newly
+isolated primary-window GPU quantiles; no such timing is claimed.
+
+Twelve public180s Video.js journeys reproduce target stalls3/3 in each native,
+installed-inactive, Baseline and Auto arm. All six active journeys retain visible
+misalignment and other binding checks; seven original pause/resume actions fail,
+and recovery is censored. Formal causal/public-scope verdict **UNRESOLVED**,
+not no-added-harm. Final Shaka passes1/2 (other offscreen rejection); Plyr remains
+a safe control-stack rejection. Production45/45, diagnostic49/49, UI reload and
+final output parity3 external+3 sampled pass. No production model/controller change.
+
+Environment, amendments, every excluded attempt and measurement scopes:
+[docs/M10.6-REPORT.md](docs/M10.6-REPORT.md),
+[observer](results/m106-observer.json), [proxy](results/m106-proxy.json),
+[public](results/m106-public.json), [verification](results/m106-verification.json).
+
 ## Reproducing
 
 ```bash

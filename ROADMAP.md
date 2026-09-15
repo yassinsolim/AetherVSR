@@ -439,9 +439,28 @@ stay local and the 8 MiB per-file restriction remains.
 
 ---
 
+## Milestone 10.6 - Browser delivery floor and public-media causality [PARTIAL]
+
+The reviewed four-arm, sixteen600s study completed, retaining an interrupted B
+attempt separately. Native controls all exceeded1% combined loss; mean4.262931%
+with one-sided95% lower bound3.895832%. This is a lean-observer apparatus result,
+not observer-free physical loss. Four noninferiority bounds failed, one Baseline
+final120s rate was57.941667fps, and observer distortion remains unbounded.
+**Case D: no normalization or readiness ADR.** Model/controller unchanged.
+
+The target Video.js stall reproduced in3/3 sessions for each native, inactive,
+Baseline and Auto arm. All six active journeys retained binding presentation
+failures; recovery was censored. Formal public causality/scope remains unresolved.
+Shaka passed1/2 checks; Plyr safely rejected. Final production45/45, diagnostic49/49,
+UI reload and six exact output-parity cases pass, without waiving those failures.
+[Full28-section report](docs/M10.6-REPORT.md). Public identity corrections were
+owner-approved, prospectively recorded and retain every superseded attempt.
+
+---
+
 ## Milestone 11 - Cross-vendor validation [GATED]
 
-Not the default next step while M10.5 delivery/public-media robustness remains
+Not the default next step while M10.6 delivery/public-media robustness remains
 unresolved and has not been proved vendor-specific. No M11 implementation is
 included. After READY or a justified vendor-specific research gate, verify on NVIDIA, AMD and Intel
 GPUs across Windows and Linux. Everything measured so far is one Apple Silicon

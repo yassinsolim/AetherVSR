@@ -8,13 +8,26 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine â
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: M10.5 EXTENSION MVP PARTIAL.** Both preregistered ten-minute M5
+**Status: M10.6 EXTENSION MVP PARTIAL, Case D.** Four ten-minute native-video
+controls exceeded the1% combined callback/quality-loss reference, averaging
+4.262931%. This is a lean-instrumented browser result, not physical display loss
+or justification for normalization. Paired uncertainty and one Baseline late-window
+failure prevent practical noninferiority; model/controller thresholds are unchanged.
+
+Video.js reproduced the near-end stall in3/3 native and3/3 installed-inactive
+controls, but all six active journeys failed binding presentation checks. Formal
+public causality/scope remains unresolved, not "no added harm." Final native
+lifecycle matrices pass45/45 and49/49; six output-parity cases pass exactly.
+Shaka passed one of two checks; the other rejected offscreen video. Plyr remains
+unsupported. Full results and limits: [docs/M10.6-REPORT.md](docs/M10.6-REPORT.md).
+
+**M10.5 history remains PARTIAL.** Both preregistered ten-minute M5
 trials failed the unchanged 1% delivery-loss gate: **3.48% and 2.90%**, at
 58.74 and 58.91 rendered fps. Both final 120-second rate gates passed. The
 counter audit found possible overlap, not a measurable unique-loss correction;
 the original metric and controller thresholds remain unchanged.
 
-The current MV3 candidate passes 45 production and 49 diagnostic native journeys,
+The M10.5 MV3 candidate passed 45 production and 49 diagnostic native journeys,
 including 20 cleanup cycles and same-document reactivation after Chrome's
 extensions-page Reload control. Six output-parity cases match exactly. Generic
 coincident rounded clips and verified size-query containers are supported.
@@ -31,7 +44,7 @@ in [BENCHMARKS.md](BENCHMARKS.md) and the full
 [M10 report](docs/M10-REPORT.md).
 
 **M9 history: complete; runtime controller replaced, weights retained.** The
-production 6,291-parameter C16D2 weights remain unchanged through M10.5. Auto performance selects
+production 6,291-parameter C16D2 weights remain unchanged through M10.6. Auto performance selects
 neural or Catmull-Rom from runtime evidence, with hysteresis and real neural
 recovery probes; Baseline mode never probes. This does not predict scene quality.
 

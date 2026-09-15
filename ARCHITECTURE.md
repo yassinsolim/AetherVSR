@@ -30,6 +30,16 @@ uses its actual top-layer clipping boundary. These checks run during geometry
 reconciliation, not per-frame layout/pixel readbacks. Diagnostic frame accounting,
 callback timing and Chrome traces are unshipped tools, never policy inputs.
 
+M10.6 adds only diagnostic control and measurement tooling. Its infrastructure-only
+attachment retains discovery/ownership/geometry while skipping GPU initialization;
+the option and branch are absent from production builds. Native/public observers
+do not steer the runtime. A test-only HLS parser identifies advertised public-media
+catalogs without changing source selection or security. No stage boundary, model,
+controller threshold or production permission changes. The measured native-floor
+decision is Case D/PARTIAL; public same-DOM misalignment remains a documented
+limitation despite passing fixture lifecycle and output parity. See
+[docs/M10.6-REPORT.md](docs/M10.6-REPORT.md).
+
 **What Milestone 3 settled about the neural stage, and Milestone 4 built.** Its
 kernels are hand-written WGSL rather than a third-party runtime, and they took
 the shape `src/bench/conv-blocked.wgsl.ts` established - see
