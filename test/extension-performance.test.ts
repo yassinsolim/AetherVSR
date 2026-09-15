@@ -13,7 +13,7 @@ function check(source: string): void {
     import { playerCommand } from './tools/m10-sites.mjs';
     import { validateOldShutdown } from './tools/m105-reload.mjs';
     import { parseFinalCases, deliveryGates } from './tools/m105-final.mjs';
-    import { COST_ORDER, compareCosts, costBounds, costCases, profileProofReads } from './tools/m107-performance.mjs';
+    import { COST_ORDER, compareCosts, costBounds, costCases, profileProofReads, profileLiveProof } from './tools/m107-performance.mjs';
     import { transitionVerdict, summarizePresentation, geometryOracleSource, installGeometryOracle, TRANSITIONS } from './tools/m107-presentation.mjs';
     ${source}
     console.log('checked without browser');
@@ -97,6 +97,17 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('bounds live proof attribution and restores the real guard without changing its result', () => check(`
+    let calls=0;const guard=function(){calls++;return 17;};
+    const attachment={video:{getBoundingClientRect(){}},canvas:{getBoundingClientRect(){}},checkedGeometry:{proof:{styles:[]}},checkPresentation:guard};
+    const context=createContext({attachment,chrome:{runtime:{id:'test'}},performance:{now:()=>0},setTimeout,clearTimeout});
+    new Script('globalThis[Symbol.for("aethervsr.m10.document.test")]={attachment}').runInContext(context);
+    const done=new Script('('+profileLiveProof.toString()+')()').runInContext(context);
+    for(let index=0;index<120;index++)assert.equal(attachment.checkPresentation(),17);
+    const result=await done;assert.equal(result.rows.length,120);assert.equal(calls,120);assert.equal(attachment.checkPresentation,guard);
+    assert.equal(result.rows.filter(row=>row.first).length,60);
+  `));
+
   it('bounds the proof read profile and preserves equivalent property operands', () => check(`
     let reads=0;const style={objectFit:'contain',getPropertyValue(name){reads++;return name==='object-fit'?this.objectFit:'';}};
     const element={},entry={element,style,keys:['objectFit'],values:['contain'],names:[]};

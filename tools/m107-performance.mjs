@@ -35,6 +35,30 @@ export function profileProofReads() {
   return {rows,scope:'Diagnostic repeated reads of retained live computed styles, 12 batches of64 whole-entry scans per method. No frame/GPU/performance acceptance; cached-style microbenchmark does not represent one live frame or cold layout work.'};
 }
 
+export function profileLiveProof() {
+  const attachment=globalThis[Symbol.for(`aethervsr.m10.document.${chrome.runtime.id}`)]?.attachment;
+  if(!attachment?.checkedGeometry?.proof)throw new Error('A retained geometry proof is required');
+  const original=attachment.checkPresentation,rows=[];
+  return new Promise(resolve=>{
+    const finish=()=>{clearTimeout(timer);attachment.checkPresentation=original;resolve({rows,scope:'Intrusive120-call component attribution only. Alternates original-first/checks-first. Extra reads warm browser caches and are not a qualifying cost window. No thresholds or production behavior changed.'});};
+    const timer=setTimeout(finish,3000);
+    attachment.checkPresentation=function(...args){
+      const first=rows.length%2===0,started=performance.now();let result,originalMs;
+      if(first){result=original.apply(this,args);originalMs=performance.now()-started;}
+      const begin=performance.now();this.video.getBoundingClientRect();this.canvas.getBoundingClientRect();const rectangles=performance.now();
+      const entries=this.checkedGeometry?.proof?.styles??[];let current=true;
+      for(const entry of entries)for(let index=0;index<entry.keys.length;index++)if(entry.style[entry.keys[index]]!==entry.values[index])current=false;
+      const properties=performance.now();
+      for(const entry of entries)for(let index=0;index<entry.names.length;index++)if(entry.style.getPropertyValue(entry.names[index])!==entry.namedValues[index])current=false;
+      const aliases=performance.now();
+      if(!first){const before=performance.now();result=original.apply(this,args);originalMs=performance.now()-before;}
+      rows.push({first,originalMs,rectanglesMs:rectangles-begin,propertiesMs:properties-rectangles,aliasesMs:aliases-properties,current});
+      if(rows.length===120)finish();
+      return result;
+    };
+  });
+}
+
 export async function runProofProfile(prefix) {
   prefix=resolve(prefix);assert(prefix.startsWith(join(ROOT,'.cache/m107/'))&&!existsSync(`${prefix}.json`));mkdirSync(dirname(prefix),{recursive:true});
   const build=verifyBuild(true),report={phase:'READ_PROFILE_NO_ACCEPTANCE',build,environment:presentationEnvironment(),started:new Date().toISOString()};
@@ -43,9 +67,12 @@ export async function runProofProfile(prefix) {
     server=await presentationServer();native=await openExtension(build,(name,data)=>{if(name==='browser')report.browser=data;});
     const page=await native.context.newPage();report.placement=await nativeWindow(page,native.context);await page.goto(server.url);await page.bringToFront();
     const panel=await native.popup(page);let tabId;
-    try{tabId=panel.tabId;await panel.click('input[value="baseline"]');await panel.click('#enable');}finally{await panel.dismiss();}
+    try{tabId=panel.tabId;await native.workerEval(async tab=>chrome.scripting.executeScript({target:{tabId:tab,frameIds:[0]},world:'ISOLATED',files:['content.js']}),tabId);
+      await native.isolated(page,()=>globalThis.__AETHERVSR_EXTENSION_TEST__.configure({presentationWatchdog:true}));
+      await panel.click('input[value="baseline"]');await panel.click('#enable');}finally{await panel.dismiss();}
     await until(()=>native.inspect(tabId),state=>state.details?.attachment?.ready,10000);
     report.profile=await native.isolated(page,profileProofReads);
+    report.live=await native.isolated(page,profileLiveProof);
     assert.deepEqual(verifyBuild(true),build);
   }finally{await native?.close();await server?.close();report.finished=new Date().toISOString();writeFileSync(`${prefix}.json`,JSON.stringify(report,null,2),{flag:'wx'});}
   return report;
