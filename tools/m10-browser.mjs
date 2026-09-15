@@ -10,6 +10,10 @@ const protocol = await transform(readFileSync(join(ROOT, 'src/extension/protocol
 const { parseExtensionResponse, MODEL_SHA256, MODEL_BYTES } = await import(`data:text/javascript;base64,${Buffer.from(protocol.code).toString('base64')}`);
 export class Unverified extends Error {}
 export class OperationTimeout extends Unverified {}
+export function workerRuntimeIdentity() {
+  if (typeof chrome === 'undefined' || typeof chrome.runtime?.id !== 'string') return null;
+  return { extensionId: chrome.runtime.id, workerURL: location.href };
+}
 export function snapshotExtensionStatus(raw) {
   const parsed = parseExtensionResponse(raw);
   assert(parsed?.ok, `Invalid/failed extension response: ${JSON.stringify(raw)}`);
@@ -241,7 +245,7 @@ export async function openExtension(build, record = () => {}) {
         const startup = await attach(browserCDP, fresh.targetId);
         try {
           await bounded(startup.send('Runtime.runIfWaitingForDebugger'), remaining(3000), 'Start fresh extension worker');
-          const ready = await bounded(startup.evaluate('({extensionId:chrome.runtime.id,workerURL:location.href})'), remaining(3000), 'Fresh worker execution');
+          const ready = await until(() => startup.evaluate(`(${workerRuntimeIdentity.toString()})()`), Boolean, remaining(3000), signal);
           assert.deepEqual(ready, { extensionId, workerURL });
           record('extension-reload-worker-ready', { targetId: fresh.targetId, ...ready });
         } finally { await bounded(startup.close(), 1500, 'Detach fresh worker startup'); }
@@ -255,7 +259,7 @@ export async function openExtension(build, record = () => {}) {
           const workers = context.serviceWorkers().filter(candidate => candidate.url() === workerURL);
           return workers.length === 1 && workers[0] !== previousWorker ? workers[0] : null;
         }, Boolean, remaining(3000), signal);
-        const identity = await bounded(nextWorker.evaluate(() => ({ extensionId: chrome.runtime.id, workerURL: location.href })), remaining(3000), 'Verify fresh extension worker');
+        const identity = await until(() => nextWorker.evaluate(workerRuntimeIdentity), Boolean, remaining(3000), signal);
         assert.deepEqual(identity, { extensionId, workerURL });
         const installed = await cdpSend(browserCDP, 'Extensions.getExtensions', {}, remaining(3000));
         const exact = installed.extensions.find(item => item.id === extensionId);

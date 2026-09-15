@@ -13,6 +13,7 @@ function check(source: string): void {
     import { playerCommand } from './tools/m10-sites.mjs';
     import { validateOldShutdown } from './tools/m105-reload.mjs';
     import { parseFinalCases, deliveryGates } from './tools/m105-final.mjs';
+    import { workerRuntimeIdentity } from './tools/m10-browser.mjs';
     import { COST_ORDER, compareCosts, costBounds, costCases, profileProofReads, profileLiveProof } from './tools/m107-performance.mjs';
     import { transitionVerdict, summarizePresentation, geometryOracleSource, installGeometryOracle, TRANSITIONS } from './tools/m107-presentation.mjs';
     ${source}
@@ -97,6 +98,15 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('waits for a fresh worker runtime binding without accepting a different identity', () => check(`
+    const context=createContext({location:{href:'chrome-extension://fixed/service-worker.js'}});
+    const identity=()=>new Script('('+workerRuntimeIdentity.toString()+')()').runInContext(context);
+    assert.equal(identity(),null);context.chrome={};assert.equal(identity(),null);
+    context.chrome.runtime={id:'fixed'};
+    assert.deepEqual(JSON.parse(JSON.stringify(identity())),{extensionId:'fixed',workerURL:'chrome-extension://fixed/service-worker.js'});
+    context.chrome.runtime.id='other';assert.notEqual(identity().extensionId,'fixed');
+  `));
+
   it('bounds live proof attribution and restores the real guard without changing its result', () => check(`
     let calls=0;const guard=function(){calls++;return 17;};
     const attachment={video:{getBoundingClientRect(){}},canvas:{getBoundingClientRect(){}},checkedGeometry:{proof:{styles:[]}},checkPresentation:guard};
