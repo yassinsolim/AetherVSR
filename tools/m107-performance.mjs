@@ -83,12 +83,14 @@ export async function runProofProfile(prefix,{trace=false,instrumented=false,obs
         await page.evaluate(()=>new Promise(done=>setTimeout(done,12000)));
         if(instrumented){
           await page.evaluate(withObservers=>withObservers?globalThis[Symbol.for('aethervsr.m106.native')].done:window.dispatchEvent(new Event('aethervsr:m106:end')),observers);
+        }
+        const {profile}=await session.send('Profiler.stop');
+        if(instrumented){
           const data=await native.isolated(page,()=>globalThis[Symbol.for('aethervsr.m107.cost')]);
           const bytes=gzipSync(JSON.stringify(data)),path=`${prefix}.cost.json.gz`;writeFileSync(path,bytes,{flag:'wx'});
           report.cost={path:relative(ROOT,path),sha256:sha256(bytes),bytes:bytes.length,guard:distribution(data.guard.map(row=>row[1])),
             observers,scope:'Same cost wrapper during intrusive CPU profiling; observers flag records the common lean native and mutation wrappers. Diagnostic only, not a registered performance window.'};
         }
-        const {profile}=await session.send('Profiler.stop');
         const packed=gzipSync(JSON.stringify(profile)),path=`${prefix}.cpuprofile.gz`;writeFileSync(path,packed,{flag:'wx'});
         report.profile={path:relative(ROOT,path),sha256:sha256(packed),bytes:packed.length,samples:profile.samples?.length??0,
           intervalUs:100,scope:'Separate12s intrusive native V8 CPU sampling of stable-start Auto. Not GPU, qualifying cadence or precise function wall time; overhead and sampling error apply.'};
