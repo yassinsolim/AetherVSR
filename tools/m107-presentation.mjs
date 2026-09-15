@@ -131,6 +131,18 @@ export function prepareTransitionMedia() {
   return metadata;
 }
 
+export function presentationEnvironment() {
+  const hardware=JSON.parse(execFileSync('system_profiler',['SPHardwareDataType','-json'],{encoding:'utf8',timeout:15000})).SPHardwareDataType[0];
+  const files=['tools/m107-presentation.mjs','tools/m107-performance.mjs','tools/m107-fixture.html','tools/m106-counters.mjs','tools/m105-accounting.mjs',
+    'tools/m10-performance.mjs','tools/m10-browser.mjs','tools/m9-browser.mjs','public/media/m9/720p60.mp4','public/models/aethersr-c16d2.json'];
+  const sourcePins=Object.fromEntries(files.map(path=>[path,sha256(readFileSync(join(ROOT,path)))]));
+  assert.equal(sourcePins['public/media/m9/720p60.mp4'],'8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a');
+  const power=execFileSync('pmset',['-g','batt'],{encoding:'utf8'}).trim();assert(power.includes('AC Power'));
+  return {sourcePins,os:execFileSync('sw_vers',['-productVersion'],{encoding:'utf8'}).trim(),node:process.version,power,
+    hardware:{model:hardware.machine_model,chip:hardware.chip_type,memory:hardware.physical_memory},displayRefreshRate:'not measured',
+    media:JSON.parse(execFileSync('ffprobe',['-v','error','-show_entries','stream=codec_name,width,height,r_frame_rate,avg_frame_rate:format=duration','-of','json',join(ROOT,'public/media/m9/720p60.mp4')],{encoding:'utf8'}))};
+}
+
 export const TRANSITIONS = [
   {name:'scroll-one',actions:['scroll-1']}, {name:'scroll-228',actions:['scroll-228']},
   {name:'scroll-large',actions:['scroll-900','scroll-0']}, {name:'continuous-smooth',actions:['smooth','scroll-0']},
@@ -154,16 +166,24 @@ export function transitionVerdict(trace, actions, negative=false) {
   const boundary=row=>row.reason==='animation'||row.reason==='submitted:after'||row.reason==='refresh:end'||row.reason.startsWith('event:');
   const dirty=known?rows.filter(row=>boundary(row)&&row.canvasVisible&&row.geometryGeneration!==row.appliedGeometryGeneration):null;
   const processed=rows.filter(row=>row.reason==='submitted:after'&&row.mismatch);
+  const staleOutput=rows.filter(row=>boundary(row)&&row.canvasVisible&&known&&
+    (row.outputGeometryGeneration!==row.geometryGeneration||row.outputGeneration!==row.sourceGeneration));
   const outcomes=actions.map(action=>{
     const settled=rows.filter(row=>row.at>=action.finishedAt+500&&row.at<action.finishedAt+1000);
     const detected=rows.filter(row=>row.at>=action.startedAt&&row.at<=action.finishedAt+1000);
     const guardBoundary=detected.find(row=>row.reason==='animation'||row.reason==='submitted:after');
     const persistent=detected.filter(row=>row.mismatch&&guardBoundary&&row.at>guardBoundary.at&&row.reason==='animation');
-    const restored=settled.some(row=>row.canvasVisible&&!row.mismatch);
-    return {...action,settledSamples:settled.length,visibleRecovery:restored,lateMismatches:persistent.length,
-      pass:!action.error&&persistent.length===0&&(negative||action.name==='scroll-900'?settled.every(row=>!row.canvasVisible||!row.mismatch):restored)};
+    const recoveryRows=rows.filter(row=>row.at>=action.finishedAt&&row.at<=action.finishedAt+500);
+    const frames=recoveryRows.filter(row=>row.reason==='submitted:after'&&row.canvasVisible&&!row.mismatch);
+    const restored=settled.some(row=>row.canvasVisible&&!row.mismatch)&&frames.length>=2;
+    const lateSource=rows.filter(row=>row.reason==='submitted:after'&&row.at>=action.startedAt&&row.at<=action.finishedAt+1000&&row.canvasVisible
+      &&(row.backing.width!==row.intrinsic.width*2||row.backing.height!==row.intrinsic.height*2||Number.isInteger(row.sourceGeneration)&&row.outputGeneration!==row.sourceGeneration));
+    return {...action,settledSamples:settled.length,visibleRecovery:restored,confirmedFramesWithin500ms:frames.length,
+      firstVisibleAfterSettledMs:frames.length?frames[0].at-action.finishedAt:null,lateMismatches:persistent.length,staleSourceSamples:lateSource.length,
+      pass:!action.error&&persistent.length===0&&lateSource.length===0&&(negative||action.name==='scroll-900'?settled.length>0&&settled.every(row=>!row.canvasVisible):restored)};
   });
-  return {...summarizePresentation(trace),pass:known&&dirty.length===0&&processed.length===0&&outcomes.every(row=>row.pass),knownDirtyVisible:dirty?.length??null,
+  return {...summarizePresentation(trace),pass:known&&dirty.length===0&&processed.length===0&&staleOutput.length===0&&outcomes.every(row=>row.pass),knownDirtyVisible:dirty?.length??null,
+    staleOutputSamples:staleOutput.length,
     postSubmitMismatches:processed.length,actions:outcomes};
 }
 
@@ -178,15 +198,15 @@ export async function runTransitions(prefix,{strategy=1,repeats=3,only=null,prod
     build={directory,provenance};
   }
   const cases=only?TRANSITIONS.filter(item=>only.includes(item.name)):TRANSITIONS;
-  const report={phase:'TRANSITIONS',strategy,production,repeats,build,apparatus:current.provenance.sourceCommit,started:new Date().toISOString(),results:[],verdict:'UNVERIFIED'};
+  const report={phase:'TRANSITIONS',strategy,production,repeats,build,apparatus:current.provenance.sourceCommit,environment:presentationEnvironment(),started:new Date().toISOString(),results:[],verdict:'UNVERIFIED'};
   let native,server;
   try{
-    server=await presentationServer();native=await openExtension(build);report.fixtureSha256=server.htmlSha256;
+    server=await presentationServer();native=await openExtension(build,(name,data)=>{if(name==='browser')report.browser=data;});report.fixtureSha256=server.htmlSha256;
     for(let repetition=1;repetition<=repeats;repetition++)for(const item of cases){
       const result={name:item.name,repetition,actions:[],verdict:'UNVERIFIED'};report.results.push(result);
       const page=await native.context.newPage();let tabId;
       try{
-        await nativeWindow(page,native.context);await page.goto(server.url);await page.bringToFront();
+        result.placement=await nativeWindow(page,native.context);await page.goto(server.url);await page.bringToFront();
         if(item.prepare)await page.evaluate(name=>globalThis.__M107_FIXTURE__.prepare(name),item.prepare);
         await page.waitForFunction(()=>{const video=document.querySelector('video');return video.readyState>=2&&!video.paused;});
         const panel=await native.popup(page);

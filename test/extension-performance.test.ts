@@ -13,6 +13,8 @@ function check(source: string): void {
     import { playerCommand } from './tools/m10-sites.mjs';
     import { validateOldShutdown } from './tools/m105-reload.mjs';
     import { parseFinalCases, deliveryGates } from './tools/m105-final.mjs';
+    import { COST_ORDER, compareCosts, costBounds } from './tools/m107-performance.mjs';
+    import { transitionVerdict } from './tools/m107-presentation.mjs';
     ${source}
     console.log('checked without browser');
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
@@ -95,6 +97,27 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('requires measured M10.7 watchdog costs and a valid neural reference', () => check(`
+    const make=()=>COST_ORDER.map(item=>({case:item,valid:true,summary:{nativeCallbackFps:59,renderedFps:59,core:{p95:.1},driver:{p95:.1},geometryGuardMsPerSecond:1,
+      tierStable:true,probes:0,transitions:0,ownerStable:true,error:null,deficit:0,visibleFraction:1,guard:{count:100,p95:.1,max:.2}}}));
+    let rows=make();assert.equal(compareCosts(rows)[2].pass,true);
+    rows.find(row=>row.case.strategy===2).summary.guard={count:0,p95:null,max:null};assert.equal(compareCosts(rows)[2].pass,false);
+    rows=make();rows[0].summary.tierStable=false;assert.equal(compareCosts(rows)[2].pass,false);
+    rows=make();rows[0].summary.probes=1;assert.equal(compareCosts(rows)[2].pass,false);
+    rows=make();delete rows.find(row=>row.case.strategy===2).summary.probes;assert.equal(compareCosts(rows)[2].pass,false);
+    rows=make();rows.find(row=>row.case.strategy===1).summary.transitions=1;assert.equal(compareCosts(rows)[1].pass,false);
+    assert.equal(costBounds([0,0,0,0,0,0]).upper95,0);assert.throws(()=>costBounds([0,0]));
+  `));
+
+  it('rejects visible negative transitions and stale output geometry even when rectangles align', () => check(`
+    const row={reason:'submitted:after',canvasVisible:true,mismatch:false,geometryGeneration:2,appliedGeometryGeneration:2,outputGeometryGeneration:2,sourceGeneration:1,outputGeneration:1,
+      intrinsic:{width:640,height:360},backing:{width:1280,height:720},videoRect:{left:0,top:0,width:640,height:360},canvasRect:{left:0,top:0,width:640,height:360}};
+    const trace={overflow:false,rows:[100,200,600,700].map(at=>({...row,at}))};
+    const actions=[{name:'style-shift',startedAt:0,finishedAt:10}];assert.equal(transitionVerdict(trace,actions).pass,true);
+    assert.equal(transitionVerdict(trace,actions,true).pass,false);
+    trace.rows[0].outputGeometryGeneration=1;assert.equal(transitionVerdict(trace,actions).pass,false);
+  `));
+
   it('keeps the 1% final loss and sustained58fps gates exact with no missing-data or rounding pass', () => check(`
     const summary={activeMs:600000,durationMs:600000,renderedFps:58,runtimePresentedFps:58,windowStats:{last120s:{renderedFps:58,runtimePresentedFps:58}}};
     const metrics={m10CombinedPercent:1,submissionDeficit:0};

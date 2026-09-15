@@ -192,6 +192,28 @@ afterEach(() => {
 });
 
 describe('VideoAttachment', () => {
+  it('watchdog hides unannounced movement before a processed frame can reveal stale placement', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const { attachment, canvas, video, frame, document } = harness({presentationWatchdog:true});
+    await attachment.start();frame();
+    expect(canvas.style.getPropertyValue('visibility')).toBe('visible');
+    const rect=video.getBoundingClientRect();
+    video.getBoundingClientRect=()=>({...rect,top:57});
+    frame();expect(canvas.style.getPropertyValue('visibility')).toBe('hidden');
+    document.flush();
+    attachment.destroy();expect(document.frames.size).toBe(0);
+    expect(Object.values(attachment.snapshot().resources).every(value=>value===0)).toBe(true);
+  });
+
+  it('bounds mutation overload and ancestor-limit startup without leaving a watchdog', async () => {
+    vi.stubGlobal('__AETHERVSR_TEST__', true);
+    const {attachment,mutate,failure,document}=harness({presentationWatchdog:true});
+    await attachment.start();
+    mutate(Array.from({length:257},()=>({type:'attributes'} as MutationRecord)));
+    expect(failure).toHaveBeenCalledWith('unsupported-geometry',expect.stringContaining('bounded limit'));
+    expect(document.frames.size).toBe(0);
+  });
+
   it('does not re-show old-size output before a current-source frame and geometry proof', async () => {
     const { attachment, canvas, video, frame, document, pipeline } = harness();
     await attachment.start(); frame();
