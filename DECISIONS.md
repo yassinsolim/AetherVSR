@@ -1538,3 +1538,33 @@ claim. The initial candidate failed the cadence non-regression gate and had
 additional reviewed correctness gaps; its raw evidence is retained separately.
 Revised guards need fresh evidence. Neither this ADR nor an eventual presentation
 verdict changes historical delivery acceptance, overall PARTIAL or the M11 gate.
+
+## ADR-0048 - No presentation architecture qualified in M10.8
+
+**Status:** accepted research decision after local falsification and independent
+review; no production architecture or safety requirement is superseded.
+
+The prospectively registered A sentinel and D5/D10/D15 periodic hybrids each
+completed24 preliminary correct cases, then revealed stale object-fit semantics
+after a notification-free CSSOM edit with unchanged rectangles. Each stopped at
+25/96, leaving71 NOT RUN. Their geometry/epoch observables did not prove the
+admitted semantic state. The B anchor lease passed nine ownership cases but
+retained its owned token after a concurrent host append; stale whole-style
+restoration would clobber newer host state. C's mandatory wrapper reparenting
+broke a direct-child layout rule and changed width640 to320. No E was registered.
+
+Therefore choose **NO ARCHITECTURE QUALIFIED**. No safety/restoration survivor
+earned the six-pair neural cost study; cost is NOT RUN, not zero. S2 remains the
+unchanged strongest diagnostic control, not a selected architecture. Its one
+local matrix is not qualification: successful-submission accounting, reverse
+recovery and painted crop/control proof remain incomplete. Dummy-canvas evidence
+establishes declaration/geometry counterexamples, not physical scanout or FPS.
+
+Scope is the tested prototypes and observed contract failures, not a proof that
+all anchor, layout-coupled or hybrid designs are impossible. Any future design
+needs a prospectively observable support predicate, noninvasive ownership,
+independent rendering/recovery proof and the unchanged cost gates before selection.
+The original video remains authoritative. Production S1, the four GPU stages,
+model, permissions and controller are unchanged; the known presentation FAIL,
+extension PARTIAL and M11 GATED verdicts remain. No new implementation ships.
+See docs/M10.8-REPORT.md and results/m108-feasibility.json for evidence and limits.

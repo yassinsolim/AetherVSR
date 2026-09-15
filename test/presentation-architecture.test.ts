@@ -12,6 +12,29 @@ function check(source: string) {
 }
 
 describe('M10.8 independent architecture helpers',()=>{
+  it('retains the frozen failure denominators and nonqualifying controls',()=>check(`
+    const {readFileSync}=await import('node:fs');
+    const report=JSON.parse(readFileSync('results/m108-feasibility.json','utf8'));
+    assert.equal(report.selection,'NO ARCHITECTURE QUALIFIED');
+    assert.equal(report.artifacts.length,13);
+    for(const name of ['A','D5','D10','D15']) {
+      const candidate=report.candidates.find(row=>row.name===name);
+      assert.deepEqual([candidate.outcome,candidate.observed,candidate.planned,candidate.notRun,candidate.cost],['REJECTED',25,96,71,'NOT RUN']);
+      const artifact=report.artifacts.find(row=>row.path.endsWith('/common-'+name+'-01.json'));
+      assert.equal(artifact.results.length,25);
+      assert.equal(artifact.results.at(-1).actions[0].challenge.valid,true);
+      const failure=artifact.results.at(-1).summary.firstFailure;
+      assert.equal(failure.visible,true);assert.equal(failure.tetherError,0);assert.deepEqual(failure.semantic,['object-fit']);
+      assert.equal(failure.focused,true);assert.equal(failure.hostIntact,true);
+    }
+    const s2=report.artifacts.find(row=>row.path.endsWith('/common-s2-01.json'));
+    assert.equal(s2.repeats,1);assert.equal(s2.results.length,32);
+    assert.equal(report.candidates.some(row=>row.name==='s2'),false);
+    assert(report.limitations.some(text=>text.includes('not independently verified successful submission')));
+    const tether=report.artifacts.find(row=>row.path.endsWith('/anchor-tether-01.json'));
+    assert.equal(tether.results[0].cleanupRelease.exactOriginal,true);assert.equal(tether.results[0].cleanupRelease.ownedTokenRemains,false);
+  `));
+
   it('never promotes stopped stale cases or a nonreplacement capability matrix',()=>check(`
     const good={at:100,reason:'render',boundary:true,stale:false,visible:true,tetherError:0,semantic:[],focused:true,visibility:'visible',expected:{visible:true}};
     const trace={overflow:false,rows:[good,{...good,at:200}]},actions=[{name:'move',settledAt:0}];

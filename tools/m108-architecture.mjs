@@ -401,6 +401,51 @@ export async function runMatrix(prefix,{kind='A',frequency=0,tetherOnly=false,re
   return report;
 }
 
+export function exportFeasibility(destination) {
+  const directory=join(ROOT,'.cache/m108');
+  const names=['feasibility-batch-01','elementary-anchor-01','elementary-anchor-02','observability-01','anchor-ownership-01','wrapper-01','anchor-tether-01','common-s1-01','common-s2-01','common-A-01','common-D5-01','common-D10-01','common-D15-01'];
+  const artifacts=names.map(name=>{
+    const path=join(directory,`${name}.json`),bytes=readFileSync(path),report=JSON.parse(bytes);
+    assert(report.finished||report.result);
+    const results=report.results?.map(result=>{
+      if(!result.raw)return result;
+      const rawBytes=readFileSync(result.raw.path);
+      assert.equal(sha256(rawBytes),result.raw.sha256);assert.equal(rawBytes.length,result.raw.bytes);
+      return {name:result.name,repeat:result.repeat,actions:result.actions,summary:result.summary,raw:result.raw,
+        restored:result.restored,cleanupResources:result.cleanup?.resources??null,
+        cleanupRelease:result.cleanup?.restored??null,error:result.error??null};
+    });
+    return {path,sha256:sha256(bytes),bytes:bytes.length,identity:report.identity,environment:report.environment,
+      browser:report.browser,started:report.started,finished:report.finished,phase:report.phase,
+      kind:report.kind,frequency:report.frequency,tetherOnly:report.tetherOnly,repeats:report.repeats,
+      stopped:report.stopped??null,remaining:report.remaining??null,result:report.result,results};
+  });
+  const candidates=['A','D5','D10','D15'].map(name=>{
+    const artifact=artifacts.find(row=>row.path.endsWith(`/common-${name}-01.json`));
+    assert.equal(artifact.results.length,25);assert.equal(artifact.remaining,71);
+    assert.equal(artifact.stopped.reason,'SUPPORTED_STALE');
+    const failure=artifact.results.at(-1);
+    assert(failure.actions[0].challenge.valid);assert(failure.restored);
+    assert.equal(failure.summary.firstFailure.tetherError,0);
+    assert.deepEqual(failure.summary.firstFailure.semantic,['object-fit']);
+    return {name,outcome:'REJECTED',observed:25,planned:96,notRun:71,reason:'VISIBLE_STALE_OBJECT_FIT',cost:'NOT RUN'};
+  });
+  const report={schemaVersion:1,selection:'NO ARCHITECTURE QUALIFIED',production:'UNCHANGED S1',
+    cost:'NOT RUN: no safety/restoration survivor',
+    scope:'Local declaration/geometry falsification, not painted pixels, neural cadence or production qualification',
+    limitations:['Admission field records configuration; raw prior visibility supports only these counterexamples.',
+      'No reverse CSSOM recovery or pixel crop/caption paint verification.',
+      'Control submitted hook observes callback completion, not independently verified successful submission.',
+      'Anchor nonreplacement semantic cases invoke forceProof/hide and do not prove semantic safety.',
+      'Observer assay covers selected nodes/events and final focus only, not every browser notification.',
+      'Raw files are local ignored artifacts; hashes are audit references, not remote availability.'],
+    candidates:[...candidates,{name:'B',outcome:'REJECTED',reason:'OWNED_ANCHOR_TOKEN_REMAINS_AFTER_HOST_APPEND',cost:'NOT RUN'},
+      {name:'C',outcome:'REJECTED',reason:'MANDATORY_REPARENT_BREAKS_HOST_LAYOUT',cost:'NOT RUN'},
+      {name:'E',outcome:'NOT RUN',reason:'NO PROSPECTIVELY REGISTERED HYBRID',cost:'NOT RUN'}],artifacts};
+  if(destination)writeFileSync(destination,`${JSON.stringify(report)}\n`,{flag:'wx'});
+  return report;
+}
+
 export async function runObservability(prefix) {
   prefix=resolve(prefix);assert(prefix.startsWith(join(ROOT,'.cache/m108/'))&&!existsSync(`${prefix}.json`));mkdirSync(dirname(prefix),{recursive:true});
   const report={phase:'NO_REPLACEMENT_OBSERVABILITY',identity:studyIdentity(),environment:presentationEnvironment(),started:new Date().toISOString(),results:[]};

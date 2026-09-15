@@ -50,6 +50,14 @@ the documented unannounced-layout gap and cannot promise the full invariant.
 The four GPU stages, model, runtime policy and permissions remain unchanged.
 See [docs/M10.7-REPORT.md](docs/M10.7-REPORT.md).
 
+M10.8 selected **NO ARCHITECTURE QUALIFIED** (ADR-0048). Local A/D geometry
+sentinels missed semantic CSSOM changes, the tested B lease failed concurrent
+ownership restoration, and C required intrusive reparenting. No candidate earned
+cost qualification. The diagnostic control and production payloads remain unchanged;
+no architecture integration or new GPU data flow was introduced. These scoped
+counterexamples do not prove every browser-maintained relationship impossible.
+See [docs/M10.8-REPORT.md](docs/M10.8-REPORT.md).
+
 **What Milestone 3 settled about the neural stage, and Milestone 4 built.** Its
 kernels are hand-written WGSL rather than a third-party runtime, and they took
 the shape `src/bench/conv-blocked.wgsl.ts` established - see

@@ -471,8 +471,21 @@ nonqualifying60s cost variants measured11.54-12.22ms/s total geometry/guard work
 No limit, controller, model, supported scope or historical verdict was weakened.
 Final strategy/public qualification is gated/not run. Independent lifecycle,
 UI-reload recheck and exact parity remain separately evidenced, not a waiver.
-Overall extension PARTIAL; [30-section report](docs/M10.7-REPORT.md). The next
-step is a bounded presentation-design plan, not M11 or another unplanned trial.
+Overall extension PARTIAL; [30-section report](docs/M10.7-REPORT.md). Its bounded
+presentation-design follow-up is recorded below; this is not permission for M11.
+
+---
+
+## Milestone 10.8 - Presentation architecture [NO ARCHITECTURE QUALIFIED]
+
+Prospectively registered local feasibility study, no production integration.
+A and fixed D5/D10/D15 each stopped on the25th/96 case with stale CSSOM object-fit;
+B stopped on concurrent anchor ownership restoration; C violated host layout by
+reparenting. No E was registered. Cost studies NOT RUN because no safety survivor
+qualified to enter them. S1 production and strongest S2 diagnostic are unchanged.
+[30-section report](docs/M10.8-REPORT.md), ADR-0048. Next recommendation is a
+separately authorized observable-support/ownership design study, not rollout of a
+selected implementation or tuning stopped candidates. Nothing implements that step.
 
 ---
 

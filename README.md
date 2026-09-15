@@ -18,6 +18,12 @@ their initial failures and scoped rechecks. M11 stays GATED. The unpacked extens
 does not guarantee synchronized replacement of page video.
 [Full30-section report](docs/M10.7-REPORT.md).
 
+**M10.8 design study: NO ARCHITECTURE QUALIFIED.** Cheap sentinel and periodic
+proof prototypes missed CSSOM semantics; the tested anchor lease failed restoration
+and the wrapper violated host layout. Costs were not run after safety/ownership
+stops. Production and historical verdicts are unchanged. This is research, not a
+presentation rollout. [Architecture feasibility report](docs/M10.8-REPORT.md).
+
 **M10.6 history remains PARTIAL, Case D.** Four ten-minute native-video
 controls exceeded the1% combined callback/quality-loss reference, averaging
 4.262931%. This is a lean-instrumented browser result, not physical display loss

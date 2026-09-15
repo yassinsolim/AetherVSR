@@ -2900,6 +2900,18 @@ after owner-directed failed closure.
 [proof/cost diagnosis](results/m107-proof-diagnosis.json),
 [independent native regressions](results/m107-verification.json).
 
+## Milestone 10.8: architecture feasibility, no cost entrant
+
+**NO ARCHITECTURE QUALIFIED.** Local Apple M5/Chrome153 study rejected the
+tested A/D sentinel variants on stale object-fit, B on ownership restoration and
+C on invasive host-layout changes. Candidate neural cadence, guard percentiles,
+paired extra JS and driver costs: **not measured**. Qualifying cost trials were
+NOT RUN under preregistered safety/restoration hard stops. No cheap-dummy timing
+is a720p60 performance result; browser-maintained layout is not free renderer work.
+The historical S2 timings above remain nonqualifying and are not a new paired
+contrast. Production payload and previous verdicts are unchanged.
+[Report and boundaries](docs/M10.8-REPORT.md), [evidence](results/m108-feasibility.json).
+
 ## Reproducing
 
 ```bash
