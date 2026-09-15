@@ -40,6 +40,16 @@ decision is Case D/PARTIAL; public same-DOM misalignment remains a documented
 limitation despite passing fixture lifecycle and output parity. See
 [docs/M10.6-REPORT.md](docs/M10.6-REPORT.md).
 
+M10.7 closes presentation synchronization **FAIL**, overall extension **PARTIAL**.
+Known invalidation now hides output synchronously and fences reveal with separate
+geometry/source/output epochs. Inspection retains bounded current style, clipping
+and placement proofs, revalidated after owned canvas insertion. ADR-0047 records
+the design. The stronger S2 live-proof guard runs only when explicitly selected
+in a diagnostic build; its measured cost did not qualify. Production S1 retains
+the documented unannounced-layout gap and cannot promise the full invariant.
+The four GPU stages, model, runtime policy and permissions remain unchanged.
+See [docs/M10.7-REPORT.md](docs/M10.7-REPORT.md).
+
 **What Milestone 3 settled about the neural stage, and Milestone 4 built.** Its
 kernels are hand-written WGSL rather than a third-party runtime, and they took
 the shape `src/bench/conv-blocked.wgsl.ts` established - see

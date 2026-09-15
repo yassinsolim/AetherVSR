@@ -8,7 +8,17 @@ AetherVSR upscales video in the browser using WebGPU, entirely on your machine â
 no uploads, no server. Apple Silicon is a first-class target; the architecture
 is cross-platform through WebGPU.
 
-**Status: M10.6 EXTENSION MVP PARTIAL, Case D.** Four ten-minute native-video
+**Status: M10.7 presentation synchronization FAIL; extension MVP PARTIAL.**
+Known scroll/source invalidations now hide stale output before reconciliation,
+but production S1 still misses unannounced layout changes. Stronger diagnostic
+proof guards passed local pilots but did not qualify under the fixed cost gates;
+S2 remains research-only. Candidate-dependent public/final acceptance is gated,
+not passed. Independent lifecycle and six exact parity cases are retained with
+their initial failures and scoped rechecks. M11 stays GATED. The unpacked extension
+does not guarantee synchronized replacement of page video.
+[Full30-section report](docs/M10.7-REPORT.md).
+
+**M10.6 history remains PARTIAL, Case D.** Four ten-minute native-video
 controls exceeded the1% combined callback/quality-loss reference, averaging
 4.262931%. This is a lean-instrumented browser result, not physical display loss
 or justification for normalization. Paired uncertainty and one Baseline late-window
@@ -44,7 +54,7 @@ in [BENCHMARKS.md](BENCHMARKS.md) and the full
 [M10 report](docs/M10-REPORT.md).
 
 **M9 history: complete; runtime controller replaced, weights retained.** The
-production 6,291-parameter C16D2 weights remain unchanged through M10.6. Auto performance selects
+production 6,291-parameter C16D2 weights remain unchanged through M10.7. Auto performance selects
 neural or Catmull-Rom from runtime evidence, with hysteresis and real neural
 recovery probes; Baseline mode never probes. This does not predict scene quality.
 

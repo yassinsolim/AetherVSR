@@ -458,9 +458,28 @@ owner-approved, prospectively recorded and retain every superseded attempt.
 
 ---
 
+## Milestone 10.7 - Presentation synchronization [FAIL]
+
+Owner-directed failed closure, not completed acceptance. The original228px stale
+scroll canvas was reproduced as delayed invalidation. Geometry/source/output
+epochs and synchronous hiding improve known transitions; production S1 still
+misses unannounced position changes. S2 remains diagnostic-only.
+
+Initial S2 cadence-penalty upper95 was0.927326fps, above the0.5fps allowance.
+Stronger current-style/clip proofs passed two separate28-case pilots but their
+nonqualifying60s cost variants measured11.54-12.22ms/s total geometry/guard work.
+No limit, controller, model, supported scope or historical verdict was weakened.
+Final strategy/public qualification is gated/not run. Independent lifecycle,
+UI-reload recheck and exact parity remain separately evidenced, not a waiver.
+Overall extension PARTIAL; [30-section report](docs/M10.7-REPORT.md). The next
+step is a bounded presentation-design plan, not M11 or another unplanned trial.
+
+---
+
 ## Milestone 11 - Cross-vendor validation [GATED]
 
-Not the default next step while M10.6 delivery/public-media robustness remains
+Not the default next step while M10.7 presentation synchronization fails and
+M10.6 delivery/public-media robustness remains
 unresolved and has not been proved vendor-specific. No M11 implementation is
 included. After READY or a justified vendor-specific research gate, verify on NVIDIA, AMD and Intel
 GPUs across Windows and Linux. Everything measured so far is one Apple Silicon

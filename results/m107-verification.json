@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "presentationSynchronization": "FAIL",
+  "overallExtension": "PARTIAL",
+  "m11": "GATED",
+  "scope": "Independent native lifecycle and exact output regressions, not presentation or performance qualification. Initial failed/unverified attempts remain unchanged.",
+  "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "bundles": {
+    "production": {"bytes": 274684, "sha256": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551", "strategy": "S1; unannounced-layout defect remains"},
+    "diagnostic": {"bytes": 275230, "sha256": "8e4927349fad976914f71d502ea5177a7fbf48b3feee7d41e134461274b7450c", "strategy": "S1 by default; optional S2 is research-only"}
+  },
+  "lifecycle": [
+    {
+      "kind": "production initial matrix",
+      "sourceCommit": "485ec90baae12016a468fa279ed6d6f5e7a5c03a",
+      "raw": {"path": ".cache/m107/journeys-production-01.json", "sha256": "d2b24a288d4d9e366c625459644afda7602904b63c40c48e310b1b3c4c22797b", "bytes": 910048},
+      "verdict": "UNVERIFIED",
+      "total": 45,
+      "passed": 44,
+      "unverified": [{"name": "native extension reload and fresh popup reinjection", "reason": "Fresh worker target appeared before its chrome runtime binding; ReferenceError: chrome is not defined."}],
+      "maximumConcurrent": 1,
+      "zeroTeardownSnapshots": 94
+    },
+    {
+      "kind": "diagnostic matrix",
+      "sourceCommit": "485ec90baae12016a468fa279ed6d6f5e7a5c03a",
+      "raw": {"path": ".cache/m107/journeys-diagnostic-01.json", "sha256": "a22ade44b0a139f4923e4f37ff8424180b075d4a238c6d93bf408c2614dc0393", "bytes": 999329},
+      "verdict": "PASS_LIFECYCLE_ONLY",
+      "total": 49,
+      "passed": 49,
+      "maximumConcurrent": 1,
+      "zeroTeardownSnapshots": 110,
+      "uiReload": {"oldWorkerClosed": true, "freshWorkerHandle": true, "exactIdentityAndInstalledPathVerified": true}
+    },
+    {
+      "kind": "production scoped reload recheck",
+      "sourceCommit": "ceaf8c4fbf2f12bb25325e83260e033bb5772e88",
+      "raw": {"path": ".cache/m107/journeys-production-reload-02.json", "sha256": "054afa1aa86ad2e7fc8a0f7a884a730086eecabcea24ff056d47df8101f0d3a6", "bytes": 35058},
+      "verdict": "PASS_LIFECYCLE_ONLY",
+      "total": 1,
+      "passed": 1,
+      "maximumConcurrent": 1,
+      "zeroTeardownSnapshots": 1,
+      "uiReload": {"oldWorkerClosed": true, "freshWorkerHandle": true, "exactIdentityAndInstalledPathVerified": true},
+      "correction": "Apparatus-only bounded wait for the fresh worker runtime binding. Existing3s per-stage/20s overall deadline, exact ID/URL/path and no-silent-reactivation assertions retained. No extension payload changes."
+    }
+  ],
+  "lifecycleCoverage": "All45 production cases covered by44 initial passes plus the separate corrected reload pass; not a single45/45 full-matrix run. Diagnostic49/49 passed in one run. Includes20 enable/disable cycles, source/owner/SPA changes, fullscreen/PiP, origin revocation, independent tabs and terminal GPU-device loss.",
+  "resourceScope": "All205 recorded teardown snapshots in the three lifecycle reports contain mutationObservers=0 and presentationFrame=0 and every owned-resource count zero. These are correlated snapshots, not205 independent cleanup events. Full S2 proof/guard resources were also checked in earlier diagnostic pilots, not promoted to final strategy acceptance.",
+  "parity": [
+    {
+      "kind": "production external",
+      "sourceCommit": "485ec90baae12016a468fa279ed6d6f5e7a5c03a",
+      "raw": {"path": ".cache/m10/output-parity/m107-external-01/result.json", "sha256": "ba422798f40cd6ac27780ab758ecfdd675f0f2afa65325a5268b07d9d127a411", "bytes": 149600},
+      "verdict": "PASS",
+      "timesSeconds": [1, 2, 3],
+      "comparisons": 3,
+      "allChecksAndDecodedTimesEqual": true,
+      "cleanup": true
+    },
+    {
+      "kind": "diagnostic forced-copy initial startup",
+      "sourceCommit": "485ec90baae12016a468fa279ed6d6f5e7a5c03a",
+      "raw": {"path": ".cache/m10/output-parity/m107-sampled-01/result.json", "sha256": "8ada67610e99f2f2e851a5bcd6cbd854875720dfc7a97592676e2ce8a87c7587", "bytes": 6827},
+      "verdict": "FAIL",
+      "comparisons": 0,
+      "reason": "TypeError: fetch failed during root harness startup, before browser/side setup or pixel comparisons. Exact connection cause not established."
+    },
+    {
+      "kind": "diagnostic forced-copy fresh-process recheck",
+      "sourceCommit": "ceaf8c4fbf2f12bb25325e83260e033bb5772e88",
+      "raw": {"path": ".cache/m10/output-parity/m107-sampled-02/result.json", "sha256": "7e50f93269a0efe9bbc32e1f7f27598240179846c6538dbbf7d835756622ad4b", "bytes": 150722},
+      "verdict": "PASS",
+      "timesSeconds": [1, 2, 3],
+      "comparisons": 3,
+      "allChecksAndDecodedTimesEqual": true,
+      "cleanup": true,
+      "scope": "Unchanged parity tool and candidate payload in a fresh CLI process; failed startup retained. No tolerance or hash waiver."
+    }
+  ],
+  "parityScope": "Actual installed extension versus root harness, fixed paused seeks1/2/3s, exact full normalized RGBA8 input/output hashes, matching model/precision/route and exact2x extent, one replay submission. Offline readbacks only. Byte deltas and live performance are not measured; no cross-route equality or visual-quality claim.",
+  "gatedNotRun": ["corrected28-case three-repeat S0/S1/S2 comparison", "revised18-run paired cost study", "selected production and diagnostic final transition matrices", "two120s production confirmations", "six180s Video.js presentation sessions", "two180s Shaka attempts", "one Plyr safe-rejection attempt"],
+  "gatingReason": "Owner-approved failed closure after no candidate qualified. Public historical outcomes remain unchanged; missing M10.7 attempts are not N/A passes.",
+  "localGates": {
+    "scope": "Separate commands after a fresh locked npm ci. Reporting documents were pending; final-gate packaging records sourceDirty=true without changing payload hashes. Clean clone and exact-final-HEAD CI are separately required.",
+    "commands": [
+      {"command": "npm ci", "verdict": "PASS"},
+      {"command": "npm run typecheck", "verdict": "PASS"},
+      {"command": "npm run lint", "verdict": "PASS"},
+      {"command": "npm run test -- --reporter=dot", "verdict": "PASS", "tests": 729, "files": 34},
+      {"command": "npm run build", "verdict": "PASS"},
+      {"command": "npm run build:extension", "verdict": "PASS"},
+      {"command": ".cache/m8-venv/bin/python -m pytest tools/test_*.py -q", "verdict": "PASS", "tests": 308}
+    ],
+    "baselineModerateDependencyAdvisories": 2,
+    "protectedScopeUnchanged": ["src/core", "src/runtime.ts", "public/models/aethersr-c16d2.json", "src/extension/manifest.json", "src/extension/service-worker.ts", "src/extension/protocol.ts", "package.json", "package-lock.json"]
+  },
+  "review": "Independent final read-only reporting, state/resource, security/debug-stripping and reload-apparatus reviews passed their closure scopes. No review promotes presentation or performance to PASS; native/hash execution is separately parent-verified."
+}

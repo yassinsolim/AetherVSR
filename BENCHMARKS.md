@@ -2858,6 +2858,48 @@ Environment, amendments, every excluded attempt and measurement scopes:
 [observer](results/m106-observer.json), [proxy](results/m106-proxy.json),
 [public](results/m106-public.json), [verification](results/m106-verification.json).
 
+## Milestone 10.7: presentation qualification failed
+
+**Presentation FAIL; overall extension PARTIAL; M11 GATED.** No production
+watchdog qualified. The initial candidate and later proof variants below are
+retained unsuccessful research apparatus, not a final performance results table.
+No normalized delivery score or controller/model change follows.
+
+### Superseded and nonqualifying candidates
+
+Apple M5 Mac17,2/24GB, macOS26.6.2, native Chrome153.0.8010.12, AC,1200x760/DPR2
+at(40,40) on the built-in display. Physical refresh/scanout are not measured.
+Exact local H.2641280x72060/1 CFR4.016667s loop,640x360 CSS, external import and
+unchanged C16D2. Each cost run follows5s warmup;60s counters and wall-time CPU
+samples bracket the stated calls. GPU histograms are cumulative session scope,
+not per-window GPU quantiles. Layout/style attribution is not measured.
+
+Initial18-run blocks012/120/201/021/210/102 retained all six run pairs. Native
+callback/submission cadence-penalty upper95: S1 **0.719600fps**, S2 **0.927326fps**,
+both above0.5fps. S2 additional geometry/guard upper95 was2.130253ms/s, below3,
+but that does not waive cadence failure. Six-pair df5 t bounds, not frame-level
+replicates. Same-neural rewarm/stable transitions were correctly distinguished
+from forbidden tier changes/probes; original raw classifier flags remain retained.
+
+Later single-run proof, flat-snapshot and static-accessor probes measured total
+geometry+guard work **12.216483 / 11.619651 / 11.538160ms/s**, respectively.
+Guard p95 stored values were0.2999999821 /0.2000000179 /0.2000000179ms: no
+rounding-based pass against0.2ms. These are separate nonqualifying probes, not
+paired estimates; the3ms/s gate is an *additional-work paired upper bound*, not
+a standalone total-work threshold. No revised paired bound was measured.
+
+Guard/full-reconciliation timings are non-nested; driver/attachment timings nest
+guard work and must not be summed with it. Short intrusive V8/read profiles are
+diagnostic, not qualifying CPU/cadence windows or evidence to subtract observer
+cost. Earlier28-case proof pilots passed local checks but do not establish final
+production synchronization. Public and candidate-final acceptance were gated
+after owner-directed failed closure.
+
+[Full report and scopes](docs/M10.7-REPORT.md),
+[initial comparison](results/m107-strategy-initial.json),
+[proof/cost diagnosis](results/m107-proof-diagnosis.json),
+[independent native regressions](results/m107-verification.json).
+
 ## Reproducing
 
 ```bash
