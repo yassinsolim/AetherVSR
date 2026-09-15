@@ -164,6 +164,26 @@ export function installPublicObserver() {
   };
 }
 
+export function settlePublicViewport(expected) {
+  return new Promise((resolve,reject)=>{
+    const started=performance.now();let changedAt=started,handle,timer,finished=false;
+    const changed=()=>{changedAt=performance.now();};
+    const stop=error=>{
+      if(finished)return;finished=true;
+      window.removeEventListener('resize',changed);cancelAnimationFrame(handle);clearTimeout(timer);
+      if(error)reject(error);else resolve({started,ended:performance.now(),quietMs:performance.now()-changedAt,width:innerWidth,height:innerHeight});
+    };
+    const frame=()=>{
+      const restored=!document.fullscreenElement&&innerWidth===expected.width&&innerHeight===expected.height;
+      if(!restored)changedAt=performance.now();
+      if(restored&&performance.now()-changedAt>=200)stop();else handle=requestAnimationFrame(frame);
+    };
+    window.addEventListener('resize',changed);
+    timer=setTimeout(()=>stop(new Error('Original viewport did not settle after fullscreen exit')),3000);
+    handle=requestAnimationFrame(frame);
+  });
+}
+
 function localPrefix(prefix) {
   prefix = resolve(prefix);
   const path = relative(join(ROOT,'.cache/m106'),prefix);
@@ -327,6 +347,7 @@ export async function runVideojs(prefix, referencePath, resumePath) {
           [100000,'resize-1024',()=>nativeResize(native,page,1024)],
           [115000,'resize-1200',()=>nativeResize(native,page,1200)],
           [145000,'original-fullscreen',async()=>{
+            const viewport=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
             const player=page.locator(SITES.videojs.player).filter({has:page.locator('video')}).first();await player.hover();
             const button=await visibleButton(player,/^(Enter )?Full\s*screen(?: mode)?$/i);assert(button,'Original fullscreen control unavailable');
             await button.click();
@@ -336,7 +357,9 @@ export async function runVideojs(prefix, referencePath, resumePath) {
               const exit=await visibleButton(player,/^(Exit|Leave) Full\s*screen(?: mode)?$/i);
               if(exit)await exit.click();else await page.keyboard.press('Escape');
               await page.waitForFunction(()=>!document.fullscreenElement,undefined,{timeout:5000});
-            }}
+            }
+              await bounded(page.evaluate(settlePublicViewport,viewport),4000,'Original fullscreen viewport restoration');
+            }
             return {originalControl:true,holdMs:2000,exit:'Original Exit Fullscreen button when present; otherwise Escape'};
           }],
         ];

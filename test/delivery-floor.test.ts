@@ -6,7 +6,7 @@ function check(source: string): void {
     import assert from 'node:assert/strict';
     import { installNativeObserver, installRuntimeCounters, summarizeNative, validateNative, pairedBounds, floorDecision, observerComparison } from './tools/m106-counters.mjs';
     import { activeSafety, parseFloorPlan, PRIMARY_ORDER, qualifiesDisabledGeometry, resumePrefix, floorCases, bindingNativeFailure } from './tools/m106-floor.mjs';
-    import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure, manifestIdentity, observeManifests, advertisedCatalog, pairedSeekConditions, PUBLIC_ORDER } from './tools/m106-sites.mjs';
+    import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure, manifestIdentity, observeManifests, advertisedCatalog, pairedSeekConditions, PUBLIC_ORDER, settlePublicViewport } from './tools/m106-sites.mjs';
     import { runInNewContext } from 'node:vm';
     ${source}
     console.log('checked');
@@ -75,6 +75,15 @@ describe('native browser delivery floor accounting', () => {
     data.invalid=null;data.action='original-pause-resume';video.dispatchEvent(new Event('pause'));assert.equal(data.invalid,null);
     data.action=null;video.dispatchEvent(new Event('pause'));assert.equal(data.invalid,'Unexpected media event: pause');
     data.stop();assert.equal(timers.size,0);assert.equal(video.listeners+window.listeners+document.listeners,0);
+  `));
+  it('keeps fullscreen restoration bounded until the original viewport is quiet', () => check(observerFixture + `
+    document.fullscreenElement=null;context.innerWidth=1200;context.innerHeight=760;
+    context.requestAnimationFrame=callback=>{const id=++nextId;callbacks.set(id,callback);return id;};context.cancelAnimationFrame=id=>callbacks.delete(id);
+    const promise=runInNewContext('('+settlePublicViewport.toString()+')({width:1200,height:760})',context);
+    const tick=now=>{clock=now;const [id,callback]=callbacks.entries().next().value;callbacks.delete(id);callback(now);};
+    tick(100);clock=150;window.dispatchEvent(new Event('resize'));tick(250);assert.equal(callbacks.size,1);tick(350);
+    const result=await promise;assert.equal(result.quietMs,200);assert.equal(result.width,1200);
+    assert.equal(callbacks.size,0);assert.equal(timers.size,0);assert.equal(window.listeners,0);
   `));
   it('requires a matched public asset and never invents a substitute seek target', () => check(`
     const reference={urlSha256:'a'.repeat(64),origin:'https://example.test',duration:35.963044,width:1280,height:720};
