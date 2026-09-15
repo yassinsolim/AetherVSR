@@ -7,9 +7,28 @@ export interface Rect {
 
 export type ObjectFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 
+const STYLE_READERS: Partial<Record<string, (style: CSSStyleDeclaration) => unknown>> = {
+  objectPosition: style => style.objectPosition, objectFit: style => style.objectFit,
+  borderTopWidth: style => style.borderTopWidth, borderRightWidth: style => style.borderRightWidth,
+  borderBottomWidth: style => style.borderBottomWidth, borderLeftWidth: style => style.borderLeftWidth,
+  paddingTop: style => style.paddingTop, paddingRight: style => style.paddingRight,
+  paddingBottom: style => style.paddingBottom, paddingLeft: style => style.paddingLeft,
+  transform: style => style.transform, rotate: style => style.rotate, scale: style => style.scale, translate: style => style.translate,
+  filter: style => style.filter, backdropFilter: style => style.backdropFilter, perspective: style => style.perspective,
+  clipPath: style => style.clipPath, maskImage: style => style.maskImage, clip: style => style.clip,
+  mixBlendMode: style => style.mixBlendMode, opacity: style => style.opacity, position: style => style.position, zIndex: style => style.zIndex,
+  width: style => style.width, height: style => style.height,
+  borderTopLeftRadius: style => style.borderTopLeftRadius, borderTopRightRadius: style => style.borderTopRightRadius,
+  borderBottomRightRadius: style => style.borderBottomRightRadius, borderBottomLeftRadius: style => style.borderBottomLeftRadius,
+  zoom: style => style.zoom, display: style => style.display, visibility: style => style.visibility,
+  contentVisibility: style => style.contentVisibility, contain: style => style.contain, willChange: style => style.willChange,
+  containerType: style => style.containerType, overflowX: style => style.overflowX, overflowY: style => style.overflowY,
+  overflowClipMargin: style => style.overflowClipMargin, isolation: style => style.isolation,
+};
+
 interface GeometryProof {
   styles: { element: Element; parent: Node | null; style: CSSStyleDeclaration;
-    keys: PropertyKey[]; values: unknown[]; names: string[]; namedValues: string[] }[];
+    keys: PropertyKey[]; values: unknown[]; readers: ((style: CSSStyleDeclaration) => unknown)[]; names: string[]; namedValues: string[] }[];
   clips: { element: HTMLElement; rect: Rect; layout: number[] }[];
   viewport: { element: HTMLElement; width: number; height: number } | null;
 }
@@ -36,8 +55,7 @@ export function geometryProofCurrent(geometry: GeometryResult): boolean {
   if (proof.viewport && (proof.viewport.element.clientWidth !== proof.viewport.width || proof.viewport.element.clientHeight !== proof.viewport.height)) return false;
   for (const entry of proof.styles) {
     if (entry.element.parentNode !== entry.parent) return false;
-    const style = entry.style as unknown as Record<PropertyKey, unknown>;
-    for (let index = 0; index < entry.keys.length; index++) if (style[entry.keys[index]!] !== entry.values[index]) return false;
+    for (let index = 0; index < entry.readers.length; index++) if (entry.readers[index]!(entry.style) !== entry.values[index]) return false;
     for (let index = 0; index < entry.names.length; index++) if (entry.style.getPropertyValue(entry.names[index]!) !== entry.namedValues[index]) return false;
   }
   for (const entry of proof.clips) {
@@ -282,6 +300,7 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
     const style = view.getComputedStyle(element);
     if (styles.size >= 256) { overflow = true; return style; }
     const keys: PropertyKey[] = [], values: unknown[] = [], names: string[] = [], namedValues: string[] = [];
+    const readers: ((style: CSSStyleDeclaration) => unknown)[] = [];
     const indices = new Map<PropertyKey, number>(), namedIndices = new Map<string, number>();
     const tracked = new Proxy(style, { get(target, key) {
       if (key === 'getPropertyValue') return (name: string) => {
@@ -291,12 +310,15 @@ export function inspectGeometry(video: HTMLVideoElement): GeometryResult {
         return value;
       };
       const value: unknown = Reflect.get(target, key, target), index = indices.get(key) ?? keys.length;
-      if (index === keys.length) { indices.set(key, index); keys.push(key); }
+      if (index === keys.length) {
+        indices.set(key, index); keys.push(key);
+        readers.push(typeof key === 'string' && Object.hasOwn(STYLE_READERS, key) ? STYLE_READERS[key]! : style => Reflect.get(style, key, style) as unknown);
+      }
       values[index] = value;
       return value;
     } });
     styles.set(element, tracked);
-    proof.styles.push({ element, parent: element.parentNode, style, keys, values, names, namedValues });
+    proof.styles.push({ element, parent: element.parentNode, style, keys, values, readers, names, namedValues });
     return tracked;
   };
   const computed = readStyle(video);

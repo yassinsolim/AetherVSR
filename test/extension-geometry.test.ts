@@ -89,6 +89,22 @@ function fixture() {
 }
 
 describe('inspectGeometry', () => {
+  it('invalidates every captured property through its selected reader without dropping dependencies', () => {
+    const setup = fixture();
+    const geometry = setup.inspect();
+    expect(geometry.ok).toBe(true);
+    for (const entry of geometry.proof!.styles) {
+      expect(entry.readers.length).toBe(entry.keys.length);
+      const style = entry.style as unknown as Record<PropertyKey, unknown>;
+      for (const key of entry.keys) {
+        const original = style[key]; style[key] = 'changed-for-proof-test';
+        expect(geometryProofCurrent(geometry),String(key)).toBe(false);
+        style[key] = original;
+        expect(geometryProofCurrent(geometry),String(key)).toBe(true);
+      }
+    }
+  });
+
   it.each(['none', 'scale-down'])('invalidates changed %s fitted-image inputs without another hit test', fit => {
     const setup = fixture(); setup.videoStyle.objectFit = fit;
     const geometry = setup.inspect();
