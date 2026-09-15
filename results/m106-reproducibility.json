@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-09-15T07:16:05.791Z",
+  "sourceCommit": "1a8eda800eabab6269696756e0cfec328ed8fb67",
+  "clone": ".cache/m106/closure-clone",
+  "cloneMethod": "Local git clone --no-hardlinks; own npm ci, no reused npm node_modules",
+  "gates": [
+    {
+      "command": "npm ci",
+      "outcome": "PASS"
+    },
+    {
+      "command": "npm run typecheck",
+      "outcome": "PASS"
+    },
+    {
+      "command": "npm run lint",
+      "outcome": "PASS"
+    },
+    {
+      "command": "npm run test",
+      "outcome": "PASS",
+      "tests": 696,
+      "files": 34
+    },
+    {
+      "command": "npm run build",
+      "outcome": "PASS"
+    },
+    {
+      "command": "npm run build:extension",
+      "outcome": "PASS"
+    },
+    {
+      "command": "../../m8-venv/bin/python -m pytest tools/test_*.py -q",
+      "outcome": "PASS",
+      "tests": 308
+    }
+  ],
+  "environment": {
+    "node": "v26.5.0",
+    "python": "Python 3.12.13",
+    "pythonEnvironmentReused": true,
+    "lockfileSha256": "f6d76547b76a4c91f6a9320584427dca7b8f78e1a468041eff3476f96ce8444e"
+  },
+  "trackedBytes": 51744224,
+  "trackedCapBytes": 52428800,
+  "builds": [
+    {
+      "kind": "production",
+      "sourceCommit": "1a8eda800eabab6269696756e0cfec328ed8fb67",
+      "sourceDirty": false,
+      "totalBytes": 265958,
+      "bundleSha256": "0234676686877988956343821d5668caa8ba868d9c589b601bb8ef7b25e7d59d",
+      "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "provenanceSha256": "98b4c6a99cabcbb9ef0f72dea5c7d2d57e725b1328ccd959653eb89d5fdff3bb",
+      "manifest": {
+        "manifest_version": 3,
+        "name": "AetherVSR",
+        "version": "0.1.0",
+        "minimum_chrome_version": "106",
+        "description": "Local video enhancement for supported non-DRM web video.",
+        "permissions": [
+          "activeTab",
+          "scripting",
+          "storage"
+        ],
+        "background": {
+          "service_worker": "service-worker.js",
+          "type": "module"
+        },
+        "action": {
+          "default_popup": "popup.html",
+          "default_title": "AetherVSR"
+        },
+        "content_security_policy": {
+          "extension_pages": "script-src 'self'; object-src 'none'"
+        }
+      },
+      "repeatedFiles": [
+        {
+          "name": "build-provenance.json",
+          "sha256": "98b4c6a99cabcbb9ef0f72dea5c7d2d57e725b1328ccd959653eb89d5fdff3bb",
+          "bytes": 1377
+        },
+        {
+          "name": "content.js",
+          "sha256": "505fd36b7e0b9000acc17558eaa70692d50bf97f5a0911c00093a69c70b9debb",
+          "bytes": 106546
+        },
+        {
+          "name": "manifest.json",
+          "sha256": "37e7922754f44097d60a2b81dfb6ba2a04f6f49cdb19aefa71b436fee7627e82",
+          "bytes": 486
+        },
+        {
+          "name": "models/production.json",
+          "sha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+          "bytes": 140467
+        },
+        {
+          "name": "popup.css",
+          "sha256": "daac6fdde1732ef8ab41615a9440a65a66ba8cf3c9ee4d45a476ad6b9d7d798c",
+          "bytes": 2135
+        },
+        {
+          "name": "popup.html",
+          "sha256": "d9bc0a5ef9dc562eee6802f983ba411e4bf15b314bb6bef0853b266ed2fbe30f",
+          "bytes": 2301
+        },
+        {
+          "name": "popup.js",
+          "sha256": "606ea6645a03b5b51d060af59560a1bb7fbcda314b798f56d8ed5084c0e0cb57",
+          "bytes": 5020
+        },
+        {
+          "name": "service-worker.js",
+          "sha256": "645d389bcbce1d1d550bc0b71353a959a4c5fa5bb10fb41113a62db98e99d72c",
+          "bytes": 9003
+        }
+      ],
+      "byteIdenticalIncludingProvenance": true
+    },
+    {
+      "kind": "test",
+      "sourceCommit": "1a8eda800eabab6269696756e0cfec328ed8fb67",
+      "sourceDirty": false,
+      "totalBytes": 266426,
+      "bundleSha256": "ef2e17d32009d1c7bb18a1fc0449d64723b7df763ca43d10b63737edb8e977c7",
+      "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "provenanceSha256": "64df4d3cfddf4cd4d6e449998437bf6478e1d57872447f4ce6e3a31ad2ec86a8",
+      "manifest": {
+        "manifest_version": 3,
+        "name": "AetherVSR",
+        "version": "0.1.0",
+        "minimum_chrome_version": "106",
+        "description": "Local video enhancement for supported non-DRM web video.",
+        "permissions": [
+          "activeTab",
+          "scripting",
+          "storage"
+        ],
+        "background": {
+          "service_worker": "service-worker.js",
+          "type": "module"
+        },
+        "action": {
+          "default_popup": "popup.html",
+          "default_title": "AetherVSR"
+        },
+        "content_security_policy": {
+          "extension_pages": "script-src 'self'; object-src 'none'"
+        }
+      },
+      "repeatedFiles": [
+        {
+          "name": "build-provenance.json",
+          "sha256": "64df4d3cfddf4cd4d6e449998437bf6478e1d57872447f4ce6e3a31ad2ec86a8",
+          "bytes": 1371
+        },
+        {
+          "name": "content.js",
+          "sha256": "fd5aeca63621c9f3fe289f89ed864bcf110d8c19d9d4f8b001afe7a15e3bc891",
+          "bytes": 107014
+        },
+        {
+          "name": "manifest.json",
+          "sha256": "37e7922754f44097d60a2b81dfb6ba2a04f6f49cdb19aefa71b436fee7627e82",
+          "bytes": 486
+        },
+        {
+          "name": "models/production.json",
+          "sha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+          "bytes": 140467
+        },
+        {
+          "name": "popup.css",
+          "sha256": "daac6fdde1732ef8ab41615a9440a65a66ba8cf3c9ee4d45a476ad6b9d7d798c",
+          "bytes": 2135
+        },
+        {
+          "name": "popup.html",
+          "sha256": "d9bc0a5ef9dc562eee6802f983ba411e4bf15b314bb6bef0853b266ed2fbe30f",
+          "bytes": 2301
+        },
+        {
+          "name": "popup.js",
+          "sha256": "606ea6645a03b5b51d060af59560a1bb7fbcda314b798f56d8ed5084c0e0cb57",
+          "bytes": 5020
+        },
+        {
+          "name": "service-worker.js",
+          "sha256": "645d389bcbce1d1d550bc0b71353a959a4c5fa5bb10fb41113a62db98e99d72c",
+          "bytes": 9003
+        }
+      ],
+      "byteIdenticalIncludingProvenance": true
+    }
+  ],
+  "clean": true,
+  "scope": "Fresh source checkout and independent npm installation with repeated byte-identical packaging. Python environment reused, source/tests from clone. No native measurement repeated or inferred; local clone is not a network-transfer-size measurement.",
+  "raw": {
+    "path": ".cache/m106/reproducibility-checks.json",
+    "sha256": "07162a9648a8aadb5484045167e02c09ffcc2cf32f8c458cdb147b4bfc5d5ef7"
+  }
+}
