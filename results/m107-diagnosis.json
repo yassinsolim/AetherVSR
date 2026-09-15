@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "6a179c6b2235c2e1f79287ddf95a63c08af66ffe",
+  "phase": "PRE_FIX_DIAGNOSIS",
+  "classification": "DELAYED INVALIDATION",
+  "productionBehaviorChanged": false,
+  "diagnosticPayloadSha256": "ef2e17d32009d1c7bb18a1fc0449d64723b7df763ca43d10b63737edb8e977c7",
+  "report": {"path": ".cache/m107/scroll-before-01.json", "sha256": "c3d012925c74989f0c011cce6cd1174ffe15981e44a862bcb0d15d795cdcfd77"},
+  "trace": {"path": ".cache/m107/scroll-before-01.json.gz", "sha256": "26eade348f324fc7f692565df7028d34818ef46ad2d35751a456907f69a114af", "bytes": 2895},
+  "observations": {"samples": 235, "visibleSamples": 235, "mismatches": 8, "maximumComponentErrorCssPixels": 228, "firstMismatchMs": 1124, "lastMismatchMs": 1128, "reconciledMsApproximate": 1128.6, "generationBasedDirtyVisibility": null},
+  "mechanism": "Scroll moved authoritative video top280 to52 while fixed canvas stayed280. refresh:end had reconciliation scheduled and stale output visible. submitted:after and animation samples still mismatched; checkGeometry subsequently produced correct coordinates. Hiding on invalidation plus a reveal-generation gate directly addresses this demonstrated delay.",
+  "otherMechanisms": "Position-only missed invalidation, intrinsic-source and fullscreen causes remain to be tested separately; not inferred from the page-scroll trace.",
+  "cleanup": "All recorded owned resource handles zero, cleanupErrors zero.",
+  "review": "Independent raw/code review confirmed P1 delayed invalidation and required synchronous hide plus geometry/source/output gating. S1/S2 watchdog selection remains experimental.",
+  "scope": "Native Chrome153.0.8010.12 on M5, built-in1200x760/DPR2. Diagnostic event/rAF/post-submit samples; first/last timestamps are observation bounds, not continuous physical exposure. Baseline geometry generations were absent, so dirty-epoch count is unavailable, not zero. Raw/screenshots remain local."
+}
