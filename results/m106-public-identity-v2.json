@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 2,
+  "phase": "METADATA_ONLY",
+  "completion": "PINNED",
+  "outcome": "not measured",
+  "ownerApproval": "Explicit identity-only amendment approval before any public playback window",
+  "amendment": "docs/M10.6-PUBLIC-IDENTITY.md",
+  "supersedes": "results/m106-public-identity.json",
+  "identity": {
+    "scheme": "blob:",
+    "origin": "https://videojs.org",
+    "urlSha256": "f40bd9ec16e6b3af59ba5e3de2736d36be58a4c166d493766a7f33a9a3e41cb2",
+    "width": 960,
+    "height": 540,
+    "duration": 35.95354,
+    "paused": true,
+    "hasMediaKeys": false,
+    "manifests": {
+      "overflow": false,
+      "records": [
+        {
+          "origin": "https://stream.mux.com",
+          "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2",
+          "pathSha256": "3580b36944bb3af3d1b3b04216a01756953af2d2f214c379475560ea5966f1e4",
+          "queryKeys": [],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "16aec11e8c06746e6ed7d021c77bc08817b0e2feee4d076b3f2ed03e1a1ca42f",
+          "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "7360129507de89a227556fb716a8e7d27193b86ce2b64e2bf3fe624c0b936df5",
+          "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "f096492e6a5f6d89bc86b02be74712bbafdce69da5a89d4115eb74aed6d31030",
+          "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "34f8d46a23cac61d63d63f6a5b2cb3d46c3a4403f68de16b3b3dc7e09939ca8b",
+          "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        }
+      ]
+    },
+    "hls": {
+      "master": {
+        "origin": "https://stream.mux.com",
+        "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2"
+      },
+      "renditionPathSha256": [
+        "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+        "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+        "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+        "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84"
+      ]
+    }
+  },
+  "confirmation": {
+    "scheme": "blob:",
+    "origin": "https://videojs.org",
+    "urlSha256": "0c79323f4f7e8733ebe95a5f675394115e429ed338359a1cf1bb9cd59d083529",
+    "width": 960,
+    "height": 540,
+    "duration": 35.95354,
+    "paused": true,
+    "hasMediaKeys": false,
+    "manifests": {
+      "overflow": false,
+      "records": [
+        {
+          "origin": "https://stream.mux.com",
+          "urlSha256": "249e69e4d29ef46a182735aee98bb4e9b916a3368f456564730a47666a29f3d2",
+          "pathSha256": "3580b36944bb3af3d1b3b04216a01756953af2d2f214c379475560ea5966f1e4",
+          "queryKeys": [],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "251552fc42be99d30f4b4464c896e192c4f8d6d575f8f545e9fc673ee31fbf7d",
+          "pathSha256": "82c87af8c8061d0d80265a1c9cd838aa3077618ce17ef9b945906bfd7d3977ad",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "f53714e97a246bb7366a9ee6887c70f61fc69a99744909f441faf3ca6ad9849f",
+          "pathSha256": "88d2a03982b9d1c44e4fbbd62e5d266e5a821d33f68b1ab005bbcc4d5a8e1c59",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "5546b057be485f35d4d27f160b2092515ab7cbeb7a4515cff3af42ef2ba05961",
+          "pathSha256": "f3eb1c6378ab97401d143f76289b2b432b893f779d823719859e9ad62c1eaa84",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        },
+        {
+          "origin": "https://manifest-oci-us-ashburn-1-vop1.edgemv.mux.com",
+          "urlSha256": "391ea274cda535997684fdc8e389669542d742dba1ff3375ce30f4bb8d734e8d",
+          "pathSha256": "5175d9b92e1dd74a27064ab50fd8ef3ad3c56d16edbb9ec34e52b2c4a36a829a",
+          "queryKeys": [
+            "cdn",
+            "expires",
+            "signature",
+            "skid"
+          ],
+          "status": 200
+        }
+      ]
+    }
+  },
+  "raw": {
+    "path": ".cache/m106/videojs-identity-diagnosis.json",
+    "sha256": "dbf91f5baaf6988e80aeda137ea4838b9c2bd38257f146aebf764cb0b683c947"
+  },
+  "failedPreflight": {
+    "path": ".cache/m106/videojs-01.json",
+    "sha256": "234b3cbfb1fcfe9039683be2eed6a5c62a6b59417692d5fb23a907dd07d01ef7",
+    "case": {
+      "id": "videojs-1-P",
+      "arm": "P",
+      "durationMs": 180000
+    },
+    "reason": "AssertionError [ERR_ASSERTION]: Reference asset changed; no substitute seek",
+    "scheduledActions": 0,
+    "observedMs": null,
+    "raw": {
+      "path": ".cache/m106/videojs-01.videojs-1-P.json.gz",
+      "sha256": "c6e1a877b392289aead7b00aa7f717bf4a47477ab839c4c6fa88332d64b27ce9",
+      "bytes": 258
+    }
+  },
+  "scope": "Observed master/rendition identity, not all media-byte equality or historical M10.5 identity proof. Cross-session blob digest differs by construction; within-session blob continuity remains mandatory. No playback outcome, public frame, full media URL or signed query value retained."
+}

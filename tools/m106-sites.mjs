@@ -48,13 +48,34 @@ export function publicStateFailure(status, owner) {
     || ['device','pipeline','canvas','resizeObservers'].some(name=>attachment.resources[name]!==1);
 }
 
-export async function publicIdentity(page) {
-  return page.locator('video').first().evaluate(async video => {
+export function manifestIdentity(address, contentType, status) {
+  const source=new URL(address);
+  if(source.protocol!=='https:' || (!/mpegurl/i.test(contentType) && !source.pathname.endsWith('.m3u8')))return null;
+  return {origin:source.origin,urlSha256:sha256(source.href),pathSha256:sha256(source.pathname),
+    queryKeys:[...new Set(source.searchParams.keys())].sort(),status};
+}
+
+export function observeManifests(page) {
+  const records=new Map();let overflow=false;
+  const observe=response=>{
+    const record=manifestIdentity(response.url(),response.headers()['content-type']??'',response.status());
+    if(!record)return;
+    if(records.size>=256&&!records.has(record.urlSha256)){overflow=true;return;}
+    if(records.has(record.urlSha256)&&records.get(record.urlSha256).status!==200)return;
+    records.set(record.urlSha256,record);
+  };
+  page.on('response',observe);
+  return {snapshot:()=>({records:[...records.values()],overflow}),stop:()=>page.off('response',observe)};
+}
+
+export async function publicIdentity(page, manifests) {
+  const metadata=await page.locator('video').first().evaluate(async video => {
     const source = new URL(video.currentSrc);
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(source.href));
-    return { origin: source.origin, urlSha256: [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join(''),
+    return { scheme:source.protocol,origin: source.origin, urlSha256: [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join(''),
       duration: Number.isFinite(video.duration) ? video.duration : null, width: video.videoWidth, height: video.videoHeight };
   });
+  return {...metadata,manifests:manifests?.snapshot()??null};
 }
 
 export function installPublicObserver() {
@@ -177,18 +198,20 @@ export async function runVideojs(prefix, referencePath, resumePath) {
       const result={case:item,completion:'UNVERIFIED',comparable:false,actions:[],checks:[],failures:[],errors:{counts:{},samples:[],omittedSamples:0},events:[],stalls:[]};report.results.push(result);
       const record=(name,data)=>result.events.push({name,data:safeEvidence(data)});
       native=item.arm==='P'?await openNativeChrome():await openExtension(build,record);
-      let page,tabId,stopErrors,raw,opening,work;
+      let page,tabId,stopErrors,raw,opening,work,manifests;
       const active=['R','S'].includes(item.arm);
       try {
         work=(async()=>{
         page=await native.context.newPage();native.context.setDefaultTimeout(5000);
         result.placement=await nativeWindow(page,native.context);result.browser=await browserIdentity(native,page);
         stopErrors=errorObserver(page,native.extensionId??'not-installed',result);
+        manifests=observeManifests(page);
         await page.addInitScript(installPublicObserver);
         const response=await page.goto(SITES.videojs.url,{waitUntil:'domcontentloaded',timeout:30000});assert(response?.ok());
         await page.bringToFront();await consent(page,record);
         await page.waitForFunction(()=>{const video=document.querySelector('video');return video?.readyState>=2&&video.videoWidth>0;},undefined,{timeout:45000});
-        result.identity=await publicIdentity(page);assert(samePublicIdentity(result.identity,reference),'Reference asset changed; no substitute seek');
+        result.identity=await until(()=>publicIdentity(page,manifests),identity=>samePublicIdentity(identity,reference),5000);
+        assert(samePublicIdentity(result.identity,reference),'Reference asset changed; no substitute seek');
         await page.evaluate(()=>{globalThis[Symbol.for('aethervsr.m106.original')]=document.querySelector('video');});
         const before=await page.evaluate(()=>({paused:document.querySelector('video').paused,time:document.querySelector('video').currentTime}));
         if(before.paused)await playerButton(page,SITES.videojs,'play');
@@ -280,10 +303,11 @@ export async function runVideojs(prefix, referencePath, resumePath) {
           await check('observation');await delay(Math.min(1000,Math.max(1,item.durationMs-elapsed)));
         }
         raw=await page.evaluate(()=>globalThis[Symbol.for('aethervsr.m106.public')].stop());
-        result.observedMs=raw.closing.at-raw.opening.at;result.closingIdentity=await publicIdentity(page);
+        result.observedMs=raw.closing.at-raw.opening.at;result.closingIdentity=await publicIdentity(page,manifests);
         assert.equal(raw.invalid,null);assert.equal(raw.overflow,false);assert(result.observedMs>=item.durationMs&&result.observedMs<=item.durationMs+5000);
         assert(raw.rows.every(row=>row.sameVideo&&row.sameSource&&row.rate===1),'Original media identity/rate changed');
         assert(samePublicIdentity(result.closingIdentity,reference),'Closing reference identity changed');
+        assert.equal(result.closingIdentity.urlSha256,result.identity.urlSha256,'Session-local blob identity changed');
         result.comparable=!result.bindingFailure&&result.actions.some(value=>value.name==='prescribed-seek'&&value.pass===true);
         result.stalls=targetStalls(raw.rows,result.actions,raw.closing.at);
         result.completion='CAPTURED';
@@ -311,7 +335,7 @@ export async function runVideojs(prefix, referencePath, resumePath) {
         {const bytes=gzipSync(JSON.stringify(safeEvidence({native:raw??null,checks:result.checks,errors:result.errors,actions:result.actions,observation:result.observation??null})));
           const path=`${prefix}.${item.id}.json.gz`;writeFileSync(path,bytes,{flag:'wx'});result.raw={path:relative(ROOT,path),sha256:sha256(bytes),bytes:bytes.length};}
         result.checkCount=result.checks.length;result.firstCheck=result.checks[0];result.lastCheck=result.checks.at(-1);delete result.checks;
-        result.gates=controlSummary(result);stopErrors?.();await native.close();native=null;
+        result.gates=controlSummary(result);stopErrors?.();manifests?.stop();await native.close();native=null;
       }
       console.log(`${item.id}: ${result.completion}; target stalls=${result.stalls?.length??'not measured'}; safety=${result.safetyPass}`);
       if(result.completion!=='CAPTURED')throw new Error(`Interrupted ${item.id}; retained record, remaining order not run`);
@@ -330,8 +354,20 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
 }
 
 export function samePublicIdentity(actual, reference) {
-  return typeof actual?.urlSha256 === 'string' && /^[a-f0-9]{64}$/.test(actual.urlSha256)
-    && actual.urlSha256 === reference?.urlSha256 && actual.origin === reference.origin
+  const digest=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
+  const hls=reference?.hls;
+  let sameSource=actual?.urlSha256===reference?.urlSha256;
+  if(hls){
+    const records=actual?.manifests?.records;
+    const masters=records?.filter(record=>record.queryKeys.length===0)??[];
+    const renditions=[...new Set(records?.filter(record=>record.queryKeys.length>0).map(record=>record.pathSha256)??[])].sort();
+    sameSource=actual?.scheme==='blob:'&&actual?.manifests?.overflow===false&&masters.length===1
+      &&masters[0].origin===hls.master.origin&&masters[0].urlSha256===hls.master.urlSha256
+      &&records.every(record=>record.status===200)&&digest(hls.master.urlSha256)
+      &&Array.isArray(hls.renditionPathSha256)&&hls.renditionPathSha256.length>0&&hls.renditionPathSha256.every(digest)
+      &&JSON.stringify(renditions)===JSON.stringify([...hls.renditionPathSha256].sort());
+  }
+  return digest(actual?.urlSha256) && sameSource && actual.origin === reference?.origin
     && actual.width === reference.width && actual.height === reference.height
     && Number.isFinite(actual.duration) && Math.abs(actual.duration - VIDEOJS_DURATION) <= 0.01
     && Number.isFinite(reference.duration) && Math.abs(actual.duration - reference.duration) <= 0.01;

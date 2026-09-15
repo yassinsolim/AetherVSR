@@ -6,7 +6,7 @@ function check(source: string): void {
     import assert from 'node:assert/strict';
     import { installNativeObserver, installRuntimeCounters, summarizeNative, validateNative, pairedBounds, floorDecision, observerComparison } from './tools/m106-counters.mjs';
     import { activeSafety, parseFloorPlan, PRIMARY_ORDER, qualifiesDisabledGeometry, resumePrefix, floorCases, bindingNativeFailure } from './tools/m106-floor.mjs';
-    import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure } from './tools/m106-sites.mjs';
+    import { installPublicObserver, samePublicIdentity, targetStalls, publicCausality, advancedForOpening, loadCommittedReference, retainBindingPublicFailure, publicStateFailure, manifestIdentity, observeManifests } from './tools/m106-sites.mjs';
     import { runInNewContext } from 'node:vm';
     ${source}
     console.log('checked');
@@ -80,6 +80,29 @@ describe('native browser delivery floor accounting', () => {
     const reference={urlSha256:'a'.repeat(64),origin:'https://example.test',duration:35.963044,width:1280,height:720};
     assert.equal(samePublicIdentity(reference,reference),true);
     for(const changed of[{duration:36},{width:1920},{urlSha256:'b'.repeat(64)},{duration:null}])assert.equal(samePublicIdentity({...reference,...changed},reference),false);
+  `));
+  it('compares stable HLS identities without equating ephemeral blob URLs across sessions', () => check(`
+    const master=manifestIdentity('https://stream.example.test/asset.m3u8','application/x-mpegURL',200);
+    const rendition=manifestIdentity('https://cdn.example.test/rendition.m3u8?signature=first&expires=1','application/x-mpegURL',200);
+    assert.equal(manifestIdentity('https://example.test/script.js','text/javascript',200),null);
+    assert.equal(manifestIdentity('http://example.test/asset.m3u8','application/x-mpegURL',200),null);
+    const reference={scheme:'blob:',origin:'https://example.test',urlSha256:'a'.repeat(64),duration:35.95354,width:960,height:540,
+      manifests:{overflow:false,records:[master,rendition]},hls:{master:{origin:master.origin,urlSha256:master.urlSha256},renditionPathSha256:[rendition.pathSha256]}};
+    const actual={...reference,urlSha256:'b'.repeat(64),manifests:{overflow:false,records:[master,
+      manifestIdentity('https://cdn.example.test/rendition.m3u8?signature=second&expires=2','application/x-mpegURL',200)]}};
+    assert.equal(samePublicIdentity(actual,reference),true);
+    actual.manifests.records[1].pathSha256='c'.repeat(64);assert.equal(samePublicIdentity(actual,reference),false);
+    actual.manifests.records[1]=rendition;actual.manifests.overflow=true;assert.equal(samePublicIdentity(actual,reference),false);
+    assert(!JSON.stringify(reference).includes('signature=first'));
+  `));
+  it('never erases a failed manifest response when the same URL later succeeds', () => check(`
+    let responseHandler,removed=false;
+    const page={on(type,callback){assert.equal(type,'response');responseHandler=callback;},off(type,callback){removed=type==='response'&&callback===responseHandler;}};
+    const observer=observeManifests(page);
+    const response=status=>({url:()=> 'https://stream.example.test/asset.m3u8',headers:()=>({'content-type':'application/x-mpegURL'}),status:()=>status});
+    responseHandler(response(503));responseHandler(response(200));
+    assert.equal(observer.snapshot().records[0].status,503);
+    observer.stop();assert.equal(removed,true);
   `));
   it('retains qualifying near-end stalls and censors recovery at scheduled actions', () => check(`
     const rows=Array.from({length:81},(_,index)=>({at:30000+index*250,currentTime:35.8852,qualityTotal:844,paused:false,ended:false,readyState:2,networkState:2}));
