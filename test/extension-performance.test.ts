@@ -13,7 +13,7 @@ function check(source: string): void {
     import { playerCommand } from './tools/m10-sites.mjs';
     import { validateOldShutdown } from './tools/m105-reload.mjs';
     import { parseFinalCases, deliveryGates } from './tools/m105-final.mjs';
-    import { COST_ORDER, compareCosts, costBounds } from './tools/m107-performance.mjs';
+    import { COST_ORDER, compareCosts, costBounds, costCases } from './tools/m107-performance.mjs';
     import { transitionVerdict, summarizePresentation, geometryOracleSource, installGeometryOracle, TRANSITIONS } from './tools/m107-presentation.mjs';
     ${source}
     console.log('checked without browser');
@@ -97,6 +97,13 @@ const fixture = `
 `;
 
 describe('M10 performance protocol helpers (no browser)', () => {
+  it('keeps a single-run cost probe separate from fixed comparison and confirmation windows', () => check(`
+    assert.deepEqual(costCases(),COST_ORDER);assert.equal(costCases().length,18);
+    assert.deepEqual(costCases({probe:true}),[{block:1,strategy:2,durationMs:60000}]);
+    assert.deepEqual(costCases({confirmation:true}),[{block:1,strategy:2,durationMs:120000},{block:2,strategy:2,durationMs:120000}]);
+    assert.throws(()=>costCases({probe:true,confirmation:true}));
+  `));
+
   it('installs a fresh geometry query and keeps unavailable expected rectangles unmeasured', () => check(`
     const context=createContext({}),oracle=geometryOracleSource();
     const native={isolated:async(page,install)=>new Script('('+install.toString()+')()').runInContext(context)};

@@ -120,13 +120,18 @@ export function compareCosts(results) {
   return output;
 }
 
-export async function runCostStudy(prefix,{confirmation=false,production=false}={}) {
+export function costCases({confirmation=false,probe=false}={}) {
+  assert(!(confirmation&&probe),'A cost probe is not a production confirmation');
+  return probe?[{block:1,strategy:2,durationMs:60000}]:confirmation?[{block:1,strategy:2,durationMs:120000},{block:2,strategy:2,durationMs:120000}]:COST_ORDER;
+}
+
+export async function runCostStudy(prefix,{confirmation=false,production=false,probe=false}={}) {
   prefix=resolve(prefix);assert(prefix.startsWith(join(ROOT,'.cache/m107/'))&&!existsSync(`${prefix}.json`));mkdirSync(dirname(prefix),{recursive:true});
   const candidate=verifyBuild(!production),directory=join(ROOT,'.cache/m107/frozen-s0');
   const baseline={directory,provenance:JSON.parse(readFileSync(join(directory,'build-provenance.json')))};
   for(const [name,value]of Object.entries(baseline.provenance.files))assert.equal(sha256(readFileSync(join(directory,name))),value.sha256);
-  const cases=confirmation?[{block:1,strategy:2,durationMs:120000},{block:2,strategy:2,durationMs:120000}]:COST_ORDER;
-  const report={phase:confirmation?'FINAL_CONFIRMATION':'STRATEGY_COST',candidate,baseline,started:new Date().toISOString(),cases,results:[],completion:'UNVERIFIED',environment:presentationEnvironment()};
+  const cases=costCases({confirmation,probe});
+  const report={phase:probe?'COST_PROBE_NO_ACCEPTANCE':confirmation?'FINAL_CONFIRMATION':'STRATEGY_COST',candidate,baseline,started:new Date().toISOString(),cases,results:[],completion:'UNVERIFIED',environment:presentationEnvironment()};
   let server,native;
   try{
     server=await presentationServer();
@@ -163,7 +168,7 @@ export async function runCostStudy(prefix,{confirmation=false,production=false}=
         if(!result.valid)throw new Error('Invalid cost trial; retain raw and stop fixed order');
       }finally{await native.close();native=null;}
     }
-    assert.deepEqual(verifyBuild(!production),candidate);report.completion='CAPTURED';if(!confirmation)report.comparison=compareCosts(report.results);
+    assert.deepEqual(verifyBuild(!production),candidate);report.completion='CAPTURED';if(!confirmation&&!probe)report.comparison=compareCosts(report.results);
   }finally{await native?.close();await server?.close();report.finished=new Date().toISOString();writeFileSync(`${prefix}.json`,JSON.stringify(report,null,2),{flag:'wx'});}
   return report;
 }
