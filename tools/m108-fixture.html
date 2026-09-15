@@ -1,0 +1,120 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AetherVSR architecture fixture</title>
+<link rel="icon" href="data:,">
+<style id="fixture-style">
+  html, body { margin: 0; background: white; }
+  body { min-height: 2400px; }
+  #spacer { height: 240px; }
+  #outer { margin-left: 40px; width: 640px; position: relative; }
+  .player { width: 640px; height: 360px; position: relative; }
+  video { display: block; width: 100%; height: 100%; object-fit: contain; object-position: 50% 50%; }
+  #outer.moved { left: 37px; }
+  #outer.query { container-type: inline-size; }
+  @container (max-width: 620px) { .player { left: 25px; } }
+  #outer.nested { height: 420px; overflow: hidden; }
+  #outer.nested .player { margin-top: 180px; }
+  #outer.nested::after { content: ''; display: block; height: 700px; }
+  #outer.rounded { height: 360px; overflow: hidden; border-radius: 12px; }
+  .player:fullscreen { width: 100%; height: 100%; background: black; }
+  .controls { position: absolute; left: 0; bottom: 0; z-index: 3; }
+  #commands { position: fixed; top: 8px; right: 8px; z-index: 20; }
+  #caption { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; }
+  #consumer { position: fixed; position-anchor: --page-anchor; left: anchor(right); top: anchor(top); width: 5px; height: 5px; }
+</style>
+<div id="spacer"></div>
+<div id="outer"><div class="player" id="player"><video autoplay muted playsinline loop src="/media/m9/720p60.mp4"></video><div class="controls"><button id="play">Play</button><button id="pause">Pause</button></div></div></div>
+<div id="destination"></div>
+<div id="commands"><button id="fullscreen">Fullscreen</button><button id="exit">Exit</button></div>
+<script>
+  const outer = document.getElementById('outer'), player = document.getElementById('player');
+  const video = document.querySelector('video'), sheet = document.getElementById('fixture-style').sheet;
+  const initial = {parent:video.parentNode,next:video.nextSibling,style:video.getAttribute('style')};
+  const state = {fit:'contain',position:[.5,.5],radius:0,clip:false,unsupported:false,expectedVisible:true,operation:0};
+  let sourceBuffer, mediaSource, blob, shadow, caption;
+  const rule = (selector, value) => (shadow ? shadow.querySelector('style').sheet : sheet).insertRule(`${selector} { ${value} }`);
+  const append = bytes => new Promise((done,reject) => {
+    const finish = () => { cleanup(); done(); }, fail = () => { cleanup(); reject(new Error('SourceBuffer append failed')); };
+    const cleanup = () => { sourceBuffer.removeEventListener('updateend',finish); sourceBuffer.removeEventListener('error',fail); };
+    sourceBuffer.addEventListener('updateend',finish); sourceBuffer.addEventListener('error',fail); sourceBuffer.appendBuffer(bytes);
+  });
+  document.getElementById('fullscreen').onclick = () => player.requestFullscreen();
+  document.getElementById('exit').onclick = () => document.exitFullscreen();
+  document.getElementById('play').onclick = () => video.play();
+  document.getElementById('pause').onclick = () => video.pause();
+  globalThis.__M108_FIXTURE__ = {
+    video, outer, player, state, initial,
+    async prepare(name) {
+      if(name==='nested-scroll'){outer.classList.add('nested');state.clip=true;}
+      if(name==='container-query')outer.classList.add('query');
+      if(name==='rounded-clip'){outer.classList.add('rounded');state.clip=true;state.radius=12;}
+      if(['contain','cover','cssom-fit','cssom-position'].includes(name)){player.style.height='400px';state.fit=name==='cover'?'cover':'contain';video.style.objectFit=state.fit;}
+      if(name==='open-shadow'){
+        const host=document.createElement('div');host.id='shadow-host';outer.append(host);shadow=host.attachShadow({mode:'open'});
+        const styles=document.createElement('style');styles.textContent='video{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 50%}.player{position:relative;width:640px;height:360px}.controls{position:absolute;bottom:0;left:0;z-index:3}';
+        shadow.append(styles,player);
+      }
+      if(name==='existing-anchor'){
+        video.style.setProperty('anchor-name','--page-anchor, --page-secondary','important');
+        const consumer=document.createElement('div');consumer.id='consumer';document.body.append(consumer);
+      }
+      if(name==='cssom-controls'){
+        caption=document.createElement('span');caption.id='caption';caption.textContent='Caption';player.insertBefore(caption,video);
+      }
+      if(['abr','source-scroll'].includes(name)){
+        const [config,bytes]=await Promise.all([fetch('/m108-media/config.json').then(value=>value.json()),fetch('/m108-media/low.mp4').then(value=>value.arrayBuffer())]);
+        mediaSource=new MediaSource();blob=URL.createObjectURL(mediaSource);video.src=blob;
+        await new Promise(done=>mediaSource.addEventListener('sourceopen',done,{once:true}));
+        sourceBuffer=mediaSource.addSourceBuffer(config.mime);sourceBuffer.mode='sequence';await append(bytes);await video.play();
+      }
+      await new Promise(done=>video.requestVideoFrameCallback(done));
+      return {name,source:{width:video.videoWidth,height:video.videoHeight}};
+    },
+    async action(name) {
+      state.operation++;globalThis.dispatchEvent(new CustomEvent('m108:operation',{detail:{name,phase:'begin'}}));
+      if(name==='scroll-one')scrollTo(0,1);
+      else if(name==='scroll-228')scrollTo(0,228);
+      else if(name==='scroll-zero')scrollTo(0,0);
+      else if(name==='offscreen')scrollTo(0,1000);
+      else if(name==='smooth')scrollTo({top:228,behavior:'smooth'});
+      else if(name==='nested')outer.scrollTop=160;
+      else if(name==='spacer')document.getElementById('spacer').style.height='277px';
+      else if(name==='class-move')outer.classList.add('moved');
+      else if(name==='style-move')outer.style.left='23px';
+      else if(name==='query-move')outer.style.width='600px';
+      else if(name==='video-resize')player.style.width='600px';
+      else if(name==='reparent'){
+        const target=document.getElementById('destination');target.style.cssText='position:absolute;left:40px;top:260px;width:640px;height:360px';target.append(video);
+      }else if(name==='pause'){video.pause();state.expectedVisible=false;}
+      else if(name==='play'){await video.play();state.expectedVisible=true;}
+      else if(name==='hide'){video.hidden=true;state.expectedVisible=false;}
+      else if(name==='show'){video.hidden=false;state.expectedVisible=true;}
+      else if(name==='not-ready'){video.removeAttribute('src');video.load();state.expectedVisible=false;}
+      else if(name==='ready'){video.src='/media/m9/720p60.mp4';await video.play();state.expectedVisible=true;}
+      else if(name==='source-high'||name==='source-low'||name==='source-high-scroll'){
+        const high=name.startsWith('source-high'),at=sourceBuffer.buffered.end(sourceBuffer.buffered.length-1);
+        await append(await fetch(`/m108-media/${high?'high':'low'}.mp4`).then(value=>value.arrayBuffer()));
+        video.loop=false;video.currentTime=at+.1;if(name.endsWith('-scroll'))scrollTo(0,228);await video.play();
+        await new Promise(done=>{const check=()=>video.videoWidth===(high?2560:960)&&video.readyState>=2?done():video.requestVideoFrameCallback(check);check();});
+      }else if(name==='cssom-fit'){state.fit='cover';rule('video','object-fit:cover!important');}
+      else if(name==='cssom-position'){state.position=[0,0];rule('video','object-position:0% 0%!important');}
+      else if(name==='cssom-radius'){state.radius=18;rule('video','border-radius:18px!important');}
+      else if(name==='cssom-clip'){state.unsupported=true;rule('.player','clip-path:inset(0 80px 0 0)!important');}
+      else if(name==='cssom-controls'){state.unsupported=true;rule('#caption','z-index:0!important');}
+      else if(name==='cssom-transform'){state.unsupported=true;rule('video','transform:rotate(180deg)!important');}
+      else if(name==='cssom-opacity'){state.unsupported=true;rule('video','opacity:.5!important');}
+      else if(name==='cssom-filter'){state.unsupported=true;rule('video','filter:blur(1px)!important');}
+      else if(name!=='noop')throw new Error(`Unknown shared action ${name}`);
+      const at=performance.now();globalThis.dispatchEvent(new CustomEvent('m108:operation',{detail:{name,phase:'after'}}));return {name,at};
+    },
+    settle() {
+      return new Promise((done,reject)=>{
+        let previous,handle;const timer=setTimeout(()=>{cancelAnimationFrame(handle);reject(new Error('Layout settling timeout'));},3000);
+        const sample=()=>{const rect=video.getBoundingClientRect(),current=[rect.left,rect.top,rect.width,rect.height,scrollX,scrollY,innerWidth,innerHeight].join(',');
+          if(previous===current){clearTimeout(timer);done(performance.now());}else{previous=current;handle=requestAnimationFrame(sample);}};handle=requestAnimationFrame(sample);
+      });
+    },
+  };
+  addEventListener('pagehide',()=>{if(blob)URL.revokeObjectURL(blob);},{once:true});
+</script>
