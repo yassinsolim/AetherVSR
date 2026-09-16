@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "milestone": "M10.10",
+  "status": "INCOMPLETE_RESEARCH_CHECKPOINT",
+  "decision": "NO CONTROLLED WEB PRODUCT PATH QUALIFIED",
+  "verifiedSourceCommit": "8af39f8f24a22fd88dd8ff1f6cc34560779dab39",
+  "verificationScope": "Separate local and independent clean-clone gates; no new native measurements or product qualification",
+  "cleanClone": {
+    "ownNpmInstallation": true,
+    "pythonEnvironmentReused": true,
+    "npmCi": "PASS_WITH_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "lint": "PASS_REPOSITORY_CONFIGURATION",
+    "vitestFiles": 45,
+    "vitestPassed": 1249,
+    "vitestSkipped": 2,
+    "ffmpegOptInPassed": 8,
+    "build": "PASS",
+    "buildExtension": "PASS",
+    "pythonPassed": 311
+  },
+  "packageAudit": {
+    "path": ".cache/m1010/clean-clone-checks.json",
+    "bytes": 966,
+    "sha256": "bc7fab0a240e28ff47479324843234bdc7d70dfb9e0c241d70878f3939f798f8",
+    "frozenPayloadByteEqual": true,
+    "workspaceCloneAllBytesEqual": true,
+    "cloneRepeatedAllBytesEqual": true,
+    "sourceDirty": false
+  },
+  "packages": {
+    "production": {
+      "bytes": 274684,
+      "bundleSha256": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551"
+    },
+    "diagnostic": {
+      "bytes": 276414,
+      "bundleSha256": "7334c5db0f476048a10b63a2e0d9e4b240436fa3a669925e113cedc93cb1003f"
+    },
+    "model": {
+      "bytes": 140467,
+      "sha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a"
+    }
+  },
+  "nativeEvidenceIndex": {
+    "path": "results/m10.10-product.json",
+    "bytes": 289744,
+    "sha256": "b7d110addf560efae427d160331ff012d4613ce2a21d38e86e2199d952d3920d"
+  },
+  "verifiedSourceTrackedBytes": 53851815,
+  "approvedCapBytes": 54525952,
+  "verifiedSourceHeadroomBytes": 674137,
+  "unapprovedLargeFiles": 0,
+  "reviews": {
+    "securityLifecycleRepairs": "NO_REMAINING_P0_P1_IN_SCOPE",
+    "evidenceAttributionRepairs": "NO_REMAINING_P0_P1_IN_SCOPE"
+  },
+  "limitations": [
+    "Raw native evidence remains ignored and is not included in a clean clone",
+    "Post-measurement lifecycle and PiP repairs have mocked tests, not native requalification",
+    "Default lint excludes research tools; seven changed covered research/test files passed explicit lint",
+    "Supplemental typed player lint did not pass; see report section 29",
+    "Two existing moderate npm advisories and install warnings remain; dependencies are frozen",
+    "Historical default-parallel offline parity timeouts are retained, not erased by later passes",
+    "Absolute timing error remains null; candidate latency, A/V, neural performance and public census are NOT_RUN",
+    "Publication commit CI must be checked separately against its exact SHA; this record does not predict it"
+  ]
+}
