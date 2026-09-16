@@ -61,7 +61,16 @@ export async function buildExtension({ contentEntry = 'src/extension/content.ts'
       if (Object.values(result.metafile.outputs).some((item) => item.imports.length > 0) || result.outputFiles.length !== 1) {
         throw new Error('Extension entry must be fully bundled with no external imports.');
       }
-      artifacts.set(name, Buffer.from(result.outputFiles[0].contents));
+      let bytes = Buffer.from(result.outputFiles[0].contents);
+      if (test && name === 'content.js') {
+        const diagnostic = await build({ ...options, entryPoints: ['tools/m109-submission.ts'],
+          format: 'iife', outfile: join(staging, 'submission.js') });
+        if (diagnostic.outputFiles.length !== 1 || Object.values(diagnostic.metafile.outputs).some(item => item.imports.length > 0)) {
+          throw new Error('Submission diagnostic must be fully bundled.');
+        }
+        bytes = Buffer.concat([bytes, Buffer.from('\n'), Buffer.from(diagnostic.outputFiles[0].contents)]);
+      }
+      artifacts.set(name, bytes);
     }
     const files = Object.fromEntries([...artifacts].sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
       .map(([name, bytes]) => [name, { sha256: hash(bytes), bytes: bytes.byteLength }]));

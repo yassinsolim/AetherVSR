@@ -3,6 +3,7 @@ import type { GpuContext } from '../src/core/gpu/device.js';
 import { GpuTimer } from '../src/core/metrics/gpu-timer.js';
 import { VideoPipeline } from '../src/core/pipeline.js';
 import type { EncodeContext, FrameTexture, FrameTextureKind, FrameTick, Size, Upscaler, UpscalerConfig } from '../src/core/types.js';
+import { observeSuccessfulSubmissions, type SubmissionIdentity, type SuccessfulFrameSubmission } from '../tools/m109-submission.js';
 
 const mocks = vi.hoisted(() => ({
   deliver: null as ((tick: FrameTick) => void) | null,
@@ -152,6 +153,108 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+});
+
+describe('diagnostic successful submission boundary', () => {
+  const identity = (): SubmissionIdentity => ({ owner: 'video-1', sourceGeneration: 1,
+    geometryGeneration: 7, backingWidth: 640, backingHeight: 360, authorized: true });
+
+  it('observes the actual queue-submit sequence without GPU timestamps and excludes duplicate callbacks', () => {
+    const { pipeline, device, emit } = makeHarness(false);
+    const order: string[] = [];
+    device.queue.submit.mockImplementation(() => { order.push('submit'); });
+    pipeline.onFrame = () => { order.push('callback'); };
+    const records: SuccessfulFrameSubmission[] = [];
+    const release = observeSuccessfulSubmissions(pipeline, identity, record => { order.push('record'); records.push(record); });
+    emit();
+    expect(order).toEqual(['submit', 'callback', 'record']);
+    expect(records).toEqual([expect.objectContaining({ kind: 'successfulFrameSubmission', sequence: 1,
+      sourceGeneration: 1, geometryGeneration: 7, mediaTime: 0.1, sourceWidth: 320, sourceHeight: 180,
+      backingWidth: 640, backingHeight: 360, validForRecovery: true })]);
+    pipeline.onFrame?.(makeTick());
+    expect(records).toHaveLength(1);
+    release();
+    emit();
+    expect(records).toHaveLength(1);
+    pipeline.destroy();
+  });
+
+  it.each(['configure', 'import', 'encode', 'finish', 'submit', 'callback'] as const)(
+    'never emits success after a %s exception', failure => {
+      const { pipeline, upscaler, device, emit } = makeHarness(false);
+      const fail = () => { throw new Error(`failed ${failure}`); };
+      if (failure === 'configure') upscaler.configure.mockImplementation(fail);
+      if (failure === 'import') mocks.acquire.mockImplementation(fail);
+      if (failure === 'encode') upscaler.encode.mockImplementation(fail);
+      if (failure === 'finish') device.createCommandEncoder().finish.mockImplementation(fail);
+      if (failure === 'submit') device.queue.submit.mockImplementation(fail);
+      if (failure === 'callback') pipeline.onFrame = fail;
+      const receive = vi.fn();
+      observeSuccessfulSubmissions(pipeline, identity, receive);
+      expect(() => emit()).toThrow(`failed ${failure}`);
+      expect(receive).not.toHaveBeenCalled();
+      expect(pipeline.running).toBe(false);
+      pipeline.destroy();
+    });
+
+  it.each(['before', 'after', 'stopped'] as const)('consumes a skipped %s observation so replay cannot authorize recovery', skip => {
+    const { pipeline, emit } = makeHarness(false);
+    let state: SubmissionIdentity | null = skip === 'before' ? null : identity();
+    let first = true;
+    pipeline.onFrame = () => {
+      if (first && skip === 'after') state = null;
+      if (first && skip === 'stopped') pipeline.stop();
+      first = false;
+    };
+    const receive = vi.fn();
+    observeSuccessfulSubmissions(pipeline, () => state, receive);
+    emit();
+    expect(receive).not.toHaveBeenCalled();
+    state = { ...identity(), geometryGeneration: 8 };
+    pipeline.start();
+    pipeline.onFrame?.(makeTick());
+    expect(receive).not.toHaveBeenCalled();
+    emit();
+    expect(receive).toHaveBeenCalledOnce();
+    expect(receive).toHaveBeenCalledWith(expect.objectContaining({ sequence: 2, geometryGeneration: 8, validForRecovery: true }));
+    pipeline.destroy();
+  });
+
+  it.each(['owner', 'source', 'geometry', 'backing', 'authorization', 'frame'] as const)(
+    'cannot use a submission across a changed %s identity for recovery', change => {
+      const { pipeline, emit } = makeHarness(false);
+      const state = identity();
+      pipeline.onFrame = () => {
+        if (change === 'owner') state.owner = 'video-2';
+        if (change === 'source') state.sourceGeneration++;
+        if (change === 'geometry') state.geometryGeneration++;
+        if (change === 'backing') state.backingWidth++;
+        if (change === 'authorization') state.authorized = false;
+        if (change === 'frame') pipeline.invalidateTiming();
+      };
+      const receive = vi.fn();
+      observeSuccessfulSubmissions(pipeline, () => state, receive);
+      emit();
+      expect(receive).toHaveBeenCalledWith(expect.objectContaining({ sequence: 1, validForRecovery: false }));
+      pipeline.destroy();
+    });
+
+  it('emits nothing for zero-size, stopped, or destroyed work and does not overwrite a newer callback on release', () => {
+    const { pipeline, emit } = makeHarness(false);
+    const receive = vi.fn();
+    const release = observeSuccessfulSubmissions(pipeline, identity, receive);
+    emit(makeTick(0, 0));
+    pipeline.stop();
+    emit();
+    expect(receive).not.toHaveBeenCalled();
+    const replacement = vi.fn();
+    pipeline.onFrame = replacement;
+    release();
+    expect(pipeline.onFrame).toBe(replacement);
+    pipeline.destroy();
+    release();
+    expect(pipeline.onFrame).toBeNull();
+  });
 });
 
 describe('VideoPipeline teardown', () => {

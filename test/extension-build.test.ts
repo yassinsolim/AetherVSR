@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Script } from 'node:vm';
+import { createContext, Script } from 'node:vm';
 import ts from 'typescript';
 import { MODEL_BYTES, MODEL_PATH, MODEL_SHA256 } from '../src/extension/protocol.js';
 
@@ -120,6 +120,9 @@ describe('built MV3 extension', () => {
     expect(content).not.toContain('diagnostic-processing-disabled');
     expect(content).not.toContain('processingDisabled');
     expect(content).not.toContain('presentationWatchdog');
+    expect(content).not.toContain('__AETHERVSR_SUCCESSFUL_SUBMISSION__');
+    expect(content).not.toContain('successfulFrameSubmission');
+    expect(provenance(production).bundleSha256).toBe('46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551');
     for (const name of ['content.js', 'service-worker.js', 'popup.js']) {
       const source = read(production, name).toString();
       for (const forbidden of ['sourceMappingURL', 'import.meta', '__AETHERVSR_TEST__', 'runtime-bench',
@@ -145,6 +148,22 @@ describe('built MV3 extension', () => {
     for (const name of artifactNames.filter((name) => name !== 'content.js')) expect(read(testBuild, name)).toEqual(read(production, name));
     expect(read(testBuild, 'content.js')).not.toEqual(read(production, 'content.js'));
     expect(provenance(testBuild).bundleSha256).not.toBe(provenance(production).bundleSha256);
+    expect(read(testBuild, 'content.js').toString()).toContain('__AETHERVSR_SUCCESSFUL_SUBMISSION__');
+    expect(read(testBuild, 'content.js').toString()).toContain('successfulFrameSubmission');
+  });
+
+  it('registers the test-only submission observer idempotently on reinjection', () => {
+    const source = execFileSync(process.execPath, ['--input-type=module', '-e',
+      `import {build} from 'esbuild'; const result=await build({entryPoints:['tools/m109-submission.ts'],
+       bundle:true,format:'iife',write:false,define:{__AETHERVSR_TEST__:'true'}});
+       process.stdout.write(result.outputFiles[0].text);`], { cwd: root, encoding: 'utf8' });
+    const context = createContext({});
+    const script = new Script(source);
+    script.runInContext(context);
+    const first: unknown = context['__AETHERVSR_SUCCESSFUL_SUBMISSION__'];
+    expect(typeof first).toBe('function');
+    expect(() => { script.runInContext(context); }).not.toThrow();
+    expect(context['__AETHERVSR_SUCCESSFUL_SUBMISSION__']).toBe(first);
   });
 
   it('packages an accessible script-free HTML shell and explicit limitations', () => {
