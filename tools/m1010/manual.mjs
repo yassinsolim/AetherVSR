@@ -35,6 +35,7 @@ try {
         step.result = { source: await page.evaluate(() => globalThis.__M1010_SOURCE__.snapshot()),
           player: player() ? await player().evaluate(() => globalThis.m1010Acquire.snapshot()) : null,
           target: target() ? await target().evaluate(() => globalThis.m1010Targets.snapshot()) : null,
+          brokerTrace: await native.worker.evaluate(() => globalThis.__M1010_BROKER_TRACE__()),
           grants: await native.worker.evaluate(() => chrome.permissions.getAll()) };
       } else if (command.type === 'prepare') {
         if (player()) await player().close();

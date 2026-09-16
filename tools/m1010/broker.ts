@@ -7,6 +7,12 @@ type Session = { sourceTabId: number; sourceDocumentId: string; ownerId: string;
 type Sender = chrome.runtime.MessageSender & { documentId?: string; origin?: string };
 const sessions = new Map<number, Session>();
 const sourceIds = new Set<number>();
+const trace: { event: string; tabId: number | null; detail: string }[] = [];
+const record = (event: string, tabId: number | null, detail: string) => {
+  trace.push({ event, tabId, detail });
+  if (trace.length > 128) trace.shift();
+};
+Object.assign(globalThis, { __M1010_BROKER_TRACE__: () => trace.map(entry => ({ ...entry })) });
 const sourceOperation = async (session: Session, operation: 'snapshot' | 'captureOffer' | 'acceptAnswer' | 'command' | 'stop' | 'releaseCapture', value: unknown = null) => {
   const target = { tabId: session.sourceTabId, documentIds: [session.sourceDocumentId] } as chrome.scripting.InjectionTarget;
   const results = await chrome.scripting.executeScript({ target,
@@ -47,8 +53,9 @@ function playerSession(sender: Sender): Session | null {
     sender.origin !== `chrome-extension://${chrome.runtime.id}` || sender.frameId !== 0 ||
     sender.tab?.id === undefined || !sender.documentId) return null;
   const session = sessions.get(sender.tab.id);
-  if (!session) return null;
+  if (!session) { record('rejected', sender.tab.id, 'no-session'); return null; }
   if (session.playerDocumentId && session.playerDocumentId !== sender.documentId) return null;
+  if (!session.playerDocumentId) record('bound', sender.tab.id, 'first-document');
   session.playerDocumentId ??= sender.documentId;
   return session;
 }
@@ -76,6 +83,7 @@ chrome.runtime.onMessage.addListener((raw: unknown, sender: Sender, respond) => 
       if (player.id === undefined) throw new Error('No acquisition player');
       sessions.set(player.id, { sourceTabId: tab.id, sourceDocumentId: entry.documentId, ownerId: snapshot.ownerId,
         generation: snapshot.generation, playerDocumentId: null, snapshot, consumedRefetch: false, openingNavigation: true });
+      record('registered', player.id, 'awaiting-navigation');
       sourceIds.add(tab.id);
       await chrome.tabs.update(player.id, { url: chrome.runtime.getURL('acquire.html'), active: true });
       return { ok: true, playerTabId: player.id };
@@ -138,6 +146,7 @@ chrome.runtime.onMessage.addListener((raw: unknown, sender: Sender, respond) => 
 const revoke = (tabId: number) => {
   for (const [player, session] of sessions) {
     if (session.sourceTabId !== tabId && player !== tabId) continue;
+    record('revoked', player, session.playerDocumentId ? 'bound-document' : 'before-handshake');
     sessions.delete(player); sourceIds.delete(session.sourceTabId);
     void sourceOperation(session, 'stop').catch(() => {});
     void chrome.runtime.sendMessage({ type: 'acquire.revoked', playerTabId: player,
@@ -146,6 +155,7 @@ const revoke = (tabId: number) => {
 };
 chrome.tabs.onRemoved.addListener(revoke);
 chrome.tabs.onUpdated.addListener((tabId, changes) => {
+  record('updated', tabId, `${changes.status ?? 'no-status'}:${changes.url === undefined ? 'no-url' : changes.url === chrome.runtime.getURL('acquire.html') ? 'acquire' : changes.url === 'about:blank' ? 'blank' : 'other'}`);
   if (changes.status !== 'loading') return;
   const session = sessions.get(tabId);
   if (session?.openingNavigation && changes.url === chrome.runtime.getURL('acquire.html')) { session.openingNavigation = false; return; }

@@ -55,9 +55,17 @@ async function fixture(url=sourceUrl,register=true) {
 	if(register) await launch();
 	return {state,agent,peer,api,player,send,launch,updated,revoked,inject};
 }
-afterEach(() => {vi.unstubAllGlobals();});
+afterEach(() => {vi.unstubAllGlobals(); Reflect.deleteProperty(globalThis,'__M1010_BROKER_TRACE__');});
 
 describe('broker: mocked callbacks, not native grants',() => {
+	it('bounds private navigation diagnostics without retaining URLs',async () => {
+		const {updated}=await fixture();
+		for(let index=0;index<140;index++) updated.emit(99,{status: 'loading',url: 'https://private.test/?token=secret'});
+		const read=(globalThis as unknown as {__M1010_BROKER_TRACE__: () => unknown[]}).__M1010_BROKER_TRACE__;
+		expect(read()).toHaveLength(128);
+		expect(read()).toEqual(Array.from({length: 128},() => ({event: 'updated',tabId: 99,detail: 'loading:other'})));
+		read().pop(); expect(read()).toHaveLength(128);
+	});
 	it('registers; reads retain target',async () => {
 		const {send,launch,api,agent}=await fixture(sourceUrl,false);
 		expect(await send('acquire.info')).toBe(false);
