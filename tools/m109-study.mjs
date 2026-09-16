@@ -75,6 +75,7 @@ export function identity() {
   return { sourceCommit: git(['rev-parse', 'HEAD']), baseline: START, frozen,
     pins: Object.fromEntries(['tools/m109-study.mjs', 'tools/m109-contract.ts', 'tools/m109-monitor.ts',
       'tools/m109-submission.ts', 'tools/m109-ownership.ts', 'tools/m109-fixture.html',
+      'tools/m109_pixels.py',
       'docs/M10.9-DESIGN-PREREGISTRATION.md'].map(path => [path, sha256(readFileSync(join(ROOT, path)))])) };
 }
 
@@ -193,7 +194,11 @@ export function comparePixels(original, replacement, width, height, region, dpr 
     const neighbors = [offset - border * 3, offset + border * 3, offset - border * width * 3, offset + border * width * 3];
     if (neighbors.some(neighbor => [0, 1, 2].some(channel => Math.abs(original[neighbor + channel] - original[offset + channel]) > 2))) continue;
     tested++; colors.add(original.subarray(offset, offset + 3).toString('hex'));
-    if (expectedColor && expectedColor.some((value, channel) => Math.abs(value - original[offset + channel]) > 8)) wrongOriginal++;
+    if (Array.isArray(expectedColor) && expectedColor.some((value, channel) => Math.abs(value - original[offset + channel]) > 8)) wrongOriginal++;
+    if (expectedColor && !Array.isArray(expectedColor)) {
+      const channel = expectedColor.dominantChannel;
+      if ([0, 1, 2].filter(index => index !== channel).some(index => original[offset + channel] - original[offset + index] < 64)) wrongOriginal++;
+    }
     const difference = Math.max(...[0, 1, 2].map(channel => Math.abs(original[offset + channel] - replacement[offset + channel])));
     maxDifference = Math.max(maxDifference, difference); if (difference > 8) wrong++;
   }
@@ -225,8 +230,11 @@ export function validateReveals(trace, telemetry, actions = []) {
 function decodeScreenshot(bytes) {
   assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
   const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20);
-  const pixels = execFileSync('ffmpeg', ['-nostdin', '-hide_banner', '-loglevel', 'error', '-i', 'pipe:0', '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1'], { input: bytes, maxBuffer: 64 * 1024 ** 2 });
-  return { width, height, pixels };
+  const python = process.env.M109_PYTHON ?? join(ROOT, '.cache/m8-venv/bin/python');
+  const pixels = execFileSync(python, [join(ROOT, 'tools/m109_pixels.py')], { input: bytes, maxBuffer: 64 * 1024 ** 2 });
+  const colorProfile = JSON.parse(execFileSync(python, [join(ROOT, 'tools/m109_pixels.py'), '--metadata'], { input: bytes, encoding: 'utf8' }));
+  assert.equal(pixels.length, width * height * 3);
+  return { width, height, pixels, colorProfile };
 }
 
 async function capture(page, path) {
@@ -280,9 +288,9 @@ async function paintedProof(context, prefix) {
     regions.push({ name, ...comparePixels(original.pixels, replacement.pixels, original.width, original.height,
       { left, top, width, height }, info.dpr, color, corner) });
   };
-  for (const [index, color] of [[0, [208, 64, 64]], [1, [48, 176, 96]], [2, [48, 80, 208]]]) {
+  for (const index of [0, 1, 2]) {
     add(`source-color-${index}`, { left: image.left + image.width * (index + .5) / 3 - 12,
-      top: Math.max(12, image.top + image.height / 2 - 12), width: 24, height: 24 }, color);
+      top: Math.max(12, image.top + image.height / 2 - 12), width: 24, height: 24 }, { dominantChannel: index, minimumSeparation: 64 });
   }
   if (info.fit === 'contain' && image.height < box.height - 8) {
     add('contain-top-bar', { left: box.left + box.width / 4, top: box.top + 3,
@@ -297,10 +305,12 @@ async function paintedProof(context, prefix) {
   if (info.radius) add('rounded-outside', { left: box.left, top: box.top, width: info.radius, height: info.radius }, [24, 24, 24],
     { centerX: box.left + info.radius, centerY: box.top + info.radius, radius: info.radius });
   add('caption', { left: info.caption.left + 3, top: info.caption.top + 3, width: info.caption.width - 6, height: info.caption.height - 6 }, [240, 40, 200]);
-  add('control', info.controls, [220, 220, 220]);
+  add('control', info.controls, null);
+  add('control-background', { left: info.controls.left + 6, top: info.controls.top + info.controls.height - 6,
+    width: info.controls.width - 12, height: 3 }, [220, 220, 220]);
   const actual = regions.filter(region => region.status !== 'NOT VISIBLE');
-  return { info, image, regions, original: { path: original.path, sha256: original.sha256, bytes: original.bytes },
-    replacement: { path: replacement.path, sha256: replacement.sha256, bytes: replacement.bytes },
+  return { info, image, regions, original: { path: original.path, sha256: original.sha256, bytes: original.bytes, colorProfile: original.colorProfile },
+    replacement: { path: replacement.path, sha256: replacement.sha256, bytes: replacement.bytes, colorProfile: replacement.colorProfile },
     verdict: actual.some(region => region.verdict === 'UNSAFE') ? 'UNSAFE' :
       actual.length >= 5 && actual.every(region => region.verdict === 'SUPPORTED_CORRECT') ? 'SUPPORTED_CORRECT' : 'UNRESOLVED',
     scope: 'Browser painted pixels, independently derived colored-source regions; not physical scanout or neural quality' };
@@ -726,7 +736,7 @@ export function validateFiniteRevision(prior, current) {
   assert.equal(prior.results.O2.stopped.outcome, 'UNSAFE');
 }
 
-export async function runFiniteRevision(prefix, priorPath) {
+export async function runFiniteRevision(prefix, priorPath, apparatusPriorPath = null) {
   prefix = resolve(prefix); priorPath = resolve(priorPath);
   assert(prefix.startsWith(join(ROOT, '.cache/m109/')) && !existsSync(`${prefix}.json`));
   assert(priorPath.startsWith(join(ROOT, '.cache/m109/')));
@@ -737,6 +747,18 @@ export async function runFiniteRevision(prefix, priorPath) {
     retained: { path: relative(ROOT, priorPath), sha256: sha256(bytes), bytes: bytes.length, identity: prior.identity,
       sections: ['observability', 'existingAnchor', 'O1', 'O2', 'control', 'common(original S1)', 'census(original S1)'],
       policy: 'Original results are retained, never reclassified or pooled with S1-R1' }, results: {} };
+  if (apparatusPriorPath) {
+    const path = resolve(apparatusPriorPath); assert(path.startsWith(join(ROOT, '.cache/m109/')));
+    const bytes = readFileSync(path), previous = JSON.parse(bytes), failed = previous.results.common.results[0];
+    assert.equal(previous.results.common.results.length, 1); assert.equal(failed.name, 'initial');
+    assert.equal(failed.firstFailure, null); assert(failed.crops[0].regions.every(region => region.wrong === 0));
+    assert(failed.crops[0].regions.some(region => region.wrongOriginal > 0));
+    for (const source of ['tools/m109-contract.ts', 'tools/m109-monitor.ts', 'tools/m109-submission.ts', 'tools/m109-ownership.ts']) {
+      assert.equal(previous.identity.pins[source], current.pins[source], 'Oracle correction cannot revise any candidate');
+    }
+    report.supersededOracle = { path: relative(ROOT, path), bytes: bytes.length, sha256: sha256(bytes), identity: previous.identity,
+      reason: 'Old screenshot decoder discarded ICC and compared video color-managed pixels/glyphs against inappropriate absolute-color masks; paired differences were <=1. Candidate unchanged; fresh affected evidence required.' };
+  }
   let service, native;
   try {
     service = await server(); report.media = service.media; report.bundleSha256 = service.bundleSha256;

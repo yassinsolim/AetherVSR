@@ -383,6 +383,12 @@ for catalog identity only. It is a development dependency, excluded from the
 production extension and shared frame-processing path; upstream notices remain
 in the installed package. No third-party implementation source was copied.
 
+M10.9 offline screenshot analysis uses the existing Python environment's Pillow
+12.3.0 and ImageCms (MIT-CMU), verified from its installed license metadata and
+LICENSE. It interprets embedded ICC profiles outside the frame loop. The package
+and its notices remain installed separately; no Pillow source is copied, bundled
+in the extension, or newly added to the JavaScript dependencies.
+
 Selected references:
 
 - `requestVideoFrameCallback` — https://wicg.github.io/video-rvfc/

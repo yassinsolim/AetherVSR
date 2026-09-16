@@ -38,6 +38,10 @@ describe('M10.9 independent evidence guards',()=>{
     assert.equal(comparePixels(image,image,40,40,region,1,[200,200,200]).verdict,'UNSAFE');
     assert.equal(comparePixels(image,Buffer.alloc(image.length,120),40,40,region,1,[100,100,100]).verdict,'UNSAFE');
     assert.equal(comparePixels(image,image,40,40,{left:0,top:0,width:2,height:2},1,[100,100,100]).verdict,'UNRESOLVED');
+    const red=Buffer.alloc(image.length);for(let offset=0;offset<red.length;offset+=3){red[offset]=200;red[offset+1]=60;red[offset+2]=60;}
+    assert.equal(comparePixels(red,red,40,40,region,1,{dominantChannel:0}).verdict,'SUPPORTED_CORRECT');
+    assert.equal(comparePixels(red,red,40,40,region,1,{dominantChannel:1}).verdict,'UNSAFE');
+    assert.equal(comparePixels(image,image,40,40,region,1,{dominantChannel:0}).verdict,'UNSAFE');
   `));
   it('requires two ordered matching post-proof submissions before observed reveal',()=>check(`
     const {validateReveals}=await import('./tools/m109-study.mjs');
