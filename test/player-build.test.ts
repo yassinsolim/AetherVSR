@@ -43,6 +43,29 @@ describe('M10.10 research package isolation', () => {
     assert(!manual.includes('permissions.request'));assert(!manual.includes('getDisplayMedia('));
     assert(!manual.includes('triggerAction'));assert(!manual.includes('autoplay-policy'));
   `));
+  it('uses authenticated source and consumer self identity without tab URL permission', () => check(`
+    const {targetStreamId}=await import('./tools/m1010/native.mjs');
+    const extensionId='a'.repeat(32), origin='chrome-extension://'+extensionId;
+    let current={sourceTabId:7,playerDocumentId:'document',selection:{generation:1}},destination={id:9},issueCount=0;
+    let afterIssue=()=>{},targetUrl=origin+'/target.html?session=fixture';
+    globalThis.m1010Acquire={refresh:async()=>structuredClone(current)};
+    globalThis.chrome={runtime:{},tabs:{getCurrent:async()=>({...destination})},tabCapture:{getMediaStreamId:(options,callback)=>{
+      assert.deepEqual(options,{targetTabId:7,consumerTabId:9});issueCount++;afterIssue();callback('stream-id');
+    }}};
+    const evaluate=(callback,value)=>callback(value);
+    const native={extensionId,worker:{evaluate}},acquisition={url:()=>origin+'/acquire.html',evaluate},consumer={url:()=>targetUrl,evaluate};
+    assert.equal(await targetStreamId(native,acquisition,consumer),'stream-id');assert.equal(issueCount,1);
+    afterIssue=()=>{current.selection.generation++};
+    await assert.rejects(()=>targetStreamId(native,acquisition,consumer));
+    afterIssue=()=>{destination={id:10}};
+    await assert.rejects(()=>targetStreamId(native,acquisition,consumer));destination={id:9};
+    afterIssue=()=>{targetUrl=origin+'/other.html'};
+    await assert.rejects(()=>targetStreamId(native,acquisition,consumer));targetUrl=origin+'/target.html?session=fixture';
+    afterIssue=()=>{chrome.runtime.lastError={message:'native grant denied'}};
+    await assert.rejects(()=>targetStreamId(native,acquisition,consumer),/native grant denied/);delete chrome.runtime.lastError;
+    const previous=issueCount;destination={};
+    await assert.rejects(()=>targetStreamId(native,acquisition,consumer));assert.equal(issueCount,previous);
+  `));
   it('builds deterministically with a tracked fixture, pins every byte and refuses production output paths', () => check(`
     const path='public/media/aethervsr-testclip-720p60-h264.mp4',sha256=hash(readFileSync(path));
     const directory='.cache/m1010/package-test-'+process.pid;

@@ -4,7 +4,7 @@ import { createInterface } from 'node:readline';
 import { join } from 'node:path';
 import { ROOT, sha256 } from '../m10-fixtures.mjs';
 import { nativeWindow } from '../m105-accounting.mjs';
-import { studyIdentity, openResearch } from './native.mjs';
+import { studyIdentity, openResearch, targetStreamId } from './native.mjs';
 import { startFixtures } from './fixtures.mjs';
 
 const identity = studyIdentity(), native = await openResearch(identity);
@@ -57,13 +57,9 @@ try {
         const selected = command.surface === 'source' ? page : command.surface === 'target' ? target() : player(); assert(selected); await selected.bringToFront(); step.result = { url: selected.url() };
       } else if (command.type === 'target-capture') {
         const consumer = target(); assert(consumer, 'Owner must open related extension target');
-        const tabs = await native.worker.evaluate(() => chrome.tabs.query({}));
-        const source = tabs.find(tab => tab.url?.startsWith(fixtures.url)), destination = tabs.find(tab => tab.url === consumer.url());
-        assert(source?.id !== undefined && destination?.id !== undefined);
-        const id = await native.worker.evaluate(({ source, destination }) => new Promise((resolve, reject) => chrome.tabCapture.getMediaStreamId({ targetTabId: source, consumerTabId: destination }, value => {
-          if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message)); else resolve(value);
-        })), { source: source.id, destination: destination.id });
-        await consumer.bringToFront(); step.result = await consumer.evaluate(id => globalThis.m1010Targets.start(id), id);
+        const ticket = await consumer.evaluate(() => globalThis.m1010Targets.begin());
+        const id = await targetStreamId(native, player(), consumer);
+        await consumer.bringToFront(); step.result = await consumer.evaluate(({ id, ticket }) => globalThis.m1010Targets.start(id, ticket), { id, ticket });
       } else if (command.type === 'target-apply') {
         assert(['crop', 'restriction'].includes(command.kind)); step.result = await target().evaluate(kind => globalThis.m1010Targets.apply(kind), command.kind);
       } else if (command.type === 'self-apply') {

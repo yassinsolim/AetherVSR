@@ -28,6 +28,7 @@ class Track extends Target {
 class Stream extends Target {
   constructor(private tracks: Track[] = []) { super(); }
   getTracks() { return this.tracks; }
+  getVideoTracks() { return this.tracks.filter(track => track.kind === 'video'); }
   addTrack(track: Track) { this.tracks.push(track); this.dispatchEvent(new Event('addtrack')); }
 }
 class Video extends Element {
@@ -109,6 +110,39 @@ afterEach(async () => {
   expect(vi.getTimerCount()).toBe(0);
   vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
   Reflect.deleteProperty(globalThis, 'm1010Acquire');
+  Reflect.deleteProperty(globalThis, 'm1010Targets');
+});
+
+describe('related target capture cancellation', () => {
+  async function setupTarget() {
+    vi.stubGlobal('location', { origin: 'chrome-extension://extension', search: '?source=http%3A%2F%2F127.0.0.1%3A5204&session=12345678-1234-1234-1234-123456789abc' });
+    vi.stubGlobal('document', { querySelector: (selector: string) => selector === 'video' ? video : new Element(), getElementById: (id: string) => buttons.get(id) });
+    await import('../tools/m1010/target');
+    return (globalThis as unknown as { m1010Targets: { begin(): number; start(id: string, ticket: number): Promise<unknown>; stop(): void; snapshot(): { liveTracks: number } } }).m1010Targets;
+  }
+  it('rejects an ID arriving after Stop before media redemption', async () => {
+    const target = await setupTarget(), ticket = target.begin();
+    target.stop();
+    await expect(target.start('late-id', ticket)).rejects.toThrow(/cancelled/);
+    expect(getUserMedia).not.toHaveBeenCalled();
+  });
+  it.each(['stop', 'pagehide'] as const)('stops media arriving after %s without playing', async cancellation => {
+    const target = await setupTarget(), capture = deferred<Stream>(), track = new Track();
+    getUserMedia.mockReturnValueOnce(capture.promise);
+    const started = expect(target.start('id', target.begin())).rejects.toThrow(/cancelled/);
+    if (cancellation === 'stop') target.stop(); else page.dispatchEvent(new Event('pagehide'));
+    capture.resolve(new Stream([track])); await started;
+    expect(track.stop).toHaveBeenCalled(); expect(video.play).not.toHaveBeenCalled();
+    expect(target.snapshot().liveTracks).toBe(0);
+  });
+  it('rejects duplicate redemption and cleans playback failure', async () => {
+    const target = await setupTarget(), track = new Track(), ticket = target.begin();
+    getUserMedia.mockResolvedValue(new Stream([track])); video.play.mockRejectedValueOnce(new Error('play rejected'));
+    await expect(target.start('id', ticket)).rejects.toThrow('play rejected');
+    await expect(target.start('id', ticket)).rejects.toThrow(/cancelled/);
+    expect(getUserMedia).toHaveBeenCalledTimes(1); expect(track.stop).toHaveBeenCalled();
+    expect(target.snapshot().liveTracks).toBe(0);
+  });
 });
 
 describe('acquisition lifecycle with local platform mocks', () => {

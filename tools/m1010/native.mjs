@@ -37,6 +37,28 @@ export async function openResearch(identity) {
   } catch (error) { await native.close(); throw error; }
 }
 
+export async function targetStreamId(native, acquisition, consumer) {
+  assert(acquisition && consumer, 'Owner must open acquisition and related target');
+  const acquisitionUrl = `chrome-extension://${native.extensionId}/acquire.html`, targetUrl = consumer.url();
+  assert.equal(acquisition.url(), acquisitionUrl);
+  assert(targetUrl.startsWith(`chrome-extension://${native.extensionId}/target.html?`));
+  const selection = await acquisition.evaluate(() => globalThis.m1010Acquire.refresh());
+  const destination = await consumer.evaluate(() => chrome.tabs.getCurrent());
+  assert(Number.isInteger(selection.sourceTabId) && selection.sourceTabId >= 0 && selection.selection);
+  assert(Number.isInteger(destination?.id) && destination.id >= 0 && destination.id !== selection.sourceTabId);
+  const id = await native.worker.evaluate(({ source, destination }) => new Promise((resolve, reject) => chrome.tabCapture.getMediaStreamId({ targetTabId: source, consumerTabId: destination }, value => {
+    if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message)); else resolve(value);
+  })), { source: selection.sourceTabId, destination: destination.id });
+  assert(typeof id === 'string' && id.length > 0, 'Missing capture stream ID');
+  assert.equal(acquisition.url(), acquisitionUrl); assert.equal(consumer.url(), targetUrl);
+  const current = await acquisition.evaluate(() => globalThis.m1010Acquire.refresh());
+  assert.equal(current.sourceTabId, selection.sourceTabId);
+  assert.equal(current.playerDocumentId, selection.playerDocumentId);
+  assert.deepEqual(current.selection, selection.selection);
+  assert.equal((await consumer.evaluate(() => chrome.tabs.getCurrent()))?.id, destination.id);
+  return id;
+}
+
 async function ready(page) {
   await page.waitForFunction(() => {
     const driver = globalThis.aethervsrRuntime?.driver;
