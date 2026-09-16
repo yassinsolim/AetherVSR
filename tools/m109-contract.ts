@@ -62,6 +62,8 @@ export interface Admission {
 
 const defaulted = (style: SemanticStyle, field: string, value: string) => !style[field] || style[field] === value;
 const zero = (value: string | undefined) => value !== undefined && /^0(?:px)?$/.test(value);
+const roundCorner = (value: string | undefined) => !value || value === 'round' || value === 'superellipse(1)';
+const zeroClipMargin = (value: string | undefined) => !value || /^(?:0px|(?:content|padding|border)-box(?: 0px)?)$/.test(value);
 const pixels = (value: string | undefined): number => value && /^\d+(?:\.\d+)?px$/.test(value) ? Number.parseFloat(value) : NaN;
 export function supportedPosition(value: string): boolean {
   const tokens = value.trim().split(/\s+/);
@@ -108,7 +110,7 @@ export function assessContract(input: PresentationInput): Admission {
   if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0 ||
     Math.abs(width - input.rect.width) > 1 / 64 || Math.abs(height - input.rect.height) > 1 / 64) return reject('unsupported-video-box');
   if (!RADIUS_FIELDS.every(field => /^\d+(?:\.\d+)?px$/.test(video[field] ?? '') && video[field] === video[RADIUS_FIELDS[0]]) ||
-    !defaulted(video, 'corner-shape', 'round')) return reject('unsupported-corner');
+    !roundCorner(video['corner-shape'])) return reject('unsupported-corner');
   if (!defaulted(video, 'background-image', 'none') || !['rgba(0, 0, 0, 0)', 'transparent'].includes(video['background-color'] ?? '') ||
     !defaulted(video, 'box-shadow', 'none') || !defaulted(video, 'outline-style', 'none') ||
     !defaulted(video, 'content', 'normal') || !defaulted(video, 'object-view-box', 'none') || !defaulted(video, 'appearance', 'none')) {
@@ -123,7 +125,7 @@ export function assessContract(input: PresentationInput): Admission {
     if (!defaulted(style, 'contain', 'none') || !defaulted(style, 'will-change', 'auto') ||
       !defaulted(style, 'container-type', 'normal') || !defaulted(style, 'animation-name', 'none') ||
       !(style['transition-duration'] ?? '0s').split(',').every(value => Number.parseFloat(value) === 0)) return reject('unsupported-semantic-chain');
-    if ([style['overflow-x'], style['overflow-y']].some(value => value === 'clip') && !defaulted(style, 'overflow-clip-margin', '0px')) return reject('unsupported-clipping');
+    if ([style['overflow-x'], style['overflow-y']].some(value => value === 'clip') && !zeroClipMargin(style['overflow-clip-margin'])) return reject('unsupported-clipping');
     if (style === video) continue;
     if ([style['overflow-x'], style['overflow-y']].some(value => value && value !== 'visible')) {
       clips++;

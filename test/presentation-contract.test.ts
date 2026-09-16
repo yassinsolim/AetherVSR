@@ -27,6 +27,17 @@ const submission = (sequence: number, geometryGeneration = 1): SuccessfulFrameSu
 });
 
 describe('M10.9 explicit simple-chain admission', () => {
+  it.each(['0px', 'content-box', 'content-box 0px', 'padding-box', 'border-box'])('S1-R1 accepts native round/zero serialization %s only on undecorated boxes', margin => {
+    const state = input(); state.video['corner-shape'] = 'superellipse(1)';
+    state.video['overflow-x'] = 'clip'; state.video['overflow-clip-margin'] = margin;
+    expect(assessContract(state).outcome).toBe('SUPPORTED');
+    state.video['overflow-clip-margin'] = 'content-box 1px';
+    expect(assessContract(state).reason).toBe('unsupported-clipping');
+    state.video['overflow-clip-margin'] = margin; state.video['corner-shape'] = 'superellipse(0)';
+    expect(assessContract(state).reason).toBe('unsupported-corner');
+    state.video['corner-shape'] = 'superellipse(1)'; state.video['padding-top'] = '1px';
+    expect(assessContract(state).reason).toBe('unsupported-video-box');
+  });
   it('admits contain/cover, current movement, size/source change, reparent and container fullscreen', () => {
     for (const fit of ['contain', 'cover']) {
       const state = input(); state.video['object-fit'] = fit;

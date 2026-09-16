@@ -12,6 +12,15 @@ function check(source: string) {
 }
 
 describe('M10.9 independent evidence guards',()=>{
+  it('permits only the one finite corner-default revision without retuning stopped ownership or the monitor',()=>check(`
+    const {validateFiniteRevision}=await import('./tools/m109-study.mjs');
+    const paths=['tools/m109-monitor.ts','tools/m109-submission.ts','tools/m109-ownership.ts'];
+    const identity={pins:Object.fromEntries(paths.map(path=>[path,'frozen']))};
+    const prior={identity,results:{common:{stopped:{name:'initial',outcome:'UNRESOLVED'},results:[{firstFailure:null,cleanup:{proofCalls:0,transitions:[{reason:'unsupported-corner'}]}}]},O1:{stopped:{outcome:'UNSAFE'}},O2:{stopped:{outcome:'UNSAFE'}}}};
+    validateFiniteRevision(prior,identity);
+    const changed=structuredClone(identity);changed.pins[paths[0]]='retuned';assert.throws(()=>validateFiniteRevision(prior,changed));
+    prior.results.common.results[0].firstFailure={visible:true};assert.throws(()=>validateFiniteRevision(prior,identity));
+  `));
   it('resumes only the unchanged recorded ownership prefix after the host-registry apparatus error',()=>check(`
     const {validateOwnershipResume,OWNERSHIP_CASES}=await import('./tools/m109-study.mjs');
     const paths=['tools/m109-contract.ts','tools/m109-monitor.ts','tools/m109-submission.ts','tools/m109-ownership.ts'];

@@ -514,6 +514,7 @@ async function anchorReuse(native, service) {
 
 async function common(native, service, prefix, kind = 'S1') {
   const results = []; let stopped = null;
+  const candidate = kind !== 'S0';
   const repeats = kind === 'S0' ? 1 : 3;
   outer: for (let repeat = 1; repeat <= repeats; repeat++) for (const entry of CASES) {
     let context; const result = { name: entry.name, repeat, actions: [], crops: [], controls: [] };
@@ -560,7 +561,7 @@ async function common(native, service, prefix, kind = 'S1') {
           result.outcome = 'UNSAFE'; throw new Error('Control/caption/focus preservation failed');
         }
       };
-      if (kind === 'S1' && ['initial', 'cover', 'rounded-video'].includes(entry.name)) await visual('admission');
+      if (candidate && ['initial', 'cover', 'rounded-video'].includes(entry.name)) await visual('admission');
       for (const action of entry.actions) {
         const actionResult = { ...action, startedAt: await context.page.evaluate(() => performance.now()),
           before: await context.world.call(() => globalThis.__M109_MONITOR__.snapshot()) }; result.actions.push(actionResult);
@@ -578,7 +579,7 @@ async function common(native, service, prefix, kind = 'S1') {
           assert.equal(actionResult.stability.proofCalls, actionResult.status.proofCalls, 'Stable rejection repeated full proofs');
           assert.equal(actionResult.stability.initializes, 1, 'Repeated GPU initialization');
         }
-        if (kind === 'S1' && expected === 'SUPPORTED' && ['cssom-fit', 'cssom-position', 'radius', 'nested-scroll', 'css-resize', 'viewport-clip', 'abr', 'source-scroll', 'controls-z-index'].includes(entry.name)) await visual(`action-${result.actions.length}`);
+        if (candidate && expected === 'SUPPORTED' && ['cssom-fit', 'cssom-position', 'radius', 'nested-scroll', 'css-resize', 'viewport-clip', 'abr', 'source-scroll', 'controls-z-index'].includes(entry.name)) await visual(`action-${result.actions.length}`);
         if (entry.name === 'controls-z-index' && expected === 'UNSUPPORTED') {
           const controls = await controlProof(context); result.controls.push(controls); assert(controls.activated && controls.hit);
         }
@@ -595,7 +596,7 @@ async function common(native, service, prefix, kind = 'S1') {
           result.firstFailure = trace.firstFailure; result.interruptions = trace.interruptions;
           if (trace.firstFailure) result.outcome = 'UNSAFE';
           if (trace.interruptions.length) { result.invalid = 'external-focus-or-visibility'; if (result.outcome !== 'UNSAFE') result.outcome = 'UNRESOLVED'; }
-          if (kind === 'S1' && result.cleanup) { result.recovery = validateReveals(trace, result.cleanup, result.actions);
+          if (candidate && result.cleanup) { result.recovery = validateReveals(trace, result.cleanup, result.actions);
             if (result.outcome === 'SUPPORTED_CORRECT' && result.recovery.verdict !== 'SUPPORTED_CORRECT') result.outcome = result.recovery.verdict; }
           result.raw = raw(`${prefix}.${repeat}-${entry.name}.json.gz`, { ...trace, telemetry: result.cleanup });
         } else if (!result.notApplicable) { result.outcome = 'UNRESOLVED'; result.traceError ??= 'Missing final independent trace'; }
@@ -699,6 +700,49 @@ export async function runStudy(prefix, resumePath = null) {
     }
     report.results.control = await common(native, service, `${prefix}.S0`, 'S0');
     report.results.common = await common(native, service, `${prefix}.S1`);
+    report.costs = report.results.common.stopped ? 'NOT RUN: no complete safety survivor' : 'ELIGIBILITY_REVIEW_REQUIRED';
+    report.results.census = await census(native, service.source);
+    assert.deepEqual(identity(), report.identity);
+  } catch (error) { report.error = String(error); }
+  finally {
+    await native?.close(); await service?.close(); report.finished = new Date().toISOString();
+    writeFileSync(`${prefix}.json`, JSON.stringify(report, null, 2), { flag: 'wx' });
+  }
+  return report;
+}
+
+export function validateFiniteRevision(prior, current) {
+  assert.equal(prior.error, undefined);
+  assert.equal(prior.results.common.results.length, 1);
+  assert.equal(prior.results.common.stopped.name, 'initial');
+  assert.equal(prior.results.common.stopped.outcome, 'UNRESOLVED');
+  assert.equal(prior.results.common.results[0].cleanup.proofCalls, 0);
+  assert.equal(prior.results.common.results[0].cleanup.transitions[0].reason, 'unsupported-corner');
+  assert.equal(prior.results.common.results[0].firstFailure, null);
+  for (const path of ['tools/m109-monitor.ts', 'tools/m109-submission.ts', 'tools/m109-ownership.ts']) {
+    assert.equal(prior.identity.pins[path], current.pins[path], `Revision cannot retune ${path}`);
+  }
+  assert.equal(prior.results.O1.stopped.outcome, 'UNSAFE');
+  assert.equal(prior.results.O2.stopped.outcome, 'UNSAFE');
+}
+
+export async function runFiniteRevision(prefix, priorPath) {
+  prefix = resolve(prefix); priorPath = resolve(priorPath);
+  assert(prefix.startsWith(join(ROOT, '.cache/m109/')) && !existsSync(`${prefix}.json`));
+  assert(priorPath.startsWith(join(ROOT, '.cache/m109/')));
+  const current = identity(), bytes = readFileSync(priorPath), prior = JSON.parse(bytes);
+  validateFiniteRevision(prior, current);
+  const report = { schemaVersion: 1, phase: 'S1-R1_SINGLE_FINITE_REVISION', identity: current,
+    environment: presentationEnvironment(), started: new Date().toISOString(),
+    retained: { path: relative(ROOT, priorPath), sha256: sha256(bytes), bytes: bytes.length, identity: prior.identity,
+      sections: ['observability', 'existingAnchor', 'O1', 'O2', 'control', 'common(original S1)', 'census(original S1)'],
+      policy: 'Original results are retained, never reclassified or pooled with S1-R1' }, results: {} };
+  let service, native;
+  try {
+    service = await server(); report.media = service.media; report.bundleSha256 = service.bundleSha256;
+    native = await openNativeChrome(['--autoplay-policy=no-user-gesture-required']);
+    report.browser = { version: await native.browser.version(), executableSha256: sha256(readFileSync(native.executable)) };
+    report.results.common = await common(native, service, `${prefix}.S1-R1`, 'S1-R1');
     report.costs = report.results.common.stopped ? 'NOT RUN: no complete safety survivor' : 'ELIGIBILITY_REVIEW_REQUIRED';
     report.results.census = await census(native, service.source);
     assert.deepEqual(identity(), report.identity);
