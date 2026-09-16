@@ -127,7 +127,7 @@ export async function serveFixtures(media, options = {}) {
   try {
     for (const port of ports) {
       const server = http.createServer((request, response) => {
-        const path = request.url, origin = request.headers.origin;
+        const path = new URL(request.url, 'http://local').pathname, origin = request.headers.origin;
         const allowed = origins.includes(origin) || extensionOrigins.includes(origin);
         const cookies = (request.headers.cookie ?? '').split(';').map(value => value.trim());
         const authenticated = cookies.includes('m1010_fixture=allow');

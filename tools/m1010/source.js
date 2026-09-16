@@ -180,6 +180,23 @@ async function applyTarget(createTarget, method) {
 }
 const crop = () => applyTarget(cropTarget, 'cropTo');
 const restrict = () => applyTarget(restrictionTarget, 'restrictTo');
+function openTargetWindow() {
+  const extension = new URLSearchParams(location.search).get('extension');
+  if (!/^[a-p]{32}$/.test(extension ?? '')) throw new Error('No validated research extension identity');
+  const origin = `chrome-extension://${extension}`, session = crypto.randomUUID();
+  const consumer = window.open(`${origin}/target.html?source=${encodeURIComponent(location.origin)}&session=${session}`, '_blank');
+  if (!consumer) throw new Error('Related target window blocked');
+  const listener = async event => {
+    if (event.source !== consumer || event.origin !== origin || event.data?.type !== 'm1010-target-ready' || event.data.session !== session) return;
+    removeEventListener('message', listener);
+    const targets = { type: 'targets', session, errors: {} };
+    try { targets.crop = await cropTarget(); } catch (error) { targets.errors.crop = String(error); }
+    try { targets.restriction = await restrictionTarget(); } catch (error) { targets.errors.restriction = String(error); }
+    consumer.postMessage(targets, origin);
+  };
+  addEventListener('message', listener);
+  setTimeout(() => removeEventListener('message', listener), 10000);
+}
 globalThis.__M1010_SOURCE__ = { prepare, action, snapshot, video, captureDisplay, captureStream,
   cropTarget, restrictionTarget, crop, restrict, get stream() { return display ?? captured ?? inputStream; } };
 const button = (id, run) => byId(id).addEventListener('click', event => {
@@ -187,6 +204,7 @@ const button = (id, run) => byId(id).addEventListener('click', event => {
   try { Promise.resolve(run()).catch(fail); } catch (error) { fail(error); }
 });
 button('prepare', () => prepare({ mode: byId('mode').value, asset: byId('asset').value, credentials: byId('credentials').value }));
+button('target-window', openTargetWindow);
 for (const type of ['play', 'pause', 'fullscreen', 'cancel']) button(type, () => action({ type }));
 button('wrong', () => action({ type: 'wrong-choice' }));
 button('display', captureDisplay); button('capture', captureStream); button('crop', crop); button('restrict', restrict);

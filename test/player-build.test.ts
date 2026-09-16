@@ -32,6 +32,17 @@ describe('M10.10 research package isolation', () => {
     const html=readFileSync('tools/m1010/player.html','utf8');
     for(const id of['play','pause','seek','volume','mute','fullscreen','close','return'])assert(html.includes('id="'+id+'"'));
   `));
+  it('limits optional acquisition permissions and web-accessible resources to the local target probe', () => check(`
+    const {acquisitionManifest}=await import('./tools/m1010/build.mjs');
+    assert.deepEqual(acquisitionManifest.optional_permissions,['tabCapture']);
+    assert.deepEqual(acquisitionManifest.optional_host_permissions,['http://127.0.0.1/*']);
+    assert.deepEqual(acquisitionManifest.web_accessible_resources,[{resources:['target.html','target.js'],matches:['http://127.0.0.1/*']}]);
+    const target=readFileSync('tools/m1010/target.ts','utf8'),manual=readFileSync('tools/m1010/manual.mjs','utf8');
+    assert(!target.includes('chrome.runtime.sendMessage'));assert(!target.includes('fetch('));
+    assert(target.includes('event.source !== window.opener'));assert(target.includes('event.origin !== sourceOrigin'));
+    assert(!manual.includes('permissions.request'));assert(!manual.includes('getDisplayMedia('));
+    assert(!manual.includes('triggerAction'));assert(!manual.includes('autoplay-policy'));
+  `));
   it('builds deterministically with a tracked fixture, pins every byte and refuses production output paths', () => check(`
     const path='public/media/aethervsr-testclip-720p60-h264.mp4',sha256=hash(readFileSync(path));
     const directory='.cache/m1010/package-test-'+process.pid;
