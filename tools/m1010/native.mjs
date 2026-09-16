@@ -20,8 +20,9 @@ export function studyIdentity() {
   return { sourceCommit, provenance, directory, baseline: 'aab96fd6255641b590081e27dabd767448632aca' };
 }
 
-export async function openResearch(identity) {
-  const native = await openNativeChrome([`--load-extension=${identity.directory}`, `--disable-extensions-except=${identity.directory}`]);
+export async function openResearch(identity, options = {}) {
+  if (options.profileDirectory) assert(resolve(options.profileDirectory).startsWith(join(ROOT, '.cache/m1010/')));
+  const native = await openNativeChrome([`--load-extension=${identity.directory}`, `--disable-extensions-except=${identity.directory}`], options);
   try {
     const worker = native.context.serviceWorkers().find(worker => worker.url().endsWith('/service-worker.js')) ??
       await native.context.waitForEvent('serviceworker', { predicate: worker => worker.url().endsWith('/service-worker.js'), timeout: 10000 });

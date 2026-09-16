@@ -18,6 +18,99 @@ export const MEDIA_CASES = [
   { name: 'credentialed', mode: 'auth', asset: 'A', credentials: 'include' },
 ];
 
+export async function observePlayback() {
+  const video = document.querySelector('video'), frames = [], events = [];
+  let handle, timer;
+  const start = performance.now();
+  const onEvent = event => events.push({ at: performance.now(), type: event.type });
+  const names = ['playing', 'pause', 'ended', 'waiting', 'stalled', 'error'];
+  names.forEach(name => video.addEventListener(name, onEvent));
+  const result = { playable: false, frames, events, start, error: null };
+  try {
+    await new Promise((resolveReady, reject) => {
+      timer = setTimeout(() => reject(new Error(video.error?.message ?? 'No three decoded frames within 5s')), 5000);
+      const sample = (at, metadata) => {
+        frames.push({ at, mediaTime: metadata.mediaTime, presentedFrames: metadata.presentedFrames, width: metadata.width, height: metadata.height });
+        if (frames.length === 3) resolveReady(); else handle = video.requestVideoFrameCallback(sample);
+      };
+      handle = video.requestVideoFrameCallback(sample);
+      video.play().catch(reject);
+    });
+    result.playable = true;
+  } catch (error) { result.error = String(error); }
+  finally {
+    clearTimeout(timer); if (handle !== undefined) video.cancelVideoFrameCallback(handle);
+    video.pause(); names.forEach(name => video.removeEventListener(name, onEvent));
+  }
+  return { ...result, end: performance.now(), currentSrc: video.currentSrc, width: video.videoWidth, height: video.videoHeight,
+    duration: Number.isFinite(video.duration) ? video.duration : null, muted: video.muted, paused: video.paused,
+    readyState: video.readyState, mediaError: video.error?.code ?? null,
+    cadence: 'not measured; three-frame readiness observation only' };
+}
+
+export async function inputFrameEvidence() {
+  const video = document.querySelector('video');
+  if (!video.paused || video.seeking || video.readyState < 2) throw new Error('Input evidence requires a stable paused decoded frame');
+  const width = video.videoWidth, height = video.videoHeight;
+  const pack = async bytes => {
+    let binary = '';
+    for (let offset = 0; offset < bytes.length; offset += 16384) binary += String.fromCharCode(...bytes.subarray(offset, offset + 16384));
+    return { bytes: bytes.length, sha256: [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(value => value.toString(16).padStart(2, '0')).join(''), base64: btoa(binary) };
+  };
+  const result = { width, height, mediaTime: video.currentTime, origin: location.origin, cssRect: video.getBoundingClientRect().toJSON(),
+    dpr: devicePixelRatio, visibility: document.visibilityState, focused: document.hasFocus(),
+    normalizedFormat: 'RGBA8 sRGB unpremultiplied', sourceColorSpace: null, originClean: false,
+    externalImportable: false, forcedCopyImportable: false, pixels: null, copiedPixels: null, errors: {} };
+  let frame, device, texture, buffer;
+  try {
+    try { frame = new VideoFrame(video); result.sourceColorSpace = frame.colorSpace.toJSON(); }
+    catch (error) { result.errors.colorSpace = String(error); }
+    finally { frame?.close(); }
+    try {
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      const context = canvas.getContext('2d', { colorSpace: 'srgb', willReadFrequently: true });
+      context.drawImage(video, 0, 0); result.pixels = await pack(context.getImageData(0, 0, width, height).data); result.originClean = true;
+    } catch (error) { result.errors.pixels = String(error); }
+    const adapter = await navigator.gpu.requestAdapter(); if (!adapter) throw new Error('No GPU adapter');
+    device = await adapter.requestDevice();
+    device.pushErrorScope('validation');
+    try { device.importExternalTexture({ source: video }); result.externalImportable = true; }
+    catch (error) { result.errors.external = String(error); }
+    const externalError = await device.popErrorScope();
+    if (externalError) { result.externalImportable = false; result.errors.external = externalError.message; }
+    device.pushErrorScope('validation');
+    try {
+      texture = device.createTexture({ size: [width, height], format: 'rgba8unorm', usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT });
+      const bytesPerRow = Math.ceil(width * 4 / 256) * 256;
+      buffer = device.createBuffer({ size: bytesPerRow * height, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+      device.queue.copyExternalImageToTexture({ source: video }, { texture, colorSpace: 'srgb' }, [width, height]);
+      const encoder = device.createCommandEncoder(); encoder.copyTextureToBuffer({ texture }, { buffer, bytesPerRow }, [width, height]);
+      device.queue.submit([encoder.finish()]); await buffer.mapAsync(GPUMapMode.READ);
+      const mapped = new Uint8Array(buffer.getMappedRange()), normalized = new Uint8Array(width * height * 4);
+      for (let row = 0; row < height; row++) normalized.set(mapped.subarray(row * bytesPerRow, row * bytesPerRow + width * 4), row * width * 4);
+      result.copiedPixels = await pack(normalized); buffer.unmap(); result.forcedCopyImportable = true;
+    } catch (error) { result.errors.copy = String(error); }
+    const copyError = await device.popErrorScope();
+    if (copyError) { result.forcedCopyImportable = false; result.errors.copy = copyError.message; result.copiedPixels = null; }
+  } catch (error) { result.errors.gpu = String(error); }
+  finally { buffer?.destroy(); texture?.destroy(); device?.destroy(); }
+  return result;
+}
+
+export function pixelDifference(reference, candidate) {
+  assert(reference.length === candidate.length && reference.length > 0 && reference.length % 4 === 0);
+  let absolute = 0, maximum = 0, changedPixels = 0;
+  for (let offset = 0; offset < reference.length; offset += 4) {
+    let changed = false;
+    for (let channel = 0; channel < 4; channel++) {
+      const difference = Math.abs(reference[offset + channel] - candidate[offset + channel]);
+      absolute += difference; maximum = Math.max(maximum, difference); changed ||= difference !== 0;
+    }
+    changedPixels += Number(changed);
+  }
+  return { bytes: reference.length, mae: absolute / reference.length, maximum, changedPixels, exact: changedPixels === 0 };
+}
+
 export async function inspectMedia({ capture = false, actions = false, adaptive = false } = {}) {
   const video = document.querySelector('video'), started = performance.now(), observations = [], events = [];
   const stop = stream => stream?.getTracks().forEach(track => track.stop());

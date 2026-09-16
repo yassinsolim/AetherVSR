@@ -132,15 +132,16 @@ export async function serveFixtures(media, options = {}) {
         const cookies = (request.headers.cookie ?? '').split(';').map(value => value.trim());
         const authenticated = cookies.includes('m1010_fixture=allow');
         if (requests.length < 1000) requests.push({ path: routes.has(path) || pages.has(path)
-          || ['/config.json', '/requests.json', '/seed', '/redirect.mp4', '/mime-bad.mp4', '/oversize.mp4'].includes(path) ? path : 'blocked',
+          || ['/config.json', '/requests.json', '/seed', '/redirect.mp4', '/redirect-same.mp4', '/redirect-ungranted.mp4', '/mime-bad.mp4', '/oversize.mp4'].includes(path) ? path : 'blocked',
         originAllowed: allowed, cookiePresent: !!request.headers.cookie, authenticated,
+        authority: request.headers.host === `127.0.0.1:${server.address().port}` ? 'numeric-loopback' : 'other',
         includeRequested: path?.startsWith('/auth/include/') ?? false });
         const send = (status, type, body = '', headers = {}) => {
           response.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...headers });
           response.end(request.method === 'HEAD' ? undefined : body);
         };
         const block = status => { counters.blocked++; send(status, 'text/plain', 'Blocked'); };
-        if (request.headers.host !== `127.0.0.1:${server.address().port}`) return block(421);
+        if (![ `127.0.0.1:${server.address().port}`, `localhost:${server.address().port}` ].includes(request.headers.host)) return block(421);
         if (!['GET', 'HEAD'].includes(request.method)) return block(405);
         const credentialed = path === '/seed' || path?.startsWith('/auth/');
         const cors = credentialed && allowed ? { 'Access-Control-Allow-Origin': origin,
@@ -152,6 +153,11 @@ export async function serveFixtures(media, options = {}) {
         if (path === '/requests.json') return send(200, 'application/json', JSON.stringify({ requests, counters }));
         if (pages.has(path)) return send(200, ...pages.get(path));
         if (path === '/redirect.mp4') { counters.redirect++; return send(302, 'text/plain', '', { Location: `${origins[1]}/cors/A.mp4` }); }
+        if (path === '/redirect-same.mp4' || path === '/redirect-ungranted.mp4') {
+          counters.redirect++;
+          const destination = path === '/redirect-same.mp4' ? `http://${request.headers.host}/cors/A.mp4` : `${origins[1].replace('127.0.0.1', 'localhost')}/cors/A.mp4`;
+          return send(302, 'text/plain', '', { Location: destination });
+        }
         if (path === '/mime-bad.mp4') { counters.mimeBad++; return send(200, 'text/html', '<p>Not a video</p>'); }
         if (path === '/oversize.mp4') {
           counters.oversize++;

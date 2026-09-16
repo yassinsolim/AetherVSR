@@ -15,6 +15,83 @@ function check(source: string) {
 }
 
 describe('M10.10 research package isolation', () => {
+  it('fixes the R1 automatic prefix and waits for observed state, never an assumed click', () => check(`
+    const {R1_CASES,INPUT_TIMES,waitForObserved,replayStage,replayOutcome,redirectOutcome}=await import('./tools/m1010/study.mjs');
+    assert.deepEqual(R1_CASES.map(value=>value.id),['R1-A','R1-B','R1-C','R1-D','R1-J','R1-K']);
+    assert.deepEqual(INPUT_TIMES,[1.2,2.2,3.2]);
+    assert.deepEqual(await waitForObserved(async()=>({granted:true}),value=>value.granted,0),{granted:true});
+    await assert.rejects(()=>waitForObserved(async()=>({granted:false}),value=>value.granted,0),/no action assumed/);
+    const source=readFileSync('tools/m1010/study.mjs','utf8');
+    for(const forbidden of['permissions.request(', 'triggerAction', 'grantPermissions(', 'getDisplayMedia('])assert(!source.includes(forbidden));
+    assert(source.includes('verified[0]?.documentId'));assert(source.includes('verified[0]?.result.nonce'));
+    for(const label of['Grant source origin','Revoke source origin'])assert(source.includes(label)&&readFileSync('tools/m1010/acquire.html','utf8').includes(label));
+    assert.equal(replayStage(['R1-host-grant'],true),'AUTOMATIC_PREFIX');assert.equal(replayStage(['R1-F'],false),'RETAINED');
+    const valid={exception:null,sameBytes:true,playback:{playable:true},comparisons:Array.from({length:3},()=>({outcome:'SUPPORTED'}))};
+    assert.equal(replayOutcome(valid),'SUPPORTED');
+    for(const change of[{exception:'cancelled'},{sameBytes:false},{playback:{playable:false}},{comparisons:[]},{comparisons:[{outcome:'UNRESOLVED'}]}])assert.equal(replayOutcome({...valid,...change}),'UNRESOLVED');
+    const redirect={selected:{selectedUrl:'http://127.0.0.1:5204/redirect-same.mp4'},exception:'fetch failed',fetch:null,requestDelta:[{path:'/redirect-same.mp4'}]};
+    assert.equal(redirectOutcome(redirect),'UNSUPPORTED_SAFE');
+    assert.equal(redirectOutcome({...redirect,requestDelta:[]}), 'UNRESOLVED');
+    assert.equal(redirectOutcome({...redirect,requestDelta:[...redirect.requestDelta,{path:'/cors/A.mp4'}]}), 'UNRESOLVED');
+  `));
+  it('verifies referenced raw pixels as well as checkpoint report JSON', () => check(`
+    const {openCheckpoint}=await import('./tools/m1010/checkpoint.mjs');
+    const {writeFileSync}=await import('node:fs');
+    const directory='.cache/m1010/checkpoint-pixels-'+process.pid;
+    const pin={studyVersion:'pixels',sourceCommit:'a'.repeat(40),browserExecutableSha256:'b'.repeat(64)};
+    try{
+      const study=openCheckpoint(directory,pin),bytes=Buffer.from([1,2,3,255]);
+      writeFileSync(directory+'/input.rgba',bytes);study.begin('input');
+      study.complete('input',{frames:[{pixels:{path:'input.rgba',bytes:bytes.length,sha256:hash(bytes)}}]});
+      assert(openCheckpoint(directory,pin).has('input'));writeFileSync(directory+'/input.rgba',Buffer.from([1,2,4,255]));
+      assert.throws(()=>openCheckpoint(directory,pin),/raw artifact changed/);
+    }finally{rmSync(directory,{recursive:true,force:true});}
+  `));
+  it('keeps optional persistent native profiles explicit and research-scoped', () => check(`
+    const browser=readFileSync('tools/m9-browser.mjs','utf8'),native=readFileSync('tools/m1010/native.mjs','utf8');
+    assert(browser.includes('profileDirectory ? resolve(profileDirectory) : mkdtempSync'));
+    assert.equal(browser.split('if (!profileDirectory) rmSync(profile').length-1,2);
+    assert(native.includes("resolve(options.profileDirectory).startsWith(join(ROOT, '.cache/m1010/'))"));
+  `));
+  it('compares every diagnostic input byte independently of neural output parity', () => check(`
+    const {pixelDifference}=await import('./tools/m1010/acquisition.mjs');
+    const original=new Uint8Array([1,2,3,255,4,5,6,255]);
+    assert.deepEqual(pixelDifference(original,original),{bytes:8,mae:0,maximum:0,changedPixels:0,exact:true});
+    const changed=original.slice();changed[2]+=4;changed[7]-=8;
+    assert.deepEqual(pixelDifference(original,changed),{bytes:8,mae:1.5,maximum:8,changedPixels:2,exact:false});
+    assert.throws(()=>pixelDifference(original,new Uint8Array(4)));
+  `));
+  it('resumes immutable experiments and rejects changed source, browser or raw artifacts', () => check(`
+    const {openCheckpoint}=await import('./tools/m1010/checkpoint.mjs');
+    const {writeFileSync}=await import('node:fs');
+    const directory='.cache/m1010/checkpoint-test-'+process.pid;
+    const pin={studyVersion:'test-1',sourceCommit:'a'.repeat(40),browserExecutableSha256:'b'.repeat(64)};
+    try{
+      const study=openCheckpoint(directory,pin);
+      study.begin('R1-A');study.manual({instruction:'Grant exact local origin',observable:'permissions.contains local origin'});
+      study.candidate('R1',{state:'INCOMPLETE'});study.complete('R1-A',{outcome:'SUPPORTED'});
+      const resumed=openCheckpoint(directory,pin);assert(resumed.has('R1-A'));
+      assert.deepEqual(resumed.read('R1-A'),{outcome:'SUPPORTED'});assert.equal(resumed.snapshot().requiredNextManualAction,null);
+      assert.deepEqual(resumed.snapshot().candidateState,{R1:{state:'INCOMPLETE'}});
+      assert.throws(()=>resumed.begin('R1-A'),/immutable/);
+      for(const changed of[{sourceCommit:'c'.repeat(40)},{browserExecutableSha256:'d'.repeat(64)},{studyVersion:'other'}])assert.throws(()=>openCheckpoint(directory,{...pin,...changed}),/identity changed/);
+      writeFileSync(directory+'/R1-A.json','{}');assert.throws(()=>openCheckpoint(directory,pin));
+      assert.throws(()=>openCheckpoint('results/not-ignored',pin),/ignored/);
+    }finally{rmSync(directory,{recursive:true,force:true});}
+  `));
+  it('recovers a completed artifact if interrupted before checkpoint publication', () => check(`
+    const {openCheckpoint}=await import('./tools/m1010/checkpoint.mjs');
+    const {writeFileSync}=await import('node:fs');
+    const directory='.cache/m1010/checkpoint-recovery-'+process.pid;
+    const pin={studyVersion:'test-1',sourceCommit:'a'.repeat(40),browserExecutableSha256:'b'.repeat(64)};
+    try{
+      const study=openCheckpoint(directory,pin);study.begin('R1-A');
+      writeFileSync(directory+'/R1-A.json',JSON.stringify({experimentId:'R1-A',pin,result:{outcome:'SUPPORTED'}}));
+      const resumed=openCheckpoint(directory,pin);assert(resumed.has('R1-A'));assert.equal(resumed.snapshot().activeExperimentId,null);
+      resumed.begin('R1-B');assert.throws(()=>resumed.begin('R1-C'),/Unfinished/);
+      resumed.complete('R1-B',{outcome:'UNRESOLVED'});assert(resumed.has('R1-B'));
+    }finally{rmSync(directory,{recursive:true,force:true});}
+  `));
   it('activates only visible harness controls and retains reference frames and decoded timestamps', () => check(`
     const source=readFileSync('tools/m1010/native.mjs','utf8');
     assert(source.includes("locator('#stage').click()"));assert(!source.includes("locator('#source').click"));

@@ -1,12 +1,13 @@
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-export async function openNativeChrome(args = []) {
+export async function openNativeChrome(args = [], { profileDirectory } = {}) {
   process.env.PLAYWRIGHT_BROWSERS_PATH ??= resolve('.cache/m9/browsers');
   const { chromium } = await import('../.cache/m9/node_modules/playwright/index.mjs');
-  const profile = mkdtempSync(join(tmpdir(), 'aethervsr-m9-'));
+  const profile = profileDirectory ? resolve(profileDirectory) : mkdtempSync(join(tmpdir(), 'aethervsr-m9-'));
+  if (profileDirectory) mkdirSync(profile, { recursive: true });
   const executable = process.env.M9_CHROME_EXECUTABLE_PATH ?? chromium.executablePath();
   const child = spawn(executable, ['--remote-debugging-port=0', `--user-data-dir=${profile}`,
     '--no-first-run', '--no-default-browser-check', '--use-mock-keychain', '--disable-background-networking',
@@ -37,7 +38,7 @@ export async function openNativeChrome(args = []) {
     browser = await chromium.connectOverCDP(endpoint, { noDefaults: true, timeout: 15000 });
   } catch (error) {
     await terminate();
-    rmSync(profile, { recursive: true, force: true });
+    if (!profileDirectory) rmSync(profile, { recursive: true, force: true });
     throw error;
   }
   return { browser, context: browser.contexts()[0], executable,
@@ -48,7 +49,7 @@ export async function openNativeChrome(args = []) {
       } finally {
         clearTimeout(timer);
         await terminate();
-        rmSync(profile, { recursive: true, force: true });
+        if (!profileDirectory) rmSync(profile, { recursive: true, force: true });
       }
     } };
 }

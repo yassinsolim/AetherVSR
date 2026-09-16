@@ -38,6 +38,10 @@ describe('M10.10 local sources', () => {
       assert.equal(auth.status,200);assert.equal(auth.headers.get('access-control-allow-origin'),base);
       assert((await get('/seed')).headers.get('set-cookie'));
       assert.equal((await get('/redirect.mp4',{redirect:'manual'})).status,302);
+      const sameRedirect=await get('/redirect-same.mp4',{redirect:'manual'});
+      assert.equal(sameRedirect.status,302);assert.equal(sameRedirect.headers.get('location'),other+'/cors/A.mp4');
+      const ungrantedRedirect=await get('/redirect-ungranted.mp4',{redirect:'manual'});
+      assert.equal(ungrantedRedirect.status,302);assert.equal(new URL(ungrantedRedirect.headers.get('location')).hostname,'localhost');
       assert.equal((await get('/mime-bad.mp4')).headers.get('content-type'),'text/html');
       assert.equal((await get('/oversize.mp4',{method:'HEAD'})).headers.get('content-length'),'67108865');
       const log=await (await get('/requests.json')).json();assert(log.counters.blocked>=5);

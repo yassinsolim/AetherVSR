@@ -41,7 +41,7 @@ async function current(session: Session): Promise<boolean> {
 function fixtureSelection(session: Session): SourceSelection | null {
   const url = validateSourceUrl(session.snapshot.url);
   if (!url || !['http://127.0.0.1:5204', 'http://127.0.0.1:5205'].includes(url.origin) ||
-    !/^\/(?:same|cors|nocors|auth\/(?:omit|include))\/[ABC]\.mp4$/.test(url.pathname) || url.search) return null;
+    !/^\/(?:(?:same|cors|nocors|auth\/(?:omit|include))\/[ABC]|redirect-(?:same|ungranted))\.mp4$/.test(url.pathname) || url.search) return null;
   return validateSelection({ tabId: session.sourceTabId, documentId: session.sourceDocumentId,
     ownerId: session.ownerId, generation: session.generation, url: url.href, protected: session.snapshot.protected,
     sourceClass: url.pathname.startsWith('/auth/') ? 'credentialed-fixture' : 'progressive',
@@ -70,28 +70,35 @@ function streamId(targetTabId: number, consumerTabId?: number): Promise<string> 
   }));
 }
 
+async function selectFixture(tab: chrome.tabs.Tab | undefined) {
+  if (tab?.id === undefined || !tab.url?.startsWith('http://127.0.0.1:5204/')) throw new Error('Select the local authoritative fixture first');
+  await chrome.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, files: ['source-agent.js'] });
+  const selected = await chrome.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, func: () =>
+    (globalThis as unknown as { __M1010_AGENT__: { select(): SourceSnapshot } }).__M1010_AGENT__.select() });
+  const entry = selected[0] as (chrome.scripting.InjectionResult & { documentId?: string }) | undefined;
+  const snapshot = entry?.result as SourceSnapshot | undefined;
+  if (!entry?.documentId || !snapshot?.ownerId || snapshot.protected) throw new Error('No usable unprotected source');
+  const player = await chrome.tabs.create({ url: 'about:blank', active: false });
+  if (player.id === undefined) throw new Error('No acquisition player');
+  sessions.set(player.id, { sourceTabId: tab.id, sourceDocumentId: entry.documentId, ownerId: snapshot.ownerId,
+    generation: snapshot.generation, playerDocumentId: null, snapshot, consumedRefetch: false, openingNavigation: true });
+  record('registered', player.id, 'awaiting-navigation');
+  sourceIds.add(tab.id);
+  await chrome.tabs.update(player.id, { url: chrome.runtime.getURL('acquire.html'), active: true });
+  return { ok: true, playerTabId: player.id };
+}
+
+Object.assign(globalThis, { __M1010_RESEARCH_SELECT__: async (tabId: number) => {
+  if (!Number.isSafeInteger(tabId) || tabId < 0 || !await chrome.permissions.contains({ origins: ['http://127.0.0.1/*'] })) throw new Error('Existing local host grant required for research reselection');
+  return selectFixture(await chrome.tabs.get(tabId));
+} });
+
 chrome.runtime.onMessage.addListener((raw: unknown, sender: Sender, respond) => {
   if (!raw || typeof raw !== 'object' || !('type' in raw) || typeof raw.type !== 'string') return false;
   const message = raw as Record<string, unknown>;
   if (message['type'] === 'research.acquire' && sender.id === chrome.runtime.id && sender.url === chrome.runtime.getURL('launcher.html')) {
-    void (async () => {
-      const tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-      if (tab?.id === undefined || !tab.url?.startsWith('http://127.0.0.1:5204/')) throw new Error('Select the local authoritative fixture first');
-      await chrome.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, files: ['source-agent.js'] });
-      const selected = await chrome.scripting.executeScript({ target: { tabId: tab.id, frameIds: [0] }, func: () =>
-        (globalThis as unknown as { __M1010_AGENT__: { select(): SourceSnapshot } }).__M1010_AGENT__.select() });
-      const entry = selected[0] as (chrome.scripting.InjectionResult & { documentId?: string }) | undefined;
-      const snapshot = entry?.result as SourceSnapshot | undefined;
-      if (!entry?.documentId || !snapshot?.ownerId || snapshot.protected) throw new Error('No usable unprotected source');
-      const player = await chrome.tabs.create({ url: 'about:blank', active: false });
-      if (player.id === undefined) throw new Error('No acquisition player');
-      sessions.set(player.id, { sourceTabId: tab.id, sourceDocumentId: entry.documentId, ownerId: snapshot.ownerId,
-        generation: snapshot.generation, playerDocumentId: null, snapshot, consumedRefetch: false, openingNavigation: true });
-      record('registered', player.id, 'awaiting-navigation');
-      sourceIds.add(tab.id);
-      await chrome.tabs.update(player.id, { url: chrome.runtime.getURL('acquire.html'), active: true });
-      return { ok: true, playerTabId: player.id };
-    })().then(respond, error => respond({ ok: false, error: String(error) }));
+    void chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => selectFixture(tabs[0]))
+      .then(respond, error => respond({ ok: false, error: String(error) }));
     return true;
   }
   const session = playerSession(sender, message['navigationType']); if (!session) return false;
@@ -110,6 +117,7 @@ chrome.runtime.onMessage.addListener((raw: unknown, sender: Sender, respond) => 
         const selection = fixtureSelection(session);
         const origin = selection && permissionPatternFor(new URL(selection.url));
         if (!selection || !origin || !await chrome.permissions.contains({ origins: [origin] }) || !await current(session)) throw new Error('No current selected-origin host grant');
+        if (session.consumedRefetch) throw new Error('Refetch capability already consumed');
         session.consumedRefetch = true; return { selection };
       }
       case 'acquire.offer': return sourceOperation(session, 'captureOffer');

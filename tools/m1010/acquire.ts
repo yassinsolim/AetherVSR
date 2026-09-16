@@ -137,8 +137,10 @@ const refetch = () => start('refetch', async session => {
     ensure(ticket);
     return fetch(input, { ...init, signal: AbortSignal.any([session.controller.signal, ...(init?.signal ? [init.signal] : [])]) });
   });
+  ensure(ticket);
+  const sha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))].map(value => value.toString(16).padStart(2, '0')).join('');
   ensure(ticket); session.blobUrl = URL.createObjectURL(blob); video.removeAttribute('crossorigin'); video.src = session.blobUrl;
-  await play(session, 'PLAYER_AUTHORITY'); ensure(ticket); record('refetch', { bytes: blob.size, playable: true });
+  await play(session, 'PLAYER_AUTHORITY'); ensure(ticket); record('refetch', { bytes: blob.size, sha256, playable: true });
 });
 const rtc = () => start('rtc', async session => {
   const ticket = session.ticket;

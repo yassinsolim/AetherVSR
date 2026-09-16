@@ -36,6 +36,7 @@ async function fixture(url=sourceUrl,register=true) {
 	const api={runtime: {id: 'a'.repeat(32),getURL: (path: string) => `${origin}/${path}`,
 		onMessage: messages,sendMessage: vi.fn(() => Promise.resolve())},
 		tabs: {query: vi.fn(() => Promise.resolve([{id: 11,url: 'http://127.0.0.1:5204/fixture'}])),
+			get: vi.fn((tabId: number) => Promise.resolve({id: tabId,url: 'http://127.0.0.1:5204/fixture'})),
 			create: vi.fn(() => Promise.resolve({id: 22})),
 			update: vi.fn((tabId: number,properties: {url: string}) => {updated.emit(tabId,{status: 'loading',url: properties.url});return Promise.resolve({id: tabId});}),
 			onUpdated: updated,onRemoved: event<[number]>(),sendMessage: vi.fn()},
@@ -55,9 +56,22 @@ async function fixture(url=sourceUrl,register=true) {
 	if(register) await launch();
 	return {state,agent,peer,api,player,send,launch,updated,revoked,inject};
 }
-afterEach(() => {vi.unstubAllGlobals(); Reflect.deleteProperty(globalThis,'__M1010_BROKER_TRACE__');});
+afterEach(() => {vi.unstubAllGlobals(); Reflect.deleteProperty(globalThis,'__M1010_BROKER_TRACE__'); Reflect.deleteProperty(globalThis,'__M1010_RESEARCH_SELECT__');});
 
 describe('broker: mocked callbacks, not native grants',() => {
+	it('allows worker-private reselection only with an existing local host grant',async () => {
+		const {api,send}=await fixture(sourceUrl,false);
+		const select=(globalThis as unknown as {__M1010_RESEARCH_SELECT__: (tabId: number) => Promise<unknown>}).__M1010_RESEARCH_SELECT__;
+		api.permissions.contains.mockResolvedValueOnce(false);
+		await expect(select(11)).rejects.toThrow('Existing local host grant required');
+		expect(api.scripting.executeScript).not.toHaveBeenCalled();
+		await expect(select(-1)).rejects.toThrow('Existing local host grant required');
+		api.tabs.get.mockResolvedValueOnce({id: 11,url: 'https://ungranted.test/'});
+		await expect(select(11)).rejects.toThrow('local authoritative fixture');
+		expect(await select(11)).toEqual({ok: true,playerTabId: 22});
+		expect(await send('acquire.info')).toMatchObject({ok: true,value: {sourceTabId: 11}});
+		await denied(send({type: 'research.select',tabId: 11}));
+	});
 	it('bounds private navigation diagnostics without retaining URLs',async () => {
 		const {updated}=await fixture();
 		for(let index=0;index<140;index++) updated.emit(99,{status: 'loading',url: 'https://private.test/?token=secret'});
@@ -162,11 +176,25 @@ describe('broker: mocked callbacks, not native grants',() => {
 		expect(await send({type: 'acquire.refetch',url: 'https://evil.test/a.mp4'})).toMatchObject({ok: true,value: {selection: {url: sourceUrl}}});
 		expect(api.permissions.contains).toHaveBeenCalledWith({origins: ['http://127.0.0.1/*']});
 	});
+	it('consumes only one concurrent refetch after permission checks',async () => {
+		const {send,api}=await fixture(),entered=deferred(),grant=deferred<boolean>();
+		let waiting=0;
+		api.permissions.contains.mockImplementation(() => {if(++waiting===2) entered.resolve(); return grant.promise;});
+		const requests=[send('acquire.refetch'),send('acquire.refetch')];
+		await entered.promise;grant.resolve(true);
+		const results=await Promise.all(requests);
+		expect(results.filter(result => (result as {ok: boolean}).ok)).toHaveLength(1);
+		expect(results.filter(result => !(result as {ok: boolean}).ok)).toEqual([{ok: false,error: 'Error: Refetch capability already consumed'}]);
+	});
 	it.each(['https://evil.test/A.mp4','http://127.0.0.1:5204/other/A.mp4',`${sourceUrl}?token=x`])('invalid %s',async url => {
 		const {send}=await fixture(url); await denied(send('acquire.refetch'));
 	});
 	it('changed path',async () => {
 		const {send,state}=await fixture(); state.url='http://127.0.0.1:5204/same/B.mp4';
 		await denied(send('acquire.refetch'));
+	});
+	it.each(['redirect-same','redirect-ungranted'])('authorizes only the selected %s URL, never its redirect destination',async route => {
+		const url=`http://127.0.0.1:5204/${route}.mp4`,{send}=await fixture(url);
+		expect(await send('acquire.refetch')).toMatchObject({ok: true,value: {selection: {url}}});
 	});
 });

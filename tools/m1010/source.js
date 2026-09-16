@@ -92,14 +92,14 @@ async function prepare(value = 'same') {
   const choice = typeof value === 'string' ? { mode: value } : value;
   if (!choice || Object.keys(choice).some(key => !['mode', 'asset', 'credentials'].includes(key))) throw new Error('Invalid selection');
   const { mode = 'same', asset = 'A', credentials = 'omit' } = choice;
-  if (!['same', 'cors', 'nocors', 'auth', 'cookieseed', 'blob', 'MSE', 'srcObject', 'ABR'].includes(mode)
+  if (!['same', 'cors', 'nocors', 'auth', 'auth-progressive', 'redirect-same', 'redirect-ungranted', 'cookieseed', 'blob', 'MSE', 'srcObject', 'ABR'].includes(mode)
     || !['A', 'B', 'C'].includes(asset) || !['omit', 'include'].includes(credentials)) throw new Error('Invalid case');
   const ticket = ++generation; reset(); selection = null;
   controller = new AbortController(); const signal = controller.signal;
   const settings = await config; signal.throwIfAborted();
   byId('mode').value = mode; byId('asset').value = asset; byId('credentials').value = credentials;
   video.removeAttribute('crossorigin');
-  const origin = ['cors', 'nocors', 'auth', 'cookieseed'].includes(mode) ? settings.origins[1] : settings.origins[0];
+  const origin = ['cors', 'nocors', 'auth', 'auth-progressive', 'cookieseed'].includes(mode) ? settings.origins[1] : settings.origins[0];
   let url = `${origin}/${mode}/${asset}.mp4`, sourceClass = 'progressive';
   try {
     if (mode === 'cookieseed') {
@@ -107,7 +107,13 @@ async function prepare(value = 'same') {
       const seeded = { mode, generation: ticket, seeded: true };
       byId('status').textContent = JSON.stringify(seeded); return seeded;
     }
-    if (mode === 'auth' || mode === 'blob') {
+    if (mode === 'auth-progressive') {
+      url = `${origin}/auth/${credentials}/${asset}.mp4`;
+      video.crossOrigin = credentials === 'include' ? 'use-credentials' : 'anonymous';
+      video.src = url; sourceClass = 'credentialed-fixture';
+    } else if (mode === 'redirect-same' || mode === 'redirect-ungranted') {
+      url = `${origin}/${mode}.mp4`; video.src = url;
+    } else if (mode === 'auth' || mode === 'blob') {
       url = mode === 'auth' ? `${origin}/auth/${credentials}/${asset}.mp4` : `${origin}/same/${asset}.mp4`;
       objectUrl = URL.createObjectURL(new Blob([await bytes(url, signal, mode === 'auth' ? credentials : 'omit')], { type: 'video/mp4' }));
       video.src = objectUrl; sourceClass = mode === 'auth' ? 'credentialed-fixture' : 'blob';
@@ -116,7 +122,7 @@ async function prepare(value = 'same') {
     else { if (mode === 'cors') video.crossOrigin = 'anonymous'; video.src = url; }
     if (video.readyState < 1) await wait(video, 'loadedmetadata', signal);
     signal.throwIfAborted(); observe();
-    selection = { ownerId: 'source', generation: ticket, mode, asset, credentials: mode === 'auth' ? credentials : 'omit',
+    selection = { ownerId: 'source', generation: ticket, mode, asset, credentials: ['auth', 'auth-progressive'].includes(mode) ? credentials : 'omit',
       url: mode === 'blob' ? objectUrl : url, sourceClass, protected: false };
     byId('status').textContent = JSON.stringify(selection); return { ...selection };
   } catch (error) { if (ticket === generation) reset(); throw error; }
