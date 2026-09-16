@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "scope": "M10.9 bounded no-selection closure; not architecture qualification",
+  "selection": "NO USEFUL OBSERVABLE CONTRACT QUALIFIED",
+  "baselineCommit": "c727f0196b47d32eaad16869e6a849d6995f0075",
+  "evidenceCommit": "2c782e4b9f3780e0c95ac180e624f5dbeb2a9d1f",
+  "baseline": {
+    "vitestFiles": 35,
+    "vitestTests": 735,
+    "pythonTests": 308,
+    "separateGates": "npm ci, typecheck, lint, test, build, build:extension, Python: PASS",
+    "exactCiRun": 35024348476,
+    "gate": "success",
+    "fusion": "success",
+    "trackedBytes": 52295396
+  },
+  "workspace": {
+    "sourceCommitBeforeEvidenceCommit": "ec98b6e8d0d8cee248233bd6db33797477abc713",
+    "sourceDirtyBeforeEvidenceCommit": true,
+    "npmCi": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "vitestFiles": 38,
+    "vitestTests": 959,
+    "build": "PASS",
+    "buildExtension": "PASS",
+    "pythonTests": 311,
+    "productionPayloadUnchanged": true,
+    "preexistingModerateNpmAdvisories": 2
+  },
+  "clone": {
+    "sourceCommit": "2c782e4b9f3780e0c95ac180e624f5dbeb2a9d1f",
+    "path": ".cache/m109/closure-clone",
+    "method": "git clone --no-hardlinks --single-branch --branch main",
+    "ownNpmInstall": true,
+    "pythonEnvironment": "workspace .cache/m8-venv reused; cloned test sources",
+    "npmCi": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "vitestFiles": 38,
+    "vitestTests": 959,
+    "build": "PASS",
+    "buildExtension": "PASS",
+    "pythonTests": 311,
+    "raw": {
+      "path": ".cache/m109/reproducibility-checks.json",
+      "bytes": 1413,
+      "sha256": "5ad05a46752bf50572bcec26e7ec6137bac8a9c799af6d153e65503c41aaf313"
+    }
+  },
+  "packages": [
+    {
+      "name": "production",
+      "sourceCommit": "2c782e4b9f3780e0c95ac180e624f5dbeb2a9d1f",
+      "sourceDirty": false,
+      "bytes": 274684,
+      "bundleSha256": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551",
+      "provenanceSha256": "a3bd1a1ee6b2c98a2bb3c6419355ba47558697dc09d87a8a35e099ee414bae8b",
+      "filesVerified": 7,
+      "repeatedCloneIdentical": true,
+      "workspaceIdentical": true,
+      "frozenProductionIdentical": true
+    },
+    {
+      "name": "diagnostic",
+      "sourceCommit": "2c782e4b9f3780e0c95ac180e624f5dbeb2a9d1f",
+      "sourceDirty": false,
+      "bytes": 276414,
+      "bundleSha256": "7334c5db0f476048a10b63a2e0d9e4b240436fa3a669925e113cedc93cb1003f",
+      "provenanceSha256": "98b4286c636ce2861bcb4f78d381f93cc6aea6bdbfc7808d0a1be0c035d3d387",
+      "filesVerified": 7,
+      "repeatedCloneIdentical": true,
+      "workspaceIdentical": true,
+      "frozenProductionIdentical": null
+    }
+  ],
+  "productionModelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "unchangedPaths": ["src", "models", "public/models", "package.json", "package-lock.json"],
+  "diagnosticChange": "Successful-submission observation appended to test content only; frozen S2 retained separately",
+  "native": {
+    "finalContract": "S1-R1",
+    "preliminaryCorrectCases": 19,
+    "observedCases": 20,
+    "plannedCases": 156,
+    "requiredUnresolvedCase": "fullscreen-scrolled-enter-exit",
+    "notRun": 136,
+    "recordedStaleVisibleFailure": false,
+    "fullContractQualified": false,
+    "reverseRevealEpisodesAudited": 42,
+    "paintedPairs": 13,
+    "passingVisiblePixelRegions": 112,
+    "O1": "UNSAFE: owned token remains after history overflow; 20/22 observed",
+    "O2": "UNSAFE: attribute selector changes host width; 11/12 observed",
+    "census": "Default media policy, no admitted current videos, no owned canvases; no public compatibility qualification",
+    "costs": "NOT RUN",
+    "performanceMetrics": "not measured"
+  },
+  "reviews": {
+    "submissionAccounting": "PASS after replay fix",
+    "dependencyAdmissionFingerprintRecovery": "PASS for capture after prospective finite-field and reader repairs; runtime usefulness ultimately unqualified",
+    "ownership": "PASS for scoped failure interpretation; neither generic model qualified",
+    "cropControlFixture": "PASS for corrected apparatus; original oracle attempts retained",
+    "singleFiniteRevision": "PASS prospectively; no second contract revision",
+    "census": "Earlier autoplay contamination disclosed; canonical default-policy observations regenerated",
+    "finalReportAndDecision": "PASS for bounded no-selection closure",
+    "compactEvidenceExport": "PASS",
+    "cloneMetadata": "PASS"
+  },
+  "evidenceCommitCi": {
+    "sourceCommit": "2c782e4b9f3780e0c95ac180e624f5dbeb2a9d1f",
+    "runId": 35052845128,
+    "url": "https://github.com/yassinsolim/AetherVSR/actions/runs/35052845128",
+    "status": "completed",
+    "conclusion": "success",
+    "gate": "success",
+    "fusion": "success",
+    "scope": "Evidence commit only; closing documentation commit requires independent exact-HEAD CI"
+  },
+  "storage": {
+    "ownerApprovedCapBytes": 53477376,
+    "decision": "ADR-0049",
+    "evidenceCommitTrackedBytes": 53095468,
+    "evidenceCommitHeadroom": 381908,
+    "perFileCapBytes": 8388608,
+    "historicalEvidenceDeleted": false,
+    "rawNativeEvidenceIgnoredAndRetained": true
+  },
+  "productionIntegration": "NOT IMPLEMENTED",
+  "nextMilestone": "Controlled-player/window product study recommended only; NOT IMPLEMENTED",
+  "historicalVerdicts": {
+    "M10.7": "presentation FAIL",
+    "M10.8": "NO ARCHITECTURE QUALIFIED",
+    "extension": "PARTIAL",
+    "M11": "GATED"
+  }
+}
