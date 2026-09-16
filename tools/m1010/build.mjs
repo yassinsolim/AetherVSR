@@ -13,20 +13,24 @@ export const manifest = {
   content_security_policy: { extension_pages: "script-src 'self'; object-src 'self'" },
 };
 
+export const acquisitionManifest = { ...manifest, optional_permissions: ['tabCapture'], optional_host_permissions: ['http://127.0.0.1/*'] };
+
 export async function buildPlayer(outdir = '.cache/m1010/extension', mediaFixture = {
   path: 'public/media/m9/720p60.mp4', sha256: '8d81acbe164da1d62b7d0d02a3cc66915c96e8aa90d45cac34d818fc33df1d4a',
-}) {
+}, acquisition = false) {
   const directory = resolve(ROOT, outdir);
   assert(directory.startsWith(join(ROOT, '.cache/m1010/')), 'Research output must remain ignored');
   if (existsSync(directory)) { const before = JSON.parse(readFileSync(join(directory, 'research-provenance.json'))); assert.equal(before.generator, 'm1010-controlled-player'); rmSync(directory, { recursive: true }); }
   mkdirSync(directory, { recursive: true });
-  for (const [name, entry, format] of [['player.js', 'player.ts', 'iife'], ['launcher.js', 'launcher.ts', 'iife'], ['service-worker.js', 'worker.ts', 'esm']]) {
+  const builtManifest = acquisition ? acquisitionManifest : manifest;
+  for (const [name, entry, format] of [['player.js', 'player.ts', 'iife'], ['launcher.js', 'launcher.ts', 'iife'], ['service-worker.js', 'worker.ts', 'esm'],
+    ...(acquisition ? [['acquire.js', 'acquire.ts', 'iife'], ['source-agent.js', 'source-agent.ts', 'iife']] : [])]) {
     await build({ entryPoints: [join(ROOT, 'tools/m1010', entry)], bundle: true, write: true, minify: false, sourcemap: false,
       platform: 'browser', target: 'chrome116', format, outfile: join(directory, name), loader: { '.wgsl': 'text' },
       define: { 'import.meta.env.DEV': 'false', 'import.meta.env.PROD': 'true' } });
   }
-  for (const name of ['player.html', 'player.css', 'launcher.html']) cpSync(join(ROOT, 'tools/m1010', name), join(directory, name));
-  writeFileSync(join(directory, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  for (const name of ['player.html', 'player.css', 'launcher.html', ...(acquisition ? ['acquire.html'] : [])]) cpSync(join(ROOT, 'tools/m1010', name), join(directory, name));
+  writeFileSync(join(directory, 'manifest.json'), `${JSON.stringify(builtManifest, null, 2)}\n`);
   mkdirSync(join(directory, 'models')); mkdirSync(join(directory, 'media'));
   const model = readFileSync(join(ROOT, 'public/models/aethersr-c16d2.json'));
   assert.equal(model.length, MODEL_BYTES); assert.equal(sha256(model), MODEL_SHA256);
@@ -35,11 +39,12 @@ export async function buildPlayer(outdir = '.cache/m1010/extension', mediaFixtur
   assert.equal(sha256(media), mediaFixture.sha256);
   writeFileSync(join(directory, 'media/known.mp4'), media);
   const git = args => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
-  const names = ['manifest.json', 'player.html', 'player.css', 'player.js', 'launcher.html', 'launcher.js', 'service-worker.js', 'models/production.json', 'media/known.mp4'];
+  const names = ['manifest.json', 'player.html', 'player.css', 'player.js', 'launcher.html', 'launcher.js', 'service-worker.js', 'models/production.json', 'media/known.mp4',
+    ...(acquisition ? ['acquire.html', 'acquire.js', 'source-agent.js'] : [])];
   const files = Object.fromEntries(names.sort().map(name => { const bytes = readFileSync(join(directory, name)); return [name, { bytes: bytes.length, sha256: sha256(bytes) }]; }));
   const provenance = { generator: 'm1010-controlled-player', sourceCommit: git(['rev-parse', 'HEAD']), sourceDirty: git(['status', '--porcelain']) !== '',
     modelSha256: MODEL_SHA256, files, bundleSha256: sha256(JSON.stringify(files)), totalBytes: Object.values(files).reduce((total, file) => total + file.bytes, 0),
-    production: false, permissions: manifest.permissions, mediaFixture };
+    production: false, permissions: builtManifest.permissions, acquisition, mediaFixture };
   writeFileSync(join(directory, 'research-provenance.json'), `${JSON.stringify(provenance, null, 2)}\n`);
   return { directory: relative(ROOT, directory), provenance };
 }

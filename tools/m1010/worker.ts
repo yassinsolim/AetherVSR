@@ -1,3 +1,5 @@
+import './broker.js';
+
 let sourceTab: number | null = null;
 chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL('launcher.html')) return false;

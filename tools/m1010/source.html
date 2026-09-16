@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M10.10 controlled source</title>
+<style>
+body{font:16px Georgia,serif;margin:24px;background:#f4f6f7;color:#18221f}
+nav,footer{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+button,select,input{font:inherit}#source{display:block;width:640px;height:360px;max-width:100%;object-fit:contain;background:#000;isolation:isolate;transform-style:flat}
+#source:fullscreen{width:100%;height:100%;max-width:none}output{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+<h1>M10.10 fixture-controlled source</h1>
+<nav>
+<label>Mode <select id="mode"><option value="same">Progressive same-origin</option><option value="cors">Cross-origin CORS</option><option value="nocors">Cross-origin no-CORS</option><option value="auth">Cookie authentication</option><option value="cookieseed">Seed local fixture cookie</option><option value="blob">Blob</option><option value="MSE">MSE</option><option value="srcObject">Canvas stream (video only)</option><option value="ABR">ABR (scheduled 2s switch)</option></select></label>
+<label>Media <select id="asset"><option>A</option><option>B</option><option>C</option></select></label>
+<label>Credentials <select id="credentials"><option>omit</option><option>include</option></select></label>
+<button id="prepare">Prepare</button>
+</nav>
+<video id="source" controls muted playsinline preload="metadata"></video>
+<nav>
+<button id="play">Play</button><button id="pause">Pause</button>
+<label>Seek <input id="seek" type="range" min="0" max="4" step="0.01" value="0"></label>
+<label>Rate <input id="rate" type="number" min="0.25" max="4" step="0.25" value="1"></label>
+<label><input id="mute" type="checkbox" checked>Muted</label>
+<button id="fullscreen">Fullscreen</button>
+</nav>
+<footer><button id="display">Choose display (manual)</button><button id="capture">captureStream</button><button id="crop">Crop</button><button id="restrict">Restrict</button><button id="cancel">Cancel capture</button><button id="wrong">Wrong choice</button></footer>
+<output id="status" aria-live="polite"></output>
+<script type="module" src="/source.js"></script></html>
