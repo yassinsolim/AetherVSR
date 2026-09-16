@@ -159,14 +159,24 @@ const rtc = () => start('rtc', async session => {
   ensure(ticket); await play(session, 'PAGE_AUTHORITY'); ensure(ticket);
   record('media-mirror', { sourceTracks: offer.tracks, cloneTests: offer.cloneTests, localDescriptionType: receiver.localDescription?.type });
 });
-const tab = (consumer = true) => start('tab', async session => {
-  const ticket = session.ticket, result = await request<{ id: string }>({ type: 'acquire.tab-id', consumer }); ensure(ticket);
+const tab = (consumer = true, issuer: 'worker' | 'player' = 'worker') => start('tab', async session => {
+  const ticket = session.ticket;
+  let result: { id: string };
+  if (issuer === 'player') {
+    const selected = await readInfo(ticket); ensure(ticket);
+    result = await new Promise<{ id: string }>((resolve, reject) => chrome.tabCapture.getMediaStreamId({ targetTabId: selected.sourceTabId }, id => {
+      const error = chrome.runtime.lastError;
+      if (error || !id) reject(new Error(error?.message ?? 'No capture ID')); else resolve({ id });
+    }));
+    ensure(ticket); await request({ type: 'acquire.current' });
+  } else result = await request<{ id: string }>({ type: 'acquire.tab-id', consumer });
+  ensure(ticket);
   const constraints = { audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: result.id } },
     video: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: result.id } } };
   const acquired = await navigator.mediaDevices.getUserMedia(constraints as unknown as MediaStreamConstraints);
   if (ticket !== epoch) { acquired.getTracks().forEach(track => track.stop()); ensure(ticket); }
   setStream(session, acquired);
-  await play(session, 'PAGE_AUTHORITY'); ensure(ticket); record('tab-mirror', { consumer, tracks: acquired.getTracks().map(track => ({ kind: track.kind, settings: track.getSettings() })) });
+  await play(session, 'PAGE_AUTHORITY'); ensure(ticket); record('tab-mirror', { consumer: issuer === 'player' ? false : consumer, issuer, tracks: acquired.getTracks().map(track => ({ kind: track.kind, settings: track.getSettings() })) });
 });
 const probe = () => observed(async () => {
   const ticket = epoch; ensure(ticket);
@@ -205,6 +215,6 @@ const revoked = (message: unknown, sender: chrome.runtime.MessageSender) => {
 };
 chrome.runtime.onMessage.addListener(revoked);
 window.addEventListener('pagehide', () => { disposed = true; video.cancelVideoFrameCallback(callback); chrome.runtime.onMessage.removeListener(revoked); void stop().catch(() => {}); }, { once: true });
-(globalThis as unknown as { m1010Acquire: unknown }).m1010Acquire = { refresh, direct, refetch, rtc, tab, probe, command, stop,
+(globalThis as unknown as { m1010Acquire: unknown }).m1010Acquire = { refresh, direct, refetch, rtc, tab, tabVisible: () => tab(false, 'player'), probe, command, stop,
   snapshot: () => ({ owner, info, pending: pending !== null, epoch, frames: frames.slice(), events: events.slice(), resources: { tracks: active?.stream?.getTracks().filter(track => track.readyState === 'live').length ?? 0, peers: Number(active?.peer != null), objectUrls: Number(active?.blobUrl != null) } }) };
 void refresh().catch(error => record('selection-error', String(error)));

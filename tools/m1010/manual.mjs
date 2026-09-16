@@ -9,7 +9,7 @@ import { startFixtures } from './fixtures.mjs';
 
 const identity = studyIdentity(), native = await openResearch(identity);
 const fixtures = await startFixtures({ extensionOrigins: [`chrome-extension://${native.extensionId}`] });
-const page = await native.context.newPage();
+let page = await native.context.newPage();
 await nativeWindow(page, native.context);
 await page.goto(`${fixtures.url}?extension=${native.extensionId}`);
 await page.evaluate(() => globalThis.__M1010_SOURCE__.prepare({ mode: 'nocors', asset: 'A' }));
@@ -39,12 +39,17 @@ try {
           grants: await native.worker.evaluate(() => chrome.permissions.getAll()) };
       } else if (command.type === 'prepare') {
         if (player()) await player().close();
+        if (command.fresh === true) {
+          await page.close(); page = await native.context.newPage();
+          await nativeWindow(page, native.context);
+          await page.goto(`${fixtures.url}?extension=${native.extensionId}`);
+        }
         await page.bringToFront();
         step.result = await page.evaluate(command => globalThis.__M1010_SOURCE__.prepare({ mode: command.mode, asset: command.asset ?? 'A' }), command);
         await page.locator('#play').click();
       } else if (command.type === 'player') {
         const consumer = player(); assert(consumer, 'Owner must first activate the research extension'); await consumer.bringToFront();
-        assert(['direct', 'refetch', 'rtc', 'tab', 'probe', 'stop', 'refresh'].includes(command.action));
+        assert(['direct', 'refetch', 'rtc', 'tab', 'tabVisible', 'probe', 'stop', 'refresh'].includes(command.action));
         step.result = await consumer.evaluate(async command => { const result = await globalThis.m1010Acquire[command.action](command.argument); return { result, snapshot: globalThis.m1010Acquire.snapshot() }; }, command);
       } else if (command.type === 'source') {
         step.result = await page.evaluate(command => globalThis.__M1010_SOURCE__.action(command.action), command);
@@ -69,7 +74,12 @@ try {
         step.result = await page.evaluate(() => globalThis.__M1010_SOURCE__.action({ type: 'cancel' }));
       } else throw new Error('Unrecognized manual controller command');
     } catch (error) { step.error = String(error); }
-    save(); console.log(JSON.stringify(step)); console.log('Ready for next bounded controller command; browser consent is never automated.');
+    save();
+    const snapshot = step.result?.snapshot ?? step.result?.player;
+    console.log(JSON.stringify({ at: step.at, command: step.command, error: step.error,
+      result: snapshot ? { observation: step.result.result, owner: snapshot.owner, resources: snapshot.resources,
+        frameCount: snapshot.frames.length, lastFrame: snapshot.frames.at(-1), events: snapshot.events.slice(-3), grants: step.result.grants } : step.result }));
+    console.log('Ready for next bounded controller command; browser consent is never automated.');
   }
 } finally {
   input.close();

@@ -4,7 +4,7 @@ type Message = Record<string, unknown>;
 type Snapshot = { owner: string | null; info: unknown; pending: boolean; events: { type: string; value: unknown }[];
   resources: { tracks: number; peers: number; objectUrls: number } };
 type Acquire = { refresh(): Promise<unknown>; direct(cors?: 'anonymous' | null): Promise<void>;
-  refetch(): Promise<void>; rtc(): Promise<void>; tab(consumer?: boolean): Promise<void>;
+  refetch(): Promise<void>; rtc(): Promise<void>; tab(consumer?: boolean): Promise<void>; tabVisible(): Promise<void>;
   stop(): Promise<void>; probe(): Promise<unknown>; snapshot(): Snapshot };
 
 class Target extends EventTarget {
@@ -96,7 +96,8 @@ beforeEach(() => {
   vi.stubGlobal('MediaStream', Stream);
   vi.stubGlobal('RTCPeerConnection', Peer);
   vi.stubGlobal('chrome', { runtime: { id: 'extension', getURL: (path: string) => `chrome-extension://extension/${path}`, sendMessage,
-    onMessage: { addListener: vi.fn(), removeListener: removeMessageListener } }, permissions: { request: vi.fn(), remove: vi.fn() } });
+    onMessage: { addListener: vi.fn(), removeListener: removeMessageListener } }, permissions: { request: vi.fn(), remove: vi.fn() },
+    tabCapture: { getMediaStreamId: vi.fn((_options: unknown, callback: (id: string) => void) => { callback('visible-id'); }) } });
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Unmocked fetch')));
   createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:owned');
   revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
@@ -111,6 +112,23 @@ afterEach(async () => {
 });
 
 describe('acquisition lifecycle with local platform mocks', () => {
+  it('issues in the visible player for the authenticated selected tab only', async () => {
+    await setup(); await acquire.tabVisible();
+    expect(chrome.tabCapture.getMediaStreamId).toHaveBeenCalledWith({ targetTabId: selectionInfo.sourceTabId }, expect.any(Function));
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'acquire.current', navigationType: undefined });
+    expect(getUserMedia).toHaveBeenCalledWith({ audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: 'visible-id' } },
+      video: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: 'visible-id' } } });
+  });
+  it('rejects a visible-player ID arriving after stop before media redemption', async () => {
+    const issued = deferred<(id: string) => void>();
+    vi.mocked(chrome.tabCapture.getMediaStreamId).mockImplementation((_options, callback) => { issued.resolve(callback); });
+    await setup();
+    const pending = acquire.tabVisible().catch((error: unknown) => error);
+    const callback = await issued.promise;
+    const stopped = acquire.stop(); callback('late-id');
+    expect(await pending).toBeInstanceOf(Error); await stopped;
+    expect(getUserMedia).not.toHaveBeenCalled();
+  });
   it.each(['navigate', 'reload', 'back_forward', undefined])('forwards its own navigation type %s without defaulting', async navigationType => {
     vi.spyOn(performance, 'getEntriesByType').mockReturnValue(navigationType === undefined ? [] : [{ type: navigationType } as unknown as PerformanceEntry]);
     await setup();
