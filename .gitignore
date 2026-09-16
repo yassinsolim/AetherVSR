@@ -7,6 +7,7 @@ dist/
 /.cache/m107/
 /.cache/m108/
 /.cache/m109/
+/.cache/m1010/
 .DS_Store
 *.local
 .vite/

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AetherVSR research player</title>
+<link rel="stylesheet" href="player.css">
+<body>
+<header><strong>AetherVSR</strong><output id="status" role="status">Stopped</output></header>
+<main id="stage"><canvas id="output" aria-label="Enhanced video"></canvas></main>
+<video id="source" preload="auto" playsinline muted loop src="media/known.mp4"></video>
+<footer id="controls">
+  <button id="play" type="button">Play</button><button id="pause" type="button">Pause</button>
+  <input id="seek" aria-label="Seek" type="range" min="0" max="4" step="0.01" value="0">
+  <input id="volume" aria-label="Volume" type="range" min="0" max="1" step="0.01" value="1">
+  <label><input id="mute" type="checkbox" checked>Mute</label>
+  <select id="mode" aria-label="Upscaler"><option value="auto">Auto</option><option value="neural">Neural</option><option value="baseline">Baseline</option></select>
+  <button id="fullscreen" type="button">Fullscreen</button>
+  <button id="pip" type="button">Floating window</button>
+  <button id="return" type="button">Return to source</button><button id="close" type="button">Close</button>
+</footer>
+<script src="player.js"></script>
+</body>
+</html>
