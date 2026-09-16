@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "study": "M10.10R",
+  "verdict": "CONTROLLED REPLAY PATH NOT QUALIFIED",
+  "verifiedSourceCommit": "ed95f75297d6c38dfa6a477eaffdbfd7ee64cd04",
+  "nativeSourceCommit": "90dc459d2a144f201b7a84e77e9eff8aebbb7b6c",
+  "scope": "Repository closure verification, not calibrated timing or product qualification",
+  "localAndCleanClone": {
+    "npmCi": "PASS_WITH_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "checkM1010r": "PASS",
+    "researchTypeScriptFiles": 12,
+    "vitestFiles": 47,
+    "vitestPassed": 1337,
+    "vitestOptInSkipped": 3,
+    "combinedOptInFixtureTestsPassed": 40,
+    "build": "PASS",
+    "buildExtension": "PASS",
+    "pythonPassed": 497,
+    "cloneOwnNpmInstallation": true,
+    "pythonEnvironmentReused": true
+  },
+  "evidenceChecks": {
+    "savedNativeAnalysisReproduced": true,
+    "nativeCalibration": "UNRESOLVED",
+    "dependentAuthorityLifecycleEvidence": "NOT_RUN_STOP_VERIFIED",
+    "neuralEligibility": false,
+    "rawReferenceHashesVerified": true,
+    "localAudit": {
+      "path": ".cache/m1010r/local-evidence-checks.json",
+      "bytes": 401,
+      "sha256": "693a2ba1465a9c47d30440aa3bde8a177f00094b69de06eed01450b5278ab19a"
+    },
+    "compactIndex": {
+      "path": "results/m10.10r-replay.json",
+      "bytes": 23538,
+      "sha256": "c2d87b03e4c12314e03975cb1c0dbbab8003ce464f8b15e3d45fffbefb8ad7d1"
+    }
+  },
+  "packageChecks": {
+    "frozenPayloadByteEqual": true,
+    "workspaceCloneAllBytesEqual": true,
+    "cloneRepeatedAllBytesEqual": true,
+    "sourceDirty": false,
+    "audit": {
+      "path": ".cache/m1010r/clean-clone-checks.json",
+      "bytes": 862,
+      "sha256": "3b243dfd35af31fcb774aef79c3c948924020b7ae8024a4139d3575161dc216f"
+    },
+    "productionBytes": 274684,
+    "productionBundleSha256": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551",
+    "diagnosticBytes": 276414,
+    "diagnosticBundleSha256": "7334c5db0f476048a10b63a2e0d9e4b240436fa3a669925e113cedc93cb1003f",
+    "modelBytes": 140467,
+    "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a"
+  },
+  "verifiedSourceTrackedBytes": 54179273,
+  "approvedCapBytes": 54525952,
+  "verifiedSourceHeadroomBytes": 346679,
+  "unapprovedLargeFiles": 0,
+  "reviewDisposition": "Independent final evidence and decision review passed for negative closure; known apparatus P1 and producer P2 are documented",
+  "limitations": [
+    "The native instrument's host-clock completion defect is retained, not repaired or requalified",
+    "One calibration attempt was UNRESOLVED; five remaining records are NOT_RUN",
+    "No authority/audio handover, Return, cadence, A/V, neural or soak qualification ran",
+    "Raw native media/PCM/profiles are not in the clean clone; reproduction requires the retained local artifacts",
+    "Two existing moderate dependency advisories and installation warnings remain",
+    "Final publication metadata, clean remote synchronization and exact-final-HEAD CI are verified separately, not predicted by this record"
+  ]
+}
