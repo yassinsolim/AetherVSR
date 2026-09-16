@@ -111,6 +111,11 @@ afterEach(async () => {
 });
 
 describe('acquisition lifecycle with local platform mocks', () => {
+  it.each(['navigate', 'reload', 'back_forward', undefined])('forwards its own navigation type %s without defaulting', async navigationType => {
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue(navigationType === undefined ? [] : [{ type: navigationType } as unknown as PerformanceEntry]);
+    await setup();
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'acquire.info', navigationType });
+  });
   it.each(['pending', 'active'] as const)('authenticates an early tab start and cleans %s media on revocation', async mediaState => {
     const initialInfo = deferred<unknown>(), startupInfo = deferred<unknown>(), capture = deferred<Stream>();
     const track = new Track(), media = new Stream([track]);

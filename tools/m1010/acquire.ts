@@ -15,8 +15,9 @@ let callback = 0;
 const frames: { at: number; mediaTime: number; presented: number; width: number; height: number }[] = [];
 const record = (type: string, value: unknown) => { events.push({ at: performance.now(), type, value }); output.textContent = JSON.stringify(events.slice(-10), null, 2); };
 video.muted = true;
+const navigationType = (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)?.type;
 const request = async <T>(message: Record<string, unknown>): Promise<T> => {
-  const response: { ok: boolean; value?: T; error?: string } | undefined = await chrome.runtime.sendMessage(message);
+  const response: { ok: boolean; value?: T; error?: string } | undefined = await chrome.runtime.sendMessage({ ...message, navigationType });
   if (!response || response.ok !== true) throw new Error(response?.error ?? 'Rejected acquisition request'); return response.value!;
 };
 const observed = async <Value>(action: () => Promise<Value>): Promise<Value> => {

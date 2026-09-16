@@ -48,8 +48,8 @@ async function fixture(url=sourceUrl,register=true) {
 	await import('../tools/m1010/broker');
 	const player: Sender={id: api.runtime.id,url: `${origin}/acquire.html`,origin,frameId: 0,
 		documentId: 'player',tab: {id: 22} as chrome.tabs.Tab};
-	const send=(raw: unknown,sender=player) => new Promise<unknown>(resolve => {
-		if(!messages.emit(typeof raw==='string'? {type: raw}:raw,sender,resolve).includes(true)) resolve(false);
+	const send=(raw: string | Record<string, unknown>,sender=player) => new Promise<unknown>(resolve => {
+		if(!messages.emit({navigationType: 'navigate',...(typeof raw==='string'? {type: raw}:raw)},sender,resolve).includes(true)) resolve(false);
 	});
 	const launch=() => send('research.acquire',{id: api.runtime.id,url: `${origin}/launcher.html`});
 	if(register) await launch();
@@ -135,6 +135,26 @@ describe('broker: mocked callbacks, not native grants',() => {
 		const {send,updated,player}=await fixture();
 		updated.emit(22,{status: 'complete'}); updated.emit(22,{status: 'loading'});
 		expect(await send('acquire.info',{...player,documentId: 'replacement'})).toBe(false);
+	});
+	it('native bootstrap loading events omit URLs',async () => {
+		const {send,updated,agent}=await fixture();
+		updated.emit(22,{status: 'loading'}); updated.emit(22,{status: 'loading'});
+		expect(agent.stop).not.toHaveBeenCalled();
+		expect(await send('acquire.info')).toMatchObject({ok: true});
+		updated.emit(22,{status: 'complete'}); updated.emit(22,{status: 'loading'});
+		expect(agent.stop).toHaveBeenCalledOnce();
+		expect(await send('acquire.current')).toBe(false);
+	});
+	it.each(['reload','back_forward',undefined])('rejects initial document with navigation %s',async navigationType => {
+		const {send,updated,agent}=await fixture();
+		updated.emit(22,{status: 'loading'});
+		expect(await send({type: 'acquire.info',navigationType})).toBe(false);
+		expect(agent.read).not.toHaveBeenCalled();
+	});
+	it('rejects a known departure during bootstrap',async () => {
+		const {send,updated}=await fixture();
+		updated.emit(22,{url: 'https://other.test/'});
+		expect(await send('acquire.info')).toBe(false);
 	});
 	it('refetch grant/URL',async () => {
 		const {send,api}=await fixture(); api.permissions.contains.mockResolvedValueOnce(false);

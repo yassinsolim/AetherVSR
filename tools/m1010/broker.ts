@@ -48,14 +48,18 @@ function fixtureSelection(session: Session): SourceSelection | null {
     credentials: url.pathname.startsWith('/auth/include/') ? 'include' : 'omit' });
 }
 
-function playerSession(sender: Sender): Session | null {
+function playerSession(sender: Sender, navigationType: unknown): Session | null {
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL('acquire.html') ||
     sender.origin !== `chrome-extension://${chrome.runtime.id}` || sender.frameId !== 0 ||
     sender.tab?.id === undefined || !sender.documentId) return null;
   const session = sessions.get(sender.tab.id);
   if (!session) { record('rejected', sender.tab.id, 'no-session'); return null; }
   if (session.playerDocumentId && session.playerDocumentId !== sender.documentId) return null;
-  if (!session.playerDocumentId) record('bound', sender.tab.id, 'first-document');
+  if (!session.playerDocumentId) {
+    if (navigationType !== 'navigate') { record('rejected', sender.tab.id, 'not-initial-navigation'); return null; }
+    record('bound', sender.tab.id, 'first-document');
+    session.openingNavigation = false;
+  }
   session.playerDocumentId ??= sender.documentId;
   return session;
 }
@@ -90,7 +94,7 @@ chrome.runtime.onMessage.addListener((raw: unknown, sender: Sender, respond) => 
     })().then(respond, error => respond({ ok: false, error: String(error) }));
     return true;
   }
-  const session = playerSession(sender); if (!session) return false;
+  const session = playerSession(sender, message['navigationType']); if (!session) return false;
   const playerTabId = sender.tab!.id!;
   void (async () => {
     if (!await current(session)) throw new Error('Source owner or generation changed');
@@ -156,9 +160,13 @@ const revoke = (tabId: number) => {
 chrome.tabs.onRemoved.addListener(revoke);
 chrome.tabs.onUpdated.addListener((tabId, changes) => {
   record('updated', tabId, `${changes.status ?? 'no-status'}:${changes.url === undefined ? 'no-url' : changes.url === chrome.runtime.getURL('acquire.html') ? 'acquire' : changes.url === 'about:blank' ? 'blank' : 'other'}`);
-  if (changes.status !== 'loading') return;
   const session = sessions.get(tabId);
-  if (session?.openingNavigation && changes.url === chrome.runtime.getURL('acquire.html')) { session.openingNavigation = false; return; }
+  if (session?.openingNavigation) {
+    if (changes.url !== undefined && changes.url !== chrome.runtime.getURL('acquire.html') && changes.url !== 'about:blank') { revoke(tabId); return; }
+    if (changes.status === 'complete') session.openingNavigation = false;
+    if (!sourceIds.has(tabId)) return;
+  }
+  if (changes.status !== 'loading') return;
   if (sourceIds.has(tabId) || session) revoke(tabId);
 });
 chrome.permissions.onRemoved.addListener(() => { for (const source of [...sourceIds]) revoke(source); });
