@@ -12,6 +12,12 @@ function check(source: string) {
 }
 
 describe('M10.9 independent evidence guards',()=>{
+  it('runs the canonical public census without the fixture autoplay override or replacement setup',()=>check(`
+    const {runDefaultPolicyCensus}=await import('./tools/m109-study.mjs');
+    const source=runDefaultPolicyCensus.toString();
+    assert(source.includes('openNativeChrome()'));assert(!source.includes('autoplay-policy'));
+    assert(!source.includes('startMonitor'));assert(source.includes('createsReplacement: false'));
+  `));
   it('permits only the one finite corner-default revision without retuning stopped ownership or the monitor',()=>check(`
     const {validateFiniteRevision}=await import('./tools/m109-study.mjs');
     const paths=['tools/m109-monitor.ts','tools/m109-submission.ts','tools/m109-ownership.ts'];

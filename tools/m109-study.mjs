@@ -665,6 +665,23 @@ async function census(native, source) {
   return rows;
 }
 
+export async function runDefaultPolicyCensus(prefix) {
+  prefix = resolve(prefix); assert(prefix.startsWith(join(ROOT, '.cache/m109/')) && !existsSync(`${prefix}.json`));
+  const report = { schemaVersion: 1, phase: 'DEFAULT_MEDIA_POLICY_ADMISSION_CENSUS', identity: identity(),
+    started: new Date().toISOString(), requestedBrowserArgs: [], createsReplacement: false,
+    scope: 'Nonbinding generic current-video admission, no public pixel capture or contract retuning' };
+  const bundle = await build({ entryPoints: [join(ROOT, 'tools/m109-contract.ts')], bundle: true, write: false, format: 'iife', globalName: 'M109' });
+  let native;
+  try {
+    native = await openNativeChrome();
+    report.browser = { version: await native.browser.version(), executableSha256: sha256(readFileSync(native.executable)) };
+    report.results = await census(native, bundle.outputFiles[0].text);
+    assert.deepEqual(identity(), report.identity);
+  } catch (error) { report.error = String(error); }
+  finally { await native?.close(); report.finished = new Date().toISOString(); writeFileSync(`${prefix}.json`, JSON.stringify(report, null, 2), { flag: 'wx' }); }
+  return report;
+}
+
 export function validateOwnershipResume(prior, current) {
   assert(prior.error?.includes("reading 'define'"), 'Only the recorded host-registry apparatus interruption is resumable here');
   assert.equal(prior.results.O1.results.length, 18);
