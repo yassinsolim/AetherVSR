@@ -352,17 +352,25 @@ export async function runSelfCapture(directory) {
         browser: { version: await native.browser.version(), policy: 'default; owner physically starts and operates every chooser; no automatic permission handling' } });
     }
     const source = await native.context.newPage(), wrong = await native.context.newPage();
-    await nativeWindow(source, native.context); await nativeWindow(wrong, native.context);
     const markers = {};
     for (const [name, page] of [['source', source], ['wrong', wrong]]) {
+      let phase = 'foreground';
       try {
         await page.bringToFront();
+        phase = 'window';
+        let windowTimer;
+        try {
+          await Promise.race([nativeWindow(page, native.context), new Promise((resolveDeadline, reject) => {
+            windowTimer = setTimeout(() => reject(new Error('Window setup deadline: 10s')), 10000);
+          })]);
+        } finally { clearTimeout(windowTimer); }
+        phase = 'fixture';
         await page.goto(fixtures.url); await page.waitForFunction(() => !!globalThis.__M1010_SOURCE__?.snapshot().selection);
         markers[name] = await page.evaluate(installCaptureMarker, { identity: randomUUID().replaceAll('-', '').slice(0, 8), title: `M10.10 ${name === 'source' ? 'INTENDED' : 'WRONG'} fixture` });
       } catch (error) {
         const diagnostic = await page.evaluate(() => ({ visibility: document.visibilityState, focused: document.hasFocus(),
           status: document.getElementById('status')?.textContent, source: globalThis.__M1010_SOURCE__?.snapshot() })).catch(error => ({ error: String(error) }));
-        checkpoint.begin('setup-failure'); checkpoint.complete('setup-failure', { name, error: String(error), diagnostic,
+        checkpoint.begin('setup-failure'); checkpoint.complete('setup-failure', { name, phase, error: String(error), diagnostic,
           outcome: 'UNRESOLVED', executionStatus: 'SETUP_FAILED', chooserTrialsStarted: false });
         throw error;
       }

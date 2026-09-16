@@ -15,24 +15,27 @@ function check(source: string) {
 }
 
 describe('M10.10 research package isolation', () => {
-  it('foregrounds each self-capture fixture before navigation and readiness', () => check(`
+  it('foregrounds each self-capture fixture before bounded window setup and readiness', () => check(`
     const {runSelfCapture}=await import('./tools/m1010/capture-study.mjs'),{runInNewContext}=await import('node:vm');
-    for(const failSetup of[false,true]){
-    const visited=[],artifacts=new Map(),checkpoint={snapshot:()=>({activeExperimentId:null}),has:id=>id==='environment'||artifacts.has(id),
+    for(const failSetup of['none','window','timeout','fixture']){
+    const visited=[],sized=[],artifacts=new Map(),checkpoint={snapshot:()=>({activeExperimentId:null}),has:id=>id==='environment'||artifacts.has(id),
       begin:id=>{if(id==='unrun')throw Error('test stops before chooser')},complete:(id,result)=>artifacts.set(id,result)};
-    let foreground;
-    const page=name=>({bringToFront:async()=>{foreground=name},goto:async()=>assert.equal(foreground,name),waitForFunction:async()=>{assert.equal(foreground,name);visited.push(name);if(failSetup)throw Error('test setup failure')},evaluate:async()=>({identity:name})});
+    let foreground,timer;
+    const page=name=>({name,bringToFront:async()=>{foreground=name},goto:async()=>assert.equal(foreground,name),waitForFunction:async()=>{assert.equal(foreground,name);visited.push(name);if(failSetup==='fixture')throw Error('test setup failure')},evaluate:async()=>({identity:name})});
     const pages=[page('source'),page('wrong')];let closed=0;
     const run=runInNewContext('('+runSelfCapture.toString()+')',{
       studyIdentity:()=>({}),resolve:()=>'/repo/.cache/m1010/test',ROOT:'/repo',environment:()=>({}),assert,join:(...parts)=>parts.join('/'),
       openResearch:async()=>({context:{newPage:async()=>pages.shift()},close:async()=>{closed++}}),
       openCheckpoint:()=>checkpoint,sha256:()=>'',readFileSync:()=>'',stopAfterUnsafeSelf:()=>false,SELF_CAPTURE_CASES:[{id:'unrun'}],
-      startFixtures:async()=>({url:'fixture',close:async()=>{closed++}}),nativeWindow:async()=>{},randomUUID:()=> '12345678',installCaptureMarker:()=>{},
+      startFixtures:async()=>({url:'fixture',close:async()=>{closed++}}),
+      nativeWindow:async page=>{assert.equal(foreground,page.name);sized.push(page.name);if(failSetup==='window')throw Error('test setup failure');if(failSetup==='timeout'){queueMicrotask(()=>timer());return new Promise(()=>{});}},
+      setTimeout:(fn,delay)=>{assert.equal(delay,10000);timer=fn;return 1},clearTimeout:()=>{timer=null},randomUUID:()=> '12345678',installCaptureMarker:()=>{},
     });
-    await assert.rejects(()=>run('test'),failSetup?/test setup failure/:/test stops before chooser/);
-    assert.deepEqual(visited,failSetup?['source']:['source','wrong']);assert.equal(closed,2);
-    if(failSetup){const failure=artifacts.get('setup-failure');assert.equal(failure.name,'source');assert.equal(failure.chooserTrialsStarted,false);assert.equal(failure.executionStatus,'SETUP_FAILED');
-      await run('test');assert.equal(closed,3);assert.deepEqual(visited,['source']);}
+    await assert.rejects(()=>run('test'),failSetup==='none'?/test stops before chooser/:failSetup==='timeout'?/Window setup deadline/:/test setup failure/);
+    const expectedVisits=failSetup==='none'?['source','wrong']:failSetup==='fixture'?['source']:[];
+    assert.deepEqual(visited,expectedVisits);assert.deepEqual(sized,failSetup==='none'?['source','wrong']:['source']);assert.equal(closed,2);assert.equal(timer,null);
+    if(failSetup!=='none'){const failure=artifacts.get('setup-failure');assert.equal(failure.name,'source');assert.equal(failure.phase,failSetup==='fixture'?'fixture':'window');assert.equal(failure.chooserTrialsStarted,false);assert.equal(failure.executionStatus,'SETUP_FAILED');
+      await run('test');assert.equal(closed,3);assert.deepEqual(visited,expectedVisits);}
     }
   `));
   it('records a static display frame without assuming recurring capture callbacks', () => check(`
