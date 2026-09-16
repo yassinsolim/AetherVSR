@@ -19,6 +19,9 @@ describe('M10.10 research package isolation', () => {
     const source=readFileSync('tools/m1010/native.mjs','utf8');
     assert(source.includes("locator('#stage').click()"));assert(!source.includes("locator('#source').click"));
     assert(source.includes('report.references.push'));assert(source.includes('player.seek.metadata.mediaTime === harness.seek.metadata.mediaTime'));
+    assert(source.includes("predicate: worker => worker.url().endsWith('/service-worker.js')"));
+    assert(source.includes("installed.manifest.name, 'AetherVSR M10.10 Research'"));
+    assert(source.includes('installed.modelSha256, identity.provenance.modelSha256'));
   `));
   it('is not a production permission change or a page-owned output surface', () => check(`
     assert.deepEqual(manifest.permissions,['activeTab','scripting','storage']);

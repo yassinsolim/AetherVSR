@@ -24,9 +24,15 @@ export async function openResearch(identity) {
   const native = await openNativeChrome([`--load-extension=${identity.directory}`, `--disable-extensions-except=${identity.directory}`]);
   try {
     const worker = native.context.serviceWorkers().find(worker => worker.url().endsWith('/service-worker.js')) ??
-      await native.context.waitForEvent('serviceworker', { timeout: 10000 });
+      await native.context.waitForEvent('serviceworker', { predicate: worker => worker.url().endsWith('/service-worker.js'), timeout: 10000 });
     const extensionId = await worker.evaluate(() => chrome.runtime.id);
     assert.equal(worker.url(), `chrome-extension://${extensionId}/service-worker.js`);
+    const installed = await worker.evaluate(async () => {
+      const bytes = await (await fetch(chrome.runtime.getURL('models/production.json'))).arrayBuffer();
+      return { manifest: chrome.runtime.getManifest(), modelSha256: [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(value => value.toString(16).padStart(2, '0')).join('') };
+    });
+    assert.equal(installed.manifest.name, 'AetherVSR M10.10 Research');
+    assert.equal(installed.modelSha256, identity.provenance.modelSha256);
     return { ...native, worker, extensionId };
   } catch (error) { await native.close(); throw error; }
 }
