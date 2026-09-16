@@ -3,7 +3,13 @@ const video = byId('source');
 const config = fetch('/config.json').then(response => response.json());
 let generation = 0, controller, selection = null, objectUrl, inputStream, captured, display;
 let animation = 0, callback = 0, captureGeneration = 0, captureState = 'idle';
+let captureError = null;
 let frames = 0, lastFrame = null, qualityChanges = 0, size = '', rendition = null;
+let stoppedTracks = [];
+const targetAttempts = [];
+const trackInfo = track => ({ kind: track.kind, constructor: track.constructor.name, tag: Object.prototype.toString.call(track),
+  readyState: track.readyState, muted: track.muted, settings: track.getSettings(),
+  cropTo: typeof track.cropTo, restrictTo: typeof track.restrictTo });
 const events = {};
 for (const name of ['playing', 'pause', 'seeking', 'seeked', 'ratechange', 'resize', 'waiting', 'stalled', 'ended', 'error']) {
   video.addEventListener(name, () => { events[name] = (events[name] ?? 0) + 1; });
@@ -13,7 +19,10 @@ video.addEventListener('volumechange', () => { byId('mute').checked = video.mute
 const stop = stream => stream?.getTracks().forEach(track => track.stop());
 const fail = error => { byId('status').textContent = `${error.name}: ${error.message}`; };
 function cancelCapture(state = 'cancelled') {
+  const tracks = [...(display?.getTracks() ?? []), ...(captured?.getTracks() ?? [])];
+  const before = tracks.map(trackInfo);
   captureGeneration++; stop(display); stop(captured); display = captured = undefined; captureState = state;
+  stoppedTracks = tracks.map((track, index) => ({ before: before[index], after: trackInfo(track) }));
 }
 function reset() {
   controller?.abort(); cancelCapture('idle'); video.pause();
@@ -135,8 +144,9 @@ function snapshot() {
     readyState: video.readyState, networkState: video.networkState, error: video.error?.code ?? null,
     frames, lastFrame, qualityChanges, rendition, events: { ...events }, eventsScope: 'page-lifetime; frame counters reset per preparation',
     quality: quality ? { total: quality.totalVideoFrames, dropped: quality.droppedVideoFrames, corrupted: quality.corruptedVideoFrames } : null,
-    captureState, displayTracks: display?.getTracks().map(track => ({ kind: track.kind, readyState: track.readyState,
-      muted: track.muted, settings: track.getSettings() })) ?? [],
+    captureState, captureGeneration, captureError, displayTracks: display?.getTracks().map(trackInfo) ?? [], stoppedTracks,
+    targetFactories: { crop: typeof globalThis.CropTarget?.fromElement, restrict: typeof globalThis.RestrictionTarget?.fromElement },
+    targetAttempts: targetAttempts.slice(),
     generatorAudio: false, cssScope: 'fixture-controlled isolation:isolate; transform-style:flat; not generic-page zero-CSS' };
 }
 async function action(command) {
@@ -163,13 +173,13 @@ async function action(command) {
 function captureDisplay() {
   if (!navigator.userActivation?.isActive) throw new Error('Manual display gesture required');
   if (!navigator.mediaDevices?.getDisplayMedia) throw new Error('Display capture unavailable');
-  cancelCapture('choosing'); const ticket = captureGeneration;
+  cancelCapture('choosing'); captureError = null; const ticket = captureGeneration;
   return navigator.mediaDevices.getDisplayMedia({ video: true, audio: true, preferCurrentTab: true }).then(stream => {
     if (ticket !== captureGeneration) { stop(stream); throw new DOMException('Cancelled', 'AbortError'); }
     display = stream; captureState = 'unconfirmed-choice';
     stream.getVideoTracks()[0]?.addEventListener('ended', () => { if (display === stream) cancelCapture('ended'); });
     return stream;
-  }, error => { if (ticket === captureGeneration) captureState = error.name; throw error; });
+  }, error => { if (ticket === captureGeneration) { captureState = error.name; captureError = { name: error.name, message: error.message }; } throw error; });
 }
 function captureStream() {
   if (!video.captureStream) throw new Error('Media captureStream unavailable');
@@ -179,13 +189,24 @@ const cropTarget = () => globalThis.CropTarget.fromElement(video);
 const restrictionTarget = () => globalThis.RestrictionTarget.fromElement(video);
 async function applyTarget(createTarget, method) {
   const stream = display, ticket = captureGeneration, track = stream?.getVideoTracks()[0];
-  if (!track?.[method]) throw new Error(`${method} unavailable`);
-  const target = await createTarget();
-  if (ticket !== captureGeneration || stream !== display) throw new Error('Capture changed');
-  await track[method](target);
+  const attempt = { generation: ticket, method, before: track ? trackInfo(track) : null, outcome: 'PENDING' };
+  targetAttempts.push(attempt); if (targetAttempts.length > 64) targetAttempts.shift();
+  try {
+    if (typeof track?.[method] !== 'function') throw new Error(`${method} unavailable`);
+    const target = await createTarget();
+    if (ticket !== captureGeneration || stream !== display) throw new Error('Capture changed');
+    await track[method](target);
+    if (ticket !== captureGeneration || stream !== display) throw new Error('Capture changed during native target operation');
+    attempt.outcome = 'FULFILLED'; return { ...attempt };
+  } catch (error) { attempt.outcome = 'REJECTED'; attempt.error = { name: error.name, message: error.message }; throw error; }
+  finally { attempt.after = track ? trackInfo(track) : null; }
 }
 const crop = () => applyTarget(cropTarget, 'cropTo');
 const restrict = () => applyTarget(restrictionTarget, 'restrictTo');
+function displayForGeneration(ticket) {
+  if (ticket !== captureGeneration || !display?.getVideoTracks().some(track => track.readyState === 'live')) throw new Error('Display capture generation changed');
+  return display;
+}
 function openTargetWindow() {
   const extension = new URLSearchParams(location.search).get('extension');
   if (!/^[a-p]{32}$/.test(extension ?? '')) throw new Error('No validated research extension identity');
@@ -204,7 +225,7 @@ function openTargetWindow() {
   setTimeout(() => removeEventListener('message', listener), 10000);
 }
 globalThis.__M1010_SOURCE__ = { prepare, action, snapshot, video, captureDisplay, captureStream,
-  cropTarget, restrictionTarget, crop, restrict, get stream() { return display ?? captured ?? inputStream; } };
+  cropTarget, restrictionTarget, crop, restrict, displayForGeneration, get stream() { return display ?? captured ?? inputStream; } };
 const button = (id, run) => byId(id).addEventListener('click', event => {
   if (!event.isTrusted) return;
   try { Promise.resolve(run()).catch(fail); } catch (error) { fail(error); }

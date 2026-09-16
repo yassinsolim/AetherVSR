@@ -15,6 +15,67 @@ function check(source: string) {
 }
 
 describe('M10.10 research package isolation', () => {
+  it('uses explicit diagnostic dimensions and terminal permission or prefix outcomes', () => check(`
+    const {seekDiagnosticFrame,captureConsentResult,terminalizeTabSuffix,TAB_FIDELITY_CASES,stopAfterUnsafeSelf,SELF_CAPTURE_CASES}=await import('./tools/m1010/capture-study.mjs');
+    const {runInNewContext}=await import('node:vm');
+    for(const expected of[[640,360],[1280,720],[1920,1080]]){
+      let callback,timer,cancelled=0;const listeners=new Map();
+      const video={paused:true,seeking:false,readyState:2,currentTime:0,requestVideoFrameCallback:fn=>{callback=fn;return 1},cancelVideoFrameCallback:()=>cancelled++,addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name)};
+      const seek=runInNewContext('('+seekDiagnosticFrame.toString()+')',{document:{querySelector:()=>video},setTimeout:fn=>{timer=fn;return 1},clearTimeout:()=>{timer=null}});
+      const pending=seek({time:.5,expected});callback(0,{mediaTime:.5,width:1,height:1});assert(timer);
+      callback(1,{mediaTime:.5,width:expected[0],height:expected[1]});listeners.get('seeked')();const result=await pending;
+      assert.equal(result.discarded,1);assert.equal(result.metadata.width,expected[0]);assert.equal(timer,null);assert.equal(listeners.size,0);assert.equal(cancelled,1);
+    }
+    assert.equal(captureConsentResult([]),null);
+    assert.equal(captureConsentResult([{type:'capture-permission',value:false},{type:'capture-permission',value:true}]).granted,false);
+    assert.equal(captureConsentResult([{type:'permission-error',value:'denied'}]).granted,false);
+    const {openCheckpoint}=await import('./tools/m1010/checkpoint.mjs'),directory='.cache/m1010/terminal-prefix-'+process.pid;
+    try{const store=openCheckpoint(directory,{studyVersion:'prefix',sourceCommit:'a'.repeat(40),browserExecutableSha256:'b'.repeat(64)});
+      store.begin(TAB_FIDELITY_CASES[0].id);store.complete(TAB_FIDELITY_CASES[0].id,{outcome:'UNRESOLVED',error:'native failure'});
+      terminalizeTabSuffix(store,'stopped');terminalizeTabSuffix(store,'must not overwrite');
+      assert.equal(store.read(TAB_FIDELITY_CASES[0].id).error,'native failure');
+      for(const entry of TAB_FIDELITY_CASES.slice(1))assert.equal(store.read(entry.id).executionStatus,'NOT_RUN');
+      assert.equal(stopAfterUnsafeSelf(store),false);
+      store.begin('R6-cancel');store.complete('R6-cancel',{outcome:'UNSAFE',cleanup:{liveTracks:1}});
+      const resumed=openCheckpoint(directory,store.snapshot().pin);
+      assert.equal(stopAfterUnsafeSelf(resumed),true);assert.equal(stopAfterUnsafeSelf(resumed),true);
+      for(const entry of SELF_CAPTURE_CASES.slice(1))assert.equal(resumed.read(entry.id).executionStatus,'NOT_RUN');
+      assert.equal(resumed.read('R6-cancel').outcome,'UNSAFE');
+    }finally{rmSync(directory,{recursive:true,force:true});}
+  `));
+  it('decodes distinct display identities and rejects ambiguous guards and complements', () => check(`
+    const {installCaptureMarker,decodeCaptureMarker,SELF_CAPTURE_CASES,SELF_SCOPE_CASES,selfChoiceOutcome}=await import('./tools/m1010/capture-study.mjs');
+    assert.deepEqual(SELF_CAPTURE_CASES.map(value=>value.id),['R6-cancel','R6-wrong','R6-current','R6-repeat']);
+    assert.deepEqual(SELF_SCOPE_CASES,['baseline','movement','resize','scroll','occluder','controls-hidden','ABR-low','ABR-high']);
+    assert.equal(selfChoiceOutcome('source',{identity:'source'}),'IDENTITY_RECORDED');
+    for(const identity of['wrong','unresolved',undefined])assert.equal(selfChoiceOutcome('source',{identity,displaySurface:'browser'}),'UNRESOLVED');
+    assert.equal(selfChoiceOutcome('wrong',{identity:'wrong'}),'IDENTITY_RECORDED');
+    assert.equal(selfChoiceOutcome('rejection',{captureError:{name:'NotAllowedError'}}),'REJECTION_RECORDED');
+    assert.equal(selfChoiceOutcome('rejection',{}),'UNRESOLVED');
+    const runner=readFileSync('tools/m1010/capture-study.mjs','utf8');
+    for(const forbidden of['permissions.request(', 'triggerAction', 'grantPermissions(', 'getDisplayMedia(', "locator('#display').click"])assert(!runner.includes(forbidden));
+    const {runInNewContext}=await import('node:vm');
+    const width=1000,height=500,bytes=Buffer.alloc(width*height*4,127);
+    const context={fillStyle:'',fillRect(left,top,columns,rows){for(let vertical=top;vertical<top+rows;vertical++)for(let horizontal=left;horizontal<left+columns;horizontal++){const offset=(vertical*width+horizontal)*4;bytes.fill(this.fillStyle==='#ffffff'?255:0,offset,offset+3);bytes[offset+3]=255;}}};
+    const canvas={style:{},getContext:()=>context};
+    const install=runInNewContext('('+installCaptureMarker.toString()+')',{document:{getElementById:()=>null,createElement:()=>canvas,body:{append(){}}},innerWidth:width,innerHeight:height,devicePixelRatio:1});
+    for(const identity of['00000000','ffffffff','129abcde','f7b53021']){install({identity,title:'local fixture'});assert.equal(decodeCaptureMarker(bytes,width,height,[width,height]),identity);}
+    bytes[(12*width+6)*4]=120;assert.throws(()=>decodeCaptureMarker(bytes,width,height,[width,height]),/Ambiguous/);
+    install({identity:'12345678',title:'fixture'});bytes.fill(0,(36*width+30)*4,(36*width+30)*4+3);assert.throws(()=>decodeCaptureMarker(bytes,width,height,[width,height]),/complement/);
+    assert.throws(()=>install({identity:'not an identity',title:'fixture'}));
+    assert.throws(()=>decodeCaptureMarker(Buffer.alloc(4),width,height,[width,height]));
+  `));
+  it('keeps compositor crop inference distinct from source-faithful acquisition', () => check(`
+    const {TAB_FIDELITY_CASES,diagnosticCrop}=await import('./tools/m1010/capture-study.mjs');
+    assert.deepEqual(TAB_FIDELITY_CASES.map(value=>value.id),['R3-720-native','R3-720-small','R3-720-large','R3-720-offscreen','R3-1080-small']);
+    const geometry={rect:{x:20,y:30,width:640,height:360},viewport:[1512,982],captured:[3024,1964]};
+    const full=diagnosticCrop(geometry);assert.deepEqual(full.crop,[40,60,1280,720]);assert.deepEqual(full.sourceFraction,[0,0,1,1]);assert(full.fullyVisible);
+    const clipped=diagnosticCrop({...geometry,rect:{x:-320,y:30,width:640,height:360}});
+    assert.deepEqual(clipped.crop,[0,60,640,720]);assert.deepEqual(clipped.sourceFraction,[.5,0,.5,1]);assert(!clipped.fullyVisible);
+    assert.match(full.scope,/not independently detected/);
+    for(const captured of[[0,1964],[NaN,1964]])assert.throws(()=>diagnosticCrop({...geometry,captured}));
+    assert.throws(()=>diagnosticCrop({...geometry,rect:{x:-700,y:0,width:640,height:360}}),/outside/);
+  `));
   it('measures cadence over actual elapsed time without inventing pixel identity or submissions', () => check(`
     const {summarizeCadence,observeCadence}=await import('./tools/m1010/acquisition.mjs');
     const frames=[0,20,40,160].map((at,index)=>({at,mediaTime:[0,.02,.02,0][index],presentedFrames:[1,2,4,5][index],visibility:'visible',focused:true}));

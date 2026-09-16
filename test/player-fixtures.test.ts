@@ -101,6 +101,30 @@ describe('M10.10 local sources', () => {
     for(const command of [{type:'eval'},{type:'play',script:'x'}])await assert.rejects(()=>api.action(command));
     activation.isActive=true;const pending=api.captureDisplay();await api.action({type:'cancel'});
     deliver({getTracks:()=>[{stop(){stops++}}]});await assert.rejects(()=>pending);assert.equal(stops,1);
+    let finishCrop,startedCrop;const cropStarted=new Promise(resolve=>startedCrop=resolve);
+    class BrowserCaptureMediaStreamTrack {
+      kind='video';readyState='live';muted=false;
+      getSettings(){return {displaySurface:'browser'}}
+      stop(){this.readyState='ended';stops++}
+      addEventListener(){}
+      cropTo(){startedCrop();return new Promise(resolve=>finishCrop=resolve)}
+      restrictTo(){return Promise.reject(new DOMException('Native restriction rejected','NotAllowedError'))}
+    }
+    context.CropTarget={fromElement:async()=>({})};context.RestrictionTarget={fromElement:async()=>({})};
+    const track=new BrowserCaptureMediaStreamTrack(),audio=new BrowserCaptureMediaStreamTrack();audio.kind='audio';
+    const captured=api.captureDisplay();deliver({getTracks:()=>[track,audio],getVideoTracks:()=>[track]});await captured;
+    const captureGeneration=api.snapshot().captureGeneration;
+    assert.equal(api.displayForGeneration(captureGeneration).getVideoTracks()[0],track);
+    assert.throws(()=>api.displayForGeneration(captureGeneration-1),/generation changed/);
+    assert.equal(api.snapshot().displayTracks[0].constructor,'BrowserCaptureMediaStreamTrack');
+    assert.equal(api.snapshot().displayTracks[0].cropTo,'function');
+    await assert.rejects(()=>api.restrict(),/Native restriction rejected/);
+    assert.equal(api.snapshot().targetAttempts.at(-1).error.name,'NotAllowedError');
+    const pendingCrop=api.crop();await cropStarted;await api.action({type:'cancel'});finishCrop();
+    await assert.rejects(()=>pendingCrop,/Capture changed during/);
+    const state=api.snapshot();assert.equal(state.targetAttempts.at(-1).outcome,'REJECTED');
+    assert.throws(()=>api.displayForGeneration(captureGeneration),/generation changed/);
+    assert.equal(state.stoppedTracks.length,2);assert(state.stoppedTracks.every(value=>value.after.readyState==='ended'));
   `));
 
   it.skipIf(process.env.M1010_FFMPEG !== '1')('tiny mux PTS', () => check(`
