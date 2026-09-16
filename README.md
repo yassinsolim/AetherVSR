@@ -32,6 +32,13 @@ The next recommendation is a separately authorized controlled-player/window stud
 not more generic replacement implementation. Production S1 and all historical
 verdicts remain unchanged. [Observable contract report](docs/M10.9-REPORT.md).
 
+**M10.10: NO CONTROLLED WEB PRODUCT PATH QUALIFIED.** Incomplete research
+checkpoint: controlled-player parity and progressive acquisition were recorded,
+but timing uncertainty remains unbounded and capture/authority/audio coverage is
+incomplete. Candidate neural performance and public census were NOT RUN. This is
+not browser impossibility or authorization for M10.11. Production is unchanged.
+[Controlled-player study](docs/M10.10-PRODUCT-REPORT.md).
+
 **M10.6 history remains PARTIAL, Case D.** Four ten-minute native-video
 controls exceeded the1% combined callback/quality-loss reference, averaging
 4.262931%. This is a lean-instrumented browser result, not physical display loss

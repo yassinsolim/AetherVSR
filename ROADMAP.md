@@ -504,6 +504,17 @@ is implemented by this result.
 
 ---
 
+## Milestone 10.10 - Controlled player study [INCOMPLETE RESEARCH CHECKPOINT]
+
+M10.10 also remains an **INCOMPLETE RESEARCH CHECKPOINT / NO CONTROLLED WEB PRODUCT
+PATH QUALIFIED**. P0 controlled tab/window parity and R1 progressive acquisition
+are useful primitives, not completed product gates. Unbounded timing and partial
+capture/control coverage stop candidate neural performance and public census.
+No M10.11 implementation or additional native retry is authorized by this result.
+See [the30-section report](docs/M10.10-PRODUCT-REPORT.md), ADR-0052/0053.
+
+---
+
 ## Milestone 11 - Cross-vendor validation [GATED]
 
 Not the default next step while M10.7 presentation synchronization fails and

@@ -24,6 +24,7 @@ const params = new URLSearchParams(location.search);
 let gpu: GpuContext | null = null, pipeline: VideoPipeline | null = null, driver: RuntimeDriver | null = null;
 let starting: Promise<void> | null = null, unwatch = () => {}, destroyed = false, failure: string | null = null;
 let pipWindow: Window | null = null, objectUrl: string | null = null;
+let pipGeneration = 0;
 let mode: RuntimeMode = params.get('mode') === 'baseline' ? 'baseline' : params.get('mode') === 'neural' ? 'neural' : 'auto';
 const events: { at: number; type: string; detail: unknown }[] = [];
 const samples: { at: number; mediaTime: number; presented: number; width: number; height: number }[] = [];
@@ -64,6 +65,7 @@ async function play() {
 function destroy() {
   if (destroyed) return snapshot();
   destroyed = true;
+  pipGeneration++;
   const errors: string[] = [];
   for (const cleanup of [() => video.pause(), () => { if (frame !== null) video.cancelVideoFrameCallback(frame); frame = null; },
     unwatch, () => { driver?.destroy(); driver = null; }, () => { pipeline?.destroy(); pipeline = null; },
@@ -124,13 +126,20 @@ const modeSelect = document.querySelector<HTMLSelectElement>('#mode')!; modeSele
 modeSelect.addEventListener('change', () => { mode = modeSelect.value as RuntimeMode; driver?.setMode(mode); });
 document.querySelector('#fullscreen')!.addEventListener('click', () => { void (document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen()).catch(fail); });
 document.querySelector('#pip')!.addEventListener('click', () => {
+  if (destroyed) return;
   if (!global.documentPictureInPicture) { record('pip-unavailable'); return; }
+  const ticket = ++pipGeneration;
   void global.documentPictureInPicture.requestWindow({ width: 720, height: 480 }).then(window => {
+    if (destroyed || ticket !== pipGeneration) { window.close(); record('pip-stale'); return; }
     pipWindow = window;
     const style = window.document.createElement('link'); style.rel = 'stylesheet'; style.href = new URL('player.css', location.href).href;
     window.document.head.append(style); window.document.body.append(stage, controls);
     record('pip-open', { origin: window.document.location.origin, canvasOwner: canvas.ownerDocument.location.origin });
-    window.addEventListener('pagehide', () => { document.body.insertBefore(stage, video); document.body.append(controls); pipWindow = null; record('pip-close'); });
+    window.addEventListener('pagehide', () => {
+      if (pipWindow !== window) return;
+      if (!destroyed) { document.body.insertBefore(stage, video); document.body.append(controls); }
+      pipWindow = null; record('pip-close');
+    });
   }).catch(error => record('pip-error', String(error)));
 });
 document.querySelector('#return')!.addEventListener('click', () => { void chrome.runtime.sendMessage({ type: 'research.return' }); });

@@ -1,4 +1,6 @@
 import {afterEach,describe,expect,it,vi} from 'vitest';
+import {build} from 'esbuild';
+import {runInNewContext} from 'node:vm';
 
 const ownerId='12345678-1234-4123-8123-123456789abc';
 const origin=`chrome-extension://${'a'.repeat(32)}`;
@@ -9,6 +11,7 @@ type Injection={target: chrome.scripting.InjectionTarget; files?: string[];
 function event<Args extends unknown[]>() {
 	const listeners: ((...args: Args) => unknown)[]=[];
 	return {addListener: (listener: (...args: Args) => unknown) => {listeners.push(listener);},
+		clear: () => {listeners.length=0;},
 		emit: (...args: Args) => listeners.map(listener => listener(...args))};
 }
 function deferred<Value=void>() {
@@ -17,14 +20,14 @@ function deferred<Value=void>() {
 	return {promise,resolve};
 }
 async function denied(result: Promise<unknown>) {expect(await result).toMatchObject({ok: false});}
-async function fixture(url=sourceUrl,register=true) {
+async function fixture(url=sourceUrl,register=true,workerCode?: string) {
 	vi.resetModules();
 	const state={ownerId,generation: 1,url,protected: false};
 	const snapshot=() => ({...state});
 	const peer={close: vi.fn()};
 	const agent={select: vi.fn(snapshot),read: vi.fn(snapshot),
 		captureOffer: vi.fn(() => ({ownerId: state.ownerId,sdp: 'offer'})),
-		stop: vi.fn(() => {peer.close();}),command: vi.fn()};
+		stop: vi.fn(() => {peer.close();}),releaseCapture: vi.fn(),command: vi.fn()};
 	const messages=event<[unknown,Sender,(value: unknown) => void]>();
 	const updated=event<[number,{status?: string;url?: string}]>();
 	const revoked=event<[chrome.permissions.Permissions]>();
@@ -34,7 +37,7 @@ async function fixture(url=sourceUrl,register=true) {
 		return [{frameId: 0,documentId: 'selected',result}];
 	};
 	const api={runtime: {id: 'a'.repeat(32),getURL: (path: string) => `${origin}/${path}`,
-		onMessage: messages,sendMessage: vi.fn(() => Promise.resolve())},
+		onMessage: messages,onConnect: event<[chrome.runtime.Port]>(),sendMessage: vi.fn(() => Promise.resolve())},
 		tabs: {query: vi.fn(() => Promise.resolve([{id: 11,url: 'http://127.0.0.1:5204/fixture'}])),
 			get: vi.fn((tabId: number) => Promise.resolve({id: tabId,url: 'http://127.0.0.1:5204/fixture'})),
 			create: vi.fn(() => Promise.resolve({id: 22})),
@@ -46,19 +49,71 @@ async function fixture(url=sourceUrl,register=true) {
 			callback: (id: string) => void) => {callback('stream-id');})}};
 	vi.stubGlobal('chrome',api);
 	vi.stubGlobal('__M1010_AGENT__',agent);
-	await import('../tools/m1010/broker');
+	const restart=() => {
+		messages.clear(); api.runtime.onConnect.clear(); updated.clear(); revoked.clear(); api.tabs.onRemoved.clear();
+		runInNewContext(workerCode!,{chrome: api,__M1010_AGENT__: agent,URL});
+	};
+	if(workerCode) restart(); else await import('../tools/m1010/broker');
 	const player: Sender={id: api.runtime.id,url: `${origin}/acquire.html`,origin,frameId: 0,
 		documentId: 'player',tab: {id: 22} as chrome.tabs.Tab};
 	const send=(raw: string | Record<string, unknown>,sender=player) => new Promise<unknown>(resolve => {
 		if(!messages.emit({navigationType: 'navigate',...(typeof raw==='string'? {type: raw}:raw)},sender,resolve).includes(true)) resolve(false);
 	});
 	const launch=() => send('research.acquire',{id: api.runtime.id,url: `${origin}/launcher.html`});
+	const connect=(sender: Sender=player,name='m1010-acquire') => {
+		const port={name,sender,onDisconnect: event<[]>(),postMessage: vi.fn(),disconnect: vi.fn()};
+		api.runtime.onConnect.emit(port as unknown as chrome.runtime.Port);
+		return port;
+	};
 	if(register) await launch();
-	return {state,agent,peer,api,player,send,launch,updated,revoked,inject};
+	return {state,agent,peer,api,player,send,launch,updated,revoked,inject,connect,restart};
 }
 afterEach(() => {vi.unstubAllGlobals(); Reflect.deleteProperty(globalThis,'__M1010_BROKER_TRACE__'); Reflect.deleteProperty(globalThis,'__M1010_RESEARCH_SELECT__');});
 
 describe('broker: mocked callbacks, not native grants',() => {
+	it('releases the source port before another capture without awaiting its disconnect callback',async () => {
+		const {send,connect,api}=await fixture(); await send('acquire.info');
+		const sender: Sender={id: api.runtime.id,frameId: 0,documentId: 'selected',tab: {id: 11} as chrome.tabs.Tab};
+		const name=`m1010-source:${ownerId}:1`,old=connect(sender,name);
+		expect(await send('acquire.stop')).toMatchObject({ok: true});
+		expect(old.disconnect).toHaveBeenCalledOnce();
+		const next=connect(sender,name); expect(next.disconnect).not.toHaveBeenCalled();
+		old.onDisconnect.emit();
+		expect(connect(sender,name).disconnect).toHaveBeenCalledOnce();
+	});
+	it('authenticates source RTC lifetime ports and disconnects them on permission removal',async () => {
+		const {send,connect,api,revoked}=await fixture(); await send('acquire.info');
+		const sender: Sender={id: api.runtime.id,frameId: 0,documentId: 'selected',tab: {id: 11} as chrome.tabs.Tab};
+		const name=`m1010-source:${ownerId}:1`;
+		for(const patch of [{id: 'foreign'},{frameId: 1},{documentId: 'other'},{tab: {id: 99} as chrome.tabs.Tab}]) expect(connect({...sender,...patch},name).disconnect).toHaveBeenCalledOnce();
+		expect(connect(sender,`m1010-source:${ownerId}:2`).disconnect).toHaveBeenCalledOnce();
+		const port=connect(sender,name); expect(port.disconnect).not.toHaveBeenCalled();
+		revoked.emit({permissions: ['tabCapture']}); expect(port.disconnect).toHaveBeenCalledOnce();
+	});
+	it.each(['navigation','permission'] as const)('rejects orphaned players in a fresh worker VM after %s',async cause => {
+		const compiled=await build({entryPoints: ['tools/m1010/worker.ts'],bundle: true,format: 'iife',write: false});
+		const {send,connect,restart,updated,revoked}=await fixture(sourceUrl,true,compiled.outputFiles[0]!.text);
+		await send('acquire.info'); const old=connect();
+		await vi.waitFor(() => expect(old.postMessage).toHaveBeenCalledWith({type: 'acquire.bound',playerTabId: 22,playerDocumentId: 'player',ownerId,generation: 1}));
+		restart();
+		expect(connect({id: 'a'.repeat(32),frameId: 0,documentId: 'selected',tab: {id: 11} as chrome.tabs.Tab},`m1010-source:${ownerId}:1`).disconnect).toHaveBeenCalledOnce();
+		if(cause==='navigation') updated.emit(11,{status: 'loading'}); else revoked.emit({permissions: ['tabCapture']});
+		expect(await send('acquire.info')).toBe(false);
+		const orphan=connect(); expect(orphan.disconnect).toHaveBeenCalledOnce();
+		expect(orphan.postMessage).not.toHaveBeenCalled();
+	});
+	it('binds a lifetime port only to the registered player document and revokes on disconnect',async () => {
+		const {send,connect,player,agent}=await fixture();
+		expect(connect().disconnect).toHaveBeenCalledOnce();
+		await send('acquire.info');
+		expect(connect({...player,documentId: 'other'}).disconnect).toHaveBeenCalledOnce();
+		const port=connect();
+		await vi.waitFor(() => expect(port.postMessage).toHaveBeenCalledOnce());
+		expect(connect().disconnect).toHaveBeenCalledOnce();
+		port.onDisconnect.emit();
+		expect(agent.stop).toHaveBeenCalledOnce();
+		expect(await send('acquire.current')).toBe(false);
+	});
 	it('allows worker-private reselection only with an existing local host grant',async () => {
 		const {api,send}=await fixture(sourceUrl,false);
 		const select=(globalThis as unknown as {__M1010_RESEARCH_SELECT__: (tabId: number) => Promise<unknown>}).__M1010_RESEARCH_SELECT__;
@@ -141,9 +196,22 @@ describe('broker: mocked callbacks, not native grants',() => {
 		updated.emit(tabId,{status: 'loading'});
 		expect(peer.close).toHaveBeenCalledOnce();
 		expect(api.scripting.executeScript.mock.lastCall?.[0].args).toEqual(['stop',null,ownerId,1]);
-		expect(api.runtime.sendMessage).toHaveBeenCalledWith({type: 'acquire.revoked',playerTabId: 22,playerDocumentId: 'player',ownerId});
+		expect(api.runtime.sendMessage).toHaveBeenCalledWith({type: 'acquire.revoked',playerTabId: 22,playerDocumentId: 'player',ownerId,generation: 1});
 		expect(api.tabs.sendMessage).not.toHaveBeenCalled();
 		expect(await send('acquire.current')).toBe(false);
+	});
+	it.each(['navigation','permission'] as const)('retains %s revocation tracking after an older player closes',async cause => {
+		const {send,launch,api,player,updated,revoked,state,agent}=await fixture(); await send('acquire.info');
+		state.generation=2;
+		api.tabs.create.mockResolvedValueOnce({id: 23}); await launch();
+		const newer={...player,documentId: 'newer-player',tab: {id: 23} as chrome.tabs.Tab};
+		expect(await send('acquire.info',newer)).toMatchObject({ok: true});
+		api.tabs.onRemoved.emit(22);
+		expect(agent.stop).not.toHaveBeenCalled();
+		expect(await send('acquire.current',newer)).toMatchObject({ok: true});
+		if(cause==='navigation') updated.emit(11,{status: 'loading'}); else revoked.emit({permissions: ['tabCapture']});
+		expect(api.runtime.sendMessage).toHaveBeenCalledWith({type: 'acquire.revoked',playerTabId: 23,playerDocumentId: 'newer-player',ownerId,generation: 2});
+		expect(await send('acquire.current',newer)).toBe(false);
 	});
 	it('navigation before handshake',async () => {
 		const {send,updated,player}=await fixture();
@@ -189,9 +257,21 @@ describe('broker: mocked callbacks, not native grants',() => {
 	it.each(['https://evil.test/A.mp4','http://127.0.0.1:5204/other/A.mp4',`${sourceUrl}?token=x`])('invalid %s',async url => {
 		const {send}=await fixture(url); await denied(send('acquire.refetch'));
 	});
+	it('authenticates source generation invalidation without waiting for a player request',async () => {
+		const {send,api}=await fixture(); await send('acquire.info');
+		const source: Sender={id: api.runtime.id,frameId: 0,documentId: 'selected',tab: {id: 11} as chrome.tabs.Tab};
+		const invalid={type: 'acquire.source-invalid',ownerId,generation: 1};
+		for(const patch of [{id: 'foreign'},{frameId: 1},{documentId: 'other'},{tab: {id: 99} as chrome.tabs.Tab}]) await send(invalid,{...source,...patch});
+		await send({...invalid,ownerId: 'other'},source); await send({...invalid,generation: 2},source);
+		expect(api.runtime.sendMessage).not.toHaveBeenCalled();
+		await send(invalid,source);
+		expect(api.runtime.sendMessage).toHaveBeenCalledWith({type: 'acquire.revoked',playerTabId: 22,playerDocumentId: 'player',ownerId,generation: 1});
+		expect(await send('acquire.current')).toBe(false);
+	});
 	it('changed path',async () => {
 		const {send,state}=await fixture(); state.url='http://127.0.0.1:5204/same/B.mp4';
 		await denied(send('acquire.refetch'));
+		expect(await send('acquire.current')).toBe(false);
 	});
 	it.each(['redirect-same','redirect-ungranted'])('authorizes only the selected %s URL, never its redirect destination',async route => {
 		const url=`http://127.0.0.1:5204/${route}.mp4`,{send}=await fixture(url);

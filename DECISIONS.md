@@ -1640,3 +1640,41 @@ hashes, recipes, tests and documentation remain tracked. Check prospective Git
 object sizes before every commit. Another cap increase requires explicit approval.
 No capture consent, permission, production, safety or M11 gate is changed by this
 storage decision. The arbitrary-page overlay research line remains closed.
+
+## ADR-0052 - Fail-closed research acquisition lifetimes
+
+**Status:** accepted for M10.10 research only; no production boundary or permission change.
+
+Final review reproduced broker restart, same-document source replacement and
+multiple-player bookkeeping gaps after the native study prefix. Research
+acquisition is now bound to an authenticated runtime-port lifetime. Broker loss
+retires the player and stops its owned media; source-owned RTC resources have a
+companion port. The isolated source agent reports the retired owner/generation
+through the document-authenticating broker to revoke the bound consumer. Source
+tracking remains until the last registered session ends.
+
+No persistent authority, automatic rebinding, keepalive traffic or new permission
+is introduced. Worker loss requires fresh selection. Browser event delivery is
+required; teardown latency is not measured. New mocked regressions verify these
+paths, not native behavior. Original measurements retain their earlier source
+commits and cannot be attributed to this correction. Production acquisition,
+import, upscale and presentation boundaries remain unchanged.
+
+## ADR-0053 - No controlled web product path qualified in M10.10
+
+**Status:** incomplete research checkpoint; no implementation authorization.
+
+P0 establishes an extension-owned tab/window can execute the existing pipeline
+with exact paused parity. R1 provides the strongest progressive acquisition
+evidence, including exact input comparisons and scoped privilege/lifecycle checks.
+R2 has unexplained transport sizing, R3 partial compositor evidence, R4/R5 absent
+track methods in their exact topology, and R6 unresolved chooser outcomes despite
+one actual self-capture exposing both methods. These are distinct observations.
+
+The timing floor has no bounded absolute instrument error; the60fps floor also
+has identity mismatches. Candidate latency/A/V, neural paired performance and
+public census therefore remain NOT_RUN. Mandatory authority/audio/fidelity and
+coverage gates are incomplete. Select exactly **NO CONTROLLED WEB PRODUCT PATH
+QUALIFIED**, not browser impossibility or COOPERATING-SITE/API REQUIRED. No M10.11,
+new chooser budget, timing retry, production rollout or arbitrary-page overlay work
+is authorized. See docs/M10.10-PRODUCT-REPORT.md and results/m10.10-product.json.

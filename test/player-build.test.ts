@@ -15,6 +15,43 @@ function check(source: string) {
 }
 
 describe('M10.10 research package isolation', () => {
+  it('verifies compact evidence references and keeps consent tokens out of summaries', () => check(`
+    const {fileEvidence,referencedEvidence,summarizeExperiment}=await import('./tools/m1010/report.mjs');
+    const {mkdirSync,writeFileSync}=await import('node:fs'),{resolve}=await import('node:path');
+    const directory=resolve('.cache/m1010/report-test-'+process.pid);mkdirSync(directory,{recursive:true});
+    try{const path=directory+'/frame.rgba';writeFileSync(path,Buffer.from([1,2,3,4]));const reference=fileEvidence(path);
+      assert.equal(referencedEvidence({pixels:{...reference,path:'frame.rgba'}},directory).length,1);
+      writeFileSync(path,Buffer.from([4,3,2,1]));assert.throws(()=>fileEvidence(path,reference),/hash changed/);
+      assert.throws(()=>fileEvidence('package.json'),/outside ignored/);
+      const summary=summarizeExperiment('R6-current',{outcome:'UNRESOLVED',choice:{requestedAt:'then',value:{token:'secret',displayTracks:[]}},cleanup:{token:'secret',displayTracks:[]},scopes:[]});
+      assert(!JSON.stringify(summary).includes('secret'));assert.equal(summary.method,null);assert.equal(summary.scopeObservations,0);
+      const captured=summarizeExperiment('R6-cancel',{captureError:null,identity:'source',rejectionScope:'native denial/rejection observed'});
+      assert.match(captured.rejectionScope,/not observed; capture occurred/);
+      const teardown=summarizeExperiment('cleanup',{player:{resources:{tracks:0,token:'secret'}},source:{selection:{token:'secret'},displayTracks:[{kind:'video',token:'secret',settings:{token:'secret'}}]}});
+      assert(!JSON.stringify(teardown).includes('secret'));assert.equal(teardown.teardown.source.hasSelection,true);
+      assert.equal(summarizeExperiment('R1-I',{credentialsOmitted:{status:401,token:'secret'}}).credentialsOmitted.status,401);
+      assert.equal(summarizeExperiment('setup-failure',{recordOrigin:'Post-run audit'}).recordOrigin,'Post-run audit');
+    }finally{rmSync(directory,{recursive:true,force:true});}
+  `));
+  it('closes late PiP windows after disposal or a superseding request', () => check(`
+    const {build}=await import('esbuild'),{runInNewContext}=await import('node:vm');
+    const compiled=await build({entryPoints:['tools/m1010/player.ts'],bundle:true,write:false,format:'iife',plugins:[{name:'unused-gpu',setup(build){
+      build.onResolve({filter:/src/},args=>({path:args.path,namespace:'unused'}));
+      build.onLoad({filter:/.*/,namespace:'unused'},()=>({contents:'export const acquireGpu=()=>{},watchDeviceFailures=()=>{},VideoPipeline=class{},BaselineScaler=class{},NeuralUpscaler=class{},NEURAL_OPTIONAL_FEATURES=[],loadModel=()=>{},RuntimeDriver=class{};'}));
+    }}]});
+    for(const dispose of[true,false]){
+      const nodes=new Map(),requests=[],origin='chrome-extension://fixture';let closed=0,moved=0;
+      const node=id=>{if(!nodes.has(id))nodes.set(id,{handlers:{},addEventListener(name,fn){this.handlers[name]=fn},pause(){},requestVideoFrameCallback:()=>1,cancelVideoFrameCallback(){},ownerDocument:{location:{origin}}});return nodes.get(id)};
+      const document={querySelector:node,body:{insertBefore(){moved++},append(){moved++}}};
+      const context={document,location:{search:'',href:origin+'/player.html',origin},isSecureContext:true,URLSearchParams,URL,performance:{now:()=>0},addEventListener(){},documentPictureInPicture:{requestWindow:()=>new Promise(resolve=>requests.push(resolve))}};
+      context.window=context;context.top=context;runInNewContext(compiled.outputFiles[0].text,context);
+      const click=node('#pip').handlers.click;click();if(dispose)context.m1010.destroy();else click();
+      const late={close(){closed++},document:{createElement:()=>({}),head:{append(){moved++}},body:{append(){moved++}},location:{origin}},addEventListener(){}};
+      requests[0](late);await Promise.resolve();await Promise.resolve();assert.equal(closed,1);assert.equal(moved,0);assert.equal(context.m1010.snapshot().resources.pip,0);
+      if(!dispose){context.m1010.destroy();requests[1](late);await Promise.resolve();await Promise.resolve();assert.equal(closed,2);}
+      click();assert.equal(requests.length,dispose?1:2);assert.equal(moved,0);
+    }
+  `));
   it('foregrounds each self-capture fixture before bounded window setup and readiness', () => check(`
     const {runSelfCapture}=await import('./tools/m1010/capture-study.mjs'),{runInNewContext}=await import('node:vm');
     for(const failSetup of['none','window','timeout','fixture']){

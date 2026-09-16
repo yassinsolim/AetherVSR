@@ -1,7 +1,7 @@
 import { refetchSelected } from './refetch.js';
 import type { SourceSelection } from './policy.js';
 
-type Info = { source: { url: string; protected: boolean; sourceClass: string }; selection: SourceSelection | null;
+type Info = { source: { ownerId: string; generation: number; url: string; protected: boolean; sourceClass: string }; selection: SourceSelection | null;
   sourceTabId: number; playerTabId: number; playerDocumentId: string; permission: string | null };
 const video = document.querySelector<HTMLVideoElement>('#input')!, output = document.querySelector('#result')!, status = document.querySelector('#status')!;
 const events: { at: number; type: string; value: unknown }[] = [];
@@ -10,6 +10,7 @@ type Acquisition = { ticket: number; controller: AbortController; stream: MediaS
 let info: Info | null = null, active: Acquisition | null = null, pending: Promise<void> | null = null;
 let owner: 'PAGE_AUTHORITY' | 'PLAYER_AUTHORITY' | null = null;
 let epoch = 0, refreshEpoch = 0, disposed = false;
+let lifetimeReady: Promise<void> | null = null, closeLifetime: (() => void) | null = null;
 const ensure = (ticket: number) => { if (disposed || ticket !== epoch) throw new Error('Acquisition cancelled or superseded'); };
 let callback = 0;
 const frames: { at: number; mediaTime: number; presented: number; width: number; height: number }[] = [];
@@ -82,7 +83,31 @@ async function readInfo(ticket: number) {
   const refreshTicket = ++refreshEpoch;
   const selected = await request<Info>({ type: 'acquire.info' }); ensure(ticket);
   if (refreshTicket !== refreshEpoch) throw new Error('Selection refresh superseded');
-  info = selected; status.textContent = selected.source.sourceClass; record('selection', selected); return selected;
+  info = selected;
+  await bindLifetime(selected); ensure(ticket);
+  if (refreshTicket !== refreshEpoch) throw new Error('Selection refresh superseded');
+  status.textContent = selected.source.sourceClass; record('selection', selected); return selected;
+}
+function bindLifetime(selected: Info): Promise<void> {
+  lifetimeReady ??= new Promise<void>((resolve, reject) => {
+    const port = chrome.runtime.connect({ name: 'm1010-acquire' });
+    const timer = setTimeout(() => retire('broker-timeout'), 3000);
+    const lost = () => retire('broker-lost');
+    const bound = (raw: unknown) => {
+      if (!raw || typeof raw !== 'object') { retire('broker-invalid'); return; }
+      const value = raw as Record<string, unknown>;
+      if (value['type'] !== 'acquire.bound' || value['playerTabId'] !== selected.playerTabId ||
+        value['playerDocumentId'] !== selected.playerDocumentId || value['ownerId'] !== selected.source.ownerId ||
+        value['generation'] !== selected.source.generation) { retire('broker-invalid'); return; }
+      clearTimeout(timer); port.onMessage.removeListener(bound); resolve();
+    };
+    closeLifetime = () => {
+      clearTimeout(timer); port.onMessage.removeListener(bound); port.onDisconnect.removeListener(lost);
+      reject(new Error('Acquisition cancelled: broker connection closed')); port.disconnect();
+    };
+    port.onDisconnect.addListener(lost); port.onMessage.addListener(bound);
+  }).catch(error => { retire('broker-lost'); throw error; });
+  return lifetimeReady;
 }
 const refresh = () => observed(() => readInfo(epoch));
 function waitFor(session: Acquisition, target: EventTarget, event: string, ready: () => boolean, timeout: number, message: string, failure?: () => Error) {
@@ -213,10 +238,18 @@ callback = video.requestVideoFrameCallback(frame);
 const revoked = (message: unknown, sender: chrome.runtime.MessageSender) => {
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL('service-worker.js') || !message || typeof message !== 'object') return;
   const value = message as Record<string, unknown>;
-  if (value['type'] === 'acquire.revoked' && value['playerTabId'] === info?.playerTabId && value['playerDocumentId'] === info?.playerDocumentId) { void stop().catch(() => {}); record('source-revoked', true); }
+  if (info && value['type'] === 'acquire.revoked' && value['playerTabId'] === info.playerTabId && value['playerDocumentId'] === info.playerDocumentId &&
+    value['ownerId'] === info.source.ownerId && value['generation'] === info.source.generation) retire('source-revoked');
 };
+function retire(reason: string) {
+  if (disposed) return;
+  disposed = true; refreshEpoch++;
+  video.cancelVideoFrameCallback(callback); chrome.runtime.onMessage.removeListener(revoked);
+  const close = closeLifetime; closeLifetime = null; close?.();
+  void stop().catch(() => {}); record(reason, true);
+}
 chrome.runtime.onMessage.addListener(revoked);
-window.addEventListener('pagehide', () => { disposed = true; video.cancelVideoFrameCallback(callback); chrome.runtime.onMessage.removeListener(revoked); void stop().catch(() => {}); }, { once: true });
+window.addEventListener('pagehide', () => retire('pagehide'), { once: true });
 (globalThis as unknown as { m1010Acquire: unknown }).m1010Acquire = { refresh, direct, refetch, rtc, tab, tabVisible: () => tab(false, 'player'), probe, command, stop,
   snapshot: () => ({ owner, info, pending: pending !== null, epoch, frames: frames.slice(), events: events.slice(), resources: { tracks: active?.stream?.getTracks().filter(track => track.readyState === 'live').length ?? 0, peers: Number(active?.peer != null), objectUrls: Number(active?.blobUrl != null) } }) };
 void refresh().catch(error => record('selection-error', String(error)));

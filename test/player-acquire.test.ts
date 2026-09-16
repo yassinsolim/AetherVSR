@@ -69,6 +69,19 @@ let getUserMedia: ReturnType<typeof vi.fn<() => Promise<Stream>>>;
 let removeMessageListener: ReturnType<typeof vi.fn>;
 let createObjectURL: MockInstance<typeof URL.createObjectURL>;
 let revokeObjectURL: MockInstance<typeof URL.revokeObjectURL>;
+let lifetime: ReturnType<typeof lifetimePort>;
+function lifetimePort() {
+  const messages = new Set<(message: unknown) => void>(), disconnects = new Set<() => void>();
+  return { name: 'm1010-acquire',
+    onMessage: { addListener: (listener: (message: unknown) => void) => {
+      messages.add(listener);
+      void Promise.resolve().then(() => { if (messages.has(listener)) listener({ type: 'acquire.bound', playerTabId: selectionInfo.playerTabId,
+        playerDocumentId: selectionInfo.playerDocumentId, ownerId: source.ownerId, generation: source.generation }); });
+    }, removeListener: (listener: (message: unknown) => void) => { messages.delete(listener); } },
+    onDisconnect: { addListener: (listener: () => void) => { disconnects.add(listener); }, removeListener: (listener: () => void) => { disconnects.delete(listener); } },
+    disconnect: vi.fn(), lose: () => { for (const listener of disconnects) listener(); },
+    listeners: () => messages.size + disconnects.size };
+}
 
 async function settle() { for (let index = 0; index < 30; index++) await Promise.resolve(); }
 async function setup() {
@@ -90,13 +103,14 @@ beforeEach(() => {
   });
   getUserMedia = vi.fn<() => Promise<Stream>>().mockResolvedValue(new Stream());
   removeMessageListener = vi.fn();
+  lifetime = lifetimePort();
   vi.stubGlobal('document', { querySelector: (selector: string) => buttons.get(selector.slice(1)), getElementById: (id: string) => buttons.get(id),
     createElement: () => ({ width: 0, height: 0, getContext: () => ({ drawImage: vi.fn(), getImageData: vi.fn() }) }) });
   vi.stubGlobal('window', page);
   vi.stubGlobal('navigator', { mediaDevices: { getUserMedia }, gpu: { requestAdapter: vi.fn().mockResolvedValue(null) } });
   vi.stubGlobal('MediaStream', Stream);
   vi.stubGlobal('RTCPeerConnection', Peer);
-  vi.stubGlobal('chrome', { runtime: { id: 'extension', getURL: (path: string) => `chrome-extension://extension/${path}`, sendMessage,
+  vi.stubGlobal('chrome', { runtime: { id: 'extension', getURL: (path: string) => `chrome-extension://extension/${path}`, sendMessage, connect: vi.fn(() => lifetime),
     onMessage: { addListener: vi.fn(), removeListener: removeMessageListener } }, permissions: { request: vi.fn(), remove: vi.fn() },
     tabCapture: { getMediaStreamId: vi.fn((_options: unknown, callback: (id: string) => void) => { callback('visible-id'); }) } });
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Unmocked fetch')));
@@ -108,6 +122,7 @@ afterEach(async () => {
   await settle();
   expect(video.listenerCount).toBe(0);
   expect(vi.getTimerCount()).toBe(0);
+  expect(lifetime.listeners()).toBe(0);
   vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
   Reflect.deleteProperty(globalThis, 'm1010Acquire');
   Reflect.deleteProperty(globalThis, 'm1010Targets');
@@ -146,6 +161,58 @@ describe('related target capture cancellation', () => {
 });
 
 describe('acquisition lifecycle with local platform mocks', () => {
+  it.each(['pending', 'active'] as const)('authenticates source generation revocation and cancels %s RTC without accepting late tracks or answers', async stage => {
+    await setup();
+    const answer = deferred<RTCSessionDescriptionInit>(), track = new Track();
+    let deliver!: EventListener;
+    Peer.configure = receiver => {
+      if (stage === 'pending') receiver.createAnswer.mockReturnValue(answer.promise);
+      receiver.setRemoteDescription.mockImplementation(() => {
+        deliver = [...receiver.listeners.get('track')!][0] as EventListener;
+        deliver(Object.assign(new Event('track'), { track })); return Promise.resolve();
+      });
+    };
+    const started = acquire.rtc().catch((error: unknown) => error); await settle();
+    if (stage === 'active') await started;
+    const listener = vi.mocked(chrome.runtime.onMessage).addListener.mock.calls[0]![0];
+    const notification = { type: 'acquire.revoked', playerTabId: selectionInfo.playerTabId,
+      playerDocumentId: selectionInfo.playerDocumentId, ownerId: source.ownerId, generation: source.generation };
+    const sender = { id: chrome.runtime.id, url: chrome.runtime.getURL('service-worker.js') };
+    for (const patch of [{ ownerId: 'other' }, { generation: 2 }, { playerTabId: 99 }, { playerDocumentId: 'other' }]) listener({ ...notification, ...patch }, sender, vi.fn());
+    for (const patch of [{ id: 'foreign' }, { url: chrome.runtime.getURL('other.html') }]) listener(notification, { ...sender, ...patch }, vi.fn());
+    expect(track.stop).not.toHaveBeenCalled();
+    listener(notification, sender, vi.fn());
+    expect(track.stop).toHaveBeenCalledOnce(); expect(Peer.instances[0]?.close).toHaveBeenCalledOnce();
+    answer.resolve({ type: 'answer', sdp: 'late' }); await started; await settle();
+    if (stage === 'pending') expect(Peer.instances[0]?.setLocalDescription).not.toHaveBeenCalled();
+    const late = new Track(); deliver(Object.assign(new Event('track'), { track: late }));
+    expect(late.stop).toHaveBeenCalledOnce();
+    expect(acquire.snapshot()).toMatchObject({ owner: null, pending: false, resources: { tracks: 0, peers: 0, objectUrls: 0 } });
+    await expect(acquire.rtc()).rejects.toThrow(/disposed/);
+  });
+  it.each(['pending', 'active'] as const)('fails closed on broker loss with %s player-owned capture', async stage => {
+    await setup();
+    const capture = deferred<Stream>(), track = new Track();
+    getUserMedia.mockReturnValueOnce(capture.promise);
+    const started = acquire.tab().catch((error: unknown) => error); await settle();
+    if (stage === 'active') { capture.resolve(new Stream([track])); await started; }
+    lifetime.lose(); await settle();
+    if (stage === 'pending') { capture.resolve(new Stream([track])); expect(await started).toBeInstanceOf(Error); }
+    await settle();
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(acquire.snapshot()).toMatchObject({ owner: null, resources: { tracks: 0, peers: 0, objectUrls: 0 } });
+    await expect(acquire.tab()).rejects.toThrow(/disposed|pending/);
+    expect(chrome.runtime.connect).toHaveBeenCalledTimes(1);
+  });
+  it('does not start capture until the broker acknowledges the lifetime port, with a bounded handshake', async () => {
+    lifetime.onMessage.addListener = () => {};
+    await setup();
+    const started = expect(acquire.tab()).rejects.toThrow(/cancel/); await settle();
+    expect(getUserMedia).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(3000); await started;
+    expect(getUserMedia).not.toHaveBeenCalled();
+    expect(lifetime.disconnect).toHaveBeenCalledOnce();
+  });
   it('issues in the visible player for the authenticated selected tab only', async () => {
     await setup(); await acquire.tabVisible();
     expect(chrome.tabCapture.getMediaStreamId).toHaveBeenCalledWith({ targetTabId: selectionInfo.sourceTabId }, expect.any(Function));
@@ -195,7 +262,7 @@ describe('acquisition lifecycle with local platform mocks', () => {
       expect(acquire.snapshot().owner).toBe('PAGE_AUTHORITY');
     }
     const revoked = vi.mocked(chrome.runtime.onMessage).addListener.mock.calls[0]![0];
-    revoked({ type: 'acquire.revoked', playerTabId: selectionInfo.playerTabId, playerDocumentId: selectionInfo.playerDocumentId },
+    revoked({ type: 'acquire.revoked', playerTabId: selectionInfo.playerTabId, playerDocumentId: selectionInfo.playerDocumentId, ownerId: source.ownerId, generation: source.generation },
       { id: chrome.runtime.id, url: chrome.runtime.getURL('service-worker.js') }, vi.fn());
     await settle();
     expect(acquire.snapshot().events.some(event => event.type === 'source-revoked')).toBe(true);

@@ -3,7 +3,8 @@ import { parseCommand, permissionPatternFor, validateSelection, validateSourceUr
 type SourceSnapshot = { ownerId: string; generation: number; url: string; protected: boolean; sourceClass: string;
   paused: boolean; muted: boolean; volume: number; currentTime: number; width: number; height: number };
 type Session = { sourceTabId: number; sourceDocumentId: string; ownerId: string; generation: number;
-  playerDocumentId: string | null; snapshot: SourceSnapshot; consumedRefetch: boolean; openingNavigation: boolean };
+  playerDocumentId: string | null; snapshot: SourceSnapshot; consumedRefetch: boolean; openingNavigation: boolean;
+  port?: chrome.runtime.Port; sourcePort?: chrome.runtime.Port };
 type Sender = chrome.runtime.MessageSender & { documentId?: string; origin?: string };
 const sessions = new Map<number, Session>();
 const sourceIds = new Set<number>();
@@ -33,9 +34,11 @@ async function current(session: Session): Promise<boolean> {
   try {
     if (![...sessions.values()].includes(session)) return false;
     const snapshot = await sourceOperation(session, 'snapshot') as SourceSnapshot;
-    return [...sessions.values()].includes(session) && snapshot.ownerId === session.ownerId && snapshot.generation === session.generation &&
-      snapshot.url === session.snapshot.url && !snapshot.protected;
-  } catch { return false; }
+    if ([...sessions.values()].includes(session) && snapshot.ownerId === session.ownerId && snapshot.generation === session.generation &&
+      snapshot.url === session.snapshot.url && !snapshot.protected) return true;
+  } catch { record('source-unavailable', session.sourceTabId, 'read-failed'); }
+  for (const [player, registered] of sessions) if (registered === session) revoke(player);
+  return false;
 }
 
 function fixtureSelection(session: Session): SourceSelection | null {
@@ -93,9 +96,41 @@ Object.assign(globalThis, { __M1010_RESEARCH_SELECT__: async (tabId: number) => 
   return selectFixture(await chrome.tabs.get(tabId));
 } });
 
+chrome.runtime.onConnect.addListener(port => {
+  const sender = port.sender as Sender | undefined;
+  if (port.name.startsWith('m1010-source:')) {
+    const session = sender?.id === chrome.runtime.id && sender.frameId === 0 && sender.documentId &&
+      [...sessions.values()].find(candidate => candidate.sourceTabId === sender.tab?.id && candidate.sourceDocumentId === sender.documentId &&
+        port.name === `m1010-source:${candidate.ownerId}:${candidate.generation}`);
+    if (!session || session.sourcePort) { port.disconnect(); return; }
+    session.sourcePort = port;
+    port.onDisconnect.addListener(() => { if (session.sourcePort === port) delete session.sourcePort; });
+    return;
+  }
+  if (port.name !== 'm1010-acquire') return;
+  const session = sender && playerSession(sender, undefined);
+  if (!session || session.port) { port.disconnect(); return; }
+  const player = sender.tab!.id!;
+  session.port = port;
+  port.onDisconnect.addListener(() => { if (sessions.get(player) === session) revoke(player); });
+  void current(session).then(valid => {
+    if (!valid) { port.disconnect(); return; }
+    port.postMessage({ type: 'acquire.bound', playerTabId: player, playerDocumentId: session.playerDocumentId,
+      ownerId: session.ownerId, generation: session.generation });
+  }).catch(() => { if (sessions.get(player) === session) revoke(player); });
+});
+
 chrome.runtime.onMessage.addListener((raw: unknown, sender: Sender, respond) => {
   if (!raw || typeof raw !== 'object' || !('type' in raw) || typeof raw.type !== 'string') return false;
   const message = raw as Record<string, unknown>;
+  if (message['type'] === 'acquire.source-invalid') {
+    if (sender.id !== chrome.runtime.id || sender.frameId !== 0 || !sender.documentId || sender.tab?.id === undefined) return false;
+    for (const [player, session] of sessions) {
+      if (session.sourceTabId === sender.tab.id && session.sourceDocumentId === sender.documentId &&
+        session.ownerId === message['ownerId'] && session.generation === message['generation']) revoke(player);
+    }
+    return false;
+  }
   if (message['type'] === 'research.acquire' && sender.id === chrome.runtime.id && sender.url === chrome.runtime.getURL('launcher.html')) {
     void chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => selectFixture(tabs[0]))
       .then(respond, error => respond({ ok: false, error: String(error) }));
@@ -145,7 +180,10 @@ chrome.runtime.onMessage.addListener((raw: unknown, sender: Sender, respond) => 
         if (!await current(session)) throw new Error('Source revoked during capture-ID issuance');
         return { id, sourceTabId: session.sourceTabId };
       }
-      case 'acquire.stop': await sourceOperation(session, 'releaseCapture'); return { stopped: true };
+      case 'acquire.stop': {
+        session.sourcePort?.disconnect(); delete session.sourcePort;
+        await sourceOperation(session, 'releaseCapture'); return { stopped: true };
+      }
       default: throw new Error('Unrecognized acquisition request');
     }
   })().then(async value => {
@@ -159,10 +197,13 @@ const revoke = (tabId: number) => {
   for (const [player, session] of sessions) {
     if (session.sourceTabId !== tabId && player !== tabId) continue;
     record('revoked', player, session.playerDocumentId ? 'bound-document' : 'before-handshake');
-    sessions.delete(player); sourceIds.delete(session.sourceTabId);
+    sessions.delete(player);
+    if (![...sessions.values()].some(other => other.sourceTabId === session.sourceTabId)) sourceIds.delete(session.sourceTabId);
+    session.port?.disconnect();
+    session.sourcePort?.disconnect();
     void sourceOperation(session, 'stop').catch(() => {});
     void chrome.runtime.sendMessage({ type: 'acquire.revoked', playerTabId: player,
-      playerDocumentId: session.playerDocumentId, ownerId: session.ownerId }).catch(() => {});
+      playerDocumentId: session.playerDocumentId, ownerId: session.ownerId, generation: session.generation }).catch(() => {});
   }
 };
 chrome.tabs.onRemoved.addListener(revoke);

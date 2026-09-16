@@ -78,19 +78,33 @@ function fixture() {
 		port1={postMessage() {throw new DOMException('stream','DataCloneError');},close: closePort};
 		port2={close: closePort};
 	});
-	const agent=createSourceAgent(doc);
+	const invalidated=vi.fn();
+	let lost=() => {};
+	const unwatch=vi.fn();
+	const watchCapture=vi.fn((_binding: unknown,listener: () => void) => {lost=listener; return unwatch;});
+	const agent=createSourceAgent(doc,invalidated,watchCapture);
 	const binding=agent.select();
 	const send=(type='pause',extra={}) => agent.command({
 		ownerId: binding.ownerId,
 		generation: binding.generation,requestId,type,...extra
 	});
 	return {
-		agent,binding,send,target,videos,doc,peer,rtc,track,audio,view,closePort,
+		agent,binding,send,target,videos,doc,peer,rtc,track,audio,view,closePort,invalidated,unwatch,
+		loseBroker: () => lost(),
 		mutation: () => {mutation();}
 	};
 }
 
 describe('ownership',() => {
+	it.each(['replace','remove','resize','encrypted'] as const)('notifies the retired binding on %s without a read or active source RTC',change => {
+		const {agent,binding,target,mutation,invalidated}=fixture();
+		if(change==='replace'||change==='remove') {target.isConnected=false; mutation();}
+		else if(change==='resize') {target.videoWidth=1280; target.dispatchEvent(new Event('resize'));}
+		else target.dispatchEvent(new Event('encrypted'));
+		expect(invalidated).toHaveBeenCalledWith({ownerId: binding.ownerId,generation: binding.generation});
+		expect(agent.read().generation).toBeGreaterThan(binding.generation);
+		agent.stop();
+	});
 	it('bounds top-document selection to sixteen',() => {
 		const {agent,videos,target,doc}=fixture();
 		const beyondLimit=vi.fn(() => ({width: 10000,height: 1000}));
@@ -152,6 +166,17 @@ describe('ownership',() => {
 });
 
 describe('RTC lifecycle',() => {
+	it.each(['pending','active'] as const)('releases %s source RTC resources on broker loss',async stage => {
+		const {agent,peer,track,audio,loseBroker,unwatch}=fixture(),pending=deferred();
+		if(stage==='pending') peer.createOffer.mockImplementation(() => pending.promise.then(() => ({type: 'offer',sdp: 'v=0\r\n'})));
+		const offer=agent.captureOffer().catch((error: unknown) => error);
+		if(stage==='active') await offer;
+		loseBroker(); pending.resolve();
+		if(stage==='pending') expect(await offer).toBeInstanceOf(Error);
+		expect(peer.close).toHaveBeenCalledOnce(); expect(track.stop).toHaveBeenCalledOnce(); expect(audio.stop).toHaveBeenCalledOnce();
+		expect(unwatch).toHaveBeenCalledOnce();
+		agent.stop();
+	});
 	it('offers, answers, cleans up',async () => {
 		const {agent,binding,peer,rtc,track,audio,target,closePort}=fixture();
 		const offer=await agent.captureOffer();
@@ -190,7 +215,7 @@ describe('RTC lifecycle',() => {
 		agent.stop();
 	});
 	it.each(['offer','answer'] as const)('rejects stale %s completion',async stage => {
-		const {agent,peer,target,track}=fixture();
+		const {agent,peer,target,track,binding,invalidated}=fixture();
 		const pending=deferred();
 		let result: Promise<unknown>;
 		if(stage==='offer') {
@@ -204,6 +229,7 @@ describe('RTC lifecycle',() => {
 		const rejected=expect(result).rejects.toThrow('source-changed');
 		target.currentSrc='blob:replacement';
 		target.dispatchEvent(new Event('loadstart'));
+		expect(invalidated).toHaveBeenCalledWith({ownerId: binding.ownerId,generation: binding.generation});
 		pending.resolve();
 		await rejected;
 		if(stage==='offer') expect(peer.setLocalDescription).not.toHaveBeenCalled();

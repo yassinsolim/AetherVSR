@@ -114,15 +114,16 @@ function sdpValid(sdp: unknown): sdp is string {
 type Session=Binding&{
 	video: HTMLVideoElement; stream: MediaStream; peer: RTCPeerConnection;
 	offered: boolean;
-	cancel: (reason: string) => void; unlisten: () => void;
+	cancel: (reason: string) => void; unlisten: () => void; unwatch: () => void;
 };
 
-export function createSourceAgent(doc: Document) {
+export function createSourceAgent(doc: Document,invalidated: (binding: Binding) => void=() => {},
+	watchCapture: (binding: Binding,lost: () => void) => () => void=() => () => {}) {
 	const view=doc.defaultView;
 	let video: CaptureVideo|null=null;
 	let source: Stamp|null=null;
 	let owner: string|null=null;
-	let gen=0,retired=false,encrypted=false;
+	let gen=0,retired=false,encrypted=false,unavailable=false;
 	let session: Session|null=null;
 	let observer: MutationObserver|null=null;
 	const seen=new Set<string>();
@@ -133,20 +134,27 @@ export function createSourceAgent(doc: Document) {
 		if(!owned) return;
 		owned.cancel(reason);
 		owned.unlisten();
+		owned.unwatch();
 		owned.peer.close();
 		for(const track of owned.stream.getTracks()) track.stop();
+	}
+	function invalidate(reason: string) {
+		const binding=owner? {ownerId: owner,generation: gen}:null;
+		gen++;
+		release(reason);
+		if(binding) {try {invalidated(binding);} catch {return;}}
 	}
 	function refresh(event?: Event) {
 		if(!video) return;
 		if(!connected(video,doc)) {stop(); return;}
 		const next=stamp(video);
-		if(!source||!sameSource(source,next)||['loadstart','emptied','encrypted','error'].includes(event?.type??'')) {
-			gen++;
+		if(event?.type==='encrypted') encrypted=true;
+		const blocked=Boolean(video.mediaKeys||video.error||encrypted);
+		if(!source||!sameSource(source,next)||(blocked&&!unavailable)||['loadstart','emptied','encrypted','error'].includes(event?.type??'')) {
 			source=next;
-			if(event?.type==='encrypted') encrypted=true;
-			release('source-changed');
+			invalidate('source-changed');
 		}
-		if(video.mediaKeys||video.error||encrypted) release('media-unavailable');
+		unavailable=blocked;
 	}
 	function read(): Snapshot {
 		refresh();
@@ -165,12 +173,11 @@ export function createSourceAgent(doc: Document) {
 		};
 	}
 	function stop() {
-		if(video) gen++;
-		release('stopped');
+		if(video) invalidate('stopped');
 		observer?.disconnect();
 		observer=null;
 		for(const name of events) video?.removeEventListener(name,refresh);
-		video=null; source=null; owner=null; encrypted=false;
+		video=null; source=null; owner=null; encrypted=false; unavailable=false;
 		return read();
 	}
 	function select() {
@@ -247,10 +254,11 @@ export function createSourceAgent(doc: Document) {
 		catch(error) {for(const track of stream.getTracks()) track.stop(); throw error;}
 		const owned: Session={
 			ownerId: snap.ownerId,generation: snap.generation,video: target,
-			stream,peer,offered: false,cancel: () => {},unlisten: () => {}
+			stream,peer,offered: false,cancel: () => {},unlisten: () => {},unwatch: () => {}
 		};
 		session=owned;
 		return deadline(owned,async () => {
+			owned.unwatch=watchCapture(owned,() => {if(session===owned) release('broker-lost');});
 			check(owned);
 			const tracks=stream.getTracks();
 			if(!tracks.some(track => track.kind==='video'&&track.readyState==='live')) {
@@ -304,5 +312,11 @@ export type Ack=Awaited<ReturnType<SourceAgent['command']>>;
 export type CaptureOffer=Awaited<ReturnType<SourceAgent['captureOffer']>>;
 declare global {var __M1010_AGENT__: SourceAgent|undefined;}
 if(typeof window!=='undefined'&&window.top===window&&!globalThis.__M1010_AGENT__) {
-	globalThis.__M1010_AGENT__=createSourceAgent(document);
+	globalThis.__M1010_AGENT__=createSourceAgent(document,binding => {
+		void chrome.runtime.sendMessage({type: 'acquire.source-invalid',...binding}).catch(() => {});
+	},(binding,lost) => {
+		const port=chrome.runtime.connect({name: `m1010-source:${binding.ownerId}:${binding.generation}`});
+		port.onDisconnect.addListener(lost);
+		return () => {port.onDisconnect.removeListener(lost); port.disconnect();};
+	});
 }
