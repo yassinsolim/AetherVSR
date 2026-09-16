@@ -142,7 +142,7 @@ export async function displayFrameEvidence({ generation }) {
       timer = setTimeout(() => reject(new Error('Display frame deadline')), 5000);
       const sample = (at, metadata) => {
         frames.push({ at, mediaTime: metadata.mediaTime, width: metadata.width, height: metadata.height });
-        if (frames.length === 3) done(); else callback = receiver.requestVideoFrameCallback(sample);
+        done();
       };
       callback = receiver.requestVideoFrameCallback(sample); receiver.play().catch(reject);
     });
@@ -154,7 +154,8 @@ export async function displayFrameEvidence({ generation }) {
     const sha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', pixels))].map(value => value.toString(16).padStart(2, '0')).join('');
     api.displayForGeneration(generation);
     return { generation, width: canvas.width, height: canvas.height, frames, pixels: { bytes: pixels.length, sha256, base64: btoa(binary) },
-      scope: 'Finite paused diagnostic readback from muted receiver; actual display pixels, no track clone, neural, scanout or audio measurement' };
+      scope: 'First decoded frame of a newly attached muted receiver, paused before diagnostic readback; no track clone, neural, scanout or audio measurement',
+      stateTransitionFreshness: 'not measured; one frame is not an acknowledgment of a preceding layout or target change', cadence: 'not measured' };
   } finally {
     clearTimeout(timer); if (callback !== undefined) receiver.cancelVideoFrameCallback(callback);
     receiver.pause(); receiver.srcObject = null; receiver.remove(); canvas.width = canvas.height = 0;

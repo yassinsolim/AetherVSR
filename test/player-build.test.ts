@@ -15,6 +15,28 @@ function check(source: string) {
 }
 
 describe('M10.10 research package isolation', () => {
+  it('records a static display frame without assuming recurring capture callbacks', () => check(`
+    const {displayFrameEvidence}=await import('./tools/m1010/capture-study.mjs'),{runInNewContext}=await import('node:vm');
+    for(const scenario of['static','timeout','replaced']){
+      let callback,timer,cancelled=0,removed=0,generation=7;
+      const stream={getVideoTracks:()=>[{readyState:'live'}]};
+      const receiver={style:{},videoWidth:1,videoHeight:1,play:()=>Promise.resolve(),pause(){},remove(){removed++},requestVideoFrameCallback:fn=>{callback=fn;return 1},cancelVideoFrameCallback:()=>cancelled++};
+      const canvas={getContext:()=>({drawImage(){},getImageData:()=>({data:new Uint8ClampedArray([1,2,3,255])})})};
+      const collect=runInNewContext('('+displayFrameEvidence.toString()+')',{
+        __M1010_SOURCE__:{displayForGeneration:ticket=>{assert.equal(ticket,generation,'generation changed');return stream}},
+        document:{createElement:name=>name==='video'?receiver:canvas,body:{append(){}}},
+        setTimeout:fn=>{timer=fn;return 1},clearTimeout:()=>{timer=null},btoa,
+        crypto:{subtle:{digest:async()=>{if(scenario==='replaced')generation++;return new ArrayBuffer(32)}}},
+      });
+      const pending=collect({generation:7});
+      if(scenario==='timeout'){timer();await assert.rejects(()=>pending,/deadline/);}
+      else {callback(1,{mediaTime:0,width:1,height:1});
+        if(scenario==='replaced')await assert.rejects(()=>pending,/generation changed/);
+        else {const result=await pending;assert.equal(result.frames.length,1);assert.equal(result.pixels.bytes,4);assert.equal(result.cadence,'not measured');assert.match(result.stateTransitionFreshness,/not measured/);}
+      }
+      assert.equal(timer,null);assert.equal(cancelled,1);assert.equal(removed,1);assert.equal(receiver.srcObject,null);assert.equal(canvas.width,0);assert.equal(canvas.height,0);
+    }
+  `));
   it('uses explicit diagnostic dimensions and terminal permission or prefix outcomes', () => check(`
     const {seekDiagnosticFrame,captureConsentResult,terminalizeTabSuffix,TAB_FIDELITY_CASES,stopAfterUnsafeSelf,SELF_CAPTURE_CASES}=await import('./tools/m1010/capture-study.mjs');
     const {runInNewContext}=await import('node:vm');
