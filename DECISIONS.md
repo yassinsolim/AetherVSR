@@ -1568,3 +1568,25 @@ The original video remains authoritative. Production S1, the four GPU stages,
 model, permissions and controller are unchanged; the known presentation FAIL,
 extension PARTIAL and M11 GATED verdicts remain. No new implementation ships.
 See docs/M10.8-REPORT.md and results/m108-feasibility.json for evidence and limits.
+
+## ADR-0049 - Owner-approved M10.9 compact-evidence headroom
+
+**Status:** accepted by explicit owner approval before new M10.9 artifacts or
+experiments. Supersedes only ADR-0046's aggregate tracked-tree limit.
+
+At clean c727f0196b47d32eaad16869e6a849d6995f0075, Git object sizes total
+52,295,396 bytes, leaving 133,404 bytes under the 50 MiB limit. The lean M10.9
+planning estimate is 170,000 additional bytes: source/fixture 55,000, tests
+20,000, documentation 45,000, compact evidence 50,000. These are estimates,
+not measured final sizes; the projected total exceeds the cap by 36,596 bytes.
+Work stopped for a storage-policy decision. The owner explicitly authorized
+**51 MiB (53,477,376 bytes)** through the M10.9 storage-policy question.
+
+Only the aggregate guard changes. The 8 MiB per-file limit, existing explicit
+exceptions and generated-data prohibitions remain. Historical evidence and Git
+history are preserved. New native traces, screenshots, profiles and media stay
+ignored; required compact derived evidence, source, tests and documentation
+remain tracked. Check prospective Git-normalized bytes before every commit.
+Reaching this new cap requires another explicit owner decision, not an automatic
+increase. This storage authorization does not change any safety, performance,
+production, publication or M11 gate.
