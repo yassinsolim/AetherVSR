@@ -18,6 +18,74 @@ export const MEDIA_CASES = [
   { name: 'credentialed', mode: 'auth', asset: 'A', credentials: 'include' },
 ];
 
+export async function observeCadence({ durationMs = 10000 } = {}) {
+  if (!Number.isFinite(durationMs) || durationMs <= 0) throw new Error('Invalid cadence window');
+  const video = document.querySelector('video'), frames = [], events = [];
+  const quality = () => {
+    const value = video.getVideoPlaybackQuality?.();
+    return value ? { totalVideoFrames: value.totalVideoFrames, droppedVideoFrames: value.droppedVideoFrames } : null;
+  };
+  const result = { durationMs, timeOrigin: performance.timeOrigin, start: null, end: null, frames, events,
+    qualityOpening: null, qualityClosing: null, error: null };
+  let handle, timer;
+  const onEvent = event => events.push({ type: event.type, at: performance.now(), mediaTime: video.currentTime });
+  const names = ['pause', 'ended', 'waiting', 'stalled', 'seeking', 'seeked', 'resize', 'error'];
+  names.forEach(name => video.addEventListener(name, onEvent));
+  document.addEventListener('visibilitychange', onEvent); window.addEventListener('blur', onEvent);
+  try {
+    await new Promise((done, reject) => {
+      timer = setTimeout(() => reject(new Error('No decoded frame within 5s')), 5000);
+      const sample = (callbackAt, metadata) => {
+        const at = performance.now();
+        if (result.start === null) {
+          clearTimeout(timer); result.start = at; result.qualityOpening = quality();
+          timer = setTimeout(done, durationMs);
+        }
+        frames.push({ at, callbackAt, mediaTime: metadata.mediaTime, presentedFrames: metadata.presentedFrames,
+          expectedDisplayTime: metadata.expectedDisplayTime, presentationTime: metadata.presentationTime,
+          captureTime: metadata.captureTime ?? null, receiveTime: metadata.receiveTime ?? null,
+          width: metadata.width, height: metadata.height, visibility: document.visibilityState, focused: document.hasFocus() });
+        handle = video.requestVideoFrameCallback(sample);
+      };
+      handle = video.requestVideoFrameCallback(sample);
+      video.play().catch(reject);
+    });
+  } catch (error) { result.error = String(error); }
+  finally {
+    result.end = performance.now(); result.qualityClosing = quality();
+    clearTimeout(timer); if (handle !== undefined) video.cancelVideoFrameCallback(handle);
+    names.forEach(name => video.removeEventListener(name, onEvent)); video.pause();
+    document.removeEventListener('visibilitychange', onEvent); window.removeEventListener('blur', onEvent);
+  }
+  return result;
+}
+
+export function summarizeCadence(record) {
+  const { frames, start, end, durationMs } = record;
+  const elapsedMs = start === null ? null : end - start;
+  const gaps = frames.slice(1).map((frame, index) => frame.at - frames[index].at).sort((left, right) => left - right);
+  const percentile = fraction => gaps.length ? gaps[Math.ceil(gaps.length * fraction) - 1] : null;
+  let counterGaps = 0, repeatedMediaTimes = 0, mediaDiscontinuities = 0, counterRegressions = 0;
+  for (let index = 1; index < frames.length; index++) {
+    const frame = frames[index], previous = frames[index - 1], delta = frame.presentedFrames - previous.presentedFrames;
+    counterGaps += Math.max(0, delta - 1); counterRegressions += Number(delta < 0);
+    repeatedMediaTimes += Number(frame.mediaTime === previous.mediaTime);
+    mediaDiscontinuities += Number(frame.mediaTime < previous.mediaTime);
+  }
+  const valid = !record.error && elapsedMs >= durationMs && frames.length > 1 && !counterRegressions &&
+    !record.events?.some(event => ['blur', 'visibilitychange', 'error'].includes(event.type)) &&
+    frames.every(frame => frame.visibility === 'visible' && frame.focused);
+  return { outcome: valid ? 'RECORDED' : 'UNRESOLVED', elapsedMs, callbacks: frames.length,
+    intervalCallbacks: Math.max(0, frames.length - 1),
+    callbackFps: elapsedMs > 0 && frames.length > 0 ? (frames.length - 1) * 1000 / elapsedMs : null,
+    trailingSilenceMs: frames.length ? end - frames.at(-1).at : null,
+    presentedCounterDelta: frames.length > 1 ? frames.at(-1).presentedFrames - frames[0].presentedFrames : null,
+    counterGaps, counterRegressions, repeatedMediaTimes, mediaDiscontinuities,
+    callbackGapMs: { median: percentile(0.5), p95: percentile(0.95), maximum: gaps.at(-1) ?? null, over100ms: gaps.filter(value => value > 100).length },
+    distinctPixelFrames: 'not measured', pixelDuplicates: 'not measured', successfulSubmissions: 'not measured',
+    scope: 'First decoded callback anchors the window and is excluded from interval rate; actual elapsed wall time through timer completion. rVFC/counter gaps are not independent decoded-frame loss or physical scanout.' };
+}
+
 export async function observePlayback() {
   const video = document.querySelector('video'), frames = [], events = [];
   let handle, timer;

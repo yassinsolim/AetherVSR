@@ -15,9 +15,35 @@ function check(source: string) {
 }
 
 describe('M10.10 research package isolation', () => {
+  it('measures cadence over actual elapsed time without inventing pixel identity or submissions', () => check(`
+    const {summarizeCadence,observeCadence}=await import('./tools/m1010/acquisition.mjs');
+    const frames=[0,20,40,160].map((at,index)=>({at,mediaTime:[0,.02,.02,0][index],presentedFrames:[1,2,4,5][index],visibility:'visible',focused:true}));
+    const record={frames,start:0,end:200,durationMs:200,error:null};
+    const result=summarizeCadence(record);
+    assert.equal(result.outcome,'RECORDED');assert.equal(result.callbackFps,15);
+    assert.equal(result.presentedCounterDelta,4);assert.equal(result.counterGaps,1);
+    assert.equal(result.repeatedMediaTimes,1);assert.equal(result.mediaDiscontinuities,1);
+    assert.deepEqual(result.callbackGapMs,{median:20,p95:120,maximum:120,over100ms:1});
+    assert.equal(result.pixelDuplicates,'not measured');assert.equal(result.successfulSubmissions,'not measured');
+    assert.equal(summarizeCadence({...record,frames:[]}).callbackFps,null);
+    assert.equal(result.trailingSilenceMs,40);
+    for(const change of[{error:'play denied'},{end:199},{events:[{type:'blur'}]},{frames:[{...frames[0],focused:false},...frames.slice(1)]}])assert.equal(summarizeCadence({...record,...change}).outcome,'UNRESOLVED');
+    const {runInNewContext}=await import('node:vm');
+    let now=0,callback,timerId=0,paused=0,cancelled=0;const timers=new Map(),listeners=new Set();
+    const video={currentTime:0,play:()=>Promise.resolve(),pause:()=>paused++,requestVideoFrameCallback:fn=>{callback=fn;return 1},cancelVideoFrameCallback:()=>{cancelled++;callback=null},addEventListener:name=>listeners.add(name),removeEventListener:name=>listeners.delete(name)};
+    const context={document:{querySelector:()=>video,visibilityState:'visible',hasFocus:()=>true,addEventListener:video.addEventListener,removeEventListener:video.removeEventListener},window:{addEventListener:video.addEventListener,removeEventListener:video.removeEventListener},performance:{now:()=>now,timeOrigin:1000},setTimeout:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId},clearTimeout:id=>timers.delete(id)};
+    const observe=runInNewContext('('+observeCadence.toString()+')',context);
+    const pending=observe({durationMs:200});assert.equal(timers.values().next().value.delay,5000);
+    callback(0,{mediaTime:0,presentedFrames:1,width:1280,height:720});assert.equal(timers.size,1);assert.equal(timers.values().next().value.delay,200);
+    now=20;callback(20,{mediaTime:.02,presentedFrames:2,width:1280,height:720});now=203;timers.values().next().value.fn();
+    const measured=await pending;assert.equal(measured.end,203);assert.equal(measured.frames.length,2);assert.equal(measured.error,null);
+    assert.equal(paused,1);assert.equal(cancelled,1);assert.equal(listeners.size,0);assert.equal(timers.size,0);
+    const denied=observe({durationMs:200});timers.values().next().value.fn();assert.match((await denied).error,/No decoded frame/);assert.equal(timers.size,0);assert.equal(listeners.size,0);
+  `));
   it('fixes the R1 automatic prefix and waits for observed state, never an assumed click', () => check(`
-    const {R1_CASES,INPUT_TIMES,waitForObserved,replayStage,replayOutcome,redirectOutcome}=await import('./tools/m1010/study.mjs');
+    const {R1_CASES,R1_INPUT_CASES,INPUT_TIMES,waitForObserved,replayStage,replayOutcome,redirectOutcome}=await import('./tools/m1010/study.mjs');
     assert.deepEqual(R1_CASES.map(value=>value.id),['R1-A','R1-B','R1-C','R1-D','R1-J','R1-K']);
+    assert.deepEqual(R1_INPUT_CASES.map(value=>value.id),['R1-input-A-source','R1-input-A-replay','R1-input-B-source','R1-input-B-replay']);
     assert.deepEqual(INPUT_TIMES,[1.2,2.2,3.2]);
     assert.deepEqual(await waitForObserved(async()=>({granted:true}),value=>value.granted,0),{granted:true});
     await assert.rejects(()=>waitForObserved(async()=>({granted:false}),value=>value.granted,0),/no action assumed/);

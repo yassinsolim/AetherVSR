@@ -9,7 +9,7 @@ import { seekPaused } from '../m10-output-parity.mjs';
 import { studyIdentity, openResearch } from './native.mjs';
 import { startFixtures } from './fixtures.mjs';
 import { openCheckpoint } from './checkpoint.mjs';
-import { observePlayback, inputFrameEvidence, pixelDifference } from './acquisition.mjs';
+import { observePlayback, observeCadence, summarizeCadence, inputFrameEvidence, pixelDifference } from './acquisition.mjs';
 
 export const R1_CASES = [
   { id: 'R1-A', mode: 'same', packaged: true },
@@ -20,6 +20,7 @@ export const R1_CASES = [
   { id: 'R1-K', mode: 'MSE' },
 ];
 export const INPUT_TIMES = [1.2, 2.2, 3.2];
+export const R1_INPUT_CASES = ['A', 'B'].flatMap(asset => ['source', 'replay'].map(surface => ({ asset, surface, id: `R1-input-${asset}-${surface}` })));
 
 export function replayStage(completed, automaticOnly) {
   if (completed.includes('R1-F')) return 'RETAINED';
@@ -322,8 +323,96 @@ export async function runReplayStudy(directory, { automaticOnly = false } = {}) 
   } finally { await player?.close().catch(() => {}); await native?.close(); await fixtures?.close(); }
 }
 
+export async function runReplayInputStudy(directory, priorDirectory) {
+  const identity = studyIdentity(), root = resolve(ROOT, directory);
+  assert(root.startsWith(join(ROOT, '.cache/m1010/')));
+  assert.notEqual(root, resolve(ROOT, priorDirectory));
+  const priorPath = resolve(ROOT, priorDirectory, 'state.json'), priorBytes = readFileSync(priorPath), priorState = JSON.parse(priorBytes);
+  const prior = openCheckpoint(priorDirectory, priorState.pin);
+  assert(prior.has('R1-F'), 'Complete the retained acquisition batch first');
+  let native, fixtures;
+  try {
+    native = await openResearch(identity);
+    const executableSha256 = sha256(readFileSync(native.executable));
+    assert.equal(executableSha256, priorState.pin.browserExecutableSha256, 'Different browser requires a separately registered comparison');
+    const checkpoint = openCheckpoint(directory, { studyVersion: 'M10.10-replay-input-1', sourceCommit: identity.sourceCommit, browserExecutableSha256: executableSha256 });
+    const step = async (id, run) => {
+      if (checkpoint.has(id)) { console.log(JSON.stringify({ skippedImmutable: id })); return checkpoint.read(id); }
+      checkpoint.begin(id); console.log(JSON.stringify({ running: id }));
+      try {
+        const result = await run(); checkpoint.complete(id, result);
+        console.log(JSON.stringify({ completed: id, outcome: result.outcome ?? 'RECORDED', cadence: result.cadenceSummary?.callbackFps })); return result;
+      } catch (error) { checkpoint.complete(id, { outcome: 'UNRESOLVED', error: String(error) }); throw error; }
+    };
+    fixtures = await startFixtures({ extensionOrigins: [`chrome-extension://${native.extensionId}`] });
+    await step('environment', async () => ({ ...environment(), identity, browser: { version: await native.browser.version(), executableSha256,
+      policy: 'default; no permission requests, no focus emulation' }, media: fixtures.media,
+      prior: { path: relative(ROOT, priorPath), bytes: priorBytes.length, sha256: sha256(priorBytes), sourceCommit: priorState.pin.sourceCommit },
+      scope: 'Independent input and raw media cadence only; no broker session or neural pipeline. Four-second fixtures loop; discontinuities retained.' }));
+    for (const entry of R1_INPUT_CASES) await step(entry.id, async () => {
+      const page = await native.context.newPage(), input = [], media = fixtures.media[entry.asset];
+      const result = { ...entry, mediaSha256: media.sha256, input, outcome: 'UNRESOLVED' };
+      try {
+        result.placement = await nativeWindow(page, native.context);
+        if (entry.surface === 'source') {
+          await page.goto(fixtures.url); await page.waitForFunction(() => !!globalThis.__M1010_SOURCE__?.snapshot().selection);
+          await page.evaluate(asset => globalThis.__M1010_SOURCE__.prepare({ mode: 'same', asset }), entry.asset);
+          await page.bringToFront(); await page.locator('#play').click();
+        } else {
+          await page.goto(`chrome-extension://${native.extensionId}/acquire.html`); await page.bringToFront();
+          await page.evaluate(url => { const video = document.querySelector('video'); video.crossOrigin = 'anonymous'; video.src = url; video.muted = true; video.load(); }, `${fixtures.origins[1]}/cors/${entry.asset}.mp4`);
+          await page.locator('h1').click();
+        }
+        result.playback = await page.evaluate(observePlayback); assert(result.playback.playable);
+        result.fetch = await fetchObservation(page, result.playback.currentSrc); assert.equal(result.fetch.sha256, media.sha256);
+        await page.evaluate(() => { document.querySelector('video').loop = true; });
+        result.cadence = await page.evaluate(observeCadence, { durationMs: 10000 });
+        result.cadenceSummary = summarizeCadence(result.cadence);
+        for (const time of INPUT_TIMES) {
+          const seek = await page.evaluate(seekPaused, { time }), frame = await page.evaluate(inputFrameEvidence);
+          for (const key of ['pixels', 'copiedPixels']) if (frame[key]) {
+            const { base64, ...metadata } = frame[key], bytes = Buffer.from(base64, 'base64');
+            assert.equal(bytes.length, metadata.bytes); assert.equal(sha256(bytes), metadata.sha256);
+            const path = `${entry.id}-${time}-${randomUUID()}-${key}.rgba`;
+            writeFileSync(join(root, path), bytes, { flag: 'wx' }); frame[key] = { ...metadata, path };
+          }
+          input.push({ time, seek, frame });
+        }
+        if (entry.surface === 'replay') {
+          const reference = checkpoint.read(`R1-input-${entry.asset}-source`);
+          assert.equal(reference.input?.length, INPUT_TIMES.length, 'Independent source reference incomplete');
+          result.comparisons = input.map((row, index) => {
+            const original = reference.input[index], sameDimensions = row.frame.width === original.frame.width && row.frame.height === original.frame.height;
+            const comparison = { time: row.time, sameDimensions, sameMediaTime: row.seek.metadata.mediaTime === original.seek.metadata.mediaTime };
+            for (const key of ['pixels', 'copiedPixels']) comparison[key] = sameDimensions && row.frame[key] && original.frame[key] ?
+              pixelDifference(readFileSync(join(root, original.frame[key].path)), readFileSync(join(root, row.frame[key].path))) : null;
+            comparison.exact = comparison.sameDimensions && comparison.sameMediaTime && comparison.pixels?.exact === true && comparison.copiedPixels?.exact === true;
+            return comparison;
+          });
+        }
+        result.outcome = input.every(row => row.frame.width === 1280 && row.frame.height === 720 && row.frame.originClean && row.frame.externalImportable && row.frame.forcedCopyImportable) &&
+          (entry.surface === 'source' || result.comparisons.every(row => row.exact)) && result.cadenceSummary.outcome === 'RECORDED' ? 'SUPPORTED' : 'UNRESOLVED';
+      } catch (error) { result.error = String(error); result.outcome = 'UNRESOLVED';
+      } finally {
+        if (!page.isClosed()) result.cleanup = await page.evaluate(() => {
+          const video = document.querySelector('video'); video.pause(); video.srcObject = null; video.removeAttribute('src'); video.load();
+          return { paused: video.paused, srcObject: video.srcObject, sourceAttribute: video.getAttribute('src') };
+        }).catch(error => ({ error: String(error) }));
+        await page.close();
+      }
+      if (result.cleanup?.error || result.cleanup?.paused !== true || result.cleanup?.srcObject !== null || result.cleanup?.sourceAttribute !== null) result.outcome = 'UNRESOLVED';
+      return result;
+    });
+    const supported = R1_INPUT_CASES.every(entry => checkpoint.read(entry.id).outcome === 'SUPPORTED');
+    checkpoint.candidate('R1', { state: supported ? 'INPUT_CADENCE_RECORDED_NOT_QUALIFIED' : 'INPUT_CADENCE_UNRESOLVED', missing: ['instrumented latency/A/V', 'pipeline input/output parity for these inputs', 'neural qualification'] });
+    return checkpoint.snapshot();
+  } finally { await native?.close(); await fixtures?.close(); }
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === new URL(import.meta.url).pathname) {
   const [phase, directory, option] = process.argv.slice(2);
-  assert(phase === 'r1' && directory && [undefined, '--automatic-only'].includes(option), 'Usage: study.mjs r1 .cache/m1010/<study> [--automatic-only]');
-  await runReplayStudy(directory, { automaticOnly: option === '--automatic-only' });
+  assert(directory && (phase === 'r1' && [undefined, '--automatic-only'].includes(option) || phase === 'r1-input' && option),
+    'Usage: study.mjs r1 <directory> [--automatic-only] | r1-input <directory> <prior-directory>');
+  if (phase === 'r1-input') await runReplayInputStudy(directory, option);
+  else await runReplayStudy(directory, { automaticOnly: option === '--automatic-only' });
 }
