@@ -195,7 +195,7 @@ export function comparePixels(original, replacement, width, height, region, dpr 
     if (neighbors.some(neighbor => [0, 1, 2].some(channel => Math.abs(original[neighbor + channel] - original[offset + channel]) > 2))) continue;
     tested++; colors.add(original.subarray(offset, offset + 3).toString('hex'));
     if (Array.isArray(expectedColor) && expectedColor.some((value, channel) => Math.abs(value - original[offset + channel]) > 8)) wrongOriginal++;
-    if (expectedColor && !Array.isArray(expectedColor)) {
+    if (expectedColor && !Array.isArray(expectedColor) && 'dominantChannel' in expectedColor) {
       const channel = expectedColor.dominantChannel;
       if ([0, 1, 2].filter(index => index !== channel).some(index => original[offset + channel] - original[offset + index] < 64)) wrongOriginal++;
     }
@@ -305,7 +305,9 @@ async function paintedProof(context, prefix) {
   if (info.radius) add('rounded-outside', { left: box.left, top: box.top, width: info.radius, height: info.radius }, [24, 24, 24],
     { centerX: box.left + info.radius, centerY: box.top + info.radius, radius: info.radius });
   add('caption', { left: info.caption.left + 3, top: info.caption.top + 3, width: info.caption.width - 6, height: info.caption.height - 6 }, [240, 40, 200]);
-  add('control', info.controls, null);
+  add('control', info.controls, { pairedControlPixels: true });
+  add('control-background-top', { left: info.controls.left + 6, top: info.controls.top + 3,
+    width: info.controls.width - 12, height: 3 }, [220, 220, 220]);
   add('control-background', { left: info.controls.left + 6, top: info.controls.top + info.controls.height - 6,
     width: info.controls.width - 12, height: 3 }, [220, 220, 220]);
   const actual = regions.filter(region => region.status !== 'NOT VISIBLE');
@@ -750,14 +752,26 @@ export async function runFiniteRevision(prefix, priorPath, apparatusPriorPath = 
   if (apparatusPriorPath) {
     const path = resolve(apparatusPriorPath); assert(path.startsWith(join(ROOT, '.cache/m109/')));
     const bytes = readFileSync(path), previous = JSON.parse(bytes), failed = previous.results.common.results[0];
-    assert.equal(previous.results.common.results.length, 1); assert.equal(failed.name, 'initial');
-    assert.equal(failed.firstFailure, null); assert(failed.crops[0].regions.every(region => region.wrong === 0));
-    assert(failed.crops[0].regions.some(region => region.wrongOriginal > 0));
+    const latest = previous.results.common.results.at(-1);
+    assert.equal(latest.firstFailure, null);
+    if (previous.results.common.results.length === 1) {
+      assert.equal(failed.name, 'initial'); assert(failed.crops[0].regions.every(region => region.wrong === 0));
+      assert(failed.crops[0].regions.some(region => region.wrongOriginal > 0));
+    } else {
+      assert.equal(previous.results.common.results.length, 5); assert.equal(latest.name, 'nested-scroll');
+      assert(previous.results.common.results.slice(0, 4).every(row => row.outcome === 'SUPPORTED_CORRECT'));
+      const regions = latest.crops[0].regions.filter(region => region.status !== 'NOT VISIBLE');
+      assert(regions.every(region => region.wrong === 0 && region.wrongOriginal === 0));
+      assert.deepEqual(regions.filter(region => region.verdict !== 'SUPPORTED_CORRECT').map(region => region.name), ['control']);
+      assert(regions.find(region => region.name === 'control').tested >= 100);
+    }
     for (const source of ['tools/m109-contract.ts', 'tools/m109-monitor.ts', 'tools/m109-submission.ts', 'tools/m109-ownership.ts']) {
       assert.equal(previous.identity.pins[source], current.pins[source], 'Oracle correction cannot revise any candidate');
     }
     report.supersededOracle = { path: relative(ROOT, path), bytes: bytes.length, sha256: sha256(bytes), identity: previous.identity,
-      reason: 'Old screenshot decoder discarded ICC and compared video color-managed pixels/glyphs against inappropriate absolute-color masks; paired differences were <=1. Candidate unchanged; fresh affected evidence required.' };
+      reason: previous.results.common.results.length === 1
+        ? 'Old screenshot decoder discarded ICC and compared video color-managed pixels/glyphs against inappropriate absolute-color masks; paired differences were <=1. Candidate unchanged; fresh affected evidence required.'
+        : 'Nested-scroll retained only a uniform visible control strip; the texture-count guard incorrectly required clipped-away text. All paired/color differences passed; candidate unchanged and fresh affected evidence required.' };
   }
   let service, native;
   try {
