@@ -1,0 +1,100 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AetherVSR observable presentation fixture</title>
+<link rel="icon" href="data:,">
+<style id="base">
+  html,body{margin:0;background:white}body{min-height:2400px}
+  #spacer{height:240px}#outer{margin-left:40px;width:640px;position:relative}
+  .player{position:relative;isolation:isolate;display:block;width:640px;height:400px;background:rgb(24,24,24)}
+  video{position:relative;z-index:0;display:block;width:100%;height:100%;object-fit:contain;object-position:50% 50%;background:transparent}
+  video[hidden]{display:none!important}.controls{position:absolute;left:0;bottom:-44px;z-index:3;height:36px}
+  button{min-height:32px;background:rgb(220,220,220);color:black;border:1px solid #444}#caption{position:absolute;left:24px;top:24px;width:96px;height:24px;background:rgb(240,40,200);z-index:3;pointer-events:none}
+  #commands{position:fixed;right:8px;top:8px;z-index:20}.player:fullscreen{width:100%;height:100%}
+  .player:fullscreen video{height:calc(100% - 44px)}.player:fullscreen .controls{bottom:0}
+  #outer.moved{left:37px}#outer.nested{height:440px;overflow:hidden}#outer.nested .player{margin-top:160px}
+  #outer.nested::after{content:'';display:block;height:600px}
+</style>
+<div id="spacer"></div>
+<div id="outer"><div class="player" id="player"><video muted playsinline autoplay loop src="/m109-media/pattern.mp4"></video><div class="controls"><button id="activate">Activate</button><button id="play">Play</button><button id="pause">Pause</button></div><div id="caption"></div></div></div>
+<div id="destination"></div>
+<div id="commands"><button id="fullscreen">Fullscreen</button><button id="exit">Exit</button></div>
+<script>
+  const video=document.querySelector('video'),player=document.getElementById('player'),outer=document.getElementById('outer');
+  let ruleSheet=document.getElementById('base').sheet,ruleIndex=null,ruleState=null,mediaSource,sourceBuffer,blob;
+  const state={expected:'SUPPORTED',fit:'contain',position:[.5,.5],radius:0,activations:0,operation:0,expectedParent:video.parentNode};
+  const rect=element=>{const value=element.getBoundingClientRect();return{left:value.left,top:value.top,width:value.width,height:value.height};};
+  const frame=()=>new Promise(done=>video.requestVideoFrameCallback(()=>done()));
+  const settled=()=>new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)));
+  const append=bytes=>new Promise((done,reject)=>{sourceBuffer.addEventListener('updateend',done,{once:true});sourceBuffer.addEventListener('error',reject,{once:true});sourceBuffer.appendBuffer(bytes);});
+  document.getElementById('activate').onclick=()=>state.activations++;
+  document.getElementById('play').onclick=()=>video.play();document.getElementById('pause').onclick=()=>video.pause();
+  document.getElementById('fullscreen').onclick=()=>player.requestFullscreen();document.getElementById('exit').onclick=()=>document.exitFullscreen();
+  globalThis.__M109_FIXTURE__={video,player,outer,state,rect,settled,
+    async prepare(name){
+      if(name==='nested-scroll')outer.classList.add('nested');
+      if(name==='open-shadow'){
+        const host=document.createElement('div');outer.append(host);const root=host.attachShadow({mode:'open'}),style=document.createElement('style');
+        style.textContent=document.getElementById('base').textContent;root.append(style,player);ruleSheet=style.sheet;
+      }
+      if(name==='initially-unsupported'){video.style.opacity='.5';state.expected='UNSUPPORTED';}
+      if(name==='cover'){video.style.objectFit='cover';state.fit='cover';}
+      if(name==='rounded-video'){video.style.borderRadius='24px';video.style.objectFit='cover';state.radius=24;state.fit='cover';}
+      if(name==='clip-margin')video.style.overflow='clip';
+      if(name==='existing-anchor')video.style.setProperty('anchor-name','--page-existing');
+      if(['abr','source-scroll'].includes(name)){
+        const config=await fetch('/m109-media/config.json').then(response=>response.json());
+        mediaSource=new MediaSource();blob=URL.createObjectURL(mediaSource);video.src=blob;
+        await new Promise(done=>mediaSource.addEventListener('sourceopen',done,{once:true}));
+        sourceBuffer=mediaSource.addSourceBuffer(config.mime);sourceBuffer.mode='sequence';
+        await append(await fetch('/m109-media/low.mp4').then(response=>response.arrayBuffer()));
+      }
+      await video.play();await frame();await settled();return this.host();
+    },
+    host(){return{attributes:[...video.attributes].map(attribute=>[attribute.name,attribute.value]),rect:rect(video),parent:video.parentNode===state.expectedParent,
+      focus:[...document.querySelectorAll('button,a,input,select,textarea,[tabindex]')].map(element=>element.id),activations:state.activations};},
+    async action(name,payload){
+      state.operation++;dispatchEvent(new CustomEvent('m109:action',{detail:{name,phase:'before'}}));
+      if(name==='page-one')scrollTo(0,1);else if(name==='page-228')scrollTo(0,228);else if(name==='page-zero')scrollTo(0,0);
+      else if(name==='smooth')scrollTo({top:228,behavior:'smooth'});else if(name==='nested-scroll')outer.scrollTop=140;
+      else if(name==='preceding-spacer')document.getElementById('spacer').style.height='277px';else if(name==='class-movement')outer.classList.add('moved');
+      else if(name==='css-resize')player.style.width='600px';
+      else if(name==='viewport-clip')scrollTo(0,300);
+      else if(name==='equivalent-reparent'){const target=document.getElementById('destination');target.className='player';target.style.cssText='position:relative;isolation:isolate;width:640px;height:400px;margin-left:40px';target.append(video);state.expectedParent=target;}
+      else if(name==='offscreen'){scrollTo(0,1000);state.expected='UNSUPPORTED';}else if(name==='return'){scrollTo(0,0);state.expected='SUPPORTED';}
+      else if(name==='hide'){video.hidden=true;state.expected='UNSUPPORTED';}else if(name==='show'){video.hidden=false;state.expected='SUPPORTED';}
+      else if(name==='pause'){video.pause();state.expected='UNSUPPORTED';}else if(name==='play'){await video.play();state.expected='SUPPORTED';}
+      else if(name==='not-ready'){video.removeAttribute('src');video.load();state.expected='UNSUPPORTED';}
+      else if(name==='ready'){video.src='/m109-media/pattern.mp4';await video.play();state.expected='SUPPORTED';}
+      else if(name==='initial-reverse'){video.style.removeProperty('opacity');state.expected='SUPPORTED';}
+      else if(name==='native-controls'){video.controls=true;state.expected='UNSUPPORTED';}else if(name==='native-reverse'){video.controls=false;state.expected='SUPPORTED';}
+      else if(name==='showing-track'){this.track=video.addTextTrack('captions','Local');this.track.mode='showing';state.expected='UNSUPPORTED';}
+      else if(name==='track-reverse'){this.track.mode='disabled';state.expected='SUPPORTED';}
+      else if(name==='late-cssom-fit'){
+        await new Promise(done=>requestAnimationFrame(async()=>{
+          await this.action('cssom',{selector:'video',property:'object-fit',value:'cover',expected:'SUPPORTED'});
+          dispatchEvent(new Event('m109:late-render'));done();
+        }));
+      }
+      else if(name==='source-high'||name==='source-low'||name==='source-scroll'){
+        const high=name!=='source-low',at=sourceBuffer.buffered.end(sourceBuffer.buffered.length-1);
+        await append(await fetch(`/m109-media/${high?'high':'low'}.mp4`).then(response=>response.arrayBuffer()));
+        video.loop=false;video.currentTime=at+.1;if(name==='source-scroll')scrollTo(0,228);await video.play();
+        await new Promise(done=>{const check=()=>video.videoWidth===(high?640:320)&&video.readyState>=2?done():video.requestVideoFrameCallback(check);check();});
+      }else if(name==='cssom'){
+        if(ruleIndex!==null)throw new Error('Only one active CSSOM challenge');
+        ruleState={expected:state.expected,fit:state.fit,position:[...state.position],radius:state.radius};
+        ruleIndex=ruleSheet.cssRules.length;ruleSheet.insertRule(`${payload.selector}{${payload.property}:${payload.value}!important}`,ruleIndex);
+        state.expected=payload.expected??'UNSUPPORTED';
+        if(payload.property==='object-fit')state.fit=payload.value;
+        if(payload.property==='object-position')state.position=[0,0];
+        if(payload.property==='border-radius')state.radius=24;
+      }else if(name==='reverse'){
+        if(ruleIndex===null)throw new Error('No active challenge');ruleSheet.deleteRule(ruleIndex);ruleIndex=null;
+        Object.assign(state,ruleState);ruleState=null;
+      }else if(name!=='noop')throw new Error(`Unknown action ${name}`);
+      const after={name,at:performance.now(),rect:rect(video)};dispatchEvent(new CustomEvent('m109:action',{detail:{name,phase:'after'}}));return after;
+    },
+  };
+  addEventListener('pagehide',()=>{if(blob)URL.revokeObjectURL(blob);},{once:true});
+</script>

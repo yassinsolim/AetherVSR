@@ -17,6 +17,7 @@ export interface SuccessfulFrameSubmission extends SubmissionIdentity {
   sequence: number;
   frameGeneration: number;
   mediaTime: number;
+  observedAt: number;
   sourceWidth: number;
   sourceHeight: number;
   validForRecovery: boolean;
@@ -46,7 +47,7 @@ export function observeSuccessfulSubmissions(
     if (after === null) return;
     receive({ ...before, kind: 'successfulFrameSubmission',
       boundary: 'queue.submit returned; not GPU completion or scanout',
-      sequence, frameGeneration, mediaTime: tick.mediaTime,
+      sequence, frameGeneration, mediaTime: tick.mediaTime, observedAt: performance.now(),
       sourceWidth: tick.size.width, sourceHeight: tick.size.height,
       validForRecovery: before.authorized && after.authorized &&
         before.owner === after.owner && before.sourceGeneration === after.sourceGeneration &&

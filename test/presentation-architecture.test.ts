@@ -11,6 +11,53 @@ function check(source: string) {
   expect(output.trim()).toBe('checked');
 }
 
+describe('M10.9 independent evidence guards',()=>{
+  it('never passes blank images or wrong expected colors as crop proof',()=>check(`
+    const {comparePixels}=await import('./tools/m109-study.mjs');
+    const image=Buffer.alloc(40*40*3,100),region={left:0,top:0,width:40,height:40};
+    assert.equal(comparePixels(image,image,40,40,region,1).verdict,'UNRESOLVED');
+    assert.equal(comparePixels(image,image,40,40,region,1,[100,100,100]).verdict,'SUPPORTED_CORRECT');
+    assert.equal(comparePixels(image,image,40,40,region,1,[200,200,200]).verdict,'UNSAFE');
+    assert.equal(comparePixels(image,Buffer.alloc(image.length,120),40,40,region,1,[100,100,100]).verdict,'UNSAFE');
+    assert.equal(comparePixels(image,image,40,40,{left:0,top:0,width:2,height:2},1,[100,100,100]).verdict,'UNRESOLVED');
+  `));
+  it('requires two ordered matching post-proof submissions before observed reveal',()=>check(`
+    const {validateReveals}=await import('./tools/m109-study.mjs');
+    const record={owner:'one',sourceGeneration:1,geometryGeneration:1,frameGeneration:1,backingWidth:2,backingHeight:2,sourceWidth:1,sourceHeight:1,validForRecovery:true};
+    const trace={rows:[{at:3,boundary:'render',visible:true,source:[1,1],backing:[2,2]}]};
+    const make=()=>({submissions:[{...record,sequence:1,observedAt:1},{...record,sequence:2,observedAt:2}],proofs:[{at:0,generation:1,supported:true}]});
+    assert.equal(validateReveals(trace,make()).verdict,'SUPPORTED_CORRECT');
+    for(const field of['owner','sourceGeneration','geometryGeneration','frameGeneration','backingWidth']){
+      const evidence=make();evidence.submissions[1][field]='changed';assert.equal(validateReveals(trace,evidence).verdict,'UNSAFE');
+    }
+    const missing=make();missing.submissions.shift();assert.equal(validateReveals(trace,missing).verdict,'UNSAFE');
+    const duplicate=make();duplicate.submissions[1].sequence=1;assert.equal(validateReveals(trace,duplicate).verdict,'UNSAFE');
+    const late=make();late.proofs[0].at=2;assert.equal(validateReveals(trace,late).verdict,'UNSAFE');
+    assert.equal(validateReveals(trace,make(),[{name:'reverse',startedAt:1.5}]).verdict,'UNSAFE');
+    const comparison={rows:[{...trace.rows[0],captureOriginal:true}]};
+    assert.equal(validateReveals(comparison,make()).reveals,0);
+  `));
+  it('freezes common order and forward/reverse semantic cases independently of candidate choice',()=>check(`
+    const {CASES:common,SEMANTICS,OWNERSHIP_CASES}=await import('./tools/m109-study.mjs');
+    assert.equal(common.length,52);assert.equal(new Set(common.map(row=>row.name)).size,52);
+    for(const entry of SEMANTICS)assert.deepEqual(entry.actions.map(action=>action.name),['cssom','reverse']);
+    assert.equal(common.at(-1).name,'late-render-cssom');
+    assert.equal(OWNERSHIP_CASES.O1.length,22);assert.equal(OWNERSHIP_CASES.O2.length,12);
+  `));
+  it('rejects native-token operands even when a lease falsely claims safe live-variable cleanup',()=>check(`
+    const {ownershipCase}=await import('./tools/m109-study.mjs');
+    const values=new Map();let created=false;
+    const style={getPropertyValue:name=>values.get(name)??'',getPropertyPriority:()=>'',setProperty:(name,value)=>{created=true;values.set(name,value);},[Symbol.iterator]:()=>values.keys()};
+    const video={style,getBoundingClientRect:()=>({left:0,top:0,width:640,height:400}),getAttribute:name=>name==='style'&&created?[...values].map(([key,value])=>key+':'+value).join(';'):null};
+    globalThis.document={querySelector:()=>video};
+    globalThis.getComputedStyle=()=>({getPropertyValue:()=>values.get('--host-names')??'none'});
+    globalThis.M109={leaseProperty:(_video,token)=>{style.setProperty('anchor-name',token);return{check:()=>({active:true,reason:'active'}),release:()=>({outcome:'SUPPORTED_CORRECT',hostPreserved:true,ownedTokenRemains:false,resources:{observers:0,stylesheets:0}})};}};
+    const result=await ownershipCase({model:'O1',name:'live-variable'});
+    assert.equal(result.restorationCorrect,true);assert.equal(result.independentlyAbsent.inline,null);
+    assert.equal(result.independentlyAbsent.computed,false);assert.equal(result.outcome,'UNSAFE');
+  `));
+});
+
 describe('M10.8 independent architecture helpers',()=>{
   it('retains the frozen failure denominators and nonqualifying controls',()=>check(`
     const {readFileSync}=await import('node:fs');
