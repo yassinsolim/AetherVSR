@@ -9,6 +9,21 @@ const check = (body: string) => execFileSync(process.execPath, ['--input-type=mo
 `], { encoding: 'utf8' });
 
 describe('M10.10R digital timing ground truth', () => {
+  it('distinguishes retained silent sample coverage from scheduled timing observations', () => check(`
+    const {controlDiagnosis,VERDICT}=await import('./tools/m1010r/report.mjs');
+    const record={sampleRate:48000,firstFrame:0,samples:7168,
+      scheduled:[{startFrame:12000,samples:8192,referenceStart:48000,gain:1}],
+      expectedWindows:180,verifiedWindows:0,maximumSampleError:null,errors:Array(180).fill('unverified')};
+    const result=controlDiagnosis(record,Buffer.alloc(7168*4));
+    assert(result.endsBeforeFirstScheduledSignal);assert(!result.overlapWithScheduledSignals);
+    assert.equal(result.nonzeroSamples,0);assert.equal(result.maximumSampleError,null);
+    assert.equal(result.sampleCoverageMs,7168/48000*1000);
+    assert.equal(VERDICT,'CONTROLLED REPLAY PATH NOT QUALIFIED');
+    assert.throws(()=>controlDiagnosis(record,Buffer.alloc(4)));
+    const later=controlDiagnosis({...record,firstFrame:12000},Buffer.alloc(7168*4));
+    assert(later.overlapWithScheduledSignals);assert(!later.endsBeforeFirstScheduledSignal);
+  `));
+
   it('preserves signed audio origins and rejects discontinuity or unaccounted decoded samples', () => check(`
     const stream={time_base:'1/48000',sample_rate:'48000'};
     for(const first of [-960,0,960]) {

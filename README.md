@@ -39,6 +39,13 @@ incomplete. Candidate neural performance and public census were NOT RUN. This is
 not browser impossibility or authorization for M10.11. Production is unchanged.
 [Controlled-player study](docs/M10.10-PRODUCT-REPORT.md).
 
+**M10.10R: CONTROLLED REPLAY PATH NOT QUALIFIED.** The first replay timing
+calibration ended before its audio render clock reached the scheduled controls.
+No candidate handover, A/V, neural playback or soak ran. This is an instrument
+blocker, not proof that progressive replay is impossible. M10.10 history and
+production remain unchanged; M10.11 is not authorized.
+[Replay qualification report](docs/M10.10R-REPORT.md).
+
 **M10.6 history remains PARTIAL, Case D.** Four ten-minute native-video
 controls exceeded the1% combined callback/quality-loss reference, averaging
 4.262931%. This is a lean-instrumented browser result, not physical display loss

@@ -1703,3 +1703,25 @@ A strict dedicated research project/check closes the isolated-player coverage
 gap without relaxing global rules. The unused historical capture target is not a
 qualification entrypoint. See docs/M10.10R-PREREGISTRATION.md for storage forecast,
 conditional gates, authority semantics and the required final product decision.
+
+## ADR-0055 - Replay qualification stops at audio-clock calibration
+
+**Status:** M10.10R closed without product qualification.
+
+Select **CONTROLLED REPLAY PATH NOT QUALIFIED**. The first native calibration at
+90dc459 recorded sample frames[0,7168), while the first independently scheduled
+audio signal began at12000. All180 planned control windows were unverified and
+the sample-error maximum was null. The host-timer completion assumed audio-clock
+progress it had not observed. No media timing window began; five remaining
+calibrations and all candidate authority/audio/cadence/neural/soak gates are NOT_RUN.
+
+The measured source and failed artifacts remain intact. A later mocked regression
+demonstrates failure-closed handling, not a native repair. No physical speaker/
+scanout, browser impossibility or product-support subset is inferred. M10.10's
+incomplete negative outcome remains frozen. ADR-0054's proposed authority flow
+was not implemented or qualified.
+
+Recommend only one separately authorized instrument investigation: sample-clock
+completion with an independent host watchdog and prospective stall controls.
+No M10.11, capture/overlay return, model/controller change or production permission
+change follows. See docs/M10.10R-REPORT.md and results/m10.10r-replay.json.

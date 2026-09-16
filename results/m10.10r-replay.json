@@ -1,0 +1,632 @@
+{
+  "schemaVersion": 1,
+  "study": "M10.10R",
+  "verdict": "CONTROLLED REPLAY PATH NOT QUALIFIED",
+  "status": "CLOSED_NOT_QUALIFIED",
+  "scope": "Progressive replay-only research; no product implementation, no physical timing claim",
+  "baseline": {
+    "sourceCommit": "5b1a313e1d603b46471aebb70594e044a67d44d6",
+    "branch": "main",
+    "clean": true,
+    "ciRunId": 35086643662,
+    "ciGate": "success",
+    "ciFusion": "success",
+    "vitestFiles": 45,
+    "vitestPassed": 1249,
+    "optInSkipped": 2,
+    "ffmpegFixturePassed": 8,
+    "pythonPassed": 311,
+    "trackedBytes": 53855518,
+    "capBytes": 54525952
+  },
+  "frozenM1010": {
+    "status": "INCOMPLETE_RESEARCH_CHECKPOINT",
+    "decision": "NO CONTROLLED WEB PRODUCT PATH QUALIFIED",
+    "index": {
+      "path": "results/m10.10-product.json",
+      "bytes": 289744,
+      "sha256": "b7d110addf560efae427d160331ff012d4613ce2a21d38e86e2199d952d3920d"
+    }
+  },
+  "nativeCheckpoint": {
+    "state": {
+      "path": ".cache/m1010r/calibration-01/state.json",
+      "bytes": 3242,
+      "sha256": "7bbe1bec4312bfe461712961b3ec8ee1b43a3ba3c8a93600b5b05ed9d4c13222"
+    },
+    "pin": {
+      "studyVersion": "M10.10R-calibration-1",
+      "sourceCommit": "90dc459d2a144f201b7a84e77e9eff8aebbb7b6c",
+      "baseline": "5b1a313e1d603b46471aebb70594e044a67d44d6",
+      "buildSha256": "d99898e8eaf201d6b9b3e745eaf7f26ed851db8d3b46911e3682e7bffbd1f02b",
+      "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "mediaManifestSha256": "01253e63c79993c1b07632ec9ac80d81f432a2a674c23edc0635d9eb489015f6",
+      "browserExecutable": "/Users/ysoli/Projects/AetherVSR/.cache/m9/browsers/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+      "browserExecutableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+      "analyzerSha256": "71f5851c8b616b829d89d1342143bc3b185316591ce61b7f08015e4035ff72ed",
+      "pythonExecutableSha256": "f64cf6322e4f20cd0458aab89c0d332895817bb8f243b943109b6a957582fd5d",
+      "order": [
+        "calibration-30-1",
+        "calibration-60-1",
+        "calibration-30-2",
+        "calibration-60-2",
+        "calibration-30-3",
+        "calibration-60-3"
+      ]
+    },
+    "status": "STOPPED",
+    "attempted": 1,
+    "notRun": 5,
+    "completedRecordsAreNotMeasurements": true,
+    "manualAction": null
+  },
+  "experiments": [
+    {
+      "id": "calibration-30-1",
+      "fps": 30,
+      "repeat": 1,
+      "outcome": "UNRESOLVED",
+      "reference": {
+        "path": ".cache/m1010r/calibration-01/calibration-30-1.json",
+        "bytes": 39639,
+        "sha256": "a80e452ca7d45cbb0abe50f1e985bbd128656f0393feb9cde871fd22ad83b1bf"
+      },
+      "analysisReference": {
+        "path": ".cache/m1010r/calibration-01/calibration-30-1-analysis.json",
+        "bytes": 2682,
+        "sha256": "a8d2580f5149fd6d8f6e72bb054283b21aab524fc9c74d04e165f970a07a77ff"
+      },
+      "startedAt": "2026-09-16T12:51:12.547Z",
+      "endedAt": "2026-09-16T12:51:16.253Z",
+      "pageClosed": true,
+      "environment": {
+        "machine": {
+          "model": "Mac17,2",
+          "chip": "Apple M5",
+          "memoryBytes": 25769803776
+        },
+        "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+        "displayRefreshHz": "not measured",
+        "browser": {
+          "version": "153.0.8010.12",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+          "policy": "Default autoplay; temporary profile; no owner invocation, permission override or chooser",
+          "requestedFlags": [
+            "--load-extension=/Users/ysoli/Projects/AetherVSR/.cache/m1010r/extension"
+          ],
+          "actualCommandLine": "/Users/ysoli/Projects/AetherVSR/.cache/m9/browsers/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing --remote-debugging-port=0 --user-data-dir=/var/folders/7l/0xgjxg012rq64m644ws4c53w0000gn/T/aethervsr-m9-mVCv84 --no-first-run --no-default-browser-check --use-mock-keychain --disable-background-networking --disable-component-update --disable-sync --load-extension=/Users/ysoli/Projects/AetherVSR/.cache/m1010r/extension about:blank",
+          "manifest": {
+            "background": {
+              "service_worker": "service-worker.js"
+            },
+            "content_security_policy": {
+              "extension_pages": "script-src 'self'; object-src 'self'"
+            },
+            "manifest_version": 3,
+            "minimum_chrome_version": "116",
+            "name": "AetherVSR M10.10R Calibration",
+            "version": "0.0.1"
+          }
+        }
+      },
+      "native": {
+        "state": "UNRESOLVED",
+        "primaryErrors": [
+          {
+            "stage": "run",
+            "performance": 1724.5,
+            "message": "Error: Scheduled audio-clock calibration failed"
+          }
+        ],
+        "control": {
+          "firstFrame": 0,
+          "endExclusiveFrame": 7168,
+          "samples": 7168,
+          "sampleRate": 48000,
+          "sampleCoverageMs": 149.33333333333334,
+          "allFinite": true,
+          "nonzeroSamples": 0,
+          "scheduled": [
+            {
+              "startFrame": 12000,
+              "endExclusiveFrame": 20192,
+              "referenceStart": 48000,
+              "samples": 8192,
+              "gain": 1
+            },
+            {
+              "startFrame": 38400,
+              "endExclusiveFrame": 46592,
+              "referenceStart": 96000,
+              "samples": 8192,
+              "gain": 0.5
+            },
+            {
+              "startFrame": 57600,
+              "endExclusiveFrame": 65792,
+              "referenceStart": 144000,
+              "samples": 8192,
+              "gain": 0.75
+            }
+          ],
+          "endsBeforeFirstScheduledSignal": true,
+          "overlapWithScheduledSignals": false,
+          "expectedWindows": 180,
+          "verifiedWindows": 0,
+          "maximumSampleError": null,
+          "unverifiedWindows": 180,
+          "interpretation": "Sample coverage is not wall-clock duration or physical latency; missing scheduled windows are not measured waveform errors."
+        },
+        "frames": 0,
+        "callbacks": 0,
+        "gpuSamples": 0,
+        "mediaAudio": "NOT_RUN",
+        "graph": null,
+        "capabilities": {
+          "externalTexture": true,
+          "timestampQuery": true,
+          "preferredCanvasFormat": "bgra8unorm",
+          "maxTextureDimension2D": 8192,
+          "reportedLimits": {
+            "maxTextureDimension2D": 8192,
+            "maxSampledTexturesPerShaderStage": 16,
+            "maxSamplersPerShaderStage": 16,
+            "maxUniformBuffersPerShaderStage": 12,
+            "maxStorageBuffersPerShaderStage": 8,
+            "maxBindingsPerBindGroup": 1000,
+            "maxUniformBufferBindingSize": 65536,
+            "maxStorageBufferBindingSize": 134217728,
+            "maxBufferSize": 268435456,
+            "maxComputeInvocationsPerWorkgroup": 256,
+            "maxComputeWorkgroupStorageSize": 16384,
+            "maxComputeWorkgroupsPerDimension": 65535,
+            "minUniformBufferOffsetAlignment": 256,
+            "minStorageBufferOffsetAlignment": 256
+          },
+          "adapter": {
+            "vendor": "apple",
+            "architecture": "metal-3",
+            "device": "",
+            "description": "",
+            "features": [
+              "bgra8unorm-storage",
+              "clip-distances",
+              "core-features-and-limits",
+              "depth-clip-control",
+              "depth32float-stencil8",
+              "dual-source-blending",
+              "float32-blendable",
+              "float32-filterable",
+              "indirect-first-instance",
+              "primitive-index",
+              "rg11b10ufloat-renderable",
+              "shader-f16",
+              "subgroup-size-control",
+              "subgroups",
+              "texture-component-swizzle",
+              "texture-compression-astc",
+              "texture-compression-astc-sliced-3d",
+              "texture-compression-bc",
+              "texture-compression-bc-sliced-3d",
+              "texture-compression-etc2",
+              "texture-formats-tier1",
+              "texture-formats-tier2",
+              "timestamp-query"
+            ],
+            "fallbackAdapter": false
+          },
+          "nativeRvfc": true,
+          "playbackQuality": true,
+          "gpuTiming": "timestamp-query",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+          "secureContext": true
+        },
+        "cleanup": {
+          "pipeline": 0,
+          "probe": 0,
+          "device": 0,
+          "audioNodes": 0,
+          "observers": 0,
+          "timers": 0,
+          "pendingCompletions": 0,
+          "audioContext": "closed",
+          "videoPaused": true,
+          "completed": true
+        },
+        "secondaryCollectionErrors": [
+          {
+            "stage": "audio",
+            "message": "Error: page.evaluate: Error: Audio recording is not finished\n    at Object.audioBase64 (chrome-extension://cpgobpbbmoemcajledcpnpoefedlbpmj/calibration.js:1532:60)\n    at eval (eval at evaluate (:311:30), <anonymous>:1:37)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+          }
+        ]
+      },
+      "originalAnalysis": {
+        "outcome": "UNRESOLVED",
+        "summary": "Native recorder did not retain both PCM streams",
+        "candidateTiming": "NOT_RUN",
+        "neural": "NOT_RUN"
+      },
+      "postRunDiagnosis": "The host-timer finish occurred before the recording reached the scheduled audio sample frames. Audio-clock-driven completion is unverified; decoder/OS/device startup causation is not established."
+    },
+    {
+      "id": "calibration-60-1",
+      "fps": 60,
+      "repeat": 1,
+      "outcome": "NOT_RUN",
+      "reference": {
+        "path": ".cache/m1010r/calibration-01/calibration-60-1.json",
+        "bytes": 1325,
+        "sha256": "1df55972af4a58a5f2d20ef72d3c4ec881e58bd9c806dee2fe54f0f96e5e744e"
+      },
+      "reason": {
+        "id": "calibration-30-1",
+        "outcome": "UNRESOLVED",
+        "reason": "Native recorder did not retain both PCM streams"
+      }
+    },
+    {
+      "id": "calibration-30-2",
+      "fps": 30,
+      "repeat": 2,
+      "outcome": "NOT_RUN",
+      "reference": {
+        "path": ".cache/m1010r/calibration-01/calibration-30-2.json",
+        "bytes": 1325,
+        "sha256": "c3ef6be473ffed8ce719bde65b40a037ab2f79f32f1e6ad6ba880a7afdfb595b"
+      },
+      "reason": {
+        "id": "calibration-30-1",
+        "outcome": "UNRESOLVED",
+        "reason": "Native recorder did not retain both PCM streams"
+      }
+    },
+    {
+      "id": "calibration-60-2",
+      "fps": 60,
+      "repeat": 2,
+      "outcome": "NOT_RUN",
+      "reference": {
+        "path": ".cache/m1010r/calibration-01/calibration-60-2.json",
+        "bytes": 1325,
+        "sha256": "bb7d66060bbf97f195592a494cd318883eb87f352027dae8662b18d32470effd"
+      },
+      "reason": {
+        "id": "calibration-30-1",
+        "outcome": "UNRESOLVED",
+        "reason": "Native recorder did not retain both PCM streams"
+      }
+    },
+    {
+      "id": "calibration-30-3",
+      "fps": 30,
+      "repeat": 3,
+      "outcome": "NOT_RUN",
+      "reference": {
+        "path": ".cache/m1010r/calibration-01/calibration-30-3.json",
+        "bytes": 1325,
+        "sha256": "643e9c3ae86fbd8fbdee1b2b1938b64ac9c825b5948ad2bc17918b554886171d"
+      },
+      "reason": {
+        "id": "calibration-30-1",
+        "outcome": "UNRESOLVED",
+        "reason": "Native recorder did not retain both PCM streams"
+      }
+    },
+    {
+      "id": "calibration-60-3",
+      "fps": 60,
+      "repeat": 3,
+      "outcome": "NOT_RUN",
+      "reference": {
+        "path": ".cache/m1010r/calibration-01/calibration-60-3.json",
+        "bytes": 1325,
+        "sha256": "6396eef500978856b447be5370050b574fe038cf39be4e31f5df163d6869811a"
+      },
+      "reason": {
+        "id": "calibration-30-1",
+        "outcome": "UNRESOLVED",
+        "reason": "Native recorder did not retain both PCM streams"
+      }
+    }
+  ],
+  "groundTruth": {
+    "manifest": {
+      "path": ".cache/m1010r/media-02/media.json",
+      "bytes": 37338,
+      "sha256": "af869ac7969530df7362635306f1729f795627c3383d2b9d49151ebe23d5c799"
+    },
+    "seconds": 70,
+    "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "signal": {
+      "path": ".cache/m1010r/media-02/signal.s16le",
+      "bytes": 6720000,
+      "sha256": "80ee5baf89041a2f49ada96fa4931710202960dd858fb631da0424ad81f70d85"
+    },
+    "assets": [
+      {
+        "fps": 30,
+        "media": {
+          "path": ".cache/m1010r/media-02/replay-30.mp4",
+          "bytes": 1076460,
+          "sha256": "e006f3d5381d73b1ca5739f5e74216f4bf0c312f28621634d258a770822a8f9b"
+        },
+        "pcm": {
+          "path": ".cache/m1010r/media-02/decoded-30.f32le",
+          "bytes": 13440000,
+          "sha256": "146670bf67d516149ced77dc32b860ff9d7863e89f88743202e11d2b289a0f65"
+        },
+        "video": {
+          "fps": 30,
+          "frames": 2100,
+          "width": 1280,
+          "height": 720,
+          "timeBase": "1/15360",
+          "allIdentitiesAndPtsExact": true,
+          "rowsSha256": "b8eae0c174c6c5280f42bb9def3709c852201e0f4d0378aca6217a120b7655e4"
+        },
+        "audio": {
+          "sampleRate": 48000,
+          "decodedSamples": 3360000,
+          "firstPts": 0,
+          "timeBase": "1/48000",
+          "firstSampleMediaTime": 0,
+          "endExclusiveMediaTime": 70,
+          "decodedFrames": 3282,
+          "decodedPcmBytes": 13440000,
+          "decodedPcmSha256": "146670bf67d516149ced77dc32b860ff9d7863e89f88743202e11d2b289a0f65",
+          "ptsFramesSha256": "b9e0dfa7c80debb479b9172af2ec9941ab92d7b3168d4dc12760c364274b3c94"
+        },
+        "impulseCount": 70
+      },
+      {
+        "fps": 60,
+        "media": {
+          "path": ".cache/m1010r/media-02/replay-60.mp4",
+          "bytes": 1211083,
+          "sha256": "5171a8b6da7303c8c409167f4191b7330f41120fcd89d7e3aa0df9483b237b29"
+        },
+        "pcm": {
+          "path": ".cache/m1010r/media-02/decoded-60.f32le",
+          "bytes": 13440000,
+          "sha256": "146670bf67d516149ced77dc32b860ff9d7863e89f88743202e11d2b289a0f65"
+        },
+        "video": {
+          "fps": 60,
+          "frames": 4200,
+          "width": 1280,
+          "height": 720,
+          "timeBase": "1/15360",
+          "allIdentitiesAndPtsExact": true,
+          "rowsSha256": "4870cbc926a2dd56dc9b602ac42eebd7fbf58ea95c72cdf0ff33544b439a69aa"
+        },
+        "audio": {
+          "sampleRate": 48000,
+          "decodedSamples": 3360000,
+          "firstPts": 0,
+          "timeBase": "1/48000",
+          "firstSampleMediaTime": 0,
+          "endExclusiveMediaTime": 70,
+          "decodedFrames": 3282,
+          "decodedPcmBytes": 13440000,
+          "decodedPcmSha256": "146670bf67d516149ced77dc32b860ff9d7863e89f88743202e11d2b289a0f65",
+          "ptsFramesSha256": "b9e0dfa7c80debb479b9172af2ec9941ab92d7b3168d4dc12760c364274b3c94"
+        },
+        "impulseCount": 70
+      }
+    ],
+    "shifts": {
+      "reference": {
+        "path": ".cache/m1010r/shift-final-01/validation.json",
+        "bytes": 53398,
+        "sha256": "a16d2e5d625f3411b09819ad528da3d743a76c9478831cd19885803e9c9734b9"
+      },
+      "controls": [
+        {
+          "fps": 30,
+          "requestedAudioShiftSeconds": -0.05,
+          "observedAudioShiftSeconds": -0.050000000000000044,
+          "expectedVideoMinusAudioShiftMs": 50,
+          "videoPtsUnchanged": true,
+          "matchedInteriorSamples": 8192,
+          "referenceFirstMediaTime": 0,
+          "shiftedFirstMediaTime": 0,
+          "media": {
+            "path": ".cache/m1010r/shift-final-01/shift-30--0.05.mp4",
+            "bytes": 1076492,
+            "sha256": "77e2b5ca6852b8547de0be6b4defcc06200581f3321d20c8026550729e4c1df8"
+          }
+        },
+        {
+          "fps": 30,
+          "requestedAudioShiftSeconds": 0.05,
+          "observedAudioShiftSeconds": 0.04999999999999993,
+          "expectedVideoMinusAudioShiftMs": -50,
+          "videoPtsUnchanged": true,
+          "matchedInteriorSamples": 8192,
+          "referenceFirstMediaTime": 0,
+          "shiftedFirstMediaTime": 0.028666666666666667,
+          "media": {
+            "path": ".cache/m1010r/shift-final-01/shift-30-0.05.mp4",
+            "bytes": 1076492,
+            "sha256": "d62414f29008daf453c3629f31c96166a3f0a13133ab22b624304cc99e7a9446"
+          }
+        },
+        {
+          "fps": 60,
+          "requestedAudioShiftSeconds": -0.05,
+          "observedAudioShiftSeconds": -0.050000000000000044,
+          "expectedVideoMinusAudioShiftMs": 50,
+          "videoPtsUnchanged": true,
+          "matchedInteriorSamples": 8192,
+          "referenceFirstMediaTime": 0,
+          "shiftedFirstMediaTime": 0,
+          "media": {
+            "path": ".cache/m1010r/shift-final-01/shift-60--0.05.mp4",
+            "bytes": 1211123,
+            "sha256": "4ffa0081f82601febf623a9965a54d67fbd1f4048b006c8dc4f3f6d589024da6"
+          }
+        },
+        {
+          "fps": 60,
+          "requestedAudioShiftSeconds": 0.05,
+          "observedAudioShiftSeconds": 0.04999999999999993,
+          "expectedVideoMinusAudioShiftMs": -50,
+          "videoPtsUnchanged": true,
+          "matchedInteriorSamples": 8192,
+          "referenceFirstMediaTime": 0,
+          "shiftedFirstMediaTime": 0.028666666666666667,
+          "media": {
+            "path": ".cache/m1010r/shift-final-01/shift-60-0.05.mp4",
+            "bytes": 1211119,
+            "sha256": "f8ae16886bc0d026e4d5c3c86228b8da73f87a47239ced457c95b8103d4a08f7"
+          }
+        }
+      ]
+    }
+  },
+  "qualification": {
+    "instrument": "UNRESOLVED",
+    "digitalUncertaintyBoundMs": null,
+    "candidateEligibility": false,
+    "timingAcceptance": "NOT_RUN",
+    "authorityHandover": "NOT_RUN",
+    "audioOverlapGap": "NOT_RUN",
+    "returnToPage": "NOT_RUN",
+    "failureRollback": "NOT_RUN",
+    "permissionRefetch": "NOT_RUN",
+    "sourceReplacement": "NOT_RUN",
+    "workerRestart": "NOT_RUN",
+    "multiplePlayers": "NOT_RUN",
+    "inputProvenanceRegression": "NOT_RUN",
+    "raw30Cadence": "NOT_RUN",
+    "raw60Cadence": "NOT_RUN",
+    "avSync": "NOT_RUN",
+    "drift": "NOT_RUN",
+    "seekRecovery": "NOT_RUN",
+    "pauseResume": "NOT_RUN",
+    "rate125": "NOT_RUN",
+    "neural720p60": "NOT_RUN",
+    "tenMinuteSoak": "NOT_RUN",
+    "m1011": "NOT_STARTED"
+  },
+  "nextDirection": "One separately authorized replay-instrument investigation: sample-clock-driven recording completion with an independent wall-clock watchdog; no automatic retry or capture/overlay pivot.",
+  "limitations": [
+    "No media timing window began; zero frames is an observed count, not a throughput measurement.",
+    "No native authority, Return, permission, worker-restart, generation or multi-session gate was earned.",
+    "The measured apparatus has a known wall-clock completion defect and is not qualified for reuse.",
+    "Audio startup/scheduling/OS causation is unresolved; no speaker/scanout claim.",
+    "Post-measurement test-only failure regression is not a native fix or requalification."
+  ],
+  "rawReferences": [
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1-analysis.json",
+      "bytes": 2682,
+      "sha256": "a8d2580f5149fd6d8f6e72bb054283b21aab524fc9c74d04e165f970a07a77ff"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1-control-audio.f32le",
+      "bytes": 28672,
+      "sha256": "18619b678a5c207a971a0aa931604f48162e307c57ecdec450d5f095fe9f32c7"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1-snapshot.json",
+      "bytes": 13403,
+      "sha256": "3cf2914e3fd42e6ff60cdb6c1ce110eb4e9e439be7c75b7be0c39a622a018023"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1.json",
+      "bytes": 39639,
+      "sha256": "a80e452ca7d45cbb0abe50f1e985bbd128656f0393feb9cde871fd22ad83b1bf"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-2.json",
+      "bytes": 1325,
+      "sha256": "c3ef6be473ffed8ce719bde65b40a037ab2f79f32f1e6ad6ba880a7afdfb595b"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-3.json",
+      "bytes": 1325,
+      "sha256": "643e9c3ae86fbd8fbdee1b2b1938b64ac9c825b5948ad2bc17918b554886171d"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-60-1.json",
+      "bytes": 1325,
+      "sha256": "1df55972af4a58a5f2d20ef72d3c4ec881e58bd9c806dee2fe54f0f96e5e744e"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-60-2.json",
+      "bytes": 1325,
+      "sha256": "bb7d66060bbf97f195592a494cd318883eb87f352027dae8662b18d32470effd"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-60-3.json",
+      "bytes": 1325,
+      "sha256": "6396eef500978856b447be5370050b574fe038cf39be4e31f5df163d6869811a"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/state.json",
+      "bytes": 3242,
+      "sha256": "7bbe1bec4312bfe461712961b3ec8ee1b43a3ba3c8a93600b5b05ed9d4c13222"
+    },
+    {
+      "path": ".cache/m1010r/extension/research-provenance.json",
+      "bytes": 45126,
+      "sha256": "d99898e8eaf201d6b9b3e745eaf7f26ed851db8d3b46911e3682e7bffbd1f02b"
+    },
+    {
+      "path": ".cache/m1010r/media-02/decoded-30.f32le",
+      "bytes": 13440000,
+      "sha256": "146670bf67d516149ced77dc32b860ff9d7863e89f88743202e11d2b289a0f65"
+    },
+    {
+      "path": ".cache/m1010r/media-02/decoded-60.f32le",
+      "bytes": 13440000,
+      "sha256": "146670bf67d516149ced77dc32b860ff9d7863e89f88743202e11d2b289a0f65"
+    },
+    {
+      "path": ".cache/m1010r/media-02/media.json",
+      "bytes": 37338,
+      "sha256": "af869ac7969530df7362635306f1729f795627c3383d2b9d49151ebe23d5c799"
+    },
+    {
+      "path": ".cache/m1010r/media-02/replay-30.mp4",
+      "bytes": 1076460,
+      "sha256": "e006f3d5381d73b1ca5739f5e74216f4bf0c312f28621634d258a770822a8f9b"
+    },
+    {
+      "path": ".cache/m1010r/media-02/replay-60.mp4",
+      "bytes": 1211083,
+      "sha256": "5171a8b6da7303c8c409167f4191b7330f41120fcd89d7e3aa0df9483b237b29"
+    },
+    {
+      "path": ".cache/m1010r/media-02/signal.s16le",
+      "bytes": 6720000,
+      "sha256": "80ee5baf89041a2f49ada96fa4931710202960dd858fb631da0424ad81f70d85"
+    },
+    {
+      "path": ".cache/m1010r/shift-final-01/shift-30--0.05.mp4",
+      "bytes": 1076492,
+      "sha256": "77e2b5ca6852b8547de0be6b4defcc06200581f3321d20c8026550729e4c1df8"
+    },
+    {
+      "path": ".cache/m1010r/shift-final-01/shift-30-0.05.mp4",
+      "bytes": 1076492,
+      "sha256": "d62414f29008daf453c3629f31c96166a3f0a13133ab22b624304cc99e7a9446"
+    },
+    {
+      "path": ".cache/m1010r/shift-final-01/shift-60--0.05.mp4",
+      "bytes": 1211123,
+      "sha256": "4ffa0081f82601febf623a9965a54d67fbd1f4048b006c8dc4f3f6d589024da6"
+    },
+    {
+      "path": ".cache/m1010r/shift-final-01/shift-60-0.05.mp4",
+      "bytes": 1211119,
+      "sha256": "f8ae16886bc0d026e4d5c3c86228b8da73f87a47239ced457c95b8103d4a08f7"
+    },
+    {
+      "path": ".cache/m1010r/shift-final-01/validation.json",
+      "bytes": 53398,
+      "sha256": "a16d2e5d625f3411b09819ad528da3d743a76c9478831cd19885803e9c9734b9"
+    }
+  ]
+}

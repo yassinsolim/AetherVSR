@@ -515,6 +515,16 @@ See [the30-section report](docs/M10.10-PRODUCT-REPORT.md), ADR-0052/0053.
 
 ---
 
+## Milestone 10.10R - Controlled replay [NOT QUALIFIED]
+
+M10.10R closed as **CONTROLLED REPLAY PATH NOT QUALIFIED**. The first audio-clock
+control stopped before scheduled signals; no candidate timing, authority/audio
+handover, neural qualification or long soak was eligible. Recommend only one
+separately authorized clock-driven instrument investigation, not another capture
+route or M10.11. [Replay report](docs/M10.10R-REPORT.md), ADR-0055.
+
+---
+
 ## Milestone 11 - Cross-vendor validation [GATED]
 
 Not the default next step while M10.7 presentation synchronization fails and

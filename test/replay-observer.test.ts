@@ -103,7 +103,7 @@ const controlFixture = `${audioFixture}
         gains.push(gain); return gain;
       },
     };
-    const firstFrame = Math.floor(context.currentTime * 48000) + 1024;
+    const firstFrame = options.firstFrame ?? Math.floor(context.currentTime * 48000) + 1024;
     function render() {
       const end = Math.ceil(Math.max(...sources.map(source =>
         source.starts[0] * 48000 + source.buffer.length)) + 4800);
@@ -115,6 +115,7 @@ const controlFixture = `${audioFixture}
         });
       });
       options.mutate?.(rendered, {sources, firstFrame});
+      if (options.recordedSamples !== undefined) rendered = rendered.subarray(0, options.recordedSamples);
       for (let offset = 0; offset < rendered.length; offset += 128) {
         const left = rendered.subarray(offset, offset + 128), right = left.slice();
         const outputs = [new Float32Array(left.length), new Float32Array(right.length)];
@@ -382,6 +383,19 @@ describe('M10.10R bundled audio observer (browser-free)', () => {
 });
 
 describe('M10.10R bundled scheduled audio control (virtual sample clock)', () => {
+  it('fails closed when host finish precedes the scheduled audio sample frames', () => check(`${controlFixture}
+    const fixture = await controlFixture({firstFrame: 0, recordedSamples: 7168});
+    const {pending} = await fixture.start();
+    fixture.advance(2000);
+    const result = await pending;
+    assert.equal(result.firstFrame, 0); assert.equal(result.samples, 7168);
+    assert.equal(result.scheduled[0].startFrame, 12000);
+    assert.equal(result.expectedWindows, 180); assert.equal(result.verifiedWindows, 0);
+    assert.equal(result.maximumSampleError, null); assert.equal(result.errors.length, 180);
+    assert(new Float32Array(result.pcm).every(sample => sample === 0));
+    fixture.cleaned();
+  `));
+
   it('fetches the known reference and schedules three exact segments through a stereo pass-through graph', () => check(`${controlFixture}
     const fixture = await controlFixture();
     const {pending} = await fixture.start();
