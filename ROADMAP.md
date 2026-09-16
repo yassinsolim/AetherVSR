@@ -483,9 +483,24 @@ A and fixed D5/D10/D15 each stopped on the25th/96 case with stale CSSOM object-f
 B stopped on concurrent anchor ownership restoration; C violated host layout by
 reparenting. No E was registered. Cost studies NOT RUN because no safety survivor
 qualified to enter them. S1 production and strongest S2 diagnostic are unchanged.
-[30-section report](docs/M10.8-REPORT.md), ADR-0048. Next recommendation is a
-separately authorized observable-support/ownership design study, not rollout of a
-selected implementation or tuning stopped candidates. Nothing implements that step.
+[30-section report](docs/M10.8-REPORT.md), ADR-0048. Its separately authorized
+observable-support/ownership follow-up is recorded below; no M10.8 candidate was
+promoted or integrated into production.
+
+---
+
+## Milestone 10.9 - Observable contract and ownership [NO USEFUL OBSERVABLE CONTRACT QUALIFIED]
+
+Bounded design/feasibility complete. S1-R1/O0 passed19 preliminary common cases,
+then required fullscreen recovery remained unresolved with output safely hidden.
+The implementation's modal predicate is too restrictive; this is not proof that
+fullscreen is unobservable. O1 left an owned token after history overflow; O2 changed
+host layout through an attribute selector. No complete useful safety survivor,
+so COSTS NOT RUN. Production S1/model/controller/permissions remain unchanged.
+[30-section report](docs/M10.9-REPORT.md), ADR-0050. The product-pivot gate now
+recommends a separately authorized extension-owned controlled-player/window study,
+not another generic in-page synchronization implementation or M11. No next milestone
+is implemented by this result.
 
 ---
 

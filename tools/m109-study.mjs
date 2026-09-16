@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve, dirname, relative } from 'node:path';
-import { gzipSync } from 'node:zlib';
+import { gzipSync, gunzipSync } from 'node:zlib';
 import { build } from 'esbuild';
 import { createServer } from 'vite';
 import { ROOT, sha256 } from './m10-fixtures.mjs';
@@ -803,6 +803,75 @@ export async function runFiniteRevision(prefix, priorPath, apparatusPriorPath = 
   finally {
     await native?.close(); await service?.close(); report.finished = new Date().toISOString();
     writeFileSync(`${prefix}.json`, JSON.stringify(report, null, 2), { flag: 'wx' });
+  }
+  return report;
+}
+
+export function exportEvidence(destination = null) {
+  const names = ['frozen-controls', 'pre-capture-packages', 'study-01', 'study-02', 'default-serialization-01',
+    'revision-01', 'oracle-color-audit', 'revision-02', 'revision-03', 'census-default-01'];
+  const artifacts = names.map(id => {
+    const path = `.cache/m109/${id}.json`, bytes = readFileSync(join(ROOT, path));
+    return { id, path, bytes: bytes.length, sha256: sha256(bytes), content: JSON.parse(bytes) };
+  });
+  const references = new Map();
+  const verify = value => {
+    if (!value || typeof value !== 'object') return;
+    if (typeof value.path === 'string' && typeof value.sha256 === 'string' && Number.isInteger(value.bytes)) {
+      const path = resolve(ROOT, value.path); assert(path.startsWith(join(ROOT, '.cache/m109/')));
+      const bytes = readFileSync(path); assert.equal(bytes.length, value.bytes); assert.equal(sha256(bytes), value.sha256);
+      references.set(relative(ROOT, path), { path: relative(ROOT, path), bytes: bytes.length, sha256: value.sha256 });
+    }
+    for (const child of Object.values(value)) verify(child);
+  };
+  for (const artifact of artifacts) verify(artifact.content);
+  const content = id => artifacts.find(artifact => artifact.id === id).content;
+  const final = content('revision-03').results.common, ownership = content('study-02').results;
+  assert.equal(final.results.length, 20); assert.equal(final.remaining, 136);
+  assert.equal(final.results.filter(row => row.outcome === 'SUPPORTED_CORRECT').length, 19);
+  assert.equal(final.stopped.name, 'fullscreen-scrolled-enter-exit'); assert.equal(final.stopped.outcome, 'UNRESOLVED');
+  assert.equal(ownership.O1.stopped.outcome, 'UNSAFE'); assert.equal(ownership.O2.stopped.outcome, 'UNSAFE');
+  const nativeAudit = [];
+  for (const artifact of artifacts) {
+    for (const common of [artifact.content.results?.control, artifact.content.results?.common].filter(Boolean)) {
+      for (const row of common.results) {
+        if (!row.raw) continue;
+        const trace = JSON.parse(gunzipSync(readFileSync(join(ROOT, row.raw.path))));
+        assert.deepEqual(trace.firstFailure, row.firstFailure);
+        assert.deepEqual(trace.telemetry.resources, row.cleanup.resources);
+        if (row.recovery) assert.deepEqual(validateReveals(trace, trace.telemetry, row.actions), row.recovery);
+        nativeAudit.push({ artifact: artifact.id, contract: common.contract, name: row.name, repeat: row.repeat,
+          rows: trace.rows.length, submissions: trace.telemetry.submissions.length,
+          validRecoverySubmissions: trace.telemetry.submissions.filter(record => record.validForRecovery).length,
+          interruptions: trace.interruptions.length, resources: trace.telemetry.resources,
+          recovery: row.recovery ?? null, firstFailure: row.firstFailure });
+      }
+    }
+  }
+  assert.deepEqual(content('census-default-01').requestedBrowserArgs, []);
+  const report = { schemaVersion: 1, selection: 'NO USEFUL OBSERVABLE CONTRACT QUALIFIED',
+    production: 'UNCHANGED S1', extension: 'PARTIAL', m11: 'GATED',
+    costs: { execution: 'NOT RUN', metrics: 'not measured', reason: 'No complete useful safety/ownership survivor' },
+    finalContract: { name: 'S1-R1', planned: 156, observed: 20, preliminaryCorrect: 19, unresolvedRequired: 1, notRun: 136,
+      reason: 'Required fullscreen remained safely hidden; modal predicate also rejects fullscreen; not proof of unobservability' },
+    ownership: { O0: 'Only observed restoration prefixes; not generically qualified',
+      O1: { observed: 20, planned: 22, notRun: 2, outcome: 'UNSAFE', stop: 'history-overflow with owned UUID retained' },
+      O2: { observed: 11, planned: 12, notRun: 1, outcome: 'UNSAFE', stop: 'host attribute selector changed video width' } },
+    limitations: ['Synchronous queue-submit returned is not GPU completion or physical scanout.',
+      'S0 uses unchanged VideoAttachment source as an isolated broad control, not a full packaged-extension acceptance run.',
+      'Safe rejection is not unsafe exposure or supported compatibility.',
+      'The bounded stopped prototype does not prove that a useful browser contract is impossible.',
+      'Original S1 and superseded oracle runs remain unpooled; source identities differ explicitly.',
+      'Earlier census results used a fixture autoplay flag; only census-default-01 has default media policy.',
+      'Unready or playback-denied public states cannot establish brand-level compatibility.',
+      'Raw paths/hashes establish local retained evidence identity, not remote availability.'],
+    artifacts, references: [...references.values()], nativeAudit };
+  const bytes = Buffer.from(`${JSON.stringify(report)}\n`);
+  if (destination) {
+    const tree = execFileSync('git', ['ls-tree', '-rl', 'HEAD'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 ** 2 });
+    const tracked = tree.trim().split('\n').reduce((sum, line) => sum + Number(line.split('\t')[0].trim().split(/\s+/)[3]), 0);
+    assert(tracked + bytes.length + 65000 < 53477376, 'Compact evidence plus documentation reserve exceeds owner-approved cap');
+    writeFileSync(resolve(ROOT, destination), bytes, { flag: 'wx' });
   }
   return report;
 }

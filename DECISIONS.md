@@ -1590,3 +1590,33 @@ remain tracked. Check prospective Git-normalized bytes before every commit.
 Reaching this new cap requires another explicit owner decision, not an automatic
 increase. This storage authorization does not change any safety, performance,
 production, publication or M11 gate.
+
+## ADR-0050 - No useful observable contract qualified in M10.9
+
+**Status:** accepted bounded research decision after local evidence and independent
+review; no production presentation strategy or safety requirement is superseded.
+
+Choose **NO USEFUL OBSERVABLE CONTRACT QUALIFIED**. The new S1-R1/O0 prototype
+completed 19 preliminary common cases, then required container-fullscreen recovery
+did not complete: it safely hid output with unsupported-semantic-chain. Its modal
+predicate also excludes fullscreen, an implementation limitation rather than proof
+of browser unobservability. The sole prospective finite revision had already been
+used for native equivalent round/zero CSS serialization; no further contract tuning
+is performed. The remaining136 of156 observations and all cost trials are NOT RUN.
+
+O1's delta-owned lease preserved concurrent ordinary host writes but stopped on
+history overflow with its exact UUID still in inline and computed anchor-name.
+O2's attribute/rule lease changed host width640->320 during acquisition, despite
+restoring640 afterward. Both are UNSAFE stops. O0's observed restoration prefixes
+and the optional zero-mutation existing-anchor measurement are not generic ownership
+qualification. Local two-submission recovery and painted crop/control evidence are
+retained with their limited coverage; superseded apparatus results remain explicit.
+
+The agreed product-pivot gate is triggered, not an impossibility theorem. Recommend
+a separately authorized extension-owned controlled-player/window study with an
+explicit origin-clean media and permission/cooperation contract. Do not implement
+that study, integration adapters or another synchronization architecture here.
+CORS/DRM boundaries, C16D2/WGSL, RuntimeController, production S1, service worker,
+protocol and permissions remain unchanged. M10.7 presentation FAIL, M10.8 no-selection,
+extension PARTIAL and M11 GATED remain. See docs/M10.9-REPORT.md and
+results/m109-feasibility.json for measured evidence and limitations.

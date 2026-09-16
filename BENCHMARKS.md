@@ -2912,6 +2912,19 @@ The historical S2 timings above remain nonqualifying and are not a new paired
 contrast. Production payload and previous verdicts are unchanged.
 [Report and boundaries](docs/M10.8-REPORT.md), [evidence](results/m108-feasibility.json).
 
+## Milestone 10.9: observable contract, costs not run
+
+**NO USEFUL OBSERVABLE CONTRACT QUALIFIED.** The bounded simple-chain study
+completed19 preliminary local cases before required fullscreen recovery remained
+unresolved; output was hidden, not a measured unsafe fullscreen exposure. Separate
+property/attribute ownership models stopped unsafe. No combination completed the
+usefulness, safety, recovery, rendered crop/control and restoration prerequisites.
+Candidate neural cadence, driver penalties, paired additional JS, guard acceptance
+percentiles and visible-fraction cost gates are **not measured; COSTS NOT RUN**.
+No diagnostic timing on the small synthetic30fps fixtures is a720p60 performance
+result. The six-pair M10.8 protocol and all thresholds are unchanged.
+[Report](docs/M10.9-REPORT.md), [compact evidence](results/m109-feasibility.json).
+
 ## Reproducing
 
 ```bash

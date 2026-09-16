@@ -58,6 +58,15 @@ no architecture integration or new GPU data flow was introduced. These scoped
 counterexamples do not prove every browser-maintained relationship impossible.
 See [docs/M10.8-REPORT.md](docs/M10.8-REPORT.md).
 
+M10.9 selected **NO USEFUL OBSERVABLE CONTRACT QUALIFIED** (ADR-0050). A new
+bounded simple-chain predicate and no-host-mutation monitor completed19 preliminary
+cases, but an overrestrictive fullscreen/modal predicate prevented required recovery.
+Delta-property and attribute/rule ownership models had separate unsafe stops.
+The diagnostic submission observer now follows the actual synchronous successful
+submit sequence; it is absent from the byte-identical production package. No core
+stage or production strategy changed. A controlled-player/window product study is
+recommended, not implemented. See [docs/M10.9-REPORT.md](docs/M10.9-REPORT.md).
+
 **What Milestone 3 settled about the neural stage, and Milestone 4 built.** Its
 kernels are hand-written WGSL rather than a third-party runtime, and they took
 the shape `src/bench/conv-blocked.wgsl.ts` established - see

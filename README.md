@@ -24,6 +24,14 @@ and the wrapper violated host layout. Costs were not run after safety/ownership
 stops. Production and historical verdicts are unchanged. This is research, not a
 presentation rollout. [Architecture feasibility report](docs/M10.8-REPORT.md).
 
+**M10.9: NO USEFUL OBSERVABLE CONTRACT QUALIFIED.** The simple-chain research
+contract passed19 preliminary local cases but did not satisfy required fullscreen
+recovery; two host-mutation ownership models stopped on unsafe restoration/layout.
+Costs were NOT RUN. This is not proof that all browser contracts are impossible.
+The next recommendation is a separately authorized controlled-player/window study,
+not more generic replacement implementation. Production S1 and all historical
+verdicts remain unchanged. [Observable contract report](docs/M10.9-REPORT.md).
+
 **M10.6 history remains PARTIAL, Case D.** Four ten-minute native-video
 controls exceeded the1% combined callback/quality-loss reference, averaging
 4.262931%. This is a lean-instrumented browser result, not physical display loss

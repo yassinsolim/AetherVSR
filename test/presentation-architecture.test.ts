@@ -12,6 +12,19 @@ function check(source: string) {
 }
 
 describe('M10.9 independent evidence guards',()=>{
+  it('preserves the final bounded no-selection result and distinguishes safe rejection from compatibility',()=>check(`
+    const {readFileSync}=await import('node:fs');
+    const report=JSON.parse(readFileSync('results/m109-feasibility.json','utf8'));
+    assert.equal(report.selection,'NO USEFUL OBSERVABLE CONTRACT QUALIFIED');
+    assert.deepEqual([report.finalContract.observed,report.finalContract.preliminaryCorrect,report.finalContract.unresolvedRequired,report.finalContract.notRun],[20,19,1,136]);
+    assert.equal(report.costs.execution,'NOT RUN');assert.equal(report.artifacts.length,10);assert.equal(report.references.length,69);
+    const get=id=>report.artifacts.find(row=>row.id===id).content;
+    const final=get('revision-03').results.common;assert.equal(final.stopped.outcome,'UNRESOLVED');assert.equal(final.results.at(-1).firstFailure,null);
+    assert.equal(get('study-02').results.O1.results.at(-1).independentlyAbsent.computed,false);
+    assert.equal(get('study-02').results.O2.results.at(-1).stableLayout,false);
+    assert.deepEqual(get('census-default-01').requestedBrowserArgs,[]);
+    assert(get('census-default-01').results.every(row=>row.result.noOwnedStaleCanvas));
+  `));
   it('runs the canonical public census without the fixture autoplay override or replacement setup',()=>check(`
     const {runDefaultPolicyCensus}=await import('./tools/m109-study.mjs');
     const source=runDefaultPolicyCensus.toString();
