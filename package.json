@@ -14,6 +14,7 @@
     "build:extension": "node tools/build-extension.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "check:m1010r": "node tools/m1010r/check.mjs",
     "lint": "eslint . --ignore-pattern 'dist-extension/**' --ignore-pattern 'dist-extension-test/**'",
     "test": "vitest run",
     "test:watch": "vitest"

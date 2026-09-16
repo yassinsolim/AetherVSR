@@ -97,11 +97,13 @@ function createResearch() {
       video.pause(); driver?.syncActive();
       if (cors) video.crossOrigin = cors; else video.removeAttribute('crossorigin');
       video.srcObject = null; video.src = url; video.load(); record('source-change');
+      return Promise.resolve();
     },
     setBlob: async (bytes: number[], type = 'video/mp4') => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       objectUrl = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type }));
       video.removeAttribute('crossorigin'); video.srcObject = null; video.src = objectUrl; video.load();
+      return Promise.resolve();
     },
     setStream: (stream: MediaStream) => { video.pause(); driver?.syncActive(); video.removeAttribute('src'); video.srcObject = stream; record('stream-set', stream.getTracks().map(track => ({ kind: track.kind, settings: track.getSettings() }))); },
     clearObservations: () => { events.length = samples.length = transitions.length = 0; driver?.resetMeasurements(); },

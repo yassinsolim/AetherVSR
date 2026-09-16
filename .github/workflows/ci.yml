@@ -43,6 +43,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Replay research static checks
+        run: npm run check:m1010r
+
       - name: Test
         run: npm run test
 

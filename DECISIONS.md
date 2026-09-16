@@ -1678,3 +1678,28 @@ coverage gates are incomplete. Select exactly **NO CONTROLLED WEB PRODUCT PATH
 QUALIFIED**, not browser impossibility or COOPERATING-SITE/API REQUIRED. No M10.11,
 new chooser budget, timing retry, production rollout or arbitrary-page overlay work
 is authorized. See docs/M10.10-PRODUCT-REPORT.md and results/m10.10-product.json.
+
+## ADR-0054 - Replay-only digital timing and authority research
+
+**Status:** prospective M10.10R research design; no production qualification.
+
+The owner separately authorized M10.10R for progressive direct replay and
+selected-resource optional-host refetch. M10.10's incomplete negative outcome is
+not changed. The new research may separate committed media-byte ownership from
+revocable remote-control/fetch authority: source/worker invalidation disables
+Return and new privileged fetch while independently owned playback can continue.
+Source-side exclusive leases and one-use, document/generation-bound transactions
+must protect Enter, Return and rollback. This prospectively supersedes ADR-0052's
+coupled playback teardown ONLY in the new R apparatus, not historical M10.10.
+
+The R audio path is explicitly a media-element WebAudio render graph; digital
+audio-render phase and identified GPU submission/completion are observable study
+quantities, not speakers/scanout. Ground truth and empirical uncertainty must be
+independently reviewed and calibrated before candidate collection. New research
+observers use existing Upscaler/runtime contracts and preallocated diagnostics;
+production core, model, shaders, controller, permissions and payload stay frozen.
+
+A strict dedicated research project/check closes the isolated-player coverage
+gap without relaxing global rules. The unused historical capture target is not a
+qualification entrypoint. See docs/M10.10R-PREREGISTRATION.md for storage forecast,
+conditional gates, authority semantics and the required final product decision.

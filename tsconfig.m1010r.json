@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["@webgpu/types", "vite/client", "chrome", "node"]
+  },
+  "include": ["tools/m1010/**/*.ts", "tools/m1010r/**/*.ts"],
+  "exclude": ["tools/m1010/target.ts"]
+}
