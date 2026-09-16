@@ -344,20 +344,30 @@ export async function runSelfCapture(directory) {
     const interrupted = checkpoint.snapshot().activeExperimentId;
     if (interrupted) checkpoint.complete(interrupted, { outcome: 'UNRESOLVED', executionStatus: 'INTERRUPTED', reason: 'Interrupted chooser ordinal is not automatically repeated' });
     if (stopAfterUnsafeSelf(checkpoint)) return checkpoint.snapshot();
+    if (checkpoint.has('setup-failure')) return checkpoint.snapshot();
     if (SELF_CAPTURE_CASES.every(entry => checkpoint.has(entry.id))) return checkpoint.snapshot();
     fixtures = await startFixtures();
-    const source = await native.context.newPage(), wrong = await native.context.newPage();
-    await nativeWindow(source, native.context); await nativeWindow(wrong, native.context);
-    const markers = {};
-    for (const [name, page] of [['source', source], ['wrong', wrong]]) {
-      await page.goto(fixtures.url); await page.waitForFunction(() => !!globalThis.__M1010_SOURCE__?.snapshot().selection);
-      markers[name] = await page.evaluate(installCaptureMarker, { identity: randomUUID().replaceAll('-', '').slice(0, 8), title: `M10.10 ${name === 'source' ? 'INTENDED' : 'WRONG'} fixture` });
-    }
-    assert.notEqual(markers.source.identity, markers.wrong.identity);
     if (!checkpoint.has('environment')) {
       checkpoint.begin('environment'); checkpoint.complete('environment', { identity, environment: apparatusEnvironment, media: fixtures.media,
         browser: { version: await native.browser.version(), policy: 'default; owner physically starts and operates every chooser; no automatic permission handling' } });
     }
+    const source = await native.context.newPage(), wrong = await native.context.newPage();
+    await nativeWindow(source, native.context); await nativeWindow(wrong, native.context);
+    const markers = {};
+    for (const [name, page] of [['source', source], ['wrong', wrong]]) {
+      try {
+        await page.bringToFront();
+        await page.goto(fixtures.url); await page.waitForFunction(() => !!globalThis.__M1010_SOURCE__?.snapshot().selection);
+        markers[name] = await page.evaluate(installCaptureMarker, { identity: randomUUID().replaceAll('-', '').slice(0, 8), title: `M10.10 ${name === 'source' ? 'INTENDED' : 'WRONG'} fixture` });
+      } catch (error) {
+        const diagnostic = await page.evaluate(() => ({ visibility: document.visibilityState, focused: document.hasFocus(),
+          status: document.getElementById('status')?.textContent, source: globalThis.__M1010_SOURCE__?.snapshot() })).catch(error => ({ error: String(error) }));
+        checkpoint.begin('setup-failure'); checkpoint.complete('setup-failure', { name, error: String(error), diagnostic,
+          outcome: 'UNRESOLVED', executionStatus: 'SETUP_FAILED', chooserTrialsStarted: false });
+        throw error;
+      }
+    }
+    assert.notEqual(markers.source.identity, markers.wrong.identity);
     for (const entry of SELF_CAPTURE_CASES) {
       if (checkpoint.has(entry.id)) { console.log(JSON.stringify({ skippedImmutable: entry.id })); continue; }
       checkpoint.begin(entry.id);
