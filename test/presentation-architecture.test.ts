@@ -12,6 +12,15 @@ function check(source: string) {
 }
 
 describe('M10.9 independent evidence guards',()=>{
+  it('resumes only the unchanged recorded ownership prefix after the host-registry apparatus error',()=>check(`
+    const {validateOwnershipResume,OWNERSHIP_CASES}=await import('./tools/m109-study.mjs');
+    const paths=['tools/m109-contract.ts','tools/m109-monitor.ts','tools/m109-submission.ts','tools/m109-ownership.ts'];
+    const identity={pins:Object.fromEntries(paths.map(path=>[path,'frozen']))};
+    const prior={error:"Cannot read properties of null (reading 'define')",identity,results:{O1:{stopped:null,results:OWNERSHIP_CASES.O1.slice(0,18).map(name=>({name,outcome:'SUPPORTED_CORRECT'}))}}};
+    assert.deepEqual(validateOwnershipResume(prior,identity),prior.results);
+    const retuned=structuredClone(identity);retuned.pins[paths[0]]='changed';assert.throws(()=>validateOwnershipResume(prior,retuned));
+    prior.results.O1.results[0].outcome='UNSAFE';assert.throws(()=>validateOwnershipResume(prior,identity));
+  `));
   it('never passes blank images or wrong expected colors as crop proof',()=>check(`
     const {comparePixels}=await import('./tools/m109-study.mjs');
     const image=Buffer.alloc(40*40*3,100),region={left:0,top:0,width:40,height:40};

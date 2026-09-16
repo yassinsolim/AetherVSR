@@ -356,24 +356,10 @@ function raw(path, data) {
 }
 
 export async function ownershipCase({ model, name }) {
-  let video = document.querySelector('video'); const token = `--aethervsr-${crypto.randomUUID()}`;
+  const video = document.querySelector('video'), token = `--aethervsr-${crypto.randomUUID()}`;
   const rect = () => { const value = video.getBoundingClientRect(); return [value.left, value.top, value.width, value.height]; };
   const attribute = model === 'O1' ? 'style' : 'data-aethervsr-anchor';
   let hostObserver, sideEffect = 0, observerCount = 0;
-  if (name === 'synchronous-reaction') {
-    const type = `m109-host-${crypto.randomUUID()}`;
-    customElements.define(type, class extends HTMLVideoElement {
-      static get observedAttributes() { return ['style']; }
-      attributeChangedCallback() {
-        if (!this.reacting && this.style.getPropertyValue('anchor-name')) {
-          this.reacting = true; this.style.setProperty('color', 'blue'); this.reacting = false;
-        }
-      }
-    }, { extends: 'video' });
-    const replacement = document.createElement('video', { is: type });
-    for (const attribute of video.attributes) replacement.setAttribute(attribute.name, attribute.value);
-    video.replaceWith(replacement); video = replacement; await video.play();
-  }
   if (['existing', 'host-remove-existing'].includes(name)) video.style.setProperty('anchor-name', '--host-one');
   if (name === 'important') video.style.setProperty('anchor-name', '--host-one', 'important');
   if (name === 'explicit-none') video.style.setProperty('anchor-name', 'none', 'important');
@@ -666,21 +652,43 @@ async function census(native, source) {
   return rows;
 }
 
-export async function runStudy(prefix) {
+export function validateOwnershipResume(prior, current) {
+  assert(prior.error?.includes("reading 'define'"), 'Only the recorded host-registry apparatus interruption is resumable here');
+  assert.equal(prior.results.O1.results.length, 18);
+  assert.deepEqual(prior.results.O1.results.map(row => row.name), OWNERSHIP_CASES.O1.slice(0, 18));
+  assert(prior.results.O1.results.every(row => ['SUPPORTED_CORRECT', 'UNSUPPORTED_SAFE'].includes(row.outcome)));
+  assert.equal(prior.results.O1.stopped, null);
+  assert.equal(prior.results.common, undefined); assert.equal(prior.results.O2, undefined);
+  for (const path of ['tools/m109-contract.ts', 'tools/m109-monitor.ts', 'tools/m109-submission.ts', 'tools/m109-ownership.ts']) {
+    assert.equal(prior.identity.pins[path], current.pins[path], `Resumption must not retune ${path}`);
+  }
+  return structuredClone(prior.results);
+}
+
+export async function runStudy(prefix, resumePath = null) {
   prefix = resolve(prefix); assert(prefix.startsWith(join(ROOT, '.cache/m109/')) && !existsSync(`${prefix}.json`)); mkdirSync(dirname(prefix), { recursive: true });
   const report = { schemaVersion: 1, identity: identity(), environment: presentationEnvironment(), started: new Date().toISOString(), results: {} };
+  if (resumePath) {
+    resumePath = resolve(resumePath); assert(resumePath.startsWith(join(ROOT, '.cache/m109/')));
+    const bytes = readFileSync(resumePath), prior = JSON.parse(bytes);
+    report.results = validateOwnershipResume(prior, report.identity);
+    report.retained = { path: relative(ROOT, resumePath), bytes: bytes.length, sha256: sha256(bytes),
+      identity: prior.identity, started: prior.started, finished: prior.finished,
+      sections: ['observability', 'existingAnchor', 'O1.results[0:18]'], reason: 'Only host custom-element setup moved into the fixture MAIN script; no privileged bridge or candidate retuning' };
+  }
   let service, native;
   try {
     service = await server(); report.media = service.media; report.bundleSha256 = service.bundleSha256;
     native = await openNativeChrome(['--autoplay-policy=no-user-gesture-required']);
     report.browser = { version: await native.browser.version(), executableSha256: sha256(readFileSync(native.executable)) };
-    report.results.observability = await observability(native, service);
-    report.results.existingAnchor = await anchorReuse(native, service);
+    report.results.observability ??= await observability(native, service);
+    report.results.existingAnchor ??= await anchorReuse(native, service);
     for (const model of ['O1', 'O2']) {
-      const results = []; report.results[model] = { results, stopped: null, remaining: OWNERSHIP_CASES[model].length };
+      report.results[model] ??= { results: [], stopped: null, remaining: OWNERSHIP_CASES[model].length };
+      const results = report.results[model].results;
       if (model === 'O1' && !report.results.existingAnchor.matches) { report.results[model].reason = 'No demonstrated browser-coupled value'; continue; }
-      for (const name of OWNERSHIP_CASES[model]) {
-        const context = await fresh(native, service);
+      for (const name of OWNERSHIP_CASES[model].slice(results.length)) {
+        const context = await fresh(native, service, name === 'synchronous-reaction' ? name : 'initial');
         try {
           const result = await context.world.call(ownershipCase, { model, name }); results.push(result);
           report.results[model].remaining--;
@@ -703,8 +711,8 @@ export async function runStudy(prefix) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === new URL(import.meta.url).pathname) {
-  assert.equal(process.argv.length, 3, 'Usage: node tools/m109-study.mjs .cache/m109/study-01');
-  const report = await runStudy(process.argv[2]);
+  assert([3, 4].includes(process.argv.length), 'Usage: node tools/m109-study.mjs .cache/m109/study-02 [.cache/m109/study-01.json]');
+  const report = await runStudy(process.argv[2], process.argv[3]);
   console.log(JSON.stringify({ saved: `${process.argv[2]}.json`, error: report.error ?? null, common: report.results.common?.stopped, costs: report.costs }));
   if (report.error) process.exitCode = 1;
 }

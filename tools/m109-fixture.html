@@ -20,7 +20,8 @@
 <div id="destination"></div>
 <div id="commands"><button id="fullscreen">Fullscreen</button><button id="exit">Exit</button></div>
 <script>
-  const video=document.querySelector('video'),player=document.getElementById('player'),outer=document.getElementById('outer');
+  let video=document.querySelector('video');
+  const player=document.getElementById('player'),outer=document.getElementById('outer');
   let ruleSheet=document.getElementById('base').sheet,ruleIndex=null,ruleState=null,mediaSource,sourceBuffer,blob;
   const state={expected:'SUPPORTED',fit:'contain',position:[.5,.5],radius:0,activations:0,operation:0,expectedParent:video.parentNode};
   const rect=element=>{const value=element.getBoundingClientRect();return{left:value.left,top:value.top,width:value.width,height:value.height};};
@@ -32,6 +33,18 @@
   document.getElementById('fullscreen').onclick=()=>player.requestFullscreen();document.getElementById('exit').onclick=()=>document.exitFullscreen();
   globalThis.__M109_FIXTURE__={video,player,outer,state,rect,settled,
     async prepare(name){
+      if(name==='synchronous-reaction'){
+        const type=`m109-host-${crypto.randomUUID()}`;
+        customElements.define(type,class extends HTMLVideoElement{
+          static get observedAttributes(){return['style'];}
+          attributeChangedCallback(){if(!this.reacting&&this.style.getPropertyValue('anchor-name')){
+            this.reacting=true;this.style.setProperty('color','blue');this.reacting=false;
+          }}
+        },{extends:'video'});
+        const replacement=document.createElement('video',{is:type});
+        for(const attribute of video.attributes)replacement.setAttribute(attribute.name,attribute.value);
+        video.replaceWith(replacement);video=replacement;this.video=video;state.expectedParent=video.parentNode;
+      }
       if(name==='nested-scroll')outer.classList.add('nested');
       if(name==='open-shadow'){
         const host=document.createElement('div');outer.append(host);const root=host.attachShadow({mode:'open'}),style=document.createElement('style');
