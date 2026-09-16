@@ -49,7 +49,7 @@ export async function waitForObserved(read, accept, timeoutMs = 900000) {
   }
 }
 
-function environment() {
+export function environment() {
   const command = (name, args) => execFileSync(name, args, { encoding: 'utf8' }).trim();
   return { machine: { model: command('sysctl', ['-n', 'hw.model']), chip: command('sysctl', ['-n', 'machdep.cpu.brand_string']),
     memoryBytes: Number(command('sysctl', ['-n', 'hw.memsize'])) }, os: command('sw_vers', []),

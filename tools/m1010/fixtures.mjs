@@ -32,6 +32,96 @@ export function mediaRecipe({ width, height, fps, fragmented = false }, output, 
     fragmented ? 'frag_keyframe+delay_moov+default_base_moof' : '+faststart', output];
 }
 
+export function timingRecipe(fps, output, seconds = 70) {
+  if (![30, 60].includes(fps) || seconds <= 0 || seconds * fps > 8192) throw new Error('Invalid timing fixture');
+  const recipe = mediaRecipe({ width: 1280, height: 720, fps }, output, seconds);
+  const firstInput = recipe.indexOf('-i') + 1;
+  const cells = [',drawbox=x=0:y=0:w=360:h=80:color=black:t=fill'];
+  for (const row of [16, 48]) {
+    cells.push(`,drawbox=x=0:y=${row}:w=16:h=16:color=white:t=fill`);
+    for (let bit = 0; bit < 13; bit++) cells.push(`,drawbox=x=${(bit + 2) * 24}:y=${row}:w=16:h=16:color=white:t=fill:enable='${row === 16 ? 'gt' : 'eq'}(bitand(n,${2 ** bit}),0)'`);
+  }
+  recipe[firstInput] += cells.join('');
+  recipe[recipe.indexOf('-i', firstInput) + 1] = "aevalsrc='0.35*sin(2*PI*(600+20*floor(t))*t)*lt(mod(n,48000),4800)':s=48000";
+  return recipe;
+}
+
+export function decodeTimingCounter(top, bottom) {
+  if (top.length !== 360 || bottom.length !== 360) throw new Error('Missing counter row');
+  const level = value => value > 192 ? 1 : value < 64 ? 0 : null;
+  for (const row of [top, bottom]) if (level(row[8]) !== 1 || level(row[32]) !== 0) throw new Error('Counter guard mismatch');
+  let value = 0;
+  for (let bit = 0; bit < 13; bit++) {
+    const upper = level(top[(bit + 2) * 24 + 8]), lower = level(bottom[(bit + 2) * 24 + 8]);
+    if (upper === null || lower === null || upper + lower !== 1) throw new Error('Counter complement mismatch');
+    value += upper * 2 ** bit;
+  }
+  return value;
+}
+
+export function decodeTimingAudio(bytes, sampleRate = 48000) {
+  if (bytes.length % 4 !== 0 || sampleRate !== 48000) throw new Error('Expected mono 48kHz float32 PCM');
+  const sample = index => bytes.readFloatLE(index * 4), count = bytes.length / 4, pulses = [];
+  let first = null, last = null;
+  const finish = () => {
+    if (first === null) return;
+    const crossings = [];
+    for (let index = first + 481; index < last - 480; index++) {
+      const before = sample(index - 1), after = sample(index);
+      if (before <= 0 && after > 0) crossings.push(index - 1 - before / (after - before));
+    }
+    const hz = crossings.length > 1 ? (crossings.length - 1) * sampleRate / (crossings.at(-1) - crossings[0]) : null;
+    const id = hz === null ? null : Math.round((hz - 600) / 20);
+    pulses.push({ firstSample: first, lastSample: last, firstThresholdSeconds: first / sampleRate,
+      lastThresholdSeconds: last / sampleRate, hz, id, frequencyErrorHz: hz === null ? null : Math.abs(hz - (600 + 20 * id)) });
+    first = last = null;
+  };
+  for (let index = 0; index < count; index++) {
+    if (Math.abs(sample(index)) > 0.1) { if (first === null) first = index; last = index; }
+    else if (last !== null && index - last >= 960) finish();
+  }
+  finish(); return { samples: count, sampleRate, threshold: 0.1, separationSamples: 960, pulses };
+}
+
+export function inspectTimingMedia(path, fps, seconds = 70) {
+  const execute = args => execFileSync('ffmpeg', ['-nostdin', '-hide_banner', '-v', 'error', '-i', path, ...args], { maxBuffer: 64 * 1024 * 1024, timeout: 120000 });
+  const row = vertical => execute(['-an', '-vf', `extractplanes=y,crop=360:1:0:${vertical}`, '-fps_mode', 'passthrough', '-f', 'rawvideo', 'pipe:1']);
+  const top = row(24), bottom = row(56), count = seconds * fps;
+  if (top.length !== count * 360 || bottom.length !== top.length) throw new Error('Timing frame count mismatch');
+  const flashes = execute(['-an', '-vf', 'extractplanes=y,crop=1:1:100:200', '-fps_mode', 'passthrough', '-f', 'rawvideo', 'pipe:1']);
+  if (flashes.length !== count) throw new Error('Missing decoded flash pixels');
+  const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'frame=best_effort_timestamp_time', '-of', 'json', path], { maxBuffer: 8 * 1024 * 1024 }));
+  if (probe.frames.length !== count) throw new Error('Missing timing frame PTS');
+  const frames = probe.frames.map((frame, index) => {
+    const value = decodeTimingCounter(top.subarray(index * 360, (index + 1) * 360), bottom.subarray(index * 360, (index + 1) * 360));
+    const pts = Number(frame.best_effort_timestamp_time);
+    if (value !== index || Math.abs(pts - index / fps) > 0.000002) throw new Error(`Timing frame identity/PTS mismatch at ${index}`);
+    const flash = flashes[index] > 192;
+    if (flash !== (index % fps < fps / 10)) throw new Error(`Timing flash mismatch at ${index}`);
+    return { frame: value, pts, flash, flashLuma: flashes[index] };
+  });
+  const pcm = execute(['-vn', '-ac', '1', '-ar', '48000', '-f', 'f32le', 'pipe:1']), audio = decodeTimingAudio(pcm);
+  if (audio.pulses.length !== Math.ceil(seconds) || audio.pulses.some((pulse, index) => pulse.id !== index || pulse.frequencyErrorHz > 2 || Math.abs(pulse.firstThresholdSeconds - index) > 0.02)) throw new Error('Encoded audio marker identity mismatch');
+  const audioProbe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'a:0', '-show_packets', '-show_frames', '-read_intervals', '%+#4', '-of', 'json', path], { maxBuffer: 1024 * 1024 }));
+  return { frames, audio, audioProbe, decodedPcm: { bytes: pcm.length, sha256: hash(pcm) },
+    decoding: 'FFmpeg container-timeline decode including edit list/skip metadata; threshold crossings are not physical sound onset.',
+    ffmpeg: execFileSync('ffmpeg', ['-version'], { encoding: 'utf8' }).split('\n')[0] };
+}
+
+export function prepareTimingMedia() {
+  const directory = new URL('.cache/m1010/media/', root); mkdirSync(directory, { recursive: true });
+  return Object.fromEntries([30, 60].map(fps => {
+    const path = fileURLToPath(new URL(`timing720p${fps}-v1.mp4`, directory)), recipe = timingRecipe(fps, path), recipeSha256 = hash(JSON.stringify(recipe));
+    if (!existsSync(path)) execFileSync('ffmpeg', recipe, { timeout: 120000, stdio: ['ignore', 'pipe', 'pipe'] });
+    const bytes = readFileSync(path), sha256 = hash(bytes), analysisPath = `${path}.analysis.json`;
+    if (!existsSync(analysisPath)) writeFileSync(analysisPath, JSON.stringify({ recipeSha256, sha256, inspection: inspectTimingMedia(path, fps) }), { flag: 'wx' });
+    const analysis = JSON.parse(readFileSync(analysisPath));
+    if (analysis.recipeSha256 !== recipeSha256 || analysis.sha256 !== sha256) throw new Error('Timing fixture pin mismatch');
+    return [fps === 30 ? 'A' : 'B', { path, bytes: bytes.length, sha256, recipe, recipeSha256, fps, width: 1280, height: 720, seconds: 70,
+      analysis: { path: analysisPath, bytes: readFileSync(analysisPath).length, sha256: hash(readFileSync(analysisPath)) } }];
+  }));
+}
+
 export function splitFragments(bytes) {
   const starts = [];
   let offset = 0, tail = bytes.length, moov = false;

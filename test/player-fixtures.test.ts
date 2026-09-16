@@ -15,6 +15,47 @@ function check(source: string) {
 }
 
 describe('M10.10 local sources', () => {
+  it('does not treat timestamp estimates or missing live identities as bounded A/V proof', () => check(`
+    const {summarizeTimingFloor,FLOOR_MARKERS,timingPixelIdentity}=await import('./tools/m1010/timing.mjs');
+    assert.deepEqual(FLOOR_MARKERS,[6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64]);
+    const empty=summarizeTimingFloor({samples:[],audio:[],anchors:[],frames:[],events:[],start:null,end:0,fps:60});
+    assert.equal(empty.outcome,'UNRESOLVED');assert.equal(empty.absoluteInstrumentErrorBoundMs,null);assert.equal(empty.durationMs,null);
+    assert.throws(()=>timingPixelIdentity(Buffer.alloc(4)));
+    const record={samples:[],audio:[],anchors:[],frames:[{visible:true,focused:true}],events:[],start:0,end:65000,fps:60};
+    for(const id of FLOOR_MARKERS){
+      for(const relative of[-1,0]){const identity={frame:id*60+relative,flash:relative===0};record.samples.push({marker:id,mediaTime:identity.frame/60,source:{identity},preview:{identity},expectedDisplayTime:id*1000+relative*1000/60});}
+      record.audio.push({id,hz:600+20*id,firstSample:id*48000,sampleRate:48000});
+      record.anchors.push({contextTime:id-.01,performanceTime:id*1000-10,before:0,after:.1},{contextTime:id+.01,performanceTime:id*1000+10,before:0,after:.1});
+    }
+    assert.equal(summarizeTimingFloor(record).outcome,'RECORDED_NOT_QUALIFIED');assert.equal(summarizeTimingFloor(record).absoluteInstrumentErrorBoundMs,null);
+    record.samples[0].preview={identity:{frame:99,flash:false}};assert.equal(summarizeTimingFloor(record).identityMismatch,1);assert.equal(summarizeTimingFloor(record).outcome,'UNRESOLVED');
+  `));
+  it('calibrates sample-addressed audio detection without relying on worklet message arrival', () => check(`
+    let Detector;const pulses=[],context={sampleRate:48000,currentFrame:0,registerProcessor:(name,value)=>{Detector=value},AudioWorkletProcessor:class{port={postMessage:value=>pulses.push(value)}}};
+    runInNewContext(readFileSync('tools/m1010/timing-worklet.js','utf8'),context);
+    const detector=new Detector({processorOptions:{generation:7}});
+    for(let start=0;start<6000;start+=64){
+      context.currentFrame=start;const input=Float32Array.from({length:64},(_,offset)=>start+offset<4800?.35*Math.sin(2*Math.PI*600*(start+offset)/48000):0),output=new Float32Array(64);
+      detector.process([[input]],[[output]]);assert.deepEqual(output,input);
+    }
+    assert.equal(pulses.length,1);assert.equal(pulses[0].generation,7);assert.equal(pulses[0].firstSample,4);assert.equal(pulses[0].id,0);assert(Math.abs(pulses[0].hz-600)<.01);
+    const silence=new Float32Array(256).fill(1);context.currentFrame=6000;detector.process([[]],[[silence]]);assert(silence.every(value=>value===0));
+  `));
+  it('identifies timing counters with complementary cells and rejects ambiguity', () => check(`
+    const {decodeTimingCounter,timingRecipe,decodeTimingAudio}=await import('./tools/m1010/fixtures.mjs');
+    const top=Buffer.alloc(360),bottom=Buffer.alloc(360);top[8]=bottom[8]=235;
+    for(const value of[0,1,2048,4199,8191]){
+      for(let bit=0;bit<13;bit++){top[(bit+2)*24+8]=(value&2**bit)?235:16;bottom[(bit+2)*24+8]=(value&2**bit)?16:235;}
+      assert.equal(decodeTimingCounter(top,bottom),value);
+    }
+    top[56]=120;assert.throws(()=>decodeTimingCounter(top,bottom),/complement/);
+    const recipe=timingRecipe(60,'out.mp4');assert(recipe.includes('70'));assert(recipe.some(value=>value.includes('bitand(n,4096)')));
+    assert.throws(()=>timingRecipe(24,'out.mp4'));
+    const pcm=Buffer.alloc(48000*2*4);
+    for(let index=0;index<96000;index++)pcm.writeFloatLE(index%48000<4800?.35*Math.sin(2*Math.PI*(600+20*Math.floor(index/48000))*index/48000):0,index*4);
+    const audio=decodeTimingAudio(pcm);assert.deepEqual(audio.pulses.map(pulse=>pulse.id),[0,1]);assert(audio.pulses.every(pulse=>pulse.frequencyErrorHz<.1));
+    assert.equal(decodeTimingAudio(Buffer.alloc(48000*4)).pulses.length,0);
+  `));
   it('ranges and recipes', () => check(`
     assert.deepEqual(parseRange(undefined,10),{start:0,end:9,partial:false});
     assert.deepEqual(parseRange('bytes=0-99',10),{start:0,end:9,partial:true});
@@ -71,5 +112,14 @@ describe('M10.10 local sources', () => {
       const frames=probe.frames.filter(frame=>frame.media_type==='video');assert.equal(frames.length,6);
       frames.forEach((frame,index)=>assert(Math.abs(Number(frame.pts_time)-index/30)<0.000002));
     }}finally{rmSync(dir,{recursive:true,force:true});}
+  `));
+  it.skipIf(process.env.M1010_FFMPEG !== '1')('encoded timing counter and audio identities', () => check(`
+    const {timingRecipe,inspectTimingMedia}=await import('./tools/m1010/fixtures.mjs');
+    mkdirSync('.cache/m1010/media',{recursive:true});const dir=mkdtempSync('.cache/m1010/media/timing-unit-');
+    try{
+      const path=dir+'/timing.mp4';execFileSync('ffmpeg',timingRecipe(30,path,2));
+      const inspection=inspectTimingMedia(path,30,2);assert.equal(inspection.frames.length,60);
+      assert.deepEqual(inspection.audio.pulses.map(pulse=>pulse.id),[0,1]);
+    }finally{rmSync(dir,{recursive:true,force:true});}
   `));
 });
