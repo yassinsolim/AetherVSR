@@ -1620,3 +1620,23 @@ CORS/DRM boundaries, C16D2/WGSL, RuntimeController, production S1, service worke
 protocol and permissions remain unchanged. M10.7 presentation FAIL, M10.8 no-selection,
 extension PARTIAL and M11 GATED remain. See docs/M10.9-REPORT.md and
 results/m109-feasibility.json for measured evidence and limitations.
+
+## ADR-0051 - Owner-approved controlled-player research storage
+
+**Status:** explicitly approved by the owner before M10.10 artifacts or experiments.
+Supersedes only ADR-0049's aggregate tracked-tree limit.
+
+At clean aab96fd6255641b590081e27dabd767448632aca the tracked tree measured
+53,102,383 bytes, leaving374,993 bytes under51 MiB. The lean M10.10 estimate is
+425,000 additional bytes: source/fixtures120,000, tests60,000, documentation50,000,
+compact evidence195,000. These are planning estimates, not measured final sizes.
+The projected total exceeded the cap by50,007 bytes, so work stopped for a policy
+decision. The owner explicitly authorized **52 MiB (54,525,952 bytes)**.
+
+Only the aggregate guard changes. The8 MiB per-file guard, historical evidence,
+Git history and generated-data exclusions remain. Browser traces, screenshots,
+media, stream dumps and profiles stay ignored; required compact derived summaries,
+hashes, recipes, tests and documentation remain tracked. Check prospective Git
+object sizes before every commit. Another cap increase requires explicit approval.
+No capture consent, permission, production, safety or M11 gate is changed by this
+storage decision. The arbitrary-page overlay research line remains closed.
