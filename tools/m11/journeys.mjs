@@ -27,6 +27,10 @@ export function armFullscreen({ BrowserWindow }, entered) {
   const state = globalThis.m11Fullscreen = { event, observed: false, at: null };
   BrowserWindow.getAllWindows()[0].once(event, () => { state.observed = true; state.at = new Date().toISOString(); });
 }
+export function armNavigation({ BrowserWindow }) {
+  globalThis.m11Navigation = new Promise(resolve => BrowserWindow.getAllWindows()[0].webContents.once('will-frame-navigate',
+    event => resolve({ url: event.url, prevented: event.defaultPrevented })));
+}
 function local(path) {
   let parent = path;
   while (!existsSync(parent)) parent = dirname(parent);
@@ -255,9 +259,10 @@ export async function runJourneys(directory = '.cache/m11/journeys-01', parityPa
     await attempt('recover', async () => { await file(0); await page.locator('#play').click(); return ready('neural'); });
     await attempt('security', async () => {
       record.securityProbe = true; assert(await page.evaluate(() => window.open('https://m11.invalid/') === null));
-      await app.evaluate(({ BrowserWindow }) => { globalThis.m11Navigation = new Promise(done => BrowserWindow.getAllWindows()[0].webContents.once('will-navigate', (event, url) => done({ url, prevented: event.defaultPrevented }))); });
+      await app.evaluate(armNavigation);
       await page.evaluate(() => { const link = document.createElement('a'); link.href = 'https://m11.invalid/'; document.body.append(link); link.click(); link.remove(); });
-      active.navigation = await limit(app.evaluate(() => globalThis.m11Navigation)); assert(active.navigation.prevented);
+      active.navigation = await limit(app.evaluate(() => globalThis.m11Navigation));
+      assert(active.navigation.prevented); assert.equal(active.navigation.url, 'https://m11.invalid/');
       active.networkBlocked = await page.evaluate(async () => { const frame = document.createElement('iframe'); frame.id = 'journey-frame'; frame.src = 'https://m11.invalid/frame'; frame.hidden = true; document.body.append(frame); try { await fetch('https://m11.invalid/network'); return false; } catch { return true; } }); assert(active.networkBlocked);
       await wait(() => ['frame-src', 'connect-src'].every(directive => window.m11Journey.csp.some(row => row.directive === directive))); active.csp = await page.evaluate(() => window.m11Journey.csp);
       await page.evaluate(() => document.querySelector('#journey-frame').remove());

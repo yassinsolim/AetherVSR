@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { allowedPermission, allowedRequest, APP_ORIGIN, APP_URL, ASSETS, CONTENT_SECURITY_POLICY, localAsset, SECURE_PREFERENCES } from '../apps/desktop/security.js';
 
 describe('desktop static asset and renderer boundaries', () => {
+  it('observes the frame-navigation event that the desktop actually blocks', async () => {
+    const { execFileSync } = await import('node:child_process');
+    execFileSync(process.execPath, ['--input-type=module', '-e', `
+      import assert from 'node:assert/strict';import{armNavigation}from'./tools/m11/journeys.mjs';
+      let handler;const BrowserWindow={getAllWindows:()=>[{webContents:{once(event,callback){assert.equal(event,'will-frame-navigate');handler=callback}}}]};
+      for(const prevented of [true,false]){
+        armNavigation({BrowserWindow});handler({url:'https://m11.invalid/',defaultPrevented:prevented});
+        assert.deepEqual(await globalThis.m11Navigation,{url:'https://m11.invalid/',prevented});
+      }
+    `], { encoding: 'utf8' });
+  });
+
   it('waits for native fullscreen events instead of immediate requested state', async () => {
     const { execFileSync } = await import('node:child_process');
     execFileSync(process.execPath, ['--input-type=module', '-e', `
