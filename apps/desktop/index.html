@@ -2,9 +2,20 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AetherVSR Desktop</title><link rel="stylesheet" href="player.css"></head>
-<body>
-<header><strong>AetherVSR Desktop</strong><input type="file" accept="video/*" aria-label="Open video"><button type="button">Check WebGPU</button></header>
-<main><video controls playsinline preload="auto"></video><canvas aria-label="Enhanced video"></canvas></main>
-<output role="status">No file selected</output>
+<body><main id="player" tabindex="0">
+<header><strong id="filename">AetherVSR Desktop</strong><button id="open" type="button"><span>Open file</span></button><input id="file" type="file" accept="video/*" hidden></header>
+<section id="stage" aria-label="Video playback">
+	<video id="source" playsinline preload="metadata"></video><canvas id="output" aria-label="Enhanced video" hidden></canvas>
+	<div id="empty">AetherVSR Desktop</div>
+</section>
+<footer>
+	<div class="timeline"><input id="seek" aria-label="Seek" type="range" min="0" max="0" value="0" step="0.01" disabled><output id="clock">0:00 / --:--</output></div>
+	<div class="controls"><button id="play" type="button" disabled aria-label="Play"></button><button id="mute" type="button" aria-label="Mute" aria-pressed="false"></button>
+		<input id="volume" aria-label="Volume" type="range" min="0" max="1" value="1" step="0.01">
+		<label for="mode">Quality</label><select id="mode"><option value="auto">Auto performance</option><option value="neural">Prefer neural</option><option value="baseline">Baseline</option></select>
+		<output id="status" role="status">No file selected</output><button id="telemetry-toggle" type="button" aria-label="Show telemetry" aria-pressed="false"></button><button id="fullscreen" type="button" aria-label="Fullscreen"></button>
+	</div><output id="telemetry" hidden></output>
+</footer>
+</main>
 <script type="module" src="renderer.js"></script>
 </body></html>

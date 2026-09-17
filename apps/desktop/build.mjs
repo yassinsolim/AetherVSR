@@ -9,16 +9,17 @@ import { verifyProductionModel } from '../../tools/build-extension.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-export async function buildDesktop({ diagnostic = true, outdir = '.cache/m11/smoke-app', renderer = 'apps/desktop/smoke.ts' } = {}) {
+export async function buildDesktop({ diagnostic = false, outdir = 'dist-desktop', renderer = 'apps/desktop/renderer.ts' } = {}) {
   const output = resolve(ROOT, outdir);
   assert(output.startsWith(resolve(ROOT, '.cache/m11') + '/') || output === resolve(ROOT, 'dist-desktop'));
   const model = readFileSync(join(ROOT, 'public/models/aethersr-c16d2.json')); verifyProductionModel(model);
-  const artifacts = new Map([['index.html', readFileSync(join(ROOT, 'apps/desktop/index.html'))],
+  const artifacts = new Map([['index.html', readFileSync(join(ROOT, renderer.endsWith('/smoke.ts') ? 'apps/desktop/smoke.html' : 'apps/desktop/index.html'))],
     ['player.css', readFileSync(join(ROOT, 'apps/desktop/player.css'))], ['models/production.json', model],
     ['package.json', Buffer.from(JSON.stringify({ name: 'aethervsr-desktop', version: '0.1.0', main: 'main.cjs', private: true }))]]);
   const inputs = new Set();
   for (const [entry, name, platform, format] of [['apps/desktop/main.ts', 'main.cjs', 'node', 'cjs'], [renderer, 'renderer.js', 'browser', 'esm']]) {
     const result = await build({ absWorkingDir: ROOT, entryPoints: [entry], bundle: true, write: false, metafile: true,
+      minifySyntax: true,
       platform, format, target: platform === 'node' ? 'node22' : 'chrome144', outfile: join(output, name),
       external: platform === 'node' ? ['electron'] : [], loader: { '.wgsl': 'text' },
       define: { __DESKTOP_DIAGNOSTIC__: String(diagnostic), 'import.meta.env.DEV': 'false', 'import.meta.env.PROD': 'true' } });
@@ -35,4 +36,9 @@ export async function buildDesktop({ diagnostic = true, outdir = '.cache/m11/smo
   artifacts.set('build-provenance.json', Buffer.from(JSON.stringify(provenance, null, 2) + '\n'));
   for (const [name, bytes] of artifacts) { const path = join(output, name); mkdirSync(resolve(path, '..'), { recursive: true }); writeFileSync(path, bytes); }
   return { directory: relative(ROOT, output), provenance };
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  assert.equal(process.argv.length, 2, 'Use the buildDesktop API for explicit diagnostic builds');
+  console.log(JSON.stringify(await buildDesktop(), null, 2));
 }

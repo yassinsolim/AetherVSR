@@ -55,6 +55,12 @@ jobs:
       - name: Build extension
         run: npm run build:extension
 
+      - name: Desktop checks
+        run: npm run desktop:check
+
+      - name: Build desktop
+        run: npm run desktop:build
+
   # The fusion equivalence gate. Milestone 7's entire safety argument is that a
   # training-time reparameterized block collapses *exactly* into the deployed
   # convolution, and that argument is only load-bearing if it is checked on

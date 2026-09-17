@@ -1811,3 +1811,7 @@ notices remain with the unmodified Electron distribution. New source is independ
 engineered; no external project implementation is copied. Distribution signing,
 notarization, installers and auto-update are outside M11. Reproducible local build
 output and `npm run desktop:dev` are the initial packaging contract.
+
+Desktop controls use Lucide1.47.0 icons, registry-declared ISC license verified
+before installation. Icons are bundled locally; no external icon/font request or
+remote renderer content is introduced.

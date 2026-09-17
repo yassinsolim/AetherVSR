@@ -38,6 +38,13 @@ asset map and immutable model, never arbitrary filesystem paths. Deny remote
 documents/network, popups, unexpected frame navigation, redirects, permissions,
 downloads and webviews. No frame/pixel transfer through Electron IPC.
 
+Prospective control implementation note, after the capability smoke and before
+product qualification: fullscreen is the sole permission exception. Both Electron
+permission handlers require `fullscreen`, the exact local app document, a main
+frame, and the app origin/document as requester. Automatic fullscreen, media,
+capture, filesystem and all other permissions remain denied. The original smoke
+used blanket denial; it did not claim to test the later fullscreen UI.
+
 Mandatory input: user-selected local progressive H.264/MP4,720p30/60, seekable with
 audio. File -> object URL -> one app-owned video. The same video owns all playback,
 audio, rate, seek, mute and volume; canvas processing is subordinate. No AudioContext,

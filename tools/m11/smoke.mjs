@@ -15,7 +15,7 @@ export async function runSmoke(directory) {
   assert(!existsSync(output), 'Native smoke attempt directory must be new');
   assert.equal(git(['status', '--porcelain']), '', 'Commit and review source before native smoke');
   mkdirSync(output, { recursive: true });
-  const built = await buildDesktop();
+  const built = await buildDesktop({ diagnostic: true, outdir: '.cache/m11/smoke-app', renderer: 'apps/desktop/smoke.ts' });
   const executable = (await import('electron')).default;
   const { _electron } = await import('../../.cache/m9/node_modules/playwright/index.mjs');
   const media = resolve(ROOT, '.cache/m1010r/media-02/replay-60.mp4');

@@ -1,7 +1,7 @@
 import { app, BrowserWindow, protocol, session } from 'electron';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { allowedRequest, APP_URL, CONTENT_SECURITY_POLICY, localAsset, SECURE_PREFERENCES } from './security.js';
+import { allowedPermission, allowedRequest, APP_URL, CONTENT_SECURITY_POLICY, localAsset, SECURE_PREFERENCES } from './security.js';
 
 declare const __DESKTOP_DIAGNOSTIC__: boolean;
 
@@ -18,8 +18,10 @@ app.on('window-all-closed', () => app.quit());
 
 void app.whenReady().then(async () => {
   const browsing = session.defaultSession;
-  browsing.setPermissionCheckHandler(() => false);
-  browsing.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
+  browsing.setPermissionCheckHandler((contents, permission, origin, details) =>
+    allowedPermission(permission, contents?.getURL(), details.isMainFrame, origin));
+  browsing.setPermissionRequestHandler((contents, permission, callback, details) =>
+    callback(allowedPermission(permission, contents.getURL(), details.isMainFrame, details.requestingUrl)));
   browsing.on('will-download', (event, download) => { event.preventDefault(); download.cancel(); });
   browsing.webRequest.onBeforeRequest((details, callback) => callback({ cancel: !allowedRequest(details.url) }));
   browsing.protocol.handle('aethervsr', async request => {

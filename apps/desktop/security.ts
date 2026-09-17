@@ -20,6 +20,11 @@ export function allowedRequest(url: string): boolean {
   return /^blob:aethervsr:\/\/app\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(url);
 }
 
+export function allowedPermission(permission: string, documentUrl: string | undefined, isMainFrame: boolean, requester: string): boolean {
+  return permission === 'fullscreen' && documentUrl === APP_URL && isMainFrame &&
+    (requester === APP_ORIGIN || requester === APP_URL);
+}
+
 export const SECURE_PREFERENCES = {
   nodeIntegration: false, contextIsolation: true, sandbox: true,
   webSecurity: true, webviewTag: false, allowRunningInsecureContent: false,
