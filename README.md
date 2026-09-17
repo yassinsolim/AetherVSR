@@ -46,6 +46,13 @@ blocker, not proof that progressive replay is impossible. M10.10 history and
 production remain unchanged; M10.11 is not authorized.
 [Replay qualification report](docs/M10.10R-REPORT.md).
 
+**M10.10RI: DIGITAL TIMING INSTRUMENT NOT QUALIFIED.** The render-clock-driven
+short control verified all180 waveform windows, but the following baseline media
+recorder stopped on discontinuity before its timing window. Three remaining runs
+were NOT_RUN; no digital A/V bound or repeatability was earned. The finite instrument
+investigation is exhausted. No replay qualification or M10.11 follows automatically.
+[Instrument report](docs/M10.10RI-REPORT.md).
+
 **M10.6 history remains PARTIAL, Case D.** Four ten-minute native-video
 controls exceeded the1% combined callback/quality-loss reference, averaging
 4.262931%. This is a lean-instrumented browser result, not physical display loss

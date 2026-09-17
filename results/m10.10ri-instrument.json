@@ -1,0 +1,624 @@
+{
+  "schemaVersion": 1,
+  "milestone": "M10.10RI",
+  "verdict": "DIGITAL TIMING INSTRUMENT NOT QUALIFIED",
+  "scope": "Finite instrument study only; no replay product qualification or physical timing claim",
+  "baseline": {
+    "sourceCommit": "f0c3c49fd6e01746ebc232850455da14ac347c63",
+    "cleanMain": true,
+    "startingCiRunId": 35100333935,
+    "ciGate": "success",
+    "ciFusion": "success",
+    "vitestFiles": 47,
+    "vitestPassed": 1337,
+    "optInSkipped": 3,
+    "pythonPassed": 497,
+    "optInPassed": 40,
+    "trackedBytes": 54183335,
+    "approvedCapBytes": 54525952
+  },
+  "checkpoint": {
+    "state": {
+      "path": ".cache/m1010r/ri-01/state.json",
+      "bytes": 2891,
+      "sha256": "7013d8108e99f6585907120f61f01e7f332d088a52e4397e3fff4c8c8d5d3638"
+    },
+    "pin": {
+      "studyVersion": "M10.10RI-instrument-1",
+      "sourceCommit": "6e0c4b741c581ac615e8b4675dd723cc729c1a59",
+      "baseline": "f0c3c49fd6e01746ebc232850455da14ac347c63",
+      "buildSha256": "90f5c991a8c37bae1241120a30dca025b89d4a701cb7e101d1f01270aa672447",
+      "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+      "mediaManifestSha256": "01253e63c79993c1b07632ec9ac80d81f432a2a674c23edc0635d9eb489015f6",
+      "browserExecutable": "/Users/ysoli/Projects/AetherVSR/.cache/m9/browsers/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+      "browserExecutableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+      "analyzerSha256": "f69922753f39b0bc01d75e9ac827d7723d34bca467c7d750696bd77b00d37b4d",
+      "pythonExecutableSha256": "f64cf6322e4f20cd0458aab89c0d332895817bb8f243b943109b6a957582fd5d",
+      "order": [
+        "ri-30-1",
+        "ri-60-1",
+        "ri-30-2",
+        "ri-60-2"
+      ],
+      "instrument": true,
+      "analyzerScript": "tools/m1010r/instrument_analysis.py",
+      "browserVersion": "153.0.8010.12",
+      "repeatability": {
+        "phaseField": "summary.medianDigitalPhaseMs",
+        "maximumSpreadFrames": 1,
+        "requiredPairs": 2
+      },
+      "preregistrationSha256": "b922c7347bd883651107cef1c1af82d311ede6f9c28ade7c4bcf2bc39d1302dc"
+    },
+    "status": "STOPPED",
+    "attempted": 1,
+    "notRun": 3,
+    "completedIdsAreTerminalRecordsNotMeasurements": true,
+    "requiredNextManualAction": null
+  },
+  "experiments": [
+    {
+      "id": "ri-30-1",
+      "outcome": "FAIL",
+      "nativeState": "UNRESOLVED",
+      "raw": {
+        "path": ".cache/m1010r/ri-01/ri-30-1.json",
+        "bytes": 65526,
+        "sha256": "28852e9924b5b362cb24a5ff55a33181b9abf28e09fd7b26e59ebaba62f9eaad"
+      },
+      "analysis": {
+        "path": ".cache/m1010r/ri-01/ri-30-1-analysis.json",
+        "bytes": 192698,
+        "sha256": "97109b513c73c251a666caa9b148cd7ec1bf60c64289b24c3b14891a70c96905"
+      },
+      "startedAt": "2026-09-17T09:38:44.287Z",
+      "endedAt": "2026-09-17T09:38:48.040Z",
+      "environment": {
+        "machine": {
+          "model": "Mac17,2",
+          "chip": "Apple M5",
+          "memoryBytes": 25769803776
+        },
+        "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+        "physicalRefresh": "not measured",
+        "browser": {
+          "version": "153.0.8010.12",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+          "policy": "Default autoplay; temporary profile; no owner invocation, permission override or chooser",
+          "commandLine": "/Users/ysoli/Projects/AetherVSR/.cache/m9/browsers/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing --remote-debugging-port=0 --user-data-dir=/var/folders/7l/0xgjxg012rq64m644ws4c53w0000gn/T/aethervsr-m9-1Ot17l --no-first-run --no-default-browser-check --use-mock-keychain --disable-background-networking --disable-component-update --disable-sync --load-extension=/Users/ysoli/Projects/AetherVSR/.cache/m1010r/ri-extension about:blank",
+          "manifest": {
+            "background": {
+              "service_worker": "service-worker.js"
+            },
+            "content_security_policy": {
+              "extension_pages": "script-src 'self'; object-src 'self'"
+            },
+            "manifest_version": 3,
+            "minimum_chrome_version": "116",
+            "name": "AetherVSR M10.10RI Instrument",
+            "version": "0.0.1"
+          }
+        }
+      },
+      "control": {
+        "render": {
+          "completionReason": "RENDER_TARGET_REACHED",
+          "requestedEndFrame": 71616,
+          "firstFrame": 1024,
+          "actualObservedEndFrame": 71680,
+          "processedSamples": 70656,
+          "processedBlocks": 552,
+          "sampleRate": 48000,
+          "sampleCoverageMs": 1472,
+          "blockLengths": {
+            "128": 552
+          },
+          "lastBlockLength": 128,
+          "completionOvershootFrames": 64,
+          "offendingNextFrame": null,
+          "discontinuityMagnitudeFrames": null,
+          "finite": true,
+          "nonzeroSamples": 24576,
+          "heartbeatCount": 6,
+          "reportedHeartbeatCount": 6,
+          "watchdogFired": false,
+          "timedOut": false,
+          "overflow": false,
+          "discontinuity": false,
+          "hostErrors": [],
+          "contextStates": [
+            "running"
+          ],
+          "interpretation": "Half-open retained sample range, not wall duration or physical latency; the offending next frame is not recorded."
+        },
+        "scheduled": [
+          {
+            "startFrame": 13024,
+            "referenceStart": 48000,
+            "samples": 8192,
+            "gain": 1
+          },
+          {
+            "startFrame": 39424,
+            "referenceStart": 96000,
+            "samples": 8192,
+            "gain": 0.5
+          },
+          {
+            "startFrame": 58624,
+            "referenceStart": 144000,
+            "samples": 8192,
+            "gain": 0.75
+          }
+        ],
+        "tailAfterFinalSignalFrames": 4864,
+        "expectedWindows": 180,
+        "verifiedWindows": 180,
+        "maximumSampleError": 0,
+        "independentWaveformPassed": true,
+        "pcm": {
+          "path": ".cache/m1010r/ri-01/ri-30-1-control-audio.f32le",
+          "bytes": 282624,
+          "sha256": "c8ee8b7091800972dca159ef86276cb020e3b688d2ad40a0a2aa5bf0eb44c863"
+        },
+        "clocks": {
+          "receiveResidualLowerMs": {
+            "count": 7,
+            "max": 16.000000000000014,
+            "median": 8.000000000000007,
+            "min": 0,
+            "p95": 16.00000000000001
+          },
+          "receiveResidualUpperMs": {
+            "count": 7,
+            "max": 16.000000000000014,
+            "median": 8.000000000000007,
+            "min": 0,
+            "p95": 16.00000000000001
+          },
+          "negativeGuardMs": 5.333333333333333,
+          "positiveDeliveryBoundMs": null,
+          "renderHeartbeatDeltaFrames": {
+            "count": 5,
+            "max": 12032,
+            "median": 12032,
+            "min": 12032,
+            "p95": 12032
+          },
+          "hostDeliveryRateHz": null,
+          "scope": "Host AudioContext time minus retained render endpoint at message receipt; includes asynchronous delivery and further rendering, not clock error or physical latency."
+        }
+      },
+      "media": {
+        "render": {
+          "completionReason": "DISCONTINUITY",
+          "requestedEndFrame": 3289728,
+          "firstFrame": 73728,
+          "actualObservedEndFrame": 99840,
+          "processedSamples": 26112,
+          "processedBlocks": 204,
+          "sampleRate": 48000,
+          "sampleCoverageMs": 544,
+          "blockLengths": {
+            "128": 204
+          },
+          "lastBlockLength": 128,
+          "completionOvershootFrames": null,
+          "offendingNextFrame": null,
+          "discontinuityMagnitudeFrames": null,
+          "finite": true,
+          "nonzeroSamples": 24064,
+          "heartbeatCount": 3,
+          "reportedHeartbeatCount": 3,
+          "watchdogFired": false,
+          "timedOut": false,
+          "overflow": false,
+          "discontinuity": true,
+          "hostErrors": [],
+          "contextStates": [
+            "running"
+          ],
+          "interpretation": "Half-open retained sample range, not wall duration or physical latency; the offending next frame is not recorded."
+        },
+        "renderWindow": {
+          "epochFrame": 73728,
+          "startFrame": 313728,
+          "endFrame": 3193728,
+          "targetEndFrame": 3289728,
+          "sampleRate": 48000
+        },
+        "pcm": {
+          "path": ".cache/m1010r/ri-01/ri-30-1-audio.f32le",
+          "bytes": 104448,
+          "sha256": "648a6d27e54a4f7a313bbb1c934f34af20fbedb6057450262d594d0b746e35ae"
+        },
+        "callbacks": 4,
+        "successfulSubmissions": 4,
+        "gpuSamples": 4,
+        "selectedTimingRows": 0,
+        "validCoverage": null,
+        "absolutePhase": {
+          "absoluteMagnitudeUpperMs": {
+            "count": 0,
+            "max": null,
+            "median": null,
+            "min": null,
+            "p95": null
+          },
+          "halfWidthMs": {
+            "count": 0,
+            "max": null,
+            "median": null,
+            "min": null,
+            "p95": null
+          },
+          "signedLowerMs": {
+            "count": 0,
+            "max": null,
+            "median": null,
+            "min": null,
+            "p95": null
+          },
+          "signedMidpointMs": {
+            "count": 0,
+            "max": null,
+            "median": null,
+            "min": null,
+            "p95": null
+          },
+          "signedUpperMs": {
+            "count": 0,
+            "max": null,
+            "median": null,
+            "min": null,
+            "p95": null
+          }
+        },
+        "driftIntervalMs": null,
+        "digitalUncertaintyBoundMs": null,
+        "physicalLatencyBoundMs": null,
+        "callbackReadyStates": [
+          1,
+          4,
+          4,
+          4
+        ],
+        "callbacksVisibleAndFocused": true,
+        "clocks": {
+          "receiveResidualLowerMs": {
+            "count": 4,
+            "max": 18.666666666666607,
+            "median": 9.333333333333194,
+            "min": 2.666666666666595,
+            "p95": 17.466666666666573
+          },
+          "receiveResidualUpperMs": {
+            "count": 4,
+            "max": 18.666666666666607,
+            "median": 9.333333333333194,
+            "min": 2.666666666666595,
+            "p95": 17.466666666666573
+          },
+          "negativeGuardMs": 5.333333333333333,
+          "positiveDeliveryBoundMs": null,
+          "renderHeartbeatDeltaFrames": {
+            "count": 2,
+            "max": 12032,
+            "median": 12032,
+            "min": 12032,
+            "p95": 12032
+          },
+          "hostDeliveryRateHz": null,
+          "scope": "Host AudioContext time minus retained render endpoint at message receipt; includes asynchronous delivery and further rendering, not clock error or physical latency."
+        },
+        "audioMatching": {
+          "matchedWindowCount": 185,
+          "validWindowCount": 185,
+          "invalidWindowCount": 19,
+          "invalidReasons": {
+            "incomplete_window": 3,
+            "missing_fingerprint": 3,
+            "zero_or_constant_observed_signal": 13
+          },
+          "empiricalOffsetResidualSamples": {
+            "count": 185,
+            "max": 0,
+            "median": 0,
+            "min": 0,
+            "p95": 0
+          },
+          "residualSemantics": "relative to first matched offset; NOT absolute correspondence error"
+        },
+        "globalWaveform": {
+          "method": "Global full-waveform NCC at prospectively fixed windows, independent of sign-key candidate selection",
+          "passed": false,
+          "rows": [
+            {
+              "alternativeCorrelation": null,
+              "correlation": null,
+              "differenceFromFingerprintSamples": null,
+              "observedStart": 720000,
+              "passed": false,
+              "reason": "missing_or_invalid_control_window",
+              "referenceStart": null
+            },
+            {
+              "alternativeCorrelation": null,
+              "correlation": null,
+              "differenceFromFingerprintSamples": null,
+              "observedStart": 1680000,
+              "passed": false,
+              "reason": "missing_or_invalid_control_window",
+              "referenceStart": null
+            },
+            {
+              "alternativeCorrelation": null,
+              "correlation": null,
+              "differenceFromFingerprintSamples": null,
+              "observedStart": 2640000,
+              "passed": false,
+              "reason": "missing_or_invalid_control_window",
+              "referenceStart": null
+            }
+          ],
+          "scope": "Finite-fixture content correspondence control, not speaker/scanout or universal absolute latency"
+        }
+      },
+      "originalAnalysisSummary": {
+        "controlMaximumSampleError": 0,
+        "controlVerifiedWindows": 180,
+        "failedCriteria": [
+          "audio_metadata_mismatch",
+          "foreground_not_verified",
+          "global_waveform_confirmation",
+          "media_render_failed",
+          "native_errors",
+          "timing_failed"
+        ],
+        "medianDigitalPhaseMs": null,
+        "missingEvidence": [
+          "native_not_recorded"
+        ],
+        "reason": "audio_metadata_mismatch; foreground_not_verified; global_waveform_confirmation; media_render_failed; native_errors; native_not_recorded; timing_failed",
+        "uncertaintyBoundMs": null
+      },
+      "nativeErrors": [
+        {
+          "stage": "render completion",
+          "performance": 2271.599999997765,
+          "message": "Render completion not eligible"
+        },
+        {
+          "stage": "render completion",
+          "performance": 2271.599999997765,
+          "message": "Render state/rate invalid"
+        },
+        {
+          "stage": "render completion",
+          "performance": 2271.599999997765,
+          "message": "Required render interval not covered"
+        },
+        {
+          "stage": "render completion",
+          "performance": 2271.599999997765,
+          "message": "Terminal target not in last block"
+        }
+      ],
+      "runnerErrors": [],
+      "repeatability": {
+        "policy": {
+          "phaseField": "summary.medianDigitalPhaseMs",
+          "maximumSpreadFrames": 1,
+          "requiredPairs": 2
+        },
+        "pairs": [
+          {
+            "fps": 30,
+            "thresholdMs": 33.333333333333336,
+            "runs": [
+              {
+                "id": "ri-30-1",
+                "analysis": null,
+                "medianDigitalPhaseMs": null
+              }
+            ],
+            "spreadMs": null,
+            "outcome": "UNRESOLVED"
+          },
+          {
+            "fps": 60,
+            "thresholdMs": 16.666666666666668,
+            "runs": [],
+            "spreadMs": null,
+            "outcome": "PENDING"
+          }
+        ],
+        "validatedPairCount": 0,
+        "outcome": "UNRESOLVED",
+        "reason": "missing_phase_median"
+      },
+      "cleanup": {
+        "pipeline": 0,
+        "probe": 0,
+        "device": 0,
+        "audioNodes": 0,
+        "observers": 0,
+        "timers": 0,
+        "pendingCompletions": 0,
+        "audioContext": "closed",
+        "videoPaused": true,
+        "completed": true
+      },
+      "pageClosed": true,
+      "postRunInterpretation": [
+        "Short control passed once; it is not repeatability or full instrument qualification.",
+        "Media process observed a discontinuous next block; its start/direction/magnitude were not serialized and cannot be reconstructed from target shortfall.",
+        "audio_metadata_mismatch includes the disqualifying discontinuity flag; audio and terminal metadata agree on that flag.",
+        "foreground_not_verified includes first-callback readiness=1; all callbacks were visible/focused. This is not evidence of a hidden interval.",
+        "Global waveform and timing-window checks lack required duration; they do not demonstrate waveform corruption."
+      ]
+    },
+    {
+      "id": "ri-60-1",
+      "outcome": "NOT_RUN",
+      "raw": {
+        "path": ".cache/m1010r/ri-01/ri-60-1.json",
+        "bytes": 1676,
+        "sha256": "d6c82cdb3d4de9c86e6f96918d92d0b3e39707c4bdb7b578eeca7a4809ae9a80"
+      },
+      "reason": {
+        "id": "ri-30-1",
+        "outcome": "FAIL",
+        "reason": "audio_metadata_mismatch; foreground_not_verified; global_waveform_confirmation; media_render_failed; native_errors; native_not_recorded; timing_failed"
+      }
+    },
+    {
+      "id": "ri-30-2",
+      "outcome": "NOT_RUN",
+      "raw": {
+        "path": ".cache/m1010r/ri-01/ri-30-2.json",
+        "bytes": 1676,
+        "sha256": "14c5e9d9d377d08108c056dcd3bff6c30f724413f247b0845e0947a7a11f5da6"
+      },
+      "reason": {
+        "id": "ri-30-1",
+        "outcome": "FAIL",
+        "reason": "audio_metadata_mismatch; foreground_not_verified; global_waveform_confirmation; media_render_failed; native_errors; native_not_recorded; timing_failed"
+      }
+    },
+    {
+      "id": "ri-60-2",
+      "outcome": "NOT_RUN",
+      "raw": {
+        "path": ".cache/m1010r/ri-01/ri-60-2.json",
+        "bytes": 1676,
+        "sha256": "70770c09e4fdb0f79716f1582448aa3ba17547a6c8a0d58335ba9d680a9051dd"
+      },
+      "reason": {
+        "id": "ri-30-1",
+        "outcome": "FAIL",
+        "reason": "audio_metadata_mismatch; foreground_not_verified; global_waveform_confirmation; media_render_failed; native_errors; native_not_recorded; timing_failed"
+      }
+    }
+  ],
+  "qualification": {
+    "shortControl": "ONE_NATIVE_CONTROL_PASS",
+    "fullInstrument": "FAIL",
+    "repeatability": "NOT_RUN",
+    "digitalUncertaintyBoundMs": null,
+    "physicalLatencyBoundMs": null,
+    "futureReplayPrerequisites": "NOT_AUTHORIZED",
+    "neural": "NOT_RUN",
+    "productAuthority": "NOT_RUN",
+    "m1011": "NOT_STARTED"
+  },
+  "frozen": {
+    "m1010": "INCOMPLETE RESEARCH CHECKPOINT / NO CONTROLLED WEB PRODUCT PATH QUALIFIED",
+    "m1010r": "CONTROLLED REPLAY PATH NOT QUALIFIED",
+    "originalFailedRaw": {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1.json",
+      "bytes": 39639,
+      "sha256": "a80e452ca7d45cbb0abe50f1e985bbd128656f0393feb9cde871fd22ad83b1bf"
+    },
+    "originalFailedPcm": {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1-control-audio.f32le",
+      "bytes": 28672,
+      "sha256": "18619b678a5c207a971a0aa931604f48162e307c57ecdec450d5f095fe9f32c7"
+    },
+    "indexes": [
+      {
+        "path": "results/m10.10r-replay.json",
+        "bytes": 23538,
+        "sha256": "c2d87b03e4c12314e03975cb1c0dbbab8003ce464f8b15e3d45fffbefb8ad7d1"
+      },
+      {
+        "path": "results/m10.10-product.json",
+        "bytes": 289744,
+        "sha256": "b7d110addf560efae427d160331ff012d4613ce2a21d38e86e2199d952d3920d"
+      }
+    ]
+  },
+  "nextStep": "Owner product-direction decision: scientifically valid weaker audio-only claim, cooperating-site/API, native desktop, or discontinuation. No automatic RI.2 or further native revision.",
+  "rawReferences": [
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1-control-audio.f32le",
+      "bytes": 28672,
+      "sha256": "18619b678a5c207a971a0aa931604f48162e307c57ecdec450d5f095fe9f32c7"
+    },
+    {
+      "path": ".cache/m1010r/calibration-01/calibration-30-1.json",
+      "bytes": 39639,
+      "sha256": "a80e452ca7d45cbb0abe50f1e985bbd128656f0393feb9cde871fd22ad83b1bf"
+    },
+    {
+      "path": ".cache/m1010r/media-02/decoded-30.f32le",
+      "bytes": 13440000,
+      "sha256": "146670bf67d516149ced77dc32b860ff9d7863e89f88743202e11d2b289a0f65"
+    },
+    {
+      "path": ".cache/m1010r/media-02/replay-30.mp4",
+      "bytes": 1076460,
+      "sha256": "e006f3d5381d73b1ca5739f5e74216f4bf0c312f28621634d258a770822a8f9b"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-1-analysis.json",
+      "bytes": 192698,
+      "sha256": "97109b513c73c251a666caa9b148cd7ec1bf60c64289b24c3b14891a70c96905"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-1-audio.f32le",
+      "bytes": 104448,
+      "sha256": "648a6d27e54a4f7a313bbb1c934f34af20fbedb6057450262d594d0b746e35ae"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-1-control-audio.f32le",
+      "bytes": 282624,
+      "sha256": "c8ee8b7091800972dca159ef86276cb020e3b688d2ad40a0a2aa5bf0eb44c863"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-1-final-snapshot.json",
+      "bytes": 33820,
+      "sha256": "20acc3ec2a0aaa72d70692f600dec300d537b23794f49ee3df8c76953de8e07f"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-1-launch-pin.json",
+      "bytes": 1486,
+      "sha256": "2be019f302d6d4fe1ffa284ec99abbe3ed64659658d4662d78a83b807b20be58"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-1-snapshot.json",
+      "bytes": 33820,
+      "sha256": "20acc3ec2a0aaa72d70692f600dec300d537b23794f49ee3df8c76953de8e07f"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-1.json",
+      "bytes": 65526,
+      "sha256": "28852e9924b5b362cb24a5ff55a33181b9abf28e09fd7b26e59ebaba62f9eaad"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-30-2.json",
+      "bytes": 1676,
+      "sha256": "14c5e9d9d377d08108c056dcd3bff6c30f724413f247b0845e0947a7a11f5da6"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-60-1.json",
+      "bytes": 1676,
+      "sha256": "d6c82cdb3d4de9c86e6f96918d92d0b3e39707c4bdb7b578eeca7a4809ae9a80"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/ri-60-2.json",
+      "bytes": 1676,
+      "sha256": "70770c09e4fdb0f79716f1582448aa3ba17547a6c8a0d58335ba9d680a9051dd"
+    },
+    {
+      "path": ".cache/m1010r/ri-01/state.json",
+      "bytes": 2891,
+      "sha256": "7013d8108e99f6585907120f61f01e7f332d088a52e4397e3fff4c8c8d5d3638"
+    },
+    {
+      "path": ".cache/m1010r/ri-extension/research-provenance.json",
+      "bytes": 46265,
+      "sha256": "90f5c991a8c37bae1241120a30dca025b89d4a701cb7e101d1f01270aa672447"
+    }
+  ]
+}

@@ -525,6 +525,16 @@ route or M10.11. [Replay report](docs/M10.10R-REPORT.md), ADR-0055.
 
 ---
 
+## Milestone 10.10RI - Timing instrument [NOT QUALIFIED]
+
+M10.10RI closed as **DIGITAL TIMING INSTRUMENT NOT QUALIFIED**. Its single native
+short control passed, but baseline media recording failed continuity before the
+timing window; three suffix runs are NOT_RUN. The finite instrument budget is
+exhausted. An explicit product-direction decision is required, not automatic RI.2,
+replay qualification or M10.11. [Instrument report](docs/M10.10RI-REPORT.md), ADR-0057.
+
+---
+
 ## Milestone 11 - Cross-vendor validation [GATED]
 
 Not the default next step while M10.7 presentation synchronization fails and

@@ -9,6 +9,20 @@ const check = (body: string): void => { execFileSync(process.execPath, ['--input
 `], { encoding: 'utf8' }); };
 
 describe('M10.10R digital timing ground truth', () => {
+  it('keeps RI partial render coverage distinct from target overshoot and discontinuity magnitude', () => check(`
+    const {renderEvidence,INSTRUMENT_VERDICT}=await import('./tools/m1010r/instrument_report.mjs');
+    const render={terminal:{completionReason:'DISCONTINUITY',sampleRate:48000,firstFrame:256,actualObservedEndFrame:512,
+      requestedEndFrame:2000,processedSamples:256,processedBlocks:2,blockLengths:[128,128],heartbeatCount:1,
+      overflow:false,discontinuity:true},heartbeats:[{}],watchdogFired:false,timedOut:false,errors:[],contextEvents:[{state:'running'}]};
+    const result=renderEvidence(render,Buffer.alloc(1024));
+    assert.equal(result.completionOvershootFrames,null);assert.equal(result.discontinuityMagnitudeFrames,null);
+    assert.equal(result.offendingNextFrame,null);assert.equal(result.processedSamples,256);assert.equal(result.nonzeroSamples,0);
+    assert.equal(INSTRUMENT_VERDICT,'DIGITAL TIMING INSTRUMENT NOT QUALIFIED');
+    assert.throws(()=>renderEvidence(render,Buffer.alloc(4)));
+    const reached=renderEvidence({...render,terminal:{...render.terminal,completionReason:'RENDER_TARGET_REACHED',requestedEndFrame:500,discontinuity:false}},Buffer.alloc(1024));
+    assert.equal(reached.completionOvershootFrames,12);
+  `));
+
   it('distinguishes retained silent sample coverage from scheduled timing observations', () => check(`
     const {controlDiagnosis,VERDICT}=await import('./tools/m1010r/report.mjs');
     const record={sampleRate:48000,firstFrame:0,samples:7168,

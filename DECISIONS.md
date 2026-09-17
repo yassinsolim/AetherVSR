@@ -1743,3 +1743,21 @@ The instrument uses baseline-only rendering and separate immutable RI experiment
 IDs. No model/controller/production permission or product authority/Return path is
 added. See docs/M10.10RI-PREREGISTRATION.md for fixed clock semantics, four-run budget,
 conditional uncertainty and the hard first-run stop.
+
+## ADR-0057 - Finite RI instrument investigation ends without qualification
+
+**Status:** M10.10RI closed; DIGITAL TIMING INSTRUMENT NOT QUALIFIED.
+
+At clean6e0c4b7, the short render-driven control reached target71616 with whole-block
+end71680, range[1024,71680),180 verified windows and observed maximum location
+error0 samples. The following media recorder returned DISCONTINUITY with retained
+range[73728,99840), before its registered window. The offending next frame was not
+serialized, so discontinuity direction/magnitude and cause are not established.
+Three remaining runs are NOT_RUN; digital uncertainty and repeatability are null.
+
+Keep the single-control success without turning it into a qualified full instrument
+or rewriting M10.10R's negative verdict. The finite native budget is exhausted.
+No post-measurement apparatus revision, replay product work, M10.11 or capture/
+overlay continuation follows. The owner must explicitly choose a scientifically
+valid weaker claim, cooperating-site/API, native desktop or discontinuation before
+further engineering. See docs/M10.10RI-REPORT.md and results/m10.10ri-instrument.json.
