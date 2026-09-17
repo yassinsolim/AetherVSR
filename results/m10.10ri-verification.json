@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "milestone": "M10.10RI",
+  "verdict": "DIGITAL TIMING INSTRUMENT NOT QUALIFIED",
+  "verifiedSourceCommit": "a6d88b77fd3675fc9f19f85d15d34285f0fb8575",
+  "nativeSourceCommit": "6e0c4b741c581ac615e8b4675dd723cc729c1a59",
+  "scope": "Repository closure verification, not timing-instrument qualification",
+  "localAndCleanClone": {
+    "npmCi": "PASS_WITH_EXISTING_WARNINGS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "checkM1010r": "PASS",
+    "researchTypeScriptFiles": 15,
+    "vitestFiles": 48,
+    "vitestPassed": 1418,
+    "vitestOptInSkipped": 3,
+    "optInFixtureTestsPassed": 75,
+    "build": "PASS",
+    "buildExtension": "PASS",
+    "pythonPassed": 612,
+    "cloneOwnNpmInstallation": true,
+    "pythonEnvironmentReused": true
+  },
+  "evidenceChecks": {
+    "savedNativeAnalysisReproduced": true,
+    "nativeOutcome": "FAIL",
+    "shortControlVerifiedWindows": 180,
+    "shortControlMaximumSampleError": 0,
+    "mediaCompletionReason": "DISCONTINUITY",
+    "digitalUncertaintyBoundMs": null,
+    "remainingRuns": "THREE_NOT_RUN",
+    "oldFailedRArtifactPreserved": true,
+    "allThreeIndexesReproduced": true,
+    "localAudit": {
+      "path": ".cache/m1010r/ri-local-evidence-checks.json",
+      "bytes": 783,
+      "sha256": "f59defd324f042e74ff2e1da16b9d189edd5ddbc1e9c386653b6a36da4681e94"
+    },
+    "compactIndex": {
+      "path": "results/m10.10ri-instrument.json",
+      "bytes": 22182,
+      "sha256": "1f3fcd16f75bed8528b6379c96bcc049f18701b9e5d63616e2d5d9987f107d4f"
+    }
+  },
+  "packageChecks": {
+    "frozenPayloadByteEqual": true,
+    "workspaceCloneAllBytesEqual": true,
+    "cloneRepeatedAllBytesEqual": true,
+    "sourceDirty": false,
+    "audit": {
+      "path": ".cache/m1010r/ri-clean-clone-checks.json",
+      "bytes": 861,
+      "sha256": "e2a45d8e4c8ff1004a9774172b6c04f33f281b62107d24598a808161abbf6964"
+    },
+    "productionBytes": 274684,
+    "productionBundleSha256": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551",
+    "diagnosticBytes": 276414,
+    "diagnosticBundleSha256": "7334c5db0f476048a10b63a2e0d9e4b240436fa3a669925e113cedc93cb1003f",
+    "modelBytes": 140467,
+    "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a"
+  },
+  "verifiedSourceTrackedBytes": 54457723,
+  "approvedCapBytes": 54525952,
+  "verifiedSourceHeadroomBytes": 68229,
+  "unapprovedLargeFiles": 0,
+  "reviewDisposition": "Independent eight-area pre/post reviews and final 29-section evidence/decision review completed; negative closure supported",
+  "limitations": [
+    "No complete digital timing window, aggregate uncertainty or repeatability was earned",
+    "One successful short control is not full instrument qualification",
+    "The offending media render frame, discontinuity direction, magnitude and cause were not recorded",
+    "The finite native budget is exhausted; no retry, instrument revision or product qualification followed",
+    "A clean clone lacks ignored native PCM/media/profiles required for measurement reproduction",
+    "Two existing moderate dependency advisories and install warnings remain",
+    "Exact publication-HEAD CI and remote synchronization are verified separately, not predicted by this record"
+  ]
+}
