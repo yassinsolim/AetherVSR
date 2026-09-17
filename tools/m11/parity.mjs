@@ -19,6 +19,19 @@ export { MODEL_SHA256, SOURCE_SHA256 };
 export const PARITY_CASES = Object.freeze([false, true].flatMap(forceCopy => TIMES.map(time =>
   Object.freeze({ id: `${forceCopy ? 'copy' : 'external'}-${time}`, forceCopy, time }))));
 
+export async function waitForObservation(observe, timeout = 10000) {
+  assert(Number.isFinite(timeout) && timeout > 0);
+  let timer;
+  const expired = new Promise((_, reject) => { timer = setTimeout(() => reject(Error(`Observation deadline ${timeout}ms`)), timeout); });
+  try {
+    for (;;) {
+      const value = await Promise.race([observe(), expired]);
+      if (value) return value;
+      await Promise.race([new Promise(resolve => setTimeout(resolve, 50)), expired]);
+    }
+  } finally { clearTimeout(timer); }
+}
+
 export function compareParityCase(spec, desktop, harness, modelJsonSha256) {
   assert(PARITY_CASES.some(value => value.id === spec.id && value.time === spec.time && value.forceCopy === spec.forceCopy),
     'Unknown parity case');
@@ -254,8 +267,8 @@ export async function runParity(directory = '.cache/m11/parity-01') {
       finally { row.finishedAt = new Date().toISOString(); }
     };
     const prepare = async (page, side, forceCopy, evidence) => {
-      const readiness = `(${runtimeState.toString()})({extension:false}).ready`;
-      await step(page.waitForFunction(readiness, undefined, { timeout: 20000 }), `${side} actual neural readiness`, 22000);
+      await step(waitForObservation(async () => (await page.evaluate(runtimeState, { extension: false })).ready, 20000),
+        `${side} actual neural readiness`, 22000);
       evidence.ready = await step(page.evaluate(runtimeState, { extension: false }), `${side} ready evidence`);
       assert(!evidence.ready.error); assert.equal(evidence.ready.importPath, forceCopy ? 'sampled' : 'external');
       if (side === 'desktop') await step(page.evaluate(() => window.m11Desktop.session().pause()), 'Pause desktop session');

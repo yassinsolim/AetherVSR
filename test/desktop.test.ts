@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { allowedPermission, allowedRequest, APP_ORIGIN, APP_URL, ASSETS, CONTENT_SECURITY_POLICY, localAsset, SECURE_PREFERENCES } from '../apps/desktop/security.js';
 
 describe('desktop static asset and renderer boundaries', () => {
+  it('uses bounded direct observations without dynamic page evaluation', async () => {
+    const { execFileSync } = await import('node:child_process');
+    execFileSync(process.execPath, ['--input-type=module', '-e', `
+      import assert from 'node:assert/strict';import{readFileSync}from'node:fs';
+      import{waitForObservation}from'./tools/m11/parity.mjs';
+      const values=[false,false,true];assert(await waitForObservation(async()=>values.shift(),500));
+      assert.equal(values.length,0);
+      await assert.rejects(waitForObservation(async()=>false,10),/Observation deadline/);
+      await assert.rejects(waitForObservation(async()=>{throw Error('observation failed')},100),/observation failed/);
+      for(const file of ['parity','journeys'])assert(!readFileSync('tools/m11/'+file+'.mjs','utf8').includes('waitForFunction'));
+    `], { encoding: 'utf8' });
+  });
+
   it('does not pass mandatory audio gates when native audibility is unavailable', async () => {
     const { execFileSync } = await import('node:child_process');
     execFileSync(process.execPath, ['--input-type=module', '-e', `

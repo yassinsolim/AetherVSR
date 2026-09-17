@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSyn
 import { arch, hostname, platform, release } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MODEL_SHA256, summarizeParity } from './parity.mjs';
+import { MODEL_SHA256, summarizeParity, waitForObservation } from './parity.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url)), BUILD = '.cache/m11/journey-app', VERSION = '44.4.1';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -97,7 +97,7 @@ export async function runJourneys(directory = '.cache/m11/journeys-01', parityPa
     return { path: relative(ROOT, join(output, name)), bytes: bytes.length, sha256: hash(bytes) };
   };
   const snap = () => limit(page.evaluate(snapshot));
-  const wait = (predicate, argument, timeout = 10000) => page.waitForFunction(predicate, argument, { timeout }).then(handle => handle.dispose());
+  const wait = (predicate, argument, timeout = 10000) => waitForObservation(() => page.evaluate(predicate, argument), timeout);
   const ready = async (tier = null) => {
     await wait(tier => { const state = window.m11Desktop.session().snapshot(); if (state.error) throw Error(state.error); return state.ready && !state.pending && state.runtime?.running && (!tier || state.runtime.actualTier === tier); }, tier, 20000);
     const state = await snap(); assert(state.sameVideo && !state.hidden && state.focused && state.visible === 'visible');
