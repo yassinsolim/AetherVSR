@@ -2,6 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { allowedPermission, allowedRequest, APP_ORIGIN, APP_URL, ASSETS, CONTENT_SECURITY_POLICY, localAsset, SECURE_PREFERENCES } from '../apps/desktop/security.js';
 
 describe('desktop static asset and renderer boundaries', () => {
+  it('waits for native fullscreen events instead of immediate requested state', async () => {
+    const { execFileSync } = await import('node:child_process');
+    execFileSync(process.execPath, ['--input-type=module', '-e', `
+      import assert from 'node:assert/strict';import{armFullscreen}from'./tools/m11/journeys.mjs';
+      const handlers=new Map();const BrowserWindow={getAllWindows:()=>[{once:(event,handler)=>handlers.set(event,handler)}]};
+      for(const entered of [true,false]){
+        armFullscreen({BrowserWindow},entered);const state=globalThis.m11Fullscreen;
+        assert.equal(state.observed,false);assert.equal(state.at,null);
+        assert.equal(state.event,entered?'enter-full-screen':'leave-full-screen');
+        handlers.get(state.event)();assert.equal(state.observed,true);assert(!Number.isNaN(Date.parse(state.at)));
+      }
+    `], { encoding: 'utf8' });
+  });
+
   it('uses bounded direct observations without dynamic page evaluation', async () => {
     const { execFileSync } = await import('node:child_process');
     execFileSync(process.execPath, ['--input-type=module', '-e', `

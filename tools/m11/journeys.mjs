@@ -22,6 +22,11 @@ export function observedAudibility(value, wanted) {
   assert.equal(typeof value, 'boolean', 'Native audibility unavailable; mandatory audio gate unverified');
   return value === wanted;
 }
+export function armFullscreen({ BrowserWindow }, entered) {
+  const event = entered ? 'enter-full-screen' : 'leave-full-screen';
+  const state = globalThis.m11Fullscreen = { event, observed: false, at: null };
+  BrowserWindow.getAllWindows()[0].once(event, () => { state.observed = true; state.at = new Date().toISOString(); });
+}
 function local(path) {
   let parent = path;
   while (!existsSync(parent)) parent = dirname(parent);
@@ -226,8 +231,12 @@ export async function runJourneys(directory = '.cache/m11/journeys-01', parityPa
     await attempt('fullscreen', async () => {
       active.evidence = [];
       for (const entered of [true, false]) {
-        await page.locator('#fullscreen').click(); await wait(entered => !!document.fullscreenElement === entered, entered);
-        active.evidence.push({ state: await ready(), native: await app.evaluate(nativeState) });
+        await app.evaluate(armFullscreen, entered);
+        await page.locator('#fullscreen').click();
+        await waitForObservation(() => app.evaluate(() => globalThis.m11Fullscreen.observed));
+        await wait(entered => !!document.fullscreenElement === entered, entered);
+        const native = await app.evaluate(nativeState); assert.equal(native.fullscreen, entered);
+        active.evidence.push({ state: await ready(), native, event: await app.evaluate(() => globalThis.m11Fullscreen) });
       }
     });
     await attempt('replace', async () => {
