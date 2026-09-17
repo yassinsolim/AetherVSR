@@ -535,14 +535,25 @@ replay qualification or M10.11. [Instrument report](docs/M10.10RI-REPORT.md), AD
 
 ---
 
-## Milestone 11 - Cross-vendor validation [GATED]
+## Milestone 11 - Desktop-Owned Player MVP [AUTHORIZED]
 
-Not the default next step while M10.7 presentation synchronization fails and
-M10.6 delivery/public-media robustness remains
-unresolved and has not been proved vendor-specific. No M11 implementation is
-included. After READY or a justified vendor-specific research gate, verify on NVIDIA, AMD and Intel
-GPUs across Windows and Linux. Everything measured so far is one Apple Silicon
-machine; nothing here should be assumed to transfer.
+The owner selected a desktop-owned player as the primary product surface, first
+on macOS / Apple Silicon using Electron and the unchanged production WebGPU core.
+One local-file HTMLVideoElement owns playback/audio; an app-owned canvas presents
+2x enhancement. Secure shell and native Electron capability first, then exact
+parity, controls/lifecycle, preregistered720p60 visual-lag/cadence checks and an
+eligible ten-minute soak. No browser product, capture, RI.2 or overlay work.
+The extension and historical outcomes remain frozen. ADR-0058 records the pivot
+and owner-approved56MiB storage cap before implementation.
+
+---
+
+## Milestone 12 - Cross-Vendor Desktop Validation [GATED]
+
+Moved prospectively from the former M11 plan by the owner. After a ready desktop
+MVP, validate desktop playback on Apple M5, NVIDIA RTX, AMD and Intel hardware as
+available across appropriate operating systems. No M12 implementation or measurement
+is included in M11. Existing single-machine evidence does not generalize to vendors.
 
 ---
 

@@ -2,6 +2,9 @@ node_modules/
 dist/
 /dist-extension/
 /dist-extension-test/
+/dist-desktop/
+/release-desktop/
+/.cache/m11/
 /.cache/m105/
 /.cache/m106/
 /.cache/m107/

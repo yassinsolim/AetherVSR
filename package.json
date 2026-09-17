@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "vite",
@@ -23,6 +23,7 @@
     "@eslint/js": "^9.39.0",
     "@types/chrome": "0.2.9",
     "@webgpu/types": "^0.1.71",
+    "electron": "44.4.1",
     "esbuild": "0.28.2",
     "eslint": "^9.39.0",
     "m3u8-parser": "7.2.0",
@@ -33,6 +34,7 @@
     "vitest": "^3.2.4"
   },
   "allowScripts": {
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "electron@44.4.1": true
   }
 }

@@ -1761,3 +1761,53 @@ No post-measurement apparatus revision, replay product work, M10.11 or capture/
 overlay continuation follows. The owner must explicitly choose a scientifically
 valid weaker claim, cooperating-site/API, native desktop or discontinuation before
 further engineering. See docs/M10.10RI-REPORT.md and results/m10.10ri-instrument.json.
+
+## ADR-0058 - Desktop-owned player pivot and owner-approved storage
+
+**Status:** owner-authorized before implementation; primary product direction.
+
+M11 is now **Desktop-Owned Player MVP**, first targeting macOS / Apple Silicon
+with Electron and the existing production WebGPU core, C16D2 weights, model loader,
+NeuralUpscaler, BaselineScaler and RuntimeController. One app-owned HTMLVideoElement
+owns playback, timeline and audio; one app-owned canvas presents enhancement. Main
+owns application lifecycle only. No embedded webpage, frame IPC, preload bridge or
+arbitrary-file read API is required. Renderer file selection supplies a File and
+an object URL. Native CoreML/Metal remains future work.
+
+M10.7-M10.9 did not qualify generic hostile-page presentation. M10.10 did not qualify
+a controlled browser acquisition product; R/RI did not earn the stronger digital
+A/V instrument required for that line. These results concern product environment,
+ownership and measurement contracts, not failure of the neural engine. The engine,
+model and runtime remain intact, and controlled extension surfaces established
+exact output parity. Owning the player and layout removes hostile-page geometry
+and dual-authority handover from the product contract.
+
+The extension is preserved and frozen, no longer the primary surface. All published
+M10 through M10.10RI outcomes remain historical evidence. The finite browser timing
+investigation stays closed: no RI.2, capture/overlay permutation, MSE reconstruction
+or cooperating-site work. The former M11 cross-vendor plan moves to **M12:
+Cross-Vendor Desktop Validation**, gated on a ready desktop MVP. It is not executed
+here. This prospective roadmap decision supersedes prior next-step numbering and
+primary-surface recommendations only, not their measured outcomes.
+
+Security baseline: nodeIntegration=false, contextIsolation=true, sandbox=true; no
+experimental WebGPU flags, webview, remote documents, broad IPC, updater, telemetry
+or accounts. Normal Electron must pass native WebGPU acquisition, production shader,
+external-import and timestamp-query checks before substantial UI work. If it cannot,
+stop without disabling security or forcing unsupported features. Browser media
+audio remains direct; no RI AudioContext or sample-accurate/physical A/V claim.
+
+The owner explicitly raises the aggregate tracked-tree cap once from52MiB
+(54,525,952bytes) to **56MiB (58,720,256bytes)**. Starting9e33e9f tracked54,461,963bytes,
+leaving63,989 under the old cap and4,258,293 under the new one. The increase covers
+desktop source, dependency metadata, tests, compact evidence and docs only. Existing
+8MiB file rules and historical exceptions remain. Electron binaries, node_modules,
+packaged .app/.dmg/.zip outputs, media, screenshots, traces and profiles stay ignored.
+No history/evidence deletion. Any increase above56MiB requires another owner decision.
+
+Initial dependency choice: Electron44.4.1, registry-declared MIT license, supported
+Node>=22.12.0, verified from npm metadata before adding it. Its Chromium/third-party
+notices remain with the unmodified Electron distribution. New source is independently
+engineered; no external project implementation is copied. Distribution signing,
+notarization, installers and auto-update are outside M11. Reproducible local build
+output and `npm run desktop:dev` are the initial packaging contract.

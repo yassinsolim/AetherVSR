@@ -1,0 +1,2 @@
+:root{font-family:Verdana,sans-serif;color:#e8ece9;background:#151916;color-scheme:dark;letter-spacing:0}
+*{box-sizing:border-box}body{margin:0}header{display:flex;align-items:center;gap:12px;padding:12px;flex-wrap:wrap}main{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}video,canvas{width:100%;height:auto;min-width:0;background:#080808;aspect-ratio:16/9}output{display:block;padding:12px;font-size:12px;overflow-wrap:anywhere}button{font:inherit;padding:6px 12px;border-radius:3px}
