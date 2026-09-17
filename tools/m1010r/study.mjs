@@ -8,15 +8,24 @@ import { fileURLToPath } from 'node:url';
 import { openNativeChrome } from '../m9-browser.mjs';
 import { nativeWindow } from '../m105-accounting.mjs';
 import { environment } from '../m1010/study.mjs';
-import { ROOT, DEFAULT_EXTENSION, PROVENANCE_FILE, cachePath, digest, git, verifyBuild, verifyReference } from './build.mjs';
+import { ROOT, DEFAULT_EXTENSION, DEFAULT_RI_EXTENSION, PROVENANCE_FILE, cachePath, digest, git, verifyBuild, verifyReference } from './build.mjs';
 
 export const FROZEN_BASELINE = '5b1a313e1d603b46471aebb70594e044a67d44d6';
+export const RI_FROZEN_BASELINE = 'f0c3c49fd6e01746ebc232850455da14ac347c63';
 export const DEFAULT_CALIBRATION = '.cache/m1010r/calibration-01';
+export const DEFAULT_RI_CALIBRATION = '.cache/m1010r/ri-01';
 export const ANALYZER = 'tools/m1010r/analyze.py';
+export const RI_ANALYZER = 'tools/m1010r/instrument_analysis.py';
+export const RI_BROWSER_VERSION = '153.0.8010.12';
+export const RI_BROWSER_SHA256 = '8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a';
 export const PYTHON = '.cache/m8-venv/bin/python';
 export const CALIBRATION_CASES = Object.freeze([1, 2, 3].flatMap(repeat => [30, 60].map(fps =>
   Object.freeze({ id: `calibration-${fps}-${repeat}`, fps, repeat }))));
-const ids = CALIBRATION_CASES.map(entry => entry.id);
+export const RI_STUDY_VERSION = 'M10.10RI-instrument-1';
+export const RI_CASES = Object.freeze([1, 2].flatMap(repeat => [30, 60].map(fps =>
+  Object.freeze({ id: `ri-${fps}-${repeat}`, fps, repeat }))));
+export const RI_REPEATABILITY_POLICY = Object.freeze({ phaseField: 'summary.medianDigitalPhaseMs',
+  maximumSpreadFrames: 1, requiredPairs: 2 });
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 const errorInfo = error => ({ message: String(error), stack: error?.stack ?? null });
 const reference = path => {
@@ -24,17 +33,28 @@ const reference = path => {
   return { path: relative(ROOT, path), bytes: bytes.length, sha256: digest(bytes) };
 };
 
-export function studyIdentity(outdir = DEFAULT_EXTENSION) {
+export function studyIdentity(outdir = DEFAULT_EXTENSION, { instrument = false } = {}) {
+  assert.equal(typeof instrument, 'boolean');
+  const baseline = instrument ? RI_FROZEN_BASELINE : FROZEN_BASELINE;
   assert.equal(git(['status', '--porcelain=v1', '--untracked-files=all']), '', 'Review and freeze clean source before launching calibration');
-  git(['diff', '--exit-code', FROZEN_BASELINE, '--', 'src', 'models', 'public/models', 'tools/build-extension.mjs',
+  git(['diff', '--exit-code', baseline, '--', 'src', 'models', 'public/models', 'tools/build-extension.mjs',
     'tools/m9-browser.mjs', 'tools/m105-accounting.mjs', 'package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml']);
-  const original = JSON.parse(git(['show', `${FROZEN_BASELINE}:package.json`]));
+  const original = JSON.parse(git(['show', `${baseline}:package.json`]));
   const current = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
   delete original.scripts; delete current.scripts;
   assert.deepEqual(current, original, 'Only package scripts may change; dependencies and install policy are frozen');
   assert.equal(endianness(), 'LE', 'Native Float32 recording requires little-endian storage');
   const identity = verifyBuild(outdir), sourceCommit = git(['rev-parse', 'HEAD']);
+  assert.equal(identity.provenance.generator, instrument ? 'm1010ri-instrument' : 'm1010r-calibration', 'Package mode differs from study');
   assert.equal(identity.provenance.sourceCommit, sourceCommit); assert.equal(identity.provenance.sourceDirty, false);
+  if (instrument) {
+    assert.equal(identity.provenance.instrument, true);
+    assert(/^[a-f0-9]{40}$/.test(sourceCommit), 'Invalid implementation commit');
+    for (const [fps, sha256] of [[30, 'e006f3d5381d73b1ca5739f5e74216f4bf0c312f28621634d258a770822a8f9b'],
+      [60, '5171a8b6da7303c8c409167f4191b7330f41120fcd89d7e3aa0df9483b237b29']]) {
+      assert.equal(identity.provenance.mediaManifest.assets.find(asset => asset.fps === fps)?.media.sha256, sha256, 'RI media pin changed');
+    }
+  }
   assert(Object.keys(identity.provenance.sourceFiles).length > 0, 'Missing build-input hashes');
   for (const [name, expected] of Object.entries(identity.provenance.sourceFiles)) {
     const path = resolve(ROOT, name);
@@ -42,7 +62,7 @@ export function studyIdentity(outdir = DEFAULT_EXTENSION) {
     const bytes = readFileSync(path);
     assert.deepEqual({ bytes: bytes.length, sha256: digest(bytes) }, expected, `Build input changed: ${name}`);
   }
-  return { ...identity, sourceCommit, baseline: FROZEN_BASELINE, build: reference(join(identity.directory, PROVENANCE_FILE)) };
+  return { ...identity, sourceCommit, baseline, build: reference(join(identity.directory, PROVENANCE_FILE)) };
 }
 
 function writeArtifact(directory, name, value) {
@@ -57,7 +77,47 @@ function verifyReferences(value) {
   for (const child of Object.values(value)) verifyReferences(child);
 }
 
-export function openCalibrationCheckpoint(directory, pin) {
+export function withRIRepeatability(id, analysis, previous) {
+  const index = RI_CASES.findIndex(entry => entry.id === id);
+  assert(index >= 0, 'Unknown RI ID');
+  assert.deepEqual(previous.map(entry => entry.id), RI_CASES.slice(0, index).map(entry => entry.id), 'RI analyses must be a fixed-order prefix');
+  assert(previous.every(entry => entry.result.outcome === 'PASS' && entry.result.individualOutcome === 'PASS'), 'Prior RI analyses must PASS');
+  assert(['PASS', 'FAIL', 'UNRESOLVED'].includes(analysis.outcome));
+  const entries = [...previous, { id, result: analysis, reference: null }];
+  const pairs = [30, 60].map(fps => {
+    const runs = entries.filter(entry => RI_CASES.find(trial => trial.id === entry.id).fps === fps).map(entry => ({
+      id: entry.id, analysis: entry.reference,
+      medianDigitalPhaseMs: Number.isFinite(entry.result.summary?.medianDigitalPhaseMs) ? entry.result.summary.medianDigitalPhaseMs : null,
+    }));
+    const thresholdMs = RI_REPEATABILITY_POLICY.maximumSpreadFrames * 1000 / fps;
+    const missing = runs.some(run => run.medianDigitalPhaseMs === null);
+    const spread = !missing && runs.length === 2 ? Math.abs(runs[1].medianDigitalPhaseMs - runs[0].medianDigitalPhaseMs) : null;
+    return { fps, thresholdMs, runs, spreadMs: Number.isFinite(spread) ? spread : null,
+      outcome: missing ? 'UNRESOLVED' : runs.length < 2 ? 'PENDING' : spread <= thresholdMs ? 'PASS' : 'FAIL' };
+  });
+  const validatedPairCount = pairs.filter(pair => pair.outcome === 'PASS').length;
+  const outcome = pairs.some(pair => pair.outcome === 'FAIL') ? 'FAIL' : pairs.some(pair => pair.outcome === 'UNRESOLVED') ? 'UNRESOLVED'
+    : validatedPairCount === RI_REPEATABILITY_POLICY.requiredPairs ? 'PASS' : 'PENDING';
+  const reason = outcome === 'FAIL' ? 'repeatspread' : outcome === 'UNRESOLVED' ? 'missing_phase_median' : null;
+  if (index === RI_CASES.length - 1) assert.notEqual(outcome, 'PENDING', 'Both RI pairs must be validated before completion');
+  return { ...analysis, individualOutcome: analysis.outcome,
+    outcome: analysis.outcome === 'PASS' && ['FAIL', 'UNRESOLVED'].includes(outcome) ? outcome : analysis.outcome,
+    reason: analysis.outcome === 'PASS' ? reason : analysis.reason ?? analysis.summary?.reason ?? null,
+    repeatability: { policy: RI_REPEATABILITY_POLICY, pairs, validatedPairCount, outcome, reason } };
+}
+
+function validateRIAnalysis(id, analysis, previous) {
+  const expected = withRIRepeatability(id, { ...analysis, outcome: analysis.individualOutcome }, previous);
+  assert.deepEqual(analysis.repeatability, expected.repeatability, 'RI repeatability evidence changed or missing');
+  assert.equal(analysis.outcome, expected.outcome, 'RI aggregate outcome differs');
+  assert.equal(analysis.reason, expected.reason, 'RI aggregate reason differs');
+}
+
+export function openCalibrationCheckpoint(directory, pin, cases = pin.studyVersion === RI_STUDY_VERSION ? RI_CASES : CALIBRATION_CASES) {
+  assert.deepEqual(cases, cases?.[0]?.id === 'ri-30-1' ? RI_CASES : CALIBRATION_CASES, 'Study case order changed');
+  if (pin.studyVersion === RI_STUDY_VERSION) assert.deepEqual(cases, RI_CASES, 'RI cannot use legacy IDs');
+  const ids = cases.map(entry => entry.id);
+  if (pin.order !== undefined) assert.deepEqual(pin.order, ids, 'Pinned case order changed');
   const root = cachePath(directory);
   mkdirSync(root, { recursive: true });
   const statePath = join(root, 'state.json');
@@ -110,6 +170,21 @@ export function openCalibrationCheckpoint(directory, pin) {
     assert(state.completedExperimentIds.includes(id) || state.activeExperimentId === id);
     assert.deepEqual(readEnvelope(id, true).reference, state.analysisArtifacts[id]);
   }
+  const analyses = () => {
+    const previous = [];
+    for (const id of state.completedExperimentIds) {
+      const raw = readEnvelope(id);
+      assert.deepEqual(raw.reference, state.rawArtifacts[id], 'Immutable raw JSON changed');
+      if (!state.analysisArtifacts[id]) continue;
+      const analysis = readEnvelope(id, true);
+      assert.deepEqual(analysis.reference, state.analysisArtifacts[id], 'Immutable analysis changed');
+      assert.deepEqual(analysis.envelope.result.raw, raw.reference);
+      if (pin.studyVersion === RI_STUDY_VERSION) validateRIAnalysis(id, analysis.envelope.result, previous);
+      previous.push({ id, result: analysis.envelope.result, reference: analysis.reference });
+    }
+    return previous;
+  };
+  if (pin.studyVersion === RI_STUDY_VERSION) analyses();
   verifyReferences(state.interruption); verifyReferences(state.runnerError);
   for (const id of ids) if (!state.completedExperimentIds.includes(id) && state.activeExperimentId !== id) {
     assert(!readdirSync(root).some(name => name === `${id}.json` || name.startsWith(`${id}-`)), 'Unregistered attempt artifacts cannot be reused');
@@ -149,10 +224,14 @@ export function openCalibrationCheckpoint(directory, pin) {
   };
   if (!retained) save();
   if (state.activeExperimentId !== null) interrupt({ id: state.activeExperimentId, outcome: 'INTERRUPTED', message: 'Process ended with an active attempt; no rerun permitted' });
-  else if (state.stopReason) stop(state.stopReason);
+  else if (state.stopReason) {
+    if (state.completedExperimentIds.length !== ids.length) stop(state.stopReason);
+    else assert.equal(state.status, 'STOPPED');
+  }
   else if (state.completedExperimentIds.length === ids.length) assert.equal(state.status, 'COMPLETE');
   return {
     snapshot: () => structuredClone(state),
+    analyses,
     begin(id) {
       assert.equal(state.status, 'READY', 'Only a ready checkpoint can begin an attempt');
       assert.equal(state.stopReason, null); assert.equal(state.activeExperimentId, null);
@@ -167,12 +246,14 @@ export function openCalibrationCheckpoint(directory, pin) {
     complete(id, analysis) {
       assert.equal(state.activeExperimentId, id); assert(['PASS', 'FAIL', 'UNRESOLVED'].includes(analysis.outcome));
       assert(state.rawArtifacts[id], 'Raw evidence is required before analysis completion');
+      if (pin.studyVersion === RI_STUDY_VERSION) validateRIAnalysis(id, analysis, analyses());
       const result = { ...analysis, raw: state.rawArtifacts[id] };
       state.analysisArtifacts[id] = writeArtifact(root, `${id}-analysis.json`, { pin, id, result });
       state.completedExperimentIds.push(id); state.activeExperimentId = null;
       state.status = state.completedExperimentIds.length === ids.length ? 'COMPLETE' : 'READY';
       if (result.outcome !== 'PASS') {
-        state.stopReason = { id, outcome: result.outcome, reason: result.summary ?? result.error ?? 'Analyzer did not pass' };
+        const reason = pin.studyVersion === RI_STUDY_VERSION ? result.reason : null;
+        state.stopReason = { id, outcome: result.outcome, reason: reason ?? result.summary ?? result.error ?? 'Analyzer did not pass' };
         state.status = 'STOPPED';
       }
       save();
@@ -231,7 +312,7 @@ function acquireLock() {
   return () => { assert.equal(JSON.parse(readFileSync(path, 'utf8')).token, token); unlinkSync(path); };
 }
 
-async function collect(page, native, entry, directory, result, signal) {
+async function collect(page, native, entry, directory, result, signal, instrument = false) {
   const recordError = (stage, error) => result.errors.push({ stage, ...errorInfo(error) });
   try {
     await bounded(page.bringToFront(), 10000, 'Foreground', signal);
@@ -244,11 +325,12 @@ async function collect(page, native, entry, directory, result, signal) {
       { timeout: 10000 }), 10000, 'Calibration API', signal);
     await bounded(page.locator('#play').click({ timeout: 10000 }), 10000, 'Ordinary Play button', signal);
     await bounded(page.waitForFunction(() => ['RECORDED', 'UNRESOLVED'].includes(document.getElementById('status')?.value),
-      undefined, { timeout: 100000, polling: 250 }), 101000, 'Collection and drain', signal);
+      undefined, { timeout: instrument ? 125000 : 100000, polling: 250 }), instrument ? 125000 : 101000, 'Collection and drain', signal);
   } catch (error) { recordError('collection', error); }
   try {
     result.report = await bounded(page.evaluate(() => window.m1010rCalibration.snapshot()), 10000, 'Raw snapshot');
     result.rawSnapshot = writeArtifact(directory, `${entry.id}-snapshot.json`, result.report);
+    if (instrument) assert.equal(result.report?.instrument, 'M10.10RI', 'Wrong instrument report');
   } catch (error) { recordError('snapshot', error); }
   for (const [control, name, key] of [[false, 'audio', 'audio'], [true, 'control-audio', 'audioControl']]) {
     try {
@@ -262,34 +344,58 @@ async function collect(page, native, entry, directory, result, signal) {
       assert.equal(bytes.length, result.report?.[key]?.samples * 4, 'PCM length differs from recording metadata');
     } catch (error) { recordError(name, error); }
   }
+  if (instrument) {
+    try {
+      const finalReport = await bounded(page.evaluate(() => window.m1010rCalibration.snapshot()), 10000, 'Final raw snapshot');
+      result.finalRawSnapshot = writeArtifact(directory, `${entry.id}-final-snapshot.json`, finalReport);
+      result.report = finalReport;
+      for (const [key, pcm] of [['audio', result.audioPcm], ['audioControl', result.controlAudioPcm]]) {
+        if (pcm && result.report?.[key]) result.report[key].pcm = pcm;
+        if (pcm) assert.equal(pcm.bytes, result.report?.[key]?.samples * 4, 'Final PCM metadata changed');
+      }
+      assert.equal(result.report?.instrument, 'M10.10RI', 'Wrong instrument report');
+      if (result.report.state === 'RECORDED') for (const recording of [result.report.audioControl?.render, result.report.renderAudio]) {
+        assert.equal(recording?.terminal?.completionReason, 'RENDER_TARGET_REACHED', 'Only render completion is eligible');
+        assert.equal(recording.watchdogFired, false, 'Watchdog cannot authorize completion');
+        assert.equal(recording.timedOut, false, 'Timeout cannot authorize completion');
+        assert.deepEqual(recording.errors, [], 'Render host errors prevent acceptance');
+      }
+    } catch (error) { recordError('instrument final snapshot', error); }
+  }
   try { await bounded(page.close(), 10000, 'Page close'); result.pageClosed = true; }
   catch (error) { recordError('page close', error); }
   result.endedAt = new Date().toISOString();
   result.outcome = result.report?.state === 'RECORDED' && result.errors.length === 0 ? 'RECORDED' : 'UNRESOLVED';
 }
 
-export async function runCalibrationStudy(directory = DEFAULT_CALIBRATION, { outdir = DEFAULT_EXTENSION } = {}) {
+export async function runCalibrationStudy(directory = DEFAULT_CALIBRATION, { outdir = DEFAULT_EXTENSION, instrument = false } = {}) {
+  assert.equal(typeof instrument, 'boolean');
+  const cases = instrument ? RI_CASES : CALIBRATION_CASES, ids = cases.map(entry => entry.id);
   assert.equal(resolve(process.cwd()), ROOT, 'Run the native helper from the repository root');
-  const identity = studyIdentity(outdir), root = cachePath(directory);
+  const identity = studyIdentity(outdir, { instrument }), root = cachePath(directory);
   assert(root !== identity.directory && !root.startsWith(identity.directory + '/') && !identity.directory.startsWith(root + '/'), 'Study and package directories must be disjoint');
-  const analyzerPath = join(ROOT, ANALYZER), pythonPath = join(ROOT, PYTHON);
-  assert(existsSync(analyzerPath) && existsSync(pythonPath), 'Main must provide and review analyze.py and the existing Python environment before launch');
+  const analyzerScript = instrument ? RI_ANALYZER : ANALYZER;
+  const analyzerPath = join(ROOT, analyzerScript), pythonPath = join(ROOT, PYTHON);
+  assert(existsSync(analyzerPath) && existsSync(pythonPath), `Main must provide and review ${analyzerScript} and the existing Python environment before launch`);
   process.env.PLAYWRIGHT_BROWSERS_PATH ??= join(ROOT, '.cache/m9/browsers');
   const { chromium } = await import('../../.cache/m9/node_modules/playwright/index.mjs');
   const executable = process.env.M9_CHROME_EXECUTABLE_PATH ?? chromium.executablePath();
-  const pin = { studyVersion: 'M10.10R-calibration-1', sourceCommit: identity.sourceCommit, baseline: FROZEN_BASELINE,
+  const pin = { studyVersion: instrument ? RI_STUDY_VERSION : 'M10.10R-calibration-1', sourceCommit: identity.sourceCommit, baseline: identity.baseline,
     buildSha256: identity.build.sha256, modelSha256: identity.provenance.modelSha256,
     mediaManifestSha256: identity.provenance.mediaManifestSha256, browserExecutable: executable,
     browserExecutableSha256: digest(readFileSync(executable)), analyzerSha256: digest(readFileSync(analyzerPath)),
-    pythonExecutableSha256: digest(readFileSync(pythonPath)), order: ids };
+    pythonExecutableSha256: digest(readFileSync(pythonPath)), order: ids,
+    ...(instrument ? { instrument: true, analyzerScript, browserVersion: RI_BROWSER_VERSION, repeatability: RI_REPEATABILITY_POLICY,
+      preregistrationSha256: digest(readFileSync(join(ROOT, 'docs/M10.10RI-PREREGISTRATION.md'))) } : {}) };
+  if (instrument) assert.equal(pin.browserExecutableSha256, RI_BROWSER_SHA256, 'RI browser executable pin changed');
   const release = acquireLock(), abort = new AbortController();
   const onInterrupt = () => abort.abort(new Error('Runner interrupted by SIGINT/SIGTERM; no repeat allowed'));
   let checkpoint, native, machine, browserInfo;
   process.once('SIGINT', onInterrupt); process.once('SIGTERM', onInterrupt);
   try {
-    checkpoint = openCalibrationCheckpoint(root, pin);
+    checkpoint = openCalibrationCheckpoint(root, pin, cases);
     if (['COMPLETE', 'STOPPED'].includes(checkpoint.snapshot().status)) return checkpoint.snapshot();
-    for (const entry of CALIBRATION_CASES.slice(checkpoint.snapshot().completedExperimentIds.length)) {
+    for (const entry of cases.slice(checkpoint.snapshot().completedExperimentIds.length)) {
       checkpoint.begin(entry.id); console.log(JSON.stringify({ running: entry.id }));
       const result = { outcome: 'UNRESOLVED', startedAt: new Date().toISOString(), fps: entry.fps, repeat: entry.repeat,
         scope: 'No-neural instrument calibration; not candidate qualification or physical A/V latency',
@@ -297,11 +403,22 @@ export async function runCalibrationStudy(directory = DEFAULT_CALIBRATION, { out
         environment: null, report: null, rawSnapshot: null, audioPcm: null, controlAudioPcm: null, pageClosed: false, errors: [] };
       try {
         if (abort.signal.aborted) throw abort.signal.reason;
-        const currentIdentity = studyIdentity(outdir);
+        const currentIdentity = studyIdentity(outdir, { instrument });
         assert.equal(currentIdentity.sourceCommit, pin.sourceCommit, 'Source pin changed between attempts');
         assert.deepEqual(currentIdentity.build, identity.build, 'Package changed between attempts');
         machine ??= environment(); result.environment = { ...machine, displayRefreshHz: 'not measured', browser: browserInfo ?? null };
         if (!native) {
+          if (instrument) {
+            const version = execFileSync(executable, ['--version'], { encoding: 'utf8', timeout: 10000, killSignal: 'SIGKILL' }).trim();
+            assert.deepEqual(version.match(/\b\d+\.\d+\.\d+\.\d+\b/g), [RI_BROWSER_VERSION], 'RI browser version changed');
+            assert.equal(digest(readFileSync(executable)), pin.browserExecutableSha256, 'Browser executable changed before launch');
+            assert.equal(digest(readFileSync(analyzerPath)), pin.analyzerSha256, 'Analyzer changed before launch');
+            assert.equal(digest(readFileSync(pythonPath)), pin.pythonExecutableSha256, 'Analyzer interpreter changed before launch');
+            const finalIdentity = studyIdentity(outdir, { instrument });
+            assert.equal(finalIdentity.sourceCommit, pin.sourceCommit, 'Source changed before launch');
+            assert.deepEqual(finalIdentity.build, identity.build, 'Package changed before launch');
+            result.launchPin = writeArtifact(root, `${entry.id}-launch-pin.json`, { pin, browserVersionOutput: version, recordedAt: new Date().toISOString() });
+          }
           const flags = [`--load-extension=${identity.directory}`];
           native = await openNativeChrome(flags);
           assert.equal(digest(readFileSync(native.executable)), pin.browserExecutableSha256);
@@ -314,7 +431,7 @@ export async function runCalibrationStudy(directory = DEFAULT_CALIBRATION, { out
           const worker = native.context.serviceWorkers().find(matches) ?? await native.context.waitForEvent('serviceworker', { predicate: matches, timeout: 10000 });
           native.extensionId = new URL(worker.url()).hostname;
           const installed = await bounded(worker.evaluate(() => chrome.runtime.getManifest()), 10000, 'Installed manifest', abort.signal);
-          assert.equal(installed.name, 'AetherVSR M10.10R Calibration'); assert.equal(installed.version, '0.0.1');
+          assert.equal(installed.name, instrument ? 'AetherVSR M10.10RI Instrument' : 'AetherVSR M10.10R Calibration'); assert.equal(installed.version, '0.0.1');
           for (const key of ['permissions', 'optional_permissions', 'host_permissions', 'optional_host_permissions', 'web_accessible_resources']) assert(!(key in installed));
           const cdp = await native.browser.newBrowserCDPSession();
           try {
@@ -325,11 +442,15 @@ export async function runCalibrationStudy(directory = DEFAULT_CALIBRATION, { out
             Object.assign(browserInfo, { version: await native.browser.version(), protocol: version,
               commandLine: execFileSync('ps', ['-ww', '-p', String(browserProcess.id), '-o', 'command='], { encoding: 'utf8' }).trim(),
               workerUrl: worker.url(), manifest: installed });
+            if (instrument) {
+              assert.equal(browserInfo.version, RI_BROWSER_VERSION, 'Running browser version differs from pin');
+              assert.equal(version.product, `Chrome/${RI_BROWSER_VERSION}`, 'CDP browser version differs from pin');
+            }
           } finally { await cdp.detach(); }
         }
         result.environment.browser = browserInfo;
         const page = await native.context.newPage();
-        await collect(page, native, entry, root, result, abort.signal);
+        await collect(page, native, entry, root, result, abort.signal, instrument);
       } catch (error) { result.errors.push({ stage: 'setup', ...errorInfo(error) }); result.endedAt = new Date().toISOString(); }
       const raw = checkpoint.raw(entry.id, result);
       let analysis;
@@ -337,9 +458,10 @@ export async function runCalibrationStudy(directory = DEFAULT_CALIBRATION, { out
       else {
         assert.equal(digest(readFileSync(analyzerPath)), pin.analyzerSha256, 'Analyzer changed during collection');
         assert.equal(digest(readFileSync(pythonPath)), pin.pythonExecutableSha256, 'Analyzer interpreter changed');
-        analysis = analyzeCalibration(raw);
+        analysis = analyzeCalibration(raw, { script: analyzerPath });
         if (result.outcome !== 'RECORDED' && analysis.outcome === 'PASS') analysis = { ...analysis, analyzerOutcome: 'PASS', outcome: 'UNRESOLVED', summary: 'Analyzer PASS cannot override recorder/collection errors' };
       }
+      if (instrument) analysis = withRIRepeatability(entry.id, analysis, checkpoint.analyses());
       checkpoint.complete(entry.id, analysis);
       console.log(JSON.stringify({ completed: entry.id, outcome: analysis.outcome, controlError: result.errors.length ? result.errors : null }));
       if (analysis.outcome !== 'PASS') break;
@@ -357,9 +479,12 @@ export async function runCalibrationStudy(directory = DEFAULT_CALIBRATION, { out
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    assert(process.argv.length <= 4, 'Usage: node tools/m1010r/study.mjs [directory] [extension-directory]');
-    const state = await runCalibrationStudy(process.argv[2], { outdir: process.argv[3] });
-    console.log(JSON.stringify({ completed: state.status, state: join(process.argv[2] ?? DEFAULT_CALIBRATION, 'state.json') }));
+    assert(process.argv.length <= 5 && (process.argv[4] === undefined || process.argv[4] === '--instrument') &&
+      !process.argv.slice(2, 4).some(value => value.startsWith('--')), 'Usage: node tools/m1010r/study.mjs [directory] [extension-directory] [--instrument]');
+    const instrument = process.argv[4] === '--instrument';
+    const directory = process.argv[2] || (instrument ? DEFAULT_RI_CALIBRATION : DEFAULT_CALIBRATION);
+    const state = await runCalibrationStudy(directory, { outdir: process.argv[3] || (instrument ? DEFAULT_RI_EXTENSION : DEFAULT_EXTENSION), instrument });
+    console.log(JSON.stringify({ completed: state.status, state: join(directory, 'state.json') }));
     if (state.status !== 'COMPLETE') process.exitCode = 1;
   } catch (error) { console.error(JSON.stringify({ controlError: errorInfo(error) })); process.exitCode = 1; }
 }

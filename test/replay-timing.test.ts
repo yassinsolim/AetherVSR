@@ -1,12 +1,12 @@
 import { describe, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 
-const check = (body: string) => execFileSync(process.execPath, ['--input-type=module', '-e', `
+const check = (body: string): void => { execFileSync(process.execPath, ['--input-type=module', '-e', `
   import assert from 'node:assert/strict';
   import {readFileSync,mkdtempSync,mkdirSync,rmSync} from 'node:fs';
   import {signalPcm,replayRecipe,decodeCounter,audioTimeline,prepareReplayMedia,inspectShiftControls,COUNTER_WIDTH} from './tools/m1010r/media.mjs';
   ${body}
-`], { encoding: 'utf8' });
+`], { encoding: 'utf8' }); };
 
 describe('M10.10R digital timing ground truth', () => {
   it('distinguishes retained silent sample coverage from scheduled timing observations', () => check(`
@@ -90,6 +90,349 @@ describe('M10.10R immutable calibration checkpoints', () => {
     try { ${body} } finally {rmSync(directory,{recursive:true,force:true});}
   `); };
 
+  const runnerCheck = (body: string) => checkpointCheck(`
+    const {transformSync}=await import('esbuild'),{createRequire}=await import('node:module');
+    const fs=await import('node:fs'),path=await import('node:path'),buildModule=await import('./tools/m1010r/build.mjs');
+    const realRequire=createRequire(process.cwd()+'/package.json');
+    const source=readFileSync('tools/m1010r/study.mjs','utf8');
+    const compiled=transformSync(source.slice(0,source.indexOf('\\nif (process.argv[1]'))
+      .replace('cases.slice(checkpoint.snapshot().completedExperimentIds.length)',
+        'cases.slice(checkpoint.snapshot().completedExperimentIds.length, process.caseLimit)'),{format:'cjs',supported:{'dynamic-import':false}}).code;
+    const outdir=directory+'/package',studyDir=directory+'/study',executable=path.resolve(directory,'unit-chrome');
+    const analyzerPath=path.resolve('tools/m1010r/instrument_analysis.py'),pythonPath=path.resolve('.cache/m8-venv/bin/python');
+    mkdirSync(outdir);writeFileSync(outdir+'/research-provenance.json','{}');
+    const browserHash='8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a';
+    const mode={scenario:'pass',verdict:'PASS',phases:[-20,8,-15,12],dirty:false,version:'153.0.8010.12',cdpVersion:'153.0.8010.12',browserHash};
+    const calls={opens:0,pages:0,versions:0,analyses:[],flags:[],timers:[],git:[],closes:0};
+    const syntheticFiles=new Map([[executable,Buffer.from('unit browser')],[analyzerPath,Buffer.from('unit analyzer')],[pythonPath,Buffer.from('unit python')]]);
+    const localFs={...fs,existsSync:name=>syntheticFiles.has(String(name))||fs.existsSync(name),
+      readFileSync:(name,...args)=>syntheticFiles.get(String(name))??fs.readFileSync(name,...args)};
+    const buildIdentity={directory:path.resolve(outdir),provenance:{generator:'m1010ri-instrument',instrument:true,
+      sourceCommit:'a'.repeat(40),sourceDirty:false,modelSha256:'unit model',mediaManifestSha256:'unit media',
+      sourceFiles:{'tools/m1010r/calibration.html':{bytes:readFileSync('tools/m1010r/calibration.html').length,sha256:digest(readFileSync('tools/m1010r/calibration.html'))}},
+      mediaManifest:{assets:[{fps:30,media:{sha256:'e006f3d5381d73b1ca5739f5e74216f4bf0c312f28621634d258a770822a8f9b'}},
+        {fps:60,media:{sha256:'5171a8b6da7303c8c409167f4191b7330f41120fcd89d7e3aa0df9483b237b29'}}]}}};
+    const fakeBuild={...buildModule,verifyBuild:()=>structuredClone(buildIdentity),
+      digest:bytes=>bytes.toString()==='unit browser'?mode.browserHash:digest(bytes),
+      cachePath:name=>buildModule.cachePath(name==='.cache/m1010r/calibration.lock'?directory+'/runner.lock':name),
+      git:args=>{calls.git.push(args);if(args[0]==='status')return mode.dirty?' M dirty':'';
+        if(args[0]==='show')return readFileSync('package.json','utf8');if(args[0]==='rev-parse')return 'a'.repeat(40);return '';}};
+    const recording=()=>({terminal:{completionReason:'RENDER_TARGET_REACHED',requestedEndFrame:70592,actualObservedEndFrame:70656},
+      watchdogFired:mode.scenario==='watchdog',timedOut:false,errors:[],heartbeats:[{actualObservedEndFrame:7168}]});
+    const makePage=()=>{
+      calls.pages++;let snapshots=0;
+      return {bringToFront:async()=>{},goto:async()=>{},locator:selector=>{assert.equal(selector,'#play');return {click:async()=>{}};},
+        waitForFunction:async(fn,unused,options)=>{if(options.timeout===125000&&mode.scenario==='timeout')await new Promise(()=>{});},
+        evaluate:async(fn,control)=>{
+          if(String(fn).includes('audioBase64')){if(mode.scenario==='missing'&&control)throw Error('No control PCM');return Buffer.alloc(4).toString('base64');}
+          snapshots++;
+          const report={instrument:mode.scenario==='wrong-instrument'?'M10.10R':'M10.10RI',state:'RECORDED',
+            audio:{samples:1},audioControl:{samples:1,render:recording()},renderAudio:recording(),renderWindow:{targetEndFrame:3216000},
+            frames:[{sequence:1}],callbacks:[{metadata:{mediaTime:0}}],gpuSamples:[{sequence:1}],
+            completeness:{count:snapshots},events:[{type:'unit context transition'}],errors:[],cleanup:{completed:true}};
+          if(snapshots>1){report.frames.push({sequence:2});report.renderAudio.heartbeats.push({actualObservedEndFrame:19200});}
+          return report;
+        },close:async()=>{if(mode.scenario==='close')throw Error('unit close failure');}};
+    };
+    const worker={url:()=> 'chrome-extension://'+'a'.repeat(32)+'/service-worker.js',evaluate:async()=>buildModule.instrumentManifest};
+    const native={executable,context:{setDefaultTimeout:()=>{},serviceWorkers:()=>[worker],newPage:async()=>makePage()},
+      browser:{version:async()=>mode.cdpVersion,newBrowserCDPSession:async()=>({
+        send:async method=>method==='Browser.getVersion'?{product:'Chrome/'+mode.cdpVersion}:{processInfo:[{type:'browser',id:123}]},detach:async()=>{}})},
+      close:async()=>{calls.closes++;}};
+    const childProcess={execFileSync:(file,args)=>{
+      if(file===executable){calls.versions++;assert.deepEqual(args,['--version']);return 'Google Chrome '+mode.version;}
+      if(file==='ps')return 'unit native command';
+      assert.equal(file,pythonPath);assert.equal(args[0],analyzerPath);calls.analyses.push(args);
+      const index=runner.RI_CASES.findIndex(entry=>entry.id===readJson(args[1]).id);
+      return JSON.stringify({outcome:mode.scenario==='second-fail'&&calls.analyses.length===2?'FAIL':mode.verdict,
+        summary:{reason:'unit analyzer only',failedCriteria:[],missingEvidence:[],controlVerifiedWindows:3,controlMaximumSampleError:0,
+          medianDigitalPhaseMs:mode.phases[index],uncertaintyBoundMs:1}});
+    }};
+    const mockRequire=name=>{
+      if(name==='./build.mjs')return fakeBuild;
+      if(name==='node:fs')return localFs;
+      if(name==='node:child_process')return childProcess;
+      if(name==='../m9-browser.mjs')return {openNativeChrome:async flags=>{calls.opens++;calls.flags.push(flags);return native;}};
+      if(name==='../m105-accounting.mjs')return {nativeWindow:async()=>({mock:true})};
+      if(name==='../m1010/study.mjs')return {environment:()=>({machine:'mock, not a native observation'})};
+      if(name.includes('playwright'))return {chromium:{executablePath:()=>executable}};
+      return realRequire(name);
+    };
+    const module={exports:{}};
+    const mockedProcess={argv:[],env:{M9_CHROME_EXECUTABLE_PATH:executable},cwd:()=>process.cwd(),pid:process.pid,once:()=>{},removeListener:()=>{}};
+    new Function('require','module','exports','process','console','setTimeout','clearTimeout',compiled)(
+      mockRequire,module,module.exports,mockedProcess,{log:()=>{}},(callback,ms)=>{
+        calls.timers.push(ms);if(ms===125000&&mode.scenario==='timeout')queueMicrotask(callback);return calls.timers.length;
+      },()=>{});
+    const runner=module.exports;
+    ${body}
+  `);
+
+  it.each(['pass', 'analyzer-fail', 'second-fail', 'third-outlier', 'fourth-outlier', 'first-missing', 'second-missing', 'timeout', 'watchdog', 'missing', 'wrong-instrument', 'close'])('runs RI %s with immutable evidence and no terminal reacquisition', scenario => runnerCheck(`
+    mode.scenario=${JSON.stringify(scenario)};if(mode.scenario==='analyzer-fail')mode.verdict='FAIL';
+    if(mode.scenario==='third-outlier')mode.phases[2]=20;
+    if(mode.scenario==='fourth-outlier')mode.phases[3]=-12;
+    if(mode.scenario==='first-missing')mode.phases[0]=undefined;
+    if(mode.scenario==='second-missing')mode.phases[1]=null;
+    const state=await runner.runCalibrationStudy(studyDir,{outdir,instrument:true}),passed=mode.scenario==='pass';
+    const expected=['ri-30-1','ri-60-1','ri-30-2','ri-60-2'];
+    assert.equal(state.status,passed?'COMPLETE':'STOPPED');assert.deepEqual(state.order,expected);
+    const attempted=passed||mode.scenario==='fourth-outlier'?4:mode.scenario==='third-outlier'?3:['second-fail','second-missing'].includes(mode.scenario)?2:1;
+    assert.equal(calls.pages,attempted);assert.equal(calls.opens,1);assert.equal(calls.closes,1);
+    assert.equal(state.pin.baseline,runner.RI_FROZEN_BASELINE);assert.equal(state.pin.analyzerScript,runner.RI_ANALYZER);
+    assert.equal(state.pin.analyzerSha256,digest(Buffer.from('unit analyzer')));
+    assert.deepEqual(state.pin.repeatability,runner.RI_REPEATABILITY_POLICY);
+    assert(calls.git.some(args=>args[0]==='diff'&&args[2]==='f0c3c49fd6e01746ebc232850455da14ac347c63'));
+    assert.deepEqual(calls.flags,[[ '--load-extension='+path.resolve(outdir) ]]);assert(calls.timers.includes(125000));
+    if(!passed)for(const id of expected.slice(attempted))assert.equal(readJson(studyDir+'/'+id+'.json').result.outcome,'NOT_RUN');
+    if(mode.scenario==='second-fail')assert.equal(state.stopReason.id,'ri-60-1');
+    const analyses=expected.slice(0,attempted).map(id=>readJson(studyDir+'/'+id+'-analysis.json').result);
+    if(passed){
+      assert.equal(calls.analyses.length,4);assert.equal(Object.keys(state.analysisArtifacts).length,4);
+      assert.deepEqual(analyses.map(result=>result.individualOutcome),['PASS','PASS','PASS','PASS']);
+      assert.deepEqual(analyses.map(result=>result.repeatability.validatedPairCount),[0,0,1,2]);
+      assert.deepEqual(analyses.map(result=>result.repeatability.outcome),['PENDING','PENDING','PENDING','PASS']);
+      assert.deepEqual(analyses[3].repeatability.pairs.map(pair=>[pair.fps,pair.outcome,pair.spreadMs]),[[30,'PASS',5],[60,'PASS',4]]);
+      for(const [index,result] of analyses.entries())for(const pair of result.repeatability.pairs){
+        assert.equal(pair.thresholdMs,1000/pair.fps);
+        assert.deepEqual(pair.runs.map(run=>run.id),expected.slice(0,index+1).filter(id=>id.startsWith('ri-'+pair.fps+'-')));
+        for(const run of pair.runs)assert.deepEqual(run.analysis,run.id===expected[index]?null:artifact(studyDir+'/'+run.id+'-analysis.json'));
+      }
+    }
+    if(mode.scenario.endsWith('outlier')){
+      const last=analyses.at(-1);assert.equal(calls.analyses.length,attempted);
+      assert.equal(last.individualOutcome,'PASS');assert.equal(last.outcome,'FAIL');assert.equal(last.reason,'repeatspread');
+      assert.equal(state.stopReason.reason,'repeatspread');assert.equal(last.repeatability.validatedPairCount,attempted===3?0:1);
+      assert.equal(last.summary.medianDigitalPhaseMs,mode.phases[attempted-1]);
+    }
+    if(['first-missing','second-missing'].includes(mode.scenario)){
+      const last=analyses.at(-1);assert.equal(calls.analyses.length,attempted);
+      assert.equal(last.individualOutcome,'PASS');assert.equal(last.outcome,'UNRESOLVED');assert.equal(last.reason,'missing_phase_median');
+      assert.equal(last.repeatability.pairs[attempted-1].runs[0].medianDigitalPhaseMs,null);
+      assert.equal(last.repeatability.pairs[attempted-1].spreadMs,null);
+    }
+    const raw=readJson(studyDir+'/'+expected[0]+'.json').result;
+    assert.deepEqual(raw.launchPin,artifact(raw.launchPin.path));assert.deepEqual(readJson(raw.launchPin.path).pin,state.pin);
+    assert.equal(readJson(raw.rawSnapshot.path).frames.length,1);
+    assert.equal(readJson(raw.finalRawSnapshot.path).frames.length,2);
+    assert.deepEqual(raw.report.frames,[{sequence:1},{sequence:2}]);assert.equal(raw.report.renderAudio.heartbeats.length,2);
+    if(mode.scenario==='missing'){assert.equal(raw.controlAudioPcm,null);assert(raw.errors.some(error=>error.stage==='control-audio'));}
+    if(mode.scenario==='timeout')assert(raw.errors.some(error=>error.stage==='collection'&&error.message.includes('timeout')));
+    const before=Object.fromEntries(readdirSync(studyDir).map(name=>[name,readFileSync(studyDir+'/'+name)]));
+    const count=JSON.stringify(calls);
+    assert.deepEqual(await runner.runCalibrationStudy(studyDir,{outdir,instrument:true}),state);
+    const oldCalls=JSON.parse(count);
+    for(const key of ['opens','pages','versions','analyses','flags','closes'])assert.deepEqual(calls[key],oldCalls[key]);
+    assert.deepEqual(Object.fromEntries(readdirSync(studyDir).map(name=>[name,readFileSync(studyDir+'/'+name)])),before);
+  `));
+
+  it.each(['pass', 'outlier'])('resumes an RI two-PASS prefix with %s repeatability and no new IDs', scenario => runnerCheck(`
+    mockedProcess.caseLimit=2;
+    const prefix=await runner.runCalibrationStudy(studyDir,{outdir,instrument:true});
+    assert.equal(prefix.status,'READY');assert.equal(calls.pages,2);
+    assert.deepEqual(prefix.completedExperimentIds,['ri-30-1','ri-60-1']);
+    const before=Object.fromEntries(readdirSync(studyDir).filter(name=>name!=='state.json').map(name=>[name,readFileSync(studyDir+'/'+name)]));
+    delete mockedProcess.caseLimit;
+    const failed=${JSON.stringify(scenario)}==='outlier';if(failed)mode.phases[2]=20;
+    const state=await runner.runCalibrationStudy(studyDir,{outdir,instrument:true});
+    assert.equal(state.status,failed?'STOPPED':'COMPLETE');assert.equal(calls.pages,failed?3:4);
+    assert.deepEqual(calls.analyses.map(args=>readJson(args[1]).id),state.order.slice(0,failed?3:4));
+    if(failed){assert.equal(state.stopReason.id,'ri-30-2');assert.equal(readJson(studyDir+'/ri-60-2.json').result.outcome,'NOT_RUN');}
+    const last=readJson(studyDir+'/'+(failed?'ri-30-2':'ri-60-2')+'-analysis.json').result;
+    assert.equal(last.repeatability.validatedPairCount,failed?0:2);
+    assert.deepEqual(last.repeatability.pairs[0].runs[0].analysis,prefix.analysisArtifacts['ri-30-1']);
+    for(const [name,bytes] of Object.entries(before))assert.deepEqual(readFileSync(studyDir+'/'+name),bytes);
+  `));
+
+  it('rejects missing/nonfinite RI medians without coercion and accepts exact one-frame boundaries', () => checkpointCheck(`
+    const {withRIRepeatability,RI_CASES}=await import('./tools/m1010r/study.mjs');
+    for(const median of [undefined,null,NaN,Infinity,-Infinity,'0',false]){
+      const result=withRIRepeatability('ri-30-1',{outcome:'PASS',summary:{medianDigitalPhaseMs:median}},[]);
+      assert.equal(result.individualOutcome,'PASS');assert.equal(result.outcome,'UNRESOLVED');
+      assert.equal(result.repeatability.pairs[0].spreadMs,null);assert.equal(result.repeatability.pairs[0].runs[0].medianDigitalPhaseMs,null);
+    }
+    assert.equal(withRIRepeatability('ri-30-1',{outcome:'PASS'},[]).outcome,'UNRESOLVED');
+    const previous=[];
+    for(const entry of RI_CASES){
+      const result=withRIRepeatability(entry.id,{outcome:'PASS',summary:{medianDigitalPhaseMs:entry.repeat===1?0:1000/entry.fps}},previous);
+      assert.equal(result.outcome,'PASS');previous.push({id:entry.id,result,reference:null});
+    }
+    assert.equal(previous[3].result.repeatability.validatedPairCount,2);
+    assert(previous[3].result.repeatability.pairs.every(pair=>pair.outcome==='PASS'&&pair.runs.length===2));
+    assert.throws(()=>withRIRepeatability('ri-60-2',{outcome:'PASS'},previous.slice(0,2)),/prefix/);
+  `));
+
+  it.each(['hash', 'raw', 'pin', 'prior-reference', 'pair-count', 'missing-pair', 'prefix'])('rejects RI %s corruption on read and resume without mutation', target => checkpointCheck(`
+    const {withRIRepeatability,RI_CASES,RI_STUDY_VERSION}=await import('./tools/m1010r/study.mjs');
+    const riPin={...pin,studyVersion:RI_STUDY_VERSION},checkpoint=openCalibrationCheckpoint(directory,riPin);
+    for(const entry of RI_CASES){checkpoint.begin(entry.id);checkpoint.raw(entry.id,{outcome:'RECORDED'});
+      checkpoint.complete(entry.id,withRIRepeatability(entry.id,{outcome:'PASS',summary:{medianDigitalPhaseMs:0}},checkpoint.analyses()));}
+    const original=checkpoint.analyses();original[0].result.summary.medianDigitalPhaseMs=999;
+    assert.equal(checkpoint.analyses()[0].result.summary.medianDigitalPhaseMs,0);
+    const target=${JSON.stringify(target)},id='ri-60-2',file=directory+'/'+id+'-analysis.json',envelope=readJson(file),state=readJson(directory+'/state.json');
+    if(target==='hash')writeFileSync(file,readFileSync(file)+' ');
+    else {
+      if(target==='raw')envelope.result.raw=state.rawArtifacts['ri-30-2'];
+      if(target==='pin')envelope.pin.sourceCommit='changed';
+      if(target==='prior-reference')envelope.result.repeatability.pairs[0].runs[0].analysis=state.analysisArtifacts['ri-60-1'];
+      if(target==='pair-count')envelope.result.repeatability.validatedPairCount=1;
+      if(target==='missing-pair')envelope.result.repeatability.pairs.pop();
+      if(target==='prefix')state.completedExperimentIds.reverse();
+      writeFileSync(file,JSON.stringify(envelope));state.analysisArtifacts[id]=artifact(file);writeFileSync(directory+'/state.json',JSON.stringify(state));
+    }
+    const before=Object.fromEntries(readdirSync(directory).map(name=>[name,readFileSync(directory+'/'+name)]));
+    if(target!=='prefix')assert.throws(()=>checkpoint.analyses());
+    assert.throws(()=>openCalibrationCheckpoint(directory,riPin));
+    assert.deepEqual(Object.fromEntries(readdirSync(directory).map(name=>[name,readFileSync(directory+'/'+name)])),before);
+  `));
+
+  it('cannot complete RI from bare PASS or forged aggregate counts', () => checkpointCheck(`
+    const {withRIRepeatability,RI_CASES,RI_STUDY_VERSION}=await import('./tools/m1010r/study.mjs');
+    const checkpoint=openCalibrationCheckpoint(directory,{...pin,studyVersion:RI_STUDY_VERSION});
+    for(const entry of RI_CASES){
+      checkpoint.begin(entry.id);checkpoint.raw(entry.id,{outcome:'RECORDED'});
+      const individual={outcome:'PASS',summary:{medianDigitalPhaseMs:0}};
+      const valid=withRIRepeatability(entry.id,individual,checkpoint.analyses()),forged=structuredClone(valid);
+      forged.repeatability.validatedPairCount=entry.repeat===1?2:0;
+      const before=readFileSync(directory+'/state.json');
+      assert.throws(()=>checkpoint.complete(entry.id,individual));assert.throws(()=>checkpoint.complete(entry.id,forged));
+      assert.deepEqual(readFileSync(directory+'/state.json'),before);assert(!existsSync(directory+'/'+entry.id+'-analysis.json'));
+      checkpoint.complete(entry.id,valid);
+    }
+    assert.equal(checkpoint.snapshot().status,'COMPLETE');assert.equal(checkpoint.analyses()[3].result.repeatability.validatedPairCount,2);
+  `));
+
+  it.each(['dirty', 'hash', 'version', 'cdp'])('rejects RI %s pin failure before page collection', failure => runnerCheck(`
+    const failure=${JSON.stringify(failure)};
+    if(failure==='dirty')mode.dirty=true;
+    if(failure==='hash')mode.browserHash='0'.repeat(64);
+    if(failure==='version')mode.version='153.0.8010.13';
+    if(failure==='cdp')mode.cdpVersion='153.0.8010.13';
+    if(['dirty','hash'].includes(failure))await assert.rejects(runner.runCalibrationStudy(studyDir,{outdir,instrument:true}));
+    else {const state=await runner.runCalibrationStudy(studyDir,{outdir,instrument:true});assert.equal(state.status,'STOPPED');
+      for(const id of state.order.slice(1))assert.equal(readJson(studyDir+'/'+id+'.json').result.outcome,'NOT_RUN');}
+    assert.equal(calls.pages,0);assert.equal(calls.opens,failure==='cdp'?1:0);
+  `));
+
+  it.each(['build', 'study'])('keeps legacy %s CLI arguments and accepts RI only in the fixed final position', file => check(`
+    const {resolve,join}=await import('node:path'),{fileURLToPath}=await import('node:url');
+    const buildModule=await import('./tools/m1010r/build.mjs'),studyModule=await import('./tools/m1010r/study.mjs');
+    const file=${JSON.stringify(file)},filename=resolve('tools/m1010r/'+file+'.mjs');
+    const source=readFileSync(filename,'utf8');
+    const cli=source.slice(source.indexOf('\\nif (process.argv[1]')).replaceAll('import.meta.url',JSON.stringify('file://'+filename));
+    const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
+    for(const args of [[],['old-output','old-input'],['ri-output','ri-input','--instrument'],['','','--instrument'],
+      ['--instrument'],['out','--instrument'],['out','input','--invalid'],['out','input','--instrument','extra']]) {
+      const calls=[],mockProcess={argv:[process.execPath,filename,...args],exitCode:0};
+      const invoke=async(...values)=>{calls.push(values);return {status:'COMPLETE'};};
+      const valid=args.length===0||args.length===2&&!args[1].startsWith('--')||args.length===3&&args[2]==='--instrument';
+      const action=new AsyncFunction('process','assert','resolve','join','fileURLToPath','console','buildCalibration','runCalibrationStudy',
+        'DEFAULT_EXTENSION','DEFAULT_RI_EXTENSION','DEFAULT_MEDIA','DEFAULT_CALIBRATION','DEFAULT_RI_CALIBRATION','errorInfo',cli)(
+          mockProcess,assert,resolve,join,fileURLToPath,{log:()=>{},error:()=>{}},invoke,invoke,
+          buildModule.DEFAULT_EXTENSION,buildModule.DEFAULT_RI_EXTENSION,buildModule.DEFAULT_MEDIA,
+          studyModule.DEFAULT_CALIBRATION,studyModule.DEFAULT_RI_CALIBRATION,error=>({message:String(error)}));
+      if(!valid&&file==='build')await assert.rejects(action);else await action;
+      assert.equal(calls.length,valid?1:0);
+      if(!valid)continue;
+      const instrument=args[2]==='--instrument';
+      if(file==='build')assert.deepEqual(calls[0],[args[0]||(instrument?buildModule.DEFAULT_RI_EXTENSION:buildModule.DEFAULT_EXTENSION),
+        args[1]||buildModule.DEFAULT_MEDIA,{instrument}]);
+      else assert.deepEqual(calls[0],[args[0]||(instrument?studyModule.DEFAULT_RI_CALIBRATION:studyModule.DEFAULT_CALIBRATION),
+        {outdir:args[1]||(instrument?buildModule.DEFAULT_RI_EXTENSION:buildModule.DEFAULT_EXTENSION),instrument}]);
+    }
+  `));
+
+  it('builds permission-free RI and legacy inventories from hash-valid dummy media', () => checkpointCheck(`
+    const {buildCalibration,verifyBuild,verifyInstrumentInputs,PROVENANCE_FILE}=await import('./tools/m1010r/build.mjs');
+    const mediaFile=directory+'/dummy.mp4',pcmFile=directory+'/dummy.f32le';
+    writeFileSync(mediaFile,'unit media, not native evidence');writeFileSync(pcmFile,Buffer.alloc(4));
+    const media={schemaVersion:1,study:'M10.10R',sampleRate:48000,seconds:70,
+      producerSha256:digest(readFileSync('tools/m1010r/media.mjs')),signal:artifact(pcmFile),
+      assets:[30,60].map(fps=>({fps,media:artifact(mediaFile),pcm:artifact(pcmFile),validation:{
+        audio:{decodedPcmSha256:artifact(pcmFile).sha256,decodedPcmBytes:4},video:{fps,allIdentitiesAndPtsExact:true}}}))};
+    for(const instrument of [false,true]) {
+      const outdir=directory+(instrument?'/ri':'/legacy');
+      const built=await buildCalibration(outdir,media,{instrument});
+      const verified=verifyBuild(outdir).provenance;
+      assert.deepEqual(verified,built.provenance);
+      const manifest=readJson(outdir+'/manifest.json');
+      assert.equal(manifest.name,instrument?'AetherVSR M10.10RI Instrument':'AetherVSR M10.10R Calibration');
+      assert.equal(manifest.version,'0.0.1');
+      for(const key of ['permissions','optional_permissions','host_permissions','optional_host_permissions','web_accessible_resources']) assert(!(key in manifest));
+      assert.deepEqual(Object.keys(verified.files).sort(),['manifest.json','calibration.js',instrument?'render-recorder.js':'audio-worklet.js',
+        'calibration.html','player.css','service-worker.js',... [30,60].flatMap(fps=>['media/replay-'+fps+'.mp4','media/decoded-'+fps+'.f32le'])].sort());
+      if(instrument) {
+        assert.equal(verified.instrument,true);assert.equal(verified.generator,'m1010ri-instrument');
+        assert.match(readFileSync(outdir+'/calibration.js','utf8'),/renderClockMode = true/);
+        for(const inputs of Object.values(verified.bundleInputs)) {
+          verifyInstrumentInputs(inputs);
+          for(const name of inputs) assert.equal(verified.sourceFiles[name].sha256,digest(readFileSync(name)));
+        }
+        const path=outdir+'/'+PROVENANCE_FILE,before=readFileSync(path);
+        for(const mutate of [value=>{value.instrument=false;},value=>{value.bundleInputs['calibration.js'].push('src/core/neural/model.ts');},
+          value=>{value.sourceFiles['tools/m1010r/calibration.ts'].sha256='0'.repeat(64);},value=>{delete value.sourceFiles['tools/m1010r/calibration.ts'];},
+          value=>{delete value.sourceFiles['tools/m1010r/build.mjs'];}]) {
+          const changed=structuredClone(verified);mutate(changed);writeFileSync(path,JSON.stringify(changed));assert.throws(()=>verifyBuild(outdir));
+        }
+        writeFileSync(path,before);
+        await assert.rejects(buildCalibration(outdir,media),/foreign output/);
+      } else {
+        assert.match(readFileSync(outdir+'/calibration.js','utf8'),/renderClockMode = false/);
+        assert(!('instrument' in verified));
+        const path=outdir+'/'+PROVENANCE_FILE;
+        const historical={...verified,sourceFiles:{'historic-source.ts':{bytes:1,sha256:'0'.repeat(64)}}};
+        writeFileSync(path,JSON.stringify(historical));assert.deepEqual(verifyBuild(outdir).provenance,historical);
+        await assert.rejects(buildCalibration(outdir,media,{instrument:true}),/foreign output/);
+      }
+    }
+    for(const input of ['src/core/neural/model.ts','src/core/neural/conv.wgsl.ts','src/core/upscale/neural-upscaler.ts',
+      'src/runtime.ts','src/runtime/controller.ts','src/runtime-controller.ts','tools/m1010/acquire.ts',
+      'tools/m1010/authority.ts','src/extension/authority.ts','public/models/aethersr-c16d2.json','models/model.json'])
+      assert.throws(()=>verifyInstrumentInputs([input]),/Forbidden instrument input/);
+    const esbuild=await import('esbuild'),{createRequire}=await import('node:module'),{dirname}=await import('node:path');
+    const productionBuild=await import('./tools/build-extension.mjs');
+    const require=createRequire(process.cwd()+'/tools/m1010r/build.mjs');
+    const source=readFileSync('tools/m1010r/build.mjs','utf8');
+    const compiled=esbuild.transformSync(source.slice(0,source.indexOf('\\nif (process.argv[1]'))
+      .replaceAll('import.meta.url',JSON.stringify('file://'+process.cwd()+'/tools/m1010r/build.mjs')),{format:'cjs'}).code;
+    const contaminated={exports:{}};
+    new Function('require','module','exports',compiled)(name=>name==='esbuild'?{...esbuild,build:options=>esbuild.build({...options,plugins:[{
+      name:'unit-transitive-neural-import',setup:builder=>builder.onLoad({filter:/[/]m1010r[/]probe[.]ts$/},args=>({
+        contents:"import '../../src/core/neural/model.js'; export class IdentityProbe {}",loader:'ts',resolveDir:dirname(args.path)}))}]})}
+        :name==='../build-extension.mjs'?productionBuild:require(name),
+      contaminated,contaminated.exports);
+    await assert.rejects(contaminated.exports.buildCalibration(directory+'/forbidden',media,{instrument:true}),/Forbidden instrument input: src\\/core\\/neural\\//);
+    assert(!existsSync(directory+'/forbidden'));
+  `));
+
+  it.each(['PASS', 'FAIL', 'UNRESOLVED', 'INTERRUPTED'])('keeps RI order and terminal %s evidence separate from R', outcome => checkpointCheck(`
+    const {RI_CASES,withRIRepeatability}=await import('./tools/m1010r/study.mjs');
+    const expected=['ri-30-1','ri-60-1','ri-30-2','ri-60-2'];
+    assert.deepEqual(RI_CASES.map(entry=>entry.id),expected);
+    assert.deepEqual(RI_CASES.map(entry=>entry.fps),[30,60,30,60]);
+    assert(Object.isFrozen(RI_CASES));assert(RI_CASES.every(Object.isFrozen));
+    const riPin={...pin,studyVersion:'M10.10RI-instrument-1'},outcome=${JSON.stringify(outcome)};
+    let checkpoint=openCalibrationCheckpoint(directory,riPin,RI_CASES);
+    assert.deepEqual(checkpoint.snapshot().order,expected);
+    assert.throws(()=>checkpoint.begin(ids[0]));assert.throws(()=>checkpoint.begin(expected[1]));
+    for(const id of outcome==='PASS'?expected:expected.slice(0,1)){
+      checkpoint.begin(id);checkpoint.raw(id,{outcome:'RECORDED',report:{instrument:'M10.10RI',frames:[{sequence:9}],heartbeats:[{endFrame:7168}]}});
+      if(outcome!=='INTERRUPTED') checkpoint.complete(id,withRIRepeatability(id,{outcome,summary:{medianDigitalPhaseMs:0}},checkpoint.analyses()));
+    }
+    if(outcome==='INTERRUPTED') checkpoint=openCalibrationCheckpoint(directory,riPin);
+    const stopped=checkpoint.snapshot();
+    assert.equal(stopped.status,outcome==='PASS'?'COMPLETE':'STOPPED');
+    assert.deepEqual(stopped.completedExperimentIds,expected);
+    if(outcome!=='PASS') for(const id of expected.slice(1)) assert.equal(readJson(directory+'/'+id+'.json').result.outcome,'NOT_RUN');
+    assert.deepEqual(readJson(directory+'/'+expected[0]+'.json').result.report.heartbeats,[{endFrame:7168}]);
+    const before=Object.fromEntries(readdirSync(directory).map(name=>[name,readFileSync(directory+'/'+name)]));
+    checkpoint=openCalibrationCheckpoint(directory,riPin);
+    assert.deepEqual(checkpoint.snapshot(),stopped);
+    for(const id of [undefined,...ids,...expected]) assert.throws(()=>checkpoint.begin(id));
+    assert.throws(()=>openCalibrationCheckpoint(directory,riPin,CALIBRATION_CASES));
+    assert.deepEqual(Object.fromEntries(readdirSync(directory).map(name=>[name,readFileSync(directory+'/'+name)])),before);
+  `));
+
   it('rejects completion without raw evidence without mutating the active attempt', () => checkpointCheck(`
     const checkpoint=openCalibrationCheckpoint(directory,pin);checkpoint.begin(ids[0]);
     const before=readFileSync(directory+'/state.json');
@@ -161,9 +504,10 @@ describe('M10.10R immutable calibration checkpoints', () => {
   it.each(['FAIL', 'UNRESOLVED'])('closes a %s attempt with an immutable NOT_RUN suffix', outcome => checkpointCheck(`
     let checkpoint=openCalibrationCheckpoint(directory,pin);
     checkpoint.begin(ids[0]);checkpoint.raw(ids[0],{outcome:'RECORDED'});checkpoint.complete(ids[0],{outcome:'PASS'});
-    checkpoint.begin(ids[1]);checkpoint.raw(ids[1],{outcome:'RECORDED'});checkpoint.complete(ids[1],{outcome:${JSON.stringify(outcome)},summary:'unit stop'});
+    checkpoint.begin(ids[1]);checkpoint.raw(ids[1],{outcome:'RECORDED'});checkpoint.complete(ids[1],{outcome:${JSON.stringify(outcome)},summary:'unit stop',reason:'RI-style reason'});
     const stopped=checkpoint.snapshot();assert.equal(stopped.status,'STOPPED');assert.deepEqual(stopped.completedExperimentIds,ids);
     assert.equal(stopped.stopReason.outcome,${JSON.stringify(outcome)});assert.equal(stopped.activeExperimentId,null);assert.equal(stopped.requiredNextManualAction,null);
+    assert.equal(stopped.stopReason.reason,'unit stop');
     assert.deepEqual(Object.keys(stopped.analysisArtifacts),ids.slice(0,2));
     for(const id of ids.slice(2)){
       assert.deepEqual(readJson(directory+'/'+id+'.json').result,{outcome:'NOT_RUN',reason:stopped.stopReason});

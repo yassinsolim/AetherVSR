@@ -1725,3 +1725,21 @@ Recommend only one separately authorized instrument investigation: sample-clock
 completion with an independent host watchdog and prospective stall controls.
 No M10.11, capture/overlay return, model/controller change or production permission
 change follows. See docs/M10.10R-REPORT.md and results/m10.10r-replay.json.
+
+## ADR-0056 - Render-clock authority for the finite RI instrument
+
+**Status:** prospective research-only M10.10RI, no product qualification.
+
+The owner authorized exactly one further instrument sequence, not a replay product
+continuation. A new recorder alone authorizes successful completion when its actual
+AudioWorklet block end reaches a predeclared render-frame target. Whole final
+blocks and exact observed endpoints are retained. Host deadlines only abort and
+request partial data; they cannot invent completion. Diagnostic heartbeats and
+AudioContext cross-checks do not steer completion. This corrects a research dataflow,
+not production audio, acquisition or presentation. Historical failed R artifacts
+and measured implementation remain attributed to their old pin.
+
+The instrument uses baseline-only rendering and separate immutable RI experiment
+IDs. No model/controller/production permission or product authority/Return path is
+added. See docs/M10.10RI-PREREGISTRATION.md for fixed clock semantics, four-run budget,
+conditional uncertainty and the hard first-run stop.

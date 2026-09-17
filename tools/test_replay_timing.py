@@ -687,3 +687,442 @@ def test_missing_field_cannot_hide_independent_order_failure(long_audio, fault):
     assert reason in report["rows"][900]["reasons"]
     assert not report["criteria"]["orderedClocksAndSequence"]
     assert not report["prospectiveCriteriaMet"]
+
+
+from m1010r.instrument_analysis import analyze_render, analyze_control, analyze_timing
+
+
+def ri_render(blocks, target, first=0, delay=0):
+    end = first
+    heartbeats = []
+    last_heartbeat = None
+    for index, length in enumerate(blocks, 1):
+        end += length
+        if index < len(blocks) and (last_heartbeat is None or end - last_heartbeat >= 12000):
+            heartbeats.append(dict(currentFrame=end - length, actualObservedEndFrame=end,
+                                   sampleRate=48000, processedBlocks=index, processedSamples=end - first,
+                                   blockLength=length, state="RECORDING", heartbeatOrdinal=len(heartbeats) + 1,
+                                   **ri_receive(end / 48000 + delay)))
+            last_heartbeat = end
+    return dict(terminal=dict(completionReason="RENDER_TARGET_REACHED", requestedEndFrame=target,
+                             actualObservedEndFrame=end, firstFrame=first, processedSamples=end - first,
+                             processedBlocks=len(blocks), sampleRate=48000, blockLengths=blocks,
+                             heartbeatCount=len(heartbeats), overflow=False, discontinuity=False),
+                terminalObservation=ri_receive(end / 48000 + delay, 0.001), heartbeats=heartbeats,
+                contextEvents=[dict(state="running", **ri_receive(first / 48000))],
+                watchdogFired=False, errors=[], timedOut=False)
+
+
+def ri_receive(seconds, host_offset=0):
+    return dict(hostBefore=seconds * 1000 + host_offset, hostAfter=seconds * 1000 + host_offset,
+                contextBefore=seconds, contextAfter=seconds)
+
+
+def test_ri_terminal_block_replaces_due_heartbeat():
+    render = ri_render([128] * 471, 70592, first=10368)
+    assert render["terminal"]["actualObservedEndFrame"] == 70656
+    assert [beat["processedBlocks"] for beat in render["heartbeats"]] == [1, 95, 189, 283, 377]
+    result = analyze_render(render, np.zeros(60288, dtype=np.float32),
+                            required_start=12000, target_end=70592, tail_frames=4800)
+    assert result["passed"], result["errors"]
+    assert result["heartbeat"]["expectedCount"] == 5
+
+
+@pytest.mark.parametrize("quantum", [1, 64, 96, 128, 192, 256, 512])
+@pytest.mark.parametrize("extra", [0, 1])
+def test_ri_render_whole_final_block(quantum, extra):
+    target = 70592 + extra
+    blocks = [quantum] * ((target + quantum - 1) // quantum)
+    result = analyze_render(ri_render(blocks, target), np.zeros(sum(blocks), dtype=np.float32),
+                            required_start=12000, target_end=target, tail_frames=4800)
+    assert result["passed"], result["errors"]
+    assert result["range"]["overshootFrames"] == sum(blocks) - target
+    assert result["heartbeat"]["deliveryRateHz"] is None
+
+
+@pytest.mark.parametrize("fault,reason", [
+    ("sum", "block_count_or_sum"), ("hole", "noncontiguous_range"),
+    ("target", "requested_target_mismatch"), ("zero", "invalid_block_lengths"),
+    ("ordinal", "heartbeat_metadata"), ("prefix", "heartbeat_prefix"),
+    ("watchdog", "watchdogFired"), ("context", "unexpected_context_state"),
+    ("missing", "missing_pcm"), ("nan", "pcm_shape_finiteness_or_count"),
+    ("early", "required_range_not_covered"),
+])
+def test_ri_render_metadata(fault, reason):
+    render = ri_render([128] * 552, 70592)
+    pcm = np.zeros(70656, dtype=np.float32)
+    if fault == "sum":
+        render["terminal"]["processedSamples"] -= 1
+    elif fault == "hole":
+        render["terminal"]["firstFrame"] = 1
+    elif fault == "target":
+        render["terminal"]["requestedEndFrame"] -= 1
+    elif fault == "zero":
+        render["terminal"]["blockLengths"][1] = 0
+    elif fault == "ordinal":
+        render["heartbeats"][0]["heartbeatOrdinal"] = 2
+    elif fault == "prefix":
+        render["heartbeats"][0]["currentFrame"] = 1
+    elif fault == "watchdog":
+        render["watchdogFired"] = True
+    elif fault == "context":
+        render["contextEvents"][0]["state"] = "interrupted"
+    elif fault == "missing":
+        pcm = None
+    elif fault == "nan":
+        pcm[0] = np.nan
+    else:
+        render = ri_render([128] * 56, 70592)
+        pcm = np.zeros(7168, dtype=np.float32)
+    result = analyze_render(render, pcm, required_start=12000, target_end=70592, tail_frames=4800)
+    assert not result["passed"]
+    assert reason in result["errors"]
+    assert result["range"]["processedBlocks"] == render["terminal"]["processedBlocks"]
+
+
+@pytest.mark.parametrize("residual,passed", [(-1024 / 48000, True), (-1025 / 48000, False), (900, True)])
+def test_ri_variable_quanta_clocks(residual, passed):
+    blocks = [64, 96, 128, 192, 256, 512] * 57
+    render = ri_render(blocks, sum(blocks), first=48000, delay=1000)
+    render["terminal"]["requestedEndFrame"] += 48000
+    for row in [*render["heartbeats"], render["terminalObservation"]]:
+        end = row.get("actualObservedEndFrame", render["terminal"]["actualObservedEndFrame"])
+        row["contextBefore"] = row["contextAfter"] = end / 48000 + residual
+    render["contextEvents"][0].update(ri_receive(0))
+    result = analyze_render(render, np.zeros(sum(blocks), dtype=np.float32), required_start=60000,
+                            target_end=48000 + sum(blocks), tail_frames=4800)
+    assert result["passed"] == passed, result["errors"]
+    assert result["clock"]["positiveDeliveryBoundSeconds"] is None
+    assert result["range"]["maximumBlockLength"] == 512
+
+
+def ri_control(shift=0, length=70656):
+    from m1010r.instrument_analysis import _schedule
+    reference = signal(256000)
+    observed = np.zeros(length, dtype=np.float32)
+    scheduled = _schedule(0)
+    for region in scheduled:
+        begin = region["startFrame"] + shift
+        if begin + region["samples"] <= length:
+            observed[begin:begin + region["samples"]] = reference[region["referenceStart"]:region["referenceStart"] + region["samples"]] * region["gain"]
+    control = dict(epochFrame=0, targetEndFrame=70592, scheduled=scheduled, postSignalTailFrames=4800,
+                   render=ri_render([128] * (length // 128), 70592), sampleRate=48000, firstFrame=0,
+                   samples=length, expectedWindows=180, verifiedWindows=180, maximumSampleError=abs(shift), errors=[])
+    return control, reference, observed
+
+
+@pytest.mark.parametrize("shift", [-13, -12, 0, 12, 13])
+def test_ri_fixed_control_windows(shift):
+    control, reference, observed = ri_control(shift)
+    result = analyze_control(control, reference, observed)
+    assert result["passed"] == (abs(shift) <= 12), result["errors"]
+    assert result["windows"]["checkedWindows"] == 180
+    assert result["maximumSampleError"] == (abs(shift) if abs(shift) <= 12 else None)
+
+
+def ri_timing_report(fps=30):
+    records = long_frames(fps, include_warmup=True)
+    for record in records:
+        record["neural"] = False
+        for field in ("submitBefore", "submitAfter", "readyAt", "presentationTime", "expectedDisplayTime"):
+            record[field] = 100 + record[field] / 2
+    return dict(frames=records, endPerformance=32600, completeness=certificate(65 * fps, 1),
+                renderWindow=dict(epochFrame=96000, startFrame=336000, endFrame=3216000,
+                                  targetEndFrame=3312000, sampleRate=48000))
+
+
+@pytest.mark.parametrize("fault", [None, "block", "tick", "boundary", "unlocated", "identity", "range", "wall_end"])
+@pytest.mark.parametrize("fps", [30, 60])
+def test_ri_selection_uncertainty(long_audio, fault, fps):
+    report = ri_timing_report(fps)
+    video = dict(timeBase="1/15360", allIdentitiesAndPtsExact=True)
+    maximum = 128
+    if fault == "block":
+        maximum = None
+    elif fault == "tick":
+        video["timeBase"] = "1/1000"
+    elif fault == "boundary":
+        del report["frames"][0]
+    elif fault == "unlocated":
+        del report["frames"][0]["audioBefore"]
+    elif fault == "identity":
+        report["frames"][900]["identityValid"] = False
+    elif fault == "range":
+        for row in report["frames"]:
+            row["sourceIdentity"] += 70 * fps
+    elif fault == "wall_end":
+        report["endPerformance"] = report["frames"][-1]["submitBefore"]
+    result = analyze_timing(report, long_audio, fps=fps, maximum_block=maximum, video_validation=video)
+    assert result["passed"] == (fault is None), result["errors"]
+    assert result["rows"][-1]["raw"] == report["frames"][-1]
+    if fault is None:
+        assert result["collection"]["endPerformance"] - result["collection"]["startPerformance"] < 60000
+        assert result["count"] == result["validCount"] == 60 * fps
+        assert result["excludedFromTimingCount"] == 5 * fps
+        row = result["rows"][5 * fps]
+        expansion = 128 / 48 + 1 / 48 + 0.5 + 1000 / 15360
+        assert row["intervalMs"] == pytest.approx([row["baseIntervalMs"][0] - expansion, row["baseIntervalMs"][1] + expansion])
+        assert row["widthMs"] == pytest.approx(row["halfWidthMs"] * 2)
+        assert row["uncertaintyComponents"]["correspondenceHalfWidthMsAlreadyIncluded"] == 0.25
+        assert 0 < result["uncertaintyBoundMs"] <= 15
+        assert result["first20s"]["valid"] and result["last20s"]["valid"]
+    if fault in ("block", "tick", "unlocated"):
+        assert result["uncertaintyBoundMs"] is None
+
+
+def ri_store(path, content):
+    import hashlib
+    from m1010r import analyze as legacy
+    if isinstance(content, np.ndarray):
+        content = content.astype("<f4").tobytes()
+    path.write_bytes(content)
+    return dict(path=str(path.relative_to(legacy.ROOT)), bytes=len(content), sha256=hashlib.sha256(content).hexdigest())
+
+
+def ri_snapshot(native):
+    import json
+    from m1010r import analyze as legacy
+    report = dict(native["report"])
+    for key in ("audio", "audioControl"):
+        if isinstance(report.get(key), dict):
+            report[key] = {field: value for field, value in report[key].items() if field != "pcm"}
+    native["finalRawSnapshot"] = ri_store(legacy.ROOT / ".cache/m1010r/final.json", json.dumps(report).encode())
+
+
+@pytest.fixture
+def ri_envelope(tmp_path, monkeypatch, request):
+    from m1010r import analyze as legacy
+    from m1010r.instrument_analysis import FROZEN_AUDIO, FROZEN_MEDIA
+    fps = getattr(request, "param", 30)
+    monkeypatch.setattr(legacy, "ROOT", tmp_path)
+    cache = tmp_path / ".cache/m1010r"
+    cache.mkdir(parents=True)
+    control, _, control_pcm = ri_control()
+    reference = signal(70 * 48000)
+    pcm_ref = dict(path=".cache/m1010r/reference.f32", bytes=13440000, sha256=FROZEN_AUDIO["decodedPcmSha256"])
+    media_ref = dict(path=f".cache/m1010r/replay-{fps}.mp4", bytes=FROZEN_MEDIA[fps][0], sha256=FROZEN_MEDIA[fps][1])
+    artifact = legacy.artifact
+
+    def mock_artifact(ref):
+        if ref == pcm_ref:
+            return reference.tobytes()
+        if ref == media_ref:
+            return bytes(FROZEN_MEDIA[fps][0])
+        return artifact(ref)
+
+    monkeypatch.setattr(legacy, "artifact", mock_artifact)
+    report = ri_timing_report(fps)
+    report.update(instrument="M10.10RI", state="RECORDED", audioControl=control,
+                  renderAudio=ri_render([128] * 25125, 3312000, first=96000), errors=[], metadataMatchErrors=0,
+                  callbacks=[dict(visibility="visible", focused=True, readyState=4)],
+                  events=[dict(performance=0, detail=dict(visibility="visible", focused=True))],
+                  cleanup=dict(completed=True, pipeline=0, probe=0, device=0, audioNodes=0, observers=0,
+                               timers=0, pendingCompletions=0, audioContext="closed", videoPaused=True))
+    native = dict(report=report, fps=fps, errors=[], pageClosed=True,
+                  controlAudioPcm=ri_store(cache / "control.f32", control_pcm),
+                  audioPcm=ri_store(cache / "media.f32", reference[53017:53017 + 3216000] * np.float32(0.37)),
+                  media=dict(pcm=dict(pcm_ref), media=dict(media_ref), validation=dict(audio=dict(FROZEN_AUDIO),
+                      video=dict(fps=fps, frames=70 * fps, width=1280, height=720, timeBase="1/15360",
+                                 allIdentitiesAndPtsExact=True, rowsSha256=FROZEN_MEDIA[fps][2]))))
+    report["audio"] = dict(type="audio-recording", sampleRate=48000, firstFrame=96000, samples=3216000,
+        blockLengths=report["renderAudio"]["terminal"]["blockLengths"].copy(), overflow=False, discontinuity=False,
+        bytes=native["audioPcm"]["bytes"], encoding="Float32 little-endian PCM", channel=0)
+    ri_snapshot(native)
+    report["audio"]["pcm"] = dict(native["audioPcm"])
+    report["audioControl"]["pcm"] = dict(native["controlAudioPcm"])
+    return dict(result=native)
+
+
+@pytest.mark.parametrize("ri_envelope", [30, 60], indirect=True)
+def test_ri_full_envelope(ri_envelope):
+    import json
+    from m1010r.instrument_analysis import analyze_envelope
+    result = analyze_envelope(ri_envelope)
+    assert result["outcome"] == "PASS", result["summary"]
+    assert result["control"]["verifiedWindows"] == 180
+    assert result["control"]["maximumSampleError"] == 0
+    assert result["fullWaveform"]["passed"]
+    assert [row["observedStart"] for row in result["fullWaveform"]["rows"]] == [15 * 48000, 35 * 48000, 55 * 48000]
+    assert result["timing"]["count"] == 60 * ri_envelope["result"]["fps"]
+    assert 0 < result["uncertaintyBoundMs"] <= 15
+    assert result["physicalLatencyBoundMs"] is None
+    assert "candidateTiming" not in result and "productVerdict" not in result
+    assert len(result["verifiedArtifacts"]) == 5
+    json.dumps(result, allow_nan=False)
+
+
+@pytest.mark.parametrize("fault,reason", [
+    ("missing_mp4", "missing_media_asset"), ("missing_file", "missing_media_asset"),
+    ("mp4_hash", "reference_media_identity"), ("mp4_bytes", "reference_media_identity"),
+    ("pcm_hash", "reference_audio_validation"), ("origin", "reference_audio_validation"),
+    ("audio_pts", "reference_audio_validation"), ("video_pts", "reference_video_validation"),
+    ("missing_snapshot", "missing_final_raw_snapshot"), ("snapshot_hash", "final_raw_snapshot:"),
+    ("snapshot_json", "invalid_final_raw_snapshot"), ("snapshot_change", "final_raw_snapshot_mismatch"),
+])
+def test_ri_frozen_artifact_binding(ri_envelope, fault, reason):
+    from m1010r import analyze as legacy
+    from m1010r.instrument_analysis import analyze_envelope
+    native = ri_envelope["result"]
+    media = native["media"]
+    if fault == "missing_mp4":
+        del media["media"]
+    elif fault == "missing_file":
+        media["media"]["path"] = ".cache/m1010r/absent.mp4"
+    elif fault in ("mp4_hash", "mp4_bytes", "pcm_hash"):
+        media["pcm" if fault == "pcm_hash" else "media"]["bytes" if fault == "mp4_bytes" else "sha256"] = 1 if fault == "mp4_bytes" else "0" * 64
+    elif fault in ("origin", "audio_pts"):
+        media["validation"]["audio"]["firstSampleMediaTime" if fault == "origin" else "ptsFramesSha256"] = 0.25 if fault == "origin" else "0" * 64
+    elif fault == "video_pts":
+        media["validation"]["video"]["rowsSha256"] = "0" * 64
+    elif fault == "missing_snapshot":
+        del native["finalRawSnapshot"]
+    elif fault == "snapshot_hash":
+        native["finalRawSnapshot"]["sha256"] = "0" * 64
+    elif fault == "snapshot_json":
+        native["finalRawSnapshot"] = ri_store(legacy.ROOT / ".cache/m1010r/invalid.json", b"{")
+    else:
+        native["report"]["extra"] = True
+    result = analyze_envelope(ri_envelope)
+    assert reason in result["summary"]["reason"]
+    assert result["outcome"] == ("UNRESOLVED" if fault.startswith("missing_") else "FAIL")
+    assert result["uncertaintyBoundMs"] is result["summary"]["uncertaintyBoundMs"] is None
+    if fault != "pcm_hash":
+        assert result["control"]["verifiedWindows"] == 180
+
+
+@pytest.mark.parametrize("field,value", [
+    ("firstSampleMediaTime", None), ("firstSampleMediaTime", float("nan")),
+    ("firstSampleMediaTime", float("inf")), ("firstSampleMediaTime", False),
+    ("firstPts", 1), ("timeBase", "1/44100"), ("endExclusiveMediaTime", 71),
+    ("sampleRate", 44100), ("decodedSamples", 3359999), ("decodedPcmBytes", 13440004),
+    ("decodedPcmSha256", "0" * 64), ("decodedFrames", 3281), ("ptsFramesSha256", None),
+])
+def test_ri_frozen_audio_metadata(ri_envelope, field, value):
+    from m1010r.instrument_analysis import analyze_envelope
+    ri_envelope["result"]["media"]["validation"]["audio"][field] = value
+    result = analyze_envelope(ri_envelope)
+    assert "reference_audio_validation" in result["summary"]["failedCriteria"]
+    assert result["outcome"] == "FAIL"
+    assert result["uncertaintyBoundMs"] is None
+
+
+@pytest.mark.parametrize("field,value", [
+    ("audio", None), ("firstFrame", 96001), ("samples", 3215999), ("sampleRate", 44100),
+    ("sampleRate", None), ("samples", True), ("blockLengths", [128]), ("blockLengths", None),
+    ("overflow", True), ("discontinuity", True), ("overflow", 0), ("bytes", 4), ("bytes", None),
+    ("encoding", "Float32 PCM, native byte order"), ("channel", 1), ("type", "other"),
+])
+def test_ri_audio_metadata_matches_terminal_and_pcm(ri_envelope, field, value):
+    from m1010r.instrument_analysis import analyze_envelope
+    native = ri_envelope["result"]
+    if field == "audio":
+        native["report"]["audio"] = value
+    else:
+        native["report"]["audio"][field] = value
+    ri_snapshot(native)
+    result = analyze_envelope(ri_envelope)
+    assert ("missing_audio_metadata" if field == "audio" else "audio_metadata_mismatch") in result["summary"]["reason"]
+    assert "final_raw_snapshot_mismatch" not in result["summary"]["failedCriteria"]
+    assert result["outcome"] != "PASS" and result["uncertaintyBoundMs"] is None
+
+
+@pytest.mark.parametrize("key", ["audio", "audioControl"])
+@pytest.mark.parametrize("fault", ["missing", "alias", "nested", "raw_only", "early_snapshot"])
+def test_ri_snapshot_and_alias_scope(ri_envelope, key, fault):
+    from m1010r import analyze as legacy
+    from m1010r.instrument_analysis import analyze_envelope
+    native = ri_envelope["result"]
+    if fault == "missing":
+        del native["report"][key]["pcm"]
+    elif fault == "alias":
+        native["report"][key]["pcm"] = dict(native["audioPcm" if key == "audioControl" else "controlAudioPcm"])
+    elif fault == "nested":
+        native["report"][key]["extra"] = {"pcm": {"bytes": 0}}
+    else:
+        native["rawSnapshot"] = ri_store(legacy.ROOT / ".cache/m1010r/early.json", b'{"cleanup":null}')
+        if fault == "raw_only":
+            del native["finalRawSnapshot"]
+    result = analyze_envelope(ri_envelope)
+    assert result["outcome"] == ("PASS" if fault == "early_snapshot" else "UNRESOLVED" if fault in ("missing", "raw_only") else "FAIL")
+    if fault != "early_snapshot":
+        assert result["uncertaintyBoundMs"] is None
+    assert result["control"]["verifiedWindows"] == 180
+
+
+@pytest.mark.parametrize("fault", ["early", "watchdog", "missing_pcm", "bad_hash", "bad_path", "bad_blocks", "bad_frames"])
+def test_ri_partial_envelope(ri_envelope, fault):
+    import hashlib
+    import json
+    from m1010r.instrument_analysis import analyze_envelope
+    from m1010r import analyze as legacy
+    native = ri_envelope["result"]
+    native["audioPcm"] = None
+    native["report"]["renderAudio"] = None
+    control = native["report"]["audioControl"]
+    if fault == "early":
+        control, _, pcm = ri_control(length=7168)
+        control.update(verifiedWindows=0, maximumSampleError=None)
+        control["render"]["terminal"]["completionReason"] = "WATCHDOG_ABORT"
+        native["report"]["audioControl"] = control
+        content = pcm.astype("<f4").tobytes()
+        (legacy.ROOT / native["controlAudioPcm"]["path"]).write_bytes(content)
+        native["controlAudioPcm"].update(bytes=len(content), sha256=hashlib.sha256(content).hexdigest())
+    elif fault == "watchdog":
+        control["render"]["watchdogFired"] = True
+    elif fault == "missing_pcm":
+        native["controlAudioPcm"] = None
+    elif fault == "bad_hash":
+        native["controlAudioPcm"]["sha256"] = "0" * 64
+    elif fault == "bad_path":
+        native["controlAudioPcm"]["path"] = "../outside.f32"
+    elif fault == "bad_blocks":
+        control["render"]["terminal"]["blockLengths"][0] = None
+    else:
+        native["report"]["frames"] = 7
+    result = analyze_envelope(ri_envelope)
+    assert result["outcome"] != "PASS"
+    assert result["control"]["render"]["range"]["processedBlocks"] == control["render"]["terminal"]["processedBlocks"]
+    assert result["uncertaintyBoundMs"] is None
+    if fault == "early":
+        assert result["control"]["render"]["pcm"]["samples"] == 7168
+        assert result["control"]["verifiedWindows"] == 0
+        assert result["control"]["maximumSampleError"] is None
+    elif fault == "watchdog":
+        assert result["outcome"] == "FAIL"
+        assert result["control"]["render"]["completionReason"] == "RENDER_TARGET_REACHED"
+        assert result["control"]["verifiedWindows"] == 180
+    elif fault in ("missing_pcm", "bad_hash", "bad_path"):
+        assert result["control"]["maximumSampleError"] is None
+    json.dumps(result, allow_nan=False)
+
+
+@pytest.mark.parametrize("fault", ["omit", "move", "duplicate", "corrupt"])
+def test_ri_control_negative_waveforms(fault):
+    control, reference, observed = ri_control()
+    if fault == "omit":
+        observed[12000:20192] = 0
+    elif fault == "move":
+        observed[12000:20192] = 0
+        observed[12013:20205] = reference[48000:56192]
+    elif fault == "duplicate":
+        reference[:] = 0.1
+        for region in control["scheduled"]:
+            observed[region["startFrame"]:region["startFrame"] + 8192] = 0.1 * region["gain"]
+    else:
+        observed[12513] += 1
+    result = analyze_control(control, reference, observed)
+    assert not result["passed"]
+    assert result["verifiedWindows"] < 180
+
+
+def test_ri_cli_negative_json():
+    import json
+    import subprocess
+    import sys
+    from m1010r import instrument_analysis
+    process = subprocess.run([sys.executable, instrument_analysis.__file__, "/outside-cache.json"],
+                             capture_output=True, text=True, check=False)
+    assert process.returncode == 0
+    assert process.stderr == ""
+    assert len(process.stdout.splitlines()) == 1
+    assert json.loads(process.stdout)["outcome"] == "UNRESOLVED"

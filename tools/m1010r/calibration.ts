@@ -4,6 +4,11 @@ import type { FrameTick } from '../../src/core/types.js';
 import { BaselineScaler } from '../../src/core/upscale/baseline-scaler.js';
 import { IdentityProbe } from './probe.js';
 import { runAudioControl, type AudioControlResult } from './audio-control.js';
+import { beginRenderRecording } from './render-host.js';
+import { runRenderControl, summarizeRender, renderIntegrity, type RenderSummary } from './render-control.js';
+
+declare const __M1010RI__: boolean;
+const renderClockMode = typeof __M1010RI__ !== 'undefined' && __M1010RI__;
 
 type State = 'NOT_RUN' | 'RUNNING' | 'RECORDED' | 'UNRESOLVED';
 interface RunOptions { fps: 30 | 60; seconds?: 65; mediaUrl: string }
@@ -70,6 +75,7 @@ let running: Promise<CalibrationReport> | null = null;
 const controls = new AbortController();
 
 const report = {
+  instrument: renderClockMode ? 'M10.10RI' : 'M10.10R',
   state: 'NOT_RUN' as State,
   options: null as RunOptions | null,
   requestedAt: null as string | null,
@@ -86,14 +92,16 @@ const report = {
     submission: 'performance/audio clocks before inner encode and after successful queue.submit; excludes import',
     readiness: 'Queue-completion callback upper endpoint, including queued work and callback delivery; not GPU duration',
     gpuSamples: 'Baseline render-pass timestamp-query elapsed milliseconds; identity compute is outside this pass',
-    window: '65 seconds from first post-submit observation: 5 seconds warmup, then 60 seconds observation',
+    window: renderClockMode ? 'Fixed audio render window: 5 seconds warmup, 60 seconds observation, 2 seconds tail; completion from worklet target only' : '65 seconds from first post-submit observation: 5 seconds warmup, then 60 seconds observation',
     acceptance: 'Offline analyzer only; RECORDED is not PASS',
   },
   frames: [] as FrameRow[],
   callbacks: [] as CallbackRow[],
   metadataMatchErrors: 0,
   completeness: null as { firstSequence: number; lastSequence: number; count: number; encodedCount: number; observedCallbackCount: number } | null,
-  audioControl: null as Omit<AudioControlResult, 'pcm'> | null,
+  audioControl: null as Omit<AudioControlResult, 'pcm'> | Omit<Awaited<ReturnType<typeof runRenderControl>>, 'pcm'> | null,
+  renderAudio: null as RenderSummary | null,
+  renderWindow: null as { epochFrame: number; startFrame: number; endFrame: number; targetEndFrame: number; sampleRate: number } | null,
   audio: null as (Omit<AudioRecording, 'pcm'> & { bytes: number; encoding: string; channel: number }) | null,
   graph: null as Record<string, unknown> | null,
   capabilities: null as Record<string, unknown> | null,
@@ -165,6 +173,7 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
   let completedWindow = false;
   let finishRequested = false;
   let audioStarted = false;
+  let renderRecorder: ReturnType<typeof beginRenderRecording> | null = null;
   let observedSubmissions = 0;
   let finishWindow: (() => void) | null = null;
 
@@ -237,6 +246,21 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
   }
 
   async function finishAudio(): Promise<void> {
+    if (renderRecorder) {
+      if (finishRequested) return;
+      finishRequested = true;
+      renderRecorder.abort('HOST_ABORT');
+      const collected = await bounded(renderRecorder.finished, 3000, 'render audio drain', false);
+      report.renderAudio = summarizeRender(collected);
+      const terminal = collected.terminal;
+      if (terminal) {
+        pcm = terminal.pcm.slice(0, terminal.processedSamples * 4);
+        report.audio = { type: 'audio-recording', sampleRate: terminal.sampleRate, firstFrame: terminal.firstFrame,
+          samples: terminal.processedSamples, blockLengths: report.renderAudio.terminal?.blockLengths ?? [],
+          overflow: terminal.overflow, discontinuity: terminal.discontinuity, bytes: pcm.byteLength, encoding: 'Float32 little-endian PCM', channel: 0 };
+      }
+      return;
+    }
     if (!worklet || !audioStarted || finishRequested) return;
     finishRequested = true;
     const node = worklet;
@@ -363,12 +387,16 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
     report.cleanup.observers = 1;
     trackState('setup');
 
-    await bounded(audio.audioWorklet.addModule(new URL('audio-worklet.js', document.baseURI).href), 5000, 'worklet load');
-    const control = await bounded(runAudioControl(audio, new URL(`media/decoded-${options.fps}.f32le`, document.baseURI).href), 10000, 'scheduled audio control');
+    await bounded(audio.audioWorklet.addModule(new URL(renderClockMode ? 'render-recorder.js' : 'audio-worklet.js', document.baseURI).href), 5000, 'worklet load');
+    const referenceUrl = new URL(`media/decoded-${options.fps}.f32le`, document.baseURI).href;
+    const control = renderClockMode
+      ? await runRenderControl(audio, referenceUrl, abort.signal)
+      : await bounded(runAudioControl(audio, referenceUrl), 10000, 'scheduled audio control');
     controlPcm = control.pcm;
     const { pcm: controlBytes, ...controlSummary } = control;
     report.audioControl = controlSummary;
-    if (!controlBytes.byteLength || control.errors.length || control.maximumSampleError === null || control.maximumSampleError > 12) throw new Error('Scheduled audio-clock calibration failed');
+    if (renderClockMode && abort.signal.aborted) throw new Error('Render control cancelled after bounded drainage');
+    if (!controlBytes?.byteLength || control.errors.length || control.maximumSampleError === null || control.maximumSampleError > 12) throw new Error('Scheduled audio-clock calibration failed');
     source = audio.createMediaElementSource(video);
     report.cleanup.audioNodes++;
     gate = audio.createGain();
@@ -379,12 +407,14 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
       numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2],
       channelCount: 2, channelCountMode: 'explicit', channelInterpretation: 'speakers',
     };
-    worklet = new AudioWorkletNode(audio, 'm1010r-audio', nodeOptions);
-    report.cleanup.audioNodes++;
-    worklet.onprocessorerror = () => fail('audio worklet', 'Processor error');
-    source.connect(gate).connect(worklet).connect(audio.destination);
+    if (!renderClockMode) {
+      worklet = new AudioWorkletNode(audio, 'm1010r-audio', nodeOptions);
+      report.cleanup.audioNodes++;
+      worklet.onprocessorerror = () => fail('audio worklet', 'Processor error');
+      source.connect(gate).connect(worklet).connect(audio.destination);
+    }
     report.graph = {
-      path: ['MediaElementAudioSource', 'Gain', 'm1010r-audio', 'destination'],
+      path: ['MediaElementAudioSource', 'Gain', renderClockMode ? 'm1010ri-render' : 'm1010r-audio', 'destination'],
       sampleRate: audio.sampleRate, requestedSampleRate: 48000, latencyHint: 'playback',
       baseLatency: audio.baseLatency, outputLatency: audio.outputLatency,
       sink: 'default (no setSinkId)', nodeOptions, gain: gate.gain.value,
@@ -418,6 +448,23 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
     render.onConfiguration = (configuration) => recordEvent('pipeline-configuration', configuration);
     render.onGpuSample = (sample) => report.gpuSamples.push(sample);
     const windowDone = new Promise<void>((resolve) => { finishWindow = resolve; });
+    if (renderClockMode) {
+      const epochFrame = Math.ceil(audio.currentTime * 48000);
+      report.renderWindow = { epochFrame, startFrame: epochFrame + 240000, endFrame: epochFrame + 3120000,
+        targetEndFrame: epochFrame + 3216000, sampleRate: 48000 };
+      renderRecorder = beginRenderRecording(audio, report.renderWindow.targetEndFrame, 75000);
+      worklet = renderRecorder.node;
+      report.cleanup.audioNodes++;
+      source.connect(gate).connect(worklet).connect(audio.destination);
+      const bounds = report.renderWindow;
+      void renderRecorder.finished.then(collected => {
+        report.renderAudio = summarizeRender(collected);
+        const errors = renderIntegrity(report.renderAudio, bounds.startFrame, bounds.targetEndFrame);
+        for (const message of errors) recordError('render completion', message);
+        completedWindow = errors.length === 0;
+        stopFrames(); finishWindow?.();
+      }).catch((error: unknown) => fail('render completion', error));
+    }
     render.onFrame = (tick: FrameTick) => {
       const audioAfter = audio.currentTime;
       const submitAfter = performance.now();
@@ -451,17 +498,19 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
       report.lastSubmissionPerformance = submitAfter;
       if (report.firstSubmissionPerformance === null) {
         report.firstSubmissionPerformance = submitAfter;
-        report.startPerformance = submitAfter + 5000;
-        report.plannedEndPerformance = submitAfter + 65000;
         report.startedAt = new Date().toISOString();
         recordEvent('first-submission', { performance: submitAfter, generation: row.generation });
-        const deadline = report.plannedEndPerformance;
-        const finishAtDeadline = () => {
-          const remaining = deadline - performance.now();
-          if (remaining > 0) { schedule(finishAtDeadline, Math.ceil(remaining)); return; }
-          completedWindow = true; stopFrames(); finishWindow?.();
-        };
-        schedule(finishAtDeadline, Math.max(1, Math.ceil(deadline - performance.now())));
+        if (!renderClockMode) {
+          report.startPerformance = submitAfter + 5000;
+          report.plannedEndPerformance = submitAfter + 65000;
+          const deadline = report.plannedEndPerformance;
+          const finishAtDeadline = () => {
+            const remaining = deadline - performance.now();
+            if (remaining > 0) { schedule(finishAtDeadline, Math.ceil(remaining)); return; }
+            completedWindow = true; stopFrames(); finishWindow?.();
+          };
+          schedule(finishAtDeadline, Math.max(1, Math.ceil(deadline - performance.now())));
+        }
       }
       const completion = acquired.device.queue.onSubmittedWorkDone().then(() => {
         const readyAt = performance.now();
@@ -475,17 +524,16 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
       report.cleanup.pendingCompletions = pending.size;
     };
     accepting = true;
-    const watchdog = schedule(() => fail('collection', '75-second collection watchdog expired'), 75000);
+    const watchdog = renderClockMode ? null : schedule(() => fail('collection', '75-second collection watchdog expired'), 75000);
     callbackId = video.requestVideoFrameCallback(observe);
     render.start();
-    worklet.port.postMessage('start');
-    audioStarted = true;
+    if (!renderClockMode) { worklet!.port.postMessage('start'); audioStarted = true; }
     for (const control of [pause, seek, volume, mute]) control.disabled = false;
     await bounded(video.play(), 5000, 'video play');
-    await bounded(windowDone, 75000, 'collection');
-    clearTimer(watchdog);
+    await bounded(windowDone, renderClockMode ? 80000 : 75000, 'collection');
+    if (watchdog !== null) clearTimer(watchdog);
     if (abort.signal.aborted) throw new Error('Collection interrupted');
-    await bounded(new Promise<void>((resolve) => { schedule(resolve, 100); }), 1000, 'audio tail');
+    if (!renderClockMode) await bounded(new Promise<void>((resolve) => { schedule(resolve, 100); }), 1000, 'audio tail');
     pauseMedia();
     recordEvent('audio-tail-ended', { audioTime: audio.currentTime });
   } catch (error) {
@@ -500,6 +548,7 @@ async function collect(options: RunOptions): Promise<CalibrationReport> {
     if (pipeline?.error) recordError('pipeline', pipeline.error);
     try { await finishAudio(); } catch (error) { recordError('audio finish', error); }
     try { await finishGpu(); } catch (error) { recordError('GPU finish', error); }
+    renderRecorder?.dispose();
     readyValid = false;
     if (worklet) {
       worklet.onprocessorerror = null;
