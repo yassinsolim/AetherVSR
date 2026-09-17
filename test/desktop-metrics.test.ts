@@ -425,3 +425,147 @@ describe('M11 software playback metrics (synthetic observations, not native meas
     assert.equal(result.outcome,'FAIL');
   `));
 });
+
+function playbackCheck(source: string) {
+  execFileSync(process.execPath, ['--input-type=module', '-e', `
+    import assert from 'node:assert/strict';
+    import {SHORT, shortMedia, playbackOutput, analyzeRaw, verifyPayload, verifyPrerequisites} from './tools/m11/playback.mjs';
+    ${source}
+  `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
+}
+
+describe('M11 bounded playback orchestration (no native apps)', () => {
+  it('kills only the verified owned process group and continues only healthy neural warmup misses', () => playbackCheck(`
+    import {killOwnedGroup,recoverableWarmupFailure} from './tools/m11/playback.mjs';
+    const signals=[];assert(killOwnedGroup(12345,12345,(...args)=>signals.push(args)));
+    assert.deepEqual(signals,[[-12345,'SIGKILL']]);
+    for(const [pid,group] of [[1,1],[12345,2],[process.pid,process.pid],[null,null]])assert.throws(()=>killOwnedGroup(pid,group,()=>{throw Error('must not signal')}));
+    assert.equal(killOwnedGroup(12345,12345,()=>{throw Object.assign(Error('gone'),{code:'ESRCH'})}),false);
+    const environment={visibility:'visible',focused:true,video:{paused:false,ended:false,error:null,time:9,width:1280,height:720,rate:1,muted:false,volume:1},
+      session:{mode:'auto',error:null,observerError:null,cleanupErrors:[],runtime:{running:true,actualTier:'baseline',controller:{state:'fallback'}},
+        resources:{devices:1,pipelines:1,drivers:1,callbacks:1,objectUrls:1}}};
+    const error='M11_NEURAL_WARMUP: exceeded 9000ms from play', spec={raw:false};
+    assert(recoverableWarmupFailure(error,environment,spec));
+    assert(!recoverableWarmupFailure('Operation deadline',environment,spec));
+    assert(!recoverableWarmupFailure(error,environment,{raw:true}));
+    assert(!recoverableWarmupFailure(error,environment,spec,true));
+    for(const mutate of [value=>value.focused=false,value=>value.video.paused=true,value=>value.session.error='lost',
+      value=>value.session.runtime.controller.state='failed',value=>value.session.resources.devices=0]){
+      const bad=structuredClone(environment);mutate(bad);assert(!recoverableWarmupFailure(error,bad,spec));
+    }
+  `));
+
+  it('freezes the order and rejects noncanonical outputs and alternative short sources', () => playbackCheck(`
+    assert.deepEqual(SHORT.map(row=>row.id),['raw30','neural30','raw60-1','neural60-1','neural60-2','raw60-2','raw60-3','neural60-3']);
+    assert(Object.isFrozen(SHORT) && SHORT.every(Object.isFrozen));
+    assert.equal(shortMedia(60).path,'.cache/m1010r/media-02/replay-60.mp4');
+    for(const value of ['other.mp4','./.cache/m1010r/media-02/replay-60.mp4']) assert.throws(()=>shortMedia(60,value));
+    for(const path of ['../escape','/tmp/escape','.cache/m11/../escape','.cache/m11/playback-app','.cache/m11/playback-app/child','.cache/m11','.cache/m11/old-attempt/new']) assert.throws(()=>playbackOutput(path));
+    assert(playbackOutput('.cache/m11/playback-new').endsWith('/playback-new'));
+    const {mkdtempSync,mkdirSync,symlinkSync,rmSync}=await import('node:fs');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+    const root=mkdtempSync(join(tmpdir(),'m11-path-'));
+    try {mkdirSync(join(root,'.cache/m11'),{recursive:true});symlinkSync(tmpdir(),join(root,'.cache/m11/link'));assert.throws(()=>playbackOutput('.cache/m11/link/new',root));symlinkSync(join(root,'absent'),join(root,'.cache/m11/dangling'));assert.throws(()=>playbackOutput('.cache/m11/dangling/new',root));} finally {rmSync(root,{recursive:true});}
+  `));
+
+  it('counts the full actual raw interval, preserves zero metadata and separates losses', () => playbackCheck(`
+    const record={startAt:0,stopAt:60000,durationMs:123,complete:true,pipelineAbsent:true,errors:[],
+      qualityBefore:{totalVideoFrames:10,droppedVideoFrames:0},qualityAfter:{totalVideoFrames:3615,droppedVideoFrames:2},
+      rows:Array.from({length:3600},(_,index)=>({at:index*1000/60,mediaTime:index/60,presentationTime:index*1000/60,expectedDisplayTime:index*1000/60,
+        presentedFrames:index+(index>=1800?5:0),width:1280,height:720,visibility:'visible',focused:true}))};
+    const result=analyzeRaw(record,{fps:60});assert.equal(result.outcome,'PASS');assert.equal(result.metrics.durationMs,60000);
+    assert.equal(result.metrics.windows.overall.callbackFps,60);for(const name of ['first20s','middle20s','final20s']) assert.equal(result.metrics.windows[name].callbacks,1200);
+    assert.equal(result.metrics.callbackPresentedGaps,5);assert.equal(result.metrics.qualityDelta.droppedVideoFrames,2);
+    assert.equal(result.metrics.qualityDelta.corruptedVideoFrames,null);assert.equal(result.metrics.gpuMs,null);assert.equal(result.metrics.textureIdentity,null);
+    record.stopAt=61000;assert.equal(analyzeRaw(record,{fps:60}).metrics.windows.overall.callbackFps,3600/61);
+    for(const patch of [{at:null},{mediaTime:null},{visibility:'hidden'},{focused:false},{width:0}]) {const copy=structuredClone(record);Object.assign(copy.rows[0],patch);assert.equal(analyzeRaw(copy,{fps:60}).outcome,'FAIL');}
+    for(const patch of [{pipelineAbsent:false},{complete:false},{errors:['interrupt']},{rows:[]}]) assert.equal(analyzeRaw({...record,...patch},{fps:60}).outcome,'FAIL');
+    assert.equal(analyzeRaw({...record,rows:[]},{fps:60}).metrics.callbackPresentedGaps,null);
+  `));
+});
+
+describe('M11 playback prerequisite equivalence', () => {
+  it('requires exact lineage, unchanged player sources and equal emitted payload', () => playbackCheck(`
+    import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';
+    import {PARITY_CASES,MODEL_SHA256} from './tools/m11/parity.mjs';
+    const digest=value=>createHash('sha256').update(value).digest('hex'), commit='a'.repeat(40), current='b'.repeat(40);
+    const files=Object.fromEntries(['index.html','main.cjs','models/production.json','package.json','player.css','renderer.js'].map(name=>[name,{bytes:1,sha256:name==='models/production.json'?MODEL_SHA256:digest(name)}]));
+    const pin={diagnostic:true,sourceDirty:false,electron:'44.4.1',modelSha256:MODEL_SHA256,sourceCommit:commit,files,payloadSha256:digest(JSON.stringify(files)),inputs:['apps/desktop/renderer.ts','tools/m1010r/probe.ts']};
+    const parity={schema:'aethervsr.m11.paused-parity/1',verdict:'PASS',parityPrerequisitePassed:true,errors:[],sourceBefore:{commit},sourceAfter:{commit},expected:{modelSha256:MODEL_SHA256},electronEnvironment:{versions:{electron:'44.4.1'}},packageBefore:pin,packageAfter:pin,cleanup:{chrome:true,electron:true,server:true},binaries:{electron:{sha256:digest('binary')}},cases:PARITY_CASES.map(spec=>({...spec,verdict:'PASS',comparison:{verdict:'PASS',checks:{same:true}}}))};
+    const ids=['play','pause','resume','forward','backward','audio','baseline','neural','auto','rate','resize','fullscreen','replace','device-loss','recover','security','close','close-paused','close-baseline','close-neural','close-seek','close-replacement'];
+    const journeys={schema:'aethervsr.m11.journeys/1',verdict:'PASS',parityPrerequisitePassed:true,errors:[],sourceBefore:{commit},sourceAfter:{commit},packageBefore:pin,packageAfter:pin,binary:{sha256:digest('binary')},cases:ids.map(id=>({id,verdict:'PASS'})),cleanup:{naturalExits:true,profilesRemoved:true},applications:Array.from({length:6},()=>({errors:[],profileRemoved:true,exit:{code:0,signal:null},native:{versions:{electron:'44.4.1'}}}))};
+    const calls=[], git=args=>{calls.push(args);return '';};
+    assert.equal(verifyPrerequisites(parity,journeys,current,commit,git).evidenceCommit,commit);
+    assert.deepEqual(calls[0],['merge-base','--is-ancestor',commit,current]);
+    for(const path of ['src','apps/desktop','public/models','package-lock.json','tools/m11/parity.mjs','tools/m11/journeys.mjs','tools/m11/renderer-diagnostics.ts','tools/m1010r/probe.ts']) assert(calls[1].includes(path));
+    assert.throws(()=>verifyPrerequisites(parity,journeys,current,null,git));
+    assert.throws(()=>verifyPrerequisites(parity,journeys,current,commit,()=>{throw Error('not ancestor');}));
+    assert.throws(()=>verifyPrerequisites(parity,journeys,current,commit,args=>args[0]==='diff'?'src/runtime.ts':''));
+    for(const mutate of [value=>value.verdict='FAIL',value=>value.cases.pop(),value=>value.errors=['error'],value=>value.applications[0].exit.code=1,value=>value.packageAfter={...pin,sourceDirty:true}]) {
+      const bad=structuredClone(journeys);mutate(bad);assert.throws(()=>verifyPrerequisites(parity,bad,current,commit,git));
+    }
+    const bad=structuredClone(journeys);bad.packageBefore.files['renderer.js'].sha256=digest('changed');bad.packageBefore.payloadSha256=digest(JSON.stringify(bad.packageBefore.files));bad.packageAfter=bad.packageBefore;
+    assert.throws(()=>verifyPrerequisites(parity,bad,current,commit,git));
+    assert.throws(()=>verifyPayload({...pin,payloadSha256:digest('wrong')}));
+  `));
+});
+
+describe('M11 playback recorder in a fake page', () => {
+  it('intercepts a real File only for raw, times actual boundaries, and releases callbacks and URLs', () => playbackCheck(`
+    import {installRecorder} from './tools/m11/playback.mjs';import {runInNewContext} from 'node:vm';import {webcrypto} from 'node:crypto';
+    let now=0, serial=0, pipelineLoads=0, overlayRemoved=false, revoked=0;const timers=new Map(), frames=new Map();
+    class Target {listeners=new Map();addEventListener(type,fn,options){const list=this.listeners.get(type)??[];list.push({fn,options});this.listeners.set(type,list);}removeEventListener(type,fn){this.listeners.set(type,(this.listeners.get(type)??[]).filter(row=>row.fn!==fn));}async emit(type){let blocked=false;for(const row of [...this.listeners.get(type)??[]]){await row.fn({type,stopImmediatePropagation(){blocked=true;}});if(row.options?.once)this.removeEventListener(type,row.fn);if(blocked)break;}return blocked;}}
+    const input=new Target();input.files=[new File(['clip'],'replay-60.mp4')];
+    const video=Object.assign(new Target(),{currentTime:0,duration:70,videoWidth:1280,videoHeight:720,playbackRate:1,muted:false,volume:1,paused:true,ended:false,error:null,loop:false,
+      async play(){this.paused=false;},pause(){this.paused=true;},load(){},getVideoPlaybackQuality(){return{creationTime:now,totalVideoFrames:2,droppedVideoFrames:0};},
+      requestVideoFrameCallback(fn){frames.set(++serial,fn);return serial;},cancelVideoFrameCallback(id){frames.delete(id);},removeAttribute(){delete this.src;},getAttribute(){return this.src??null;}});
+    const session={runtime:null,gpu:null,destroyed:0,destroy(){this.destroyed++;video.pause();},snapshot(){return{pending:false,resources:{devices:0,pipelines:0,drivers:0,callbacks:0,objectUrls:0},cleanupErrors:[]};}};
+    const canvas={hidden:false,width:0,height:0}, sandbox=Object.assign(new Target(),{performance:{now:()=>now},crypto:webcrypto,URL:{createObjectURL:()=> 'blob:real-file',revokeObjectURL(){revoked++;}},
+      document:{visibilityState:'visible',hasFocus:()=>true,querySelector:selector=>selector==='#file'?input:{remove(){overlayRemoved=true;}},addEventListener(){},removeEventListener(){}},
+      innerWidth:1280,innerHeight:690,outerWidth:1280,outerHeight:720,screenX:0,screenY:0,devicePixelRatio:2,screen:{width:1512,height:982},navigator:{userAgent:'fake'},
+      setTimeout:(fn,delay)=>{timers.set(++serial,{fn,at:now+delay});return serial;},clearTimeout:id=>timers.delete(id),
+      setInterval:(fn,delay)=>{timers.set(++serial,{fn,at:now+delay,delay});return serial;},clearInterval:id=>timers.delete(id)});
+    sandbox.window=sandbox;sandbox.m11Desktop={video,canvas,session:()=>session};
+    runInNewContext('('+installRecorder.toString()+')({raw:true})',sandbox);input.addEventListener('change',()=>pipelineLoads++);
+    assert(await input.emit('change'));const recorder=sandbox.m11Playback;assert.equal((await recorder.selected).bytes,4);
+    assert.equal(pipelineLoads,0);assert.equal(session.destroyed,1);assert(overlayRemoved && canvas.hidden);assert.equal(video.src,'blob:real-file');
+    const warm=recorder.warm();
+    for(now=25;now<=5025;now+=25) {video.currentTime=now/1000;for(const [id,timer] of [...timers])if(timer.at<=now){if(timer.delay)timer.at+=timer.delay;else timers.delete(id);timer.fn();}}
+    now=5025;const ready=await warm;assert.equal(ready.readyAt-ready.stableAt,5000);
+    const result=recorder.start();assert.equal(frames.size,1);
+    const emit=()=>{const [id,fn]=[...frames][0];frames.delete(id);fn(now,{mediaTime:0,presentationTime:0,expectedDisplayTime:now,presentedFrames:0,width:1280,height:720});return fn;};
+    const late=emit();assert.equal(frames.size,1);now=65040;
+    for(const [id,timer] of [...timers])if(timer.at<=now){timers.delete(id);timer.fn();}
+    const data=await result;assert.equal(data.startAt,5025);assert.equal(data.stopAt,65040);assert.equal(data.complete,true);assert.equal(data.rows.length,1);assert.equal(data.rows[0].mediaTime,0);
+    assert.equal(frames.size,0);late(now,{});assert.equal(frames.size,0);assert(video.paused);
+    const cleanup=recorder.cleanup();assert(cleanup.runtimeReleased && cleanup.sourceReleased && cleanup.callbackCancelled && cleanup.urlRevoked);assert.equal(revoked,1);assert.equal(timers.size,0);assert.equal(input.listeners.get('change').length,1);
+  `));
+
+  it('will not warm neural without real samples and retains interrupted partial data without forcing a tier', () => playbackCheck(`
+    import {installRecorder} from './tools/m11/playback.mjs';import {runInNewContext} from 'node:vm';
+    for(const samplesAvailable of [false,true,'invalid']) {
+      let now=0,serial=0,beginCount=0;const timers=new Map();
+      const video={currentTime:0,duration:70,videoWidth:1280,videoHeight:720,playbackRate:1,muted:false,volume:1,paused:true,ended:false,error:null,loop:false,
+        pause(){this.paused=true;},load(){},addEventListener(){},removeEventListener(){},removeAttribute(){},getAttribute(){return null;}};
+      const driver={onSample:null,onChange:null,pipeline:{timingGeneration:1},snapshot(){return{actualTier:'neural',running:true,controller:{state:'stable',mode:'auto'}};}};
+      const session={runtime:null,gpu:null,async play(){video.paused=false;this.runtime=driver;},destroy(){this.runtime=null;this.gpu=null;video.pause();},snapshot(){return{mode:'auto',ready:true,pending:false,error:null,observerError:null,cleanupErrors:[],runtime:this.runtime?.snapshot(),canvas:{width:2560,height:1440},resources:{devices:0,pipelines:0,drivers:0,callbacks:0,objectUrls:0}};}};
+      const diagnostics={startAt:null,stopAt:null,rows:[{sequence:1}],samples:[],states:[],errors:[],begin(){beginCount++;this.startAt=now;},async finish(){this.stopAt=now;return{startAt:this.startAt,stopAt:this.stopAt,rows:this.rows,samples:[],states:[],errors:[]};}};
+      const input={addEventListener(){},removeEventListener(){}}, sandbox={performance:{now:()=>now},document:{visibilityState:'visible',hasFocus:()=>true,querySelector:()=>input,addEventListener(){},removeEventListener(){}},
+        innerWidth:1280,innerHeight:690,outerWidth:1280,outerHeight:720,screenX:0,screenY:0,devicePixelRatio:2,screen:{width:1512,height:982},navigator:{userAgent:'fake'},
+        setTimeout:(fn,delay)=>{timers.set(++serial,{fn,at:now+delay});return serial;},clearTimeout:id=>timers.delete(id),
+        setInterval:(fn,delay)=>{timers.set(++serial,{fn,at:now+delay,delay});return serial;},clearInterval:id=>timers.delete(id),addEventListener(){},removeEventListener(){}};
+      sandbox.window=sandbox;sandbox.m11Desktop={video,canvas:{hidden:false,width:2560,height:1440},diagnostics,replace(options){assert.equal(options.observe,true);return session;}};
+      runInNewContext('('+installRecorder.toString()+')({raw:false})',sandbox);
+      const recorder=sandbox.m11Playback, warm=recorder.warm().then(value=>value,()=>null);
+      const until=samplesAvailable===true?5075:9025;
+      for(now=25;now<=until;now+=25) {
+        video.currentTime=now/1000;
+        if(samplesAvailable)driver.onSample?.({neural:true,ms:2,submittedAt:now-1,resolvedAt:samplesAvailable==='invalid'?now+1:now,generation:1,sequence:now});
+        for(const [id,timer] of [...timers])if(timer.at<=now){if(timer.delay)timer.at+=timer.delay;else timers.delete(id);timer.fn();}
+      }
+      now=until;const ready=await warm;
+      if(samplesAvailable===true){assert(ready && ready.readyAt-ready.stableAt>=5000);void recorder.start();assert.equal(beginCount,1);const data=await recorder.stop('interrupted');assert.equal(data.complete,false);assert(data.errors.includes('interrupted'));assert.equal(data.rows.length,1);assert.equal(recorder.partial().complete,false);}
+      else {assert.equal(ready,null);assert.equal(beginCount,0);assert.throws(()=>recorder.start());}
+      recorder.cleanup();assert.equal(timers.size,0);assert.equal(driver.onSample,null);assert.equal(driver.onChange,null);
+    }
+  `));
+});
