@@ -46,7 +46,10 @@ export async function runGolden(directory = '.cache/m12/stage-golden-01') {
   try {
     app = await _electron.launch({ executablePath: executable, args: [resolve(ROOT, built.directory)], env: { ...process.env, AETHERVSR_TEST_PROFILE: profile }, timeout: 30000 });
     const page = await app.firstWindow({ timeout: 10000 }); await page.waitForURL('aethervsr://app/index.html');
-    const raw = await waitForObservation(() => page.evaluate(() => document.querySelector('#result')?.value));
+    const raw = await waitForObservation(() => page.evaluate(() => {
+      const value = document.querySelector('#result')?.value;
+      return value && value !== 'pending' ? value : null;
+    }));
     const result = JSON.parse(raw); validateGoldenEvidence(result);
     const envelope = { schema: 'aethervsr.m12.1.stage-golden-envelope/1', sourceCommit: git(['rev-parse', 'HEAD']), modelSha256: MODEL,
       electron: JSON.parse(readFileSync(join(ROOT, 'node_modules/electron/package.json'))).version,
