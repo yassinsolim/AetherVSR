@@ -1,10 +1,12 @@
 # AetherVSR
 
-**Primary product direction: AetherVSR Desktop.** M11 is an authorized local-file
-Electron player for macOS / Apple Silicon, reusing the production WebGPU engine.
-The browser extension and its results below are preserved, not the primary product
-surface. Desktop qualification is not yet earned. Cross-vendor desktop validation
-moves to M12. [Roadmap](ROADMAP.md), ADR-0058 in [DECISIONS.md](DECISIONS.md).
+**Primary product direction: AetherVSR Desktop.** M11 is a local-file Electron
+player for macOS / Apple Silicon, reusing the production WebGPU engine, and is
+published as **DESKTOP PLAYER MVP READY**. The browser extension and its results
+below are preserved, not the primary product surface. M12 cross-vendor desktop
+validation is authorized and in progress; it does not broaden the product claim
+until real hardware evidence exists. [Roadmap](ROADMAP.md), ADR-0058 and ADR-0059
+in [DECISIONS.md](DECISIONS.md).
 
 Real-time 2x neural video super-resolution in the browser, with measured gains
 on selected captured-content and degradation classes. Broad web-video

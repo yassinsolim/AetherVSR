@@ -1815,3 +1815,45 @@ output and `npm run desktop:dev` are the initial packaging contract.
 Desktop controls use Lucide1.47.0 icons, registry-declared ISC license verified
 before installation. Icons are bundled locally; no external icon/font request or
 remote renderer content is introduced.
+
+## ADR-0059 - M12 cross-vendor desktop validation authorization
+
+**Status:** owner-authorized; validation only.
+
+M11 remains permanently **DESKTOP PLAYER MVP READY** at published source
+`bbe127e193961909bc98d421aee47bf0047811a9`, with exact CI `35313331062`.
+Its original raw-soak focus failure, one authorized raw replacement pass, neural
+soak pass, parity, lifecycle, security and packaging evidence remain immutable.
+M12 does not rewrite or retroactively reinterpret M11.
+
+M12 validates the same desktop player, production model, WebGPU core,
+RuntimeController, Electron `44.4.1`, media, and acceptance contract on real
+Apple, NVIDIA, AMD and Intel hardware. It does not add model optimization,
+training, extension work, UI redesign, codec expansion, distribution, or M13
+release engineering.
+
+Binding source is declared only after the cross-platform apparatus and common
+source checks pass. Every vendor run then uses that exact source, Electron,
+model and deterministic media hashes. A later runtime fix invalidates affected
+evidence and requires a new binding source plus reruns; no vendor-specific
+shader, model, threshold, fallback policy or retry-until-favorable result is
+allowed.
+
+Physical local graphical sessions are required. Software adapters, SwiftShader,
+llvmpipe, Basic Render Driver, remote/translated virtual GPUs, RDP-altered
+sessions and hosted CI GPUs are not vendor evidence. Missing physical hardware
+is `NOT_RUN_HARDWARE_UNAVAILABLE`, never PASS or FAIL. Electron security remains
+the M11 model, including the sole trusted app-main-frame fullscreen exception.
+
+The registered funnel is security/capability/shader-model/golden-stage/parity,
+raw and neural 30 FPS, raw and neural 60 FPS, lifecycle, raw 600-second soak,
+and neural 600-second soak. M11 cadence, invalid-observation, visual-age,
+controller, focus/visibility, cleanup and GPU-timestamp definitions remain
+unchanged. Same-machine parity uses the existing normalized RGBA contract;
+cross-vendor numeric differences use the preregistered golden tolerances and do
+not assume bit-identical fp16 output.
+
+M12 machine verdicts are exactly `PASS`, `FAIL`, `UNSUPPORTED`, `UNRESOLVED`, or
+`NOT_RUN_HARDWARE_UNAVAILABLE`. The overall verdict is exactly
+`CROSS-VENDOR DESKTOP VALIDATED`, `CROSS-VENDOR DESKTOP PARTIAL`, or
+`CROSS-VENDOR DESKTOP NOT VALIDATED`. No M13 work begins automatically.

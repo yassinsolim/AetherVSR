@@ -548,12 +548,14 @@ and owner-approved56MiB storage cap before implementation.
 
 ---
 
-## Milestone 12 - Cross-Vendor Desktop Validation [GATED]
+## Milestone 12 - Cross-Vendor Desktop Validation [AUTHORIZED / IN PROGRESS]
 
-Moved prospectively from the former M11 plan by the owner. After a ready desktop
-MVP, validate desktop playback on Apple M5, NVIDIA RTX, AMD and Intel hardware as
-available across appropriate operating systems. No M12 implementation or measurement
-is included in M11. Existing single-machine evidence does not generalize to vendors.
+The owner authorized validation after M11 reached DESKTOP PLAYER MVP READY. M12
+uses one binding source, Electron 44.4.1, the unchanged production model/core and
+the unchanged M11 acceptance contract on real local Apple, NVIDIA, AMD and Intel
+hardware as available. Missing physical hardware is NOT_RUN_HARDWARE_UNAVAILABLE;
+CI GPUs and software adapters are not substitutes. M12 does not optimize the
+model, redesign the player, expand codecs, or begin distribution work.
 
 ---
 
