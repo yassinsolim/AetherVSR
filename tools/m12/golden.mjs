@@ -35,7 +35,7 @@ export function validateGoldenEvidence(value, modelSha = MODEL_FILE_SHA) {
   return true;
 }
 export async function runGolden(directory = '.cache/m12/stage-golden-01') {
-  const output = resolve(ROOT, directory); assert(output.startsWith(resolve(ROOT, '.cache/m12') + '/')); assert(!existsSync(output));
+  const output = resolve(ROOT, directory); assert(output.startsWith(resolve(ROOT, '.cache/m12') + '/') || output.startsWith(resolve(ROOT, '.cache/m12.1') + '/')); assert(!existsSync(output));
   assert.equal(git(['status', '--porcelain', '--untracked-files=normal']), '');
   const { buildDesktop } = await import('../../apps/desktop/build.mjs');
   const built = await buildDesktop({ diagnostic: true, stageGolden: true, outdir: BUILD, renderer: 'apps/desktop/stage-golden.ts' });
