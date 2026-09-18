@@ -494,7 +494,7 @@ describe('M11 bounded playback orchestration (no native apps)', () => {
     assert(Object.isFrozen(SHORT) && SHORT.every(Object.isFrozen));
     assert.equal(shortMedia(60).path,'.cache/m1010r/media-02/replay-60.mp4');
     for(const value of ['other.mp4','./.cache/m1010r/media-02/replay-60.mp4']) assert.throws(()=>shortMedia(60,value));
-    for(const path of ['../escape','/tmp/escape','.cache/m11/../escape','.cache/m11/playback-app','.cache/m11/playback-app/child','.cache/m11','.cache/m11/old-attempt/new']) assert.throws(()=>playbackOutput(path));
+    for(const path of ['../escape','/tmp/escape','.cache/m11/../escape','.cache/m11/playback-app/child','.cache/m12/playback-app','.cache/m12/playback-app/child','.cache/m11','.cache/m11/old-attempt/new']) assert.throws(()=>playbackOutput(path));
     assert(playbackOutput('.cache/m11/playback-new').endsWith('/playback-new'));
     const {mkdtempSync,mkdirSync,symlinkSync,rmSync}=await import('node:fs');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
     const root=mkdtempSync(join(tmpdir(),'m11-path-'));

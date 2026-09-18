@@ -9,7 +9,7 @@ import { MODEL_SHA256, summarizeParity, waitForObservation } from './parity.mjs'
 import { verifyJourneyParity } from './journeys.mjs';
 import { analyzePlayback } from './metrics.mjs';
 
-const ROOT = fileURLToPath(new URL('../../', import.meta.url)), BUILD = '.cache/m11/playback-app', VERSION = '44.4.1';
+const ROOT = fileURLToPath(new URL('../../', import.meta.url)), BUILD = '.cache/m12/playback-app', VERSION = '44.4.1';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = args => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', timeout: 10000 }).trim();
 const finite = value => typeof value === 'number' && Number.isFinite(value);
