@@ -10,7 +10,7 @@ M11 remains `DESKTOP PLAYER MVP READY`. Its original raw focus failure, one repl
 The owner-authorized contract is recorded in [M12-PREREGISTRATION.md](M12-PREREGISTRATION.md) and ADR-0059. It preserves the M11 acceptance thresholds and forbids vendor-specific tuning.
 
 ## 4. Binding Source
-The M12 evidence envelope is pinned to source `8523fda`. Runtime, model, desktop player, package and M11 validation files are unchanged from the M11 publication; only M12 documentation/apparatus was added.
+The M12 evidence envelope is pinned to source `6e861bb0cb96a2b4cceba87aeea7a9f3db10a890`. Runtime, model, desktop player, package and M11 validation files are unchanged from the M11 publication; only M12 documentation/apparatus was added.
 
 ## 5. Electron and Platform Versions
 Electron is 44.4.1. The Apple control environment is macOS 26.6.2 build 25G83, Chromium 152.0.7977.78, Apple M5, arm64. Windows environments were unavailable.
@@ -108,7 +108,7 @@ M11 Apple evidence remains valid; M12 does not yet establish cross-vendor valida
 The public claim remains the measured local Apple M5 desktop claim from M11. No NVIDIA, AMD or Intel support claim is made. M12 does not support “works on every GPU.”
 
 ## 34. Repository, CI, and Size State
-The M12 envelope is `results/m12-envelope.json`. The tree remains under the approved 58,720,256-byte cap. M11 exact CI passed; M12 changes require their own final gates and exact-HEAD CI before publication.
+The M12 envelope is `results/m12-envelope.json`. Final local gates passed: 1,490 Vitest tests with 3 skips, 612 Python tests, typecheck, lint, replay checks, desktop checks, web/extension/desktop builds, and the 58,720,256-byte cap with a 54,813,157-byte tree. Exact-HEAD M12 CI remains required before publication.
 
 ## 35. Recommended Next Milestone
 Do not begin M13. The bounded next M12 action is either to obtain qualifying physical NVIDIA/AMD/Intel machines and a reviewed native stage-golden runner, or close M12 as partial with the current explicit limitations. No optimization loop is authorized.
