@@ -1,7 +1,7 @@
 {
   "schema": "aethervsr.m12.cross-vendor-envelope/1",
   "source": {
-    "commit": "8523fdaeda9a3dffed65776726ca2e866193ef53",
+    "commit": "6e861bb0cb96a2b4cceba87aeea7a9f3db10a890",
     "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
     "electron": "44.4.1"
   },
@@ -10,7 +10,7 @@
       "vendor": "apple",
       "machineVerdict": "UNRESOLVED",
       "source": {
-        "commit": "8523fdaeda9a3dffed65776726ca2e866193ef53",
+        "commit": "6e861bb0cb96a2b4cceba87aeea7a9f3db10a890",
         "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
         "electron": "44.4.1"
       },
@@ -118,5 +118,5 @@
     "intel"
   ],
   "publicClaim": "M11 Apple M5 desktop validation remains valid; NVIDIA, AMD and Intel cross-vendor validation is not yet claimed.",
-  "generatedAt": "2026-09-18T08:14:21.820Z"
+  "generatedAt": "2026-09-18T08:15:26.305Z"
 }
