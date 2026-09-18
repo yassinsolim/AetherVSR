@@ -1,0 +1,28 @@
+{
+  "schema": "aethervsr.m12.1.completion-envelope/1",
+  "sourceCommit": "acfb596002a01796961905959c7a66b7afa162c1",
+  "modelBytesSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+  "modelFileSha256": "9154d9490b02d8fdf136edd990217cfb6f0e9956ed928da7179d7781832c8e02",
+  "electron": "44.4.1",
+  "vendors": [
+    {
+      "vendor": "apple",
+      "machineVerdict": "PASS",
+      "environment": "Mac17,2 Apple M5, macOS 26.6.2 build 25G83, arm64",
+      "stageGolden": {"status": "PASS", "precisions": ["f32", "f16"], "adapterVendor": "apple", "fallbackAdapter": false, "evidence": ".cache/m12.1/apple-machine-03/stage-golden.json"},
+      "parity": {"status": "PASS", "cases": 6, "evidence": ".cache/m12/parity-apple-02/result.json"},
+      "shortPerformance": {"status": "PASS", "arms": 8, "evidence": ".cache/m12/playback-apple-03/result.json"},
+      "lifecycle": {"status": "PASS", "cases": 22, "evidence": ".cache/m12/journeys-apple-02/result.json"},
+      "longRun": {"status": "APPLICABLE_FROM_M11_UNCHANGED_RUNTIME", "rawReplacement": "PASS", "neural": "PASS", "originalRawFailureRetained": true}
+    },
+    {"vendor": "nvidia", "machineVerdict": "NOT_RUN_HARDWARE_UNAVAILABLE"},
+    {"vendor": "amd", "machineVerdict": "NOT_RUN_HARDWARE_UNAVAILABLE"},
+    {"vendor": "intel", "machineVerdict": "NOT_RUN_HARDWARE_UNAVAILABLE"}
+  ],
+  "overallVerdict": "CROSS-VENDOR COMPLETION PARTIAL",
+  "publicClaim": "M12.1 resolves the Apple M5 native conformance gate. NVIDIA, AMD and Intel physical validation remain outstanding.",
+  "artifactHashes": {
+    "machineBundle": ".cache/m12.1/apple-machine-03",
+    "stageGolden": "c95d8b0f8f407b46ed19e2056eaf3b568282241f271d534571dc07f1c4538106"
+  }
+}
