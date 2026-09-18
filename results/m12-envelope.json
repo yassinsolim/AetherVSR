@@ -1,0 +1,122 @@
+{
+  "schema": "aethervsr.m12.cross-vendor-envelope/1",
+  "source": {
+    "commit": "8523fdaeda9a3dffed65776726ca2e866193ef53",
+    "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+    "electron": "44.4.1"
+  },
+  "vendors": [
+    {
+      "vendor": "apple",
+      "machineVerdict": "UNRESOLVED",
+      "source": {
+        "commit": "8523fdaeda9a3dffed65776726ca2e866193ef53",
+        "modelSha256": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+        "electron": "44.4.1"
+      },
+      "environment": {
+        "machine": "Mac17,2",
+        "chip": "Apple M5",
+        "memoryBytes": 25769803776,
+        "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+        "physicalRefresh": "not measured"
+      },
+      "adapter": {
+        "class": "Apple",
+        "selected": {
+          "2d_canvas": "enabled",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "enabled",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "enabled_on",
+          "rasterization": "enabled",
+          "raw_draw": "disabled_off_ok",
+          "skia_graphite": "enabled_on",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "enabled",
+          "video_encode": "enabled",
+          "webgl": "enabled",
+          "webgpu": "enabled",
+          "webnn": "disabled_off"
+        },
+        "physicalSession": true
+      },
+      "security": {
+        "secure": true,
+        "node": "undefined",
+        "process": "undefined",
+        "electron": "undefined",
+        "gpu": "object"
+      },
+      "capabilities": [
+        {
+          "forceCopy": false,
+          "upscaler": "neural-aethersr-resizeconv-c16d2",
+          "gpuSamples": 10
+        },
+        {
+          "forceCopy": true,
+          "upscaler": "neural-aethersr-resizeconv-c16d2",
+          "gpuSamples": 10
+        }
+      ],
+      "goldenVectors": {
+        "modelIdentity": "PASS",
+        "stageExecution": "UNRESOLVED",
+        "reason": "No committed native stage-by-stage runner existed in M11; no result fabricated."
+      },
+      "parity": {
+        "evidence": ".cache/m11/parity-04/result.json",
+        "cases": 6,
+        "verdict": "PASS"
+      },
+      "lifecycle": {
+        "evidence": ".cache/m11/journeys-03/result.json",
+        "cases": 22,
+        "verdict": "PASS"
+      },
+      "short": {
+        "evidence": ".cache/m11/playback-01/result.json",
+        "arms": 8,
+        "verdict": "PASS"
+      },
+      "long": {
+        "rawOriginal": "FAIL_FOCUS_FALSE_RETAINED",
+        "rawReplacement": "PASS",
+        "neural": "PASS",
+        "evidence": [
+          ".cache/m11/soak-01/result.json",
+          ".cache/m11/soak-replacement-1/result.json"
+        ]
+      },
+      "notes": [
+        "M12 reuses M11 native evidence because apps/src/model/package/runtime bytes are unchanged since M11 publication.",
+        "Stage-by-stage native golden execution remains unresolved and is not silently counted as PASS."
+      ]
+    },
+    {
+      "vendor": "nvidia",
+      "machineVerdict": "NOT_RUN_HARDWARE_UNAVAILABLE",
+      "reason": "No qualifying physical local machine was available; software or CI adapters are not substitutes."
+    },
+    {
+      "vendor": "amd",
+      "machineVerdict": "NOT_RUN_HARDWARE_UNAVAILABLE",
+      "reason": "No qualifying physical local machine was available; software or CI adapters are not substitutes."
+    },
+    {
+      "vendor": "intel",
+      "machineVerdict": "NOT_RUN_HARDWARE_UNAVAILABLE",
+      "reason": "No qualifying physical local machine was available; software or CI adapters are not substitutes."
+    }
+  ],
+  "overallVerdict": "CROSS-VENDOR DESKTOP PARTIAL",
+  "bindingClasses": [
+    "apple",
+    "nvidia",
+    "amd",
+    "intel"
+  ],
+  "publicClaim": "M11 Apple M5 desktop validation remains valid; NVIDIA, AMD and Intel cross-vendor validation is not yet claimed.",
+  "generatedAt": "2026-09-18T08:14:21.820Z"
+}
