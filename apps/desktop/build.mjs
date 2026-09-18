@@ -11,7 +11,7 @@ const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 export async function buildDesktop({ diagnostic = false, stageGolden = false, outdir = 'dist-desktop', renderer = 'apps/desktop/renderer.ts' } = {}) {
   const output = resolve(ROOT, outdir);
-  assert(output.startsWith(resolve(ROOT, '.cache/m11') + '/') || output === resolve(ROOT, 'dist-desktop'));
+  assert(output.startsWith(resolve(ROOT, '.cache/m11') + '/') || output.startsWith(resolve(ROOT, '.cache/m12') + '/') || output === resolve(ROOT, 'dist-desktop'));
   const model = readFileSync(join(ROOT, 'public/models/aethersr-c16d2.json')); verifyProductionModel(model);
   const artifacts = new Map([['index.html', readFileSync(join(ROOT, renderer.endsWith('/smoke.ts') ? 'apps/desktop/smoke.html' : renderer.endsWith('/stage-golden.ts') ? 'apps/desktop/stage-golden.html' : 'apps/desktop/index.html'))],
     ['player.css', readFileSync(join(ROOT, 'apps/desktop/player.css'))], ['models/production.json', model],
