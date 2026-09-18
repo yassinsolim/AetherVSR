@@ -11,7 +11,7 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = args => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
 export async function runSmoke(directory) {
   const output = resolve(ROOT, directory);
-  assert(output.startsWith(resolve(ROOT, '.cache/m11') + '/'));
+  assert(output.startsWith(resolve(ROOT, '.cache/m11') + '/') || output.startsWith(resolve(ROOT, '.cache/m12') + '/'));
   assert(!existsSync(output), 'Native smoke attempt directory must be new');
   assert.equal(git(['status', '--porcelain']), '', 'Commit and review source before native smoke');
   mkdirSync(output, { recursive: true });
