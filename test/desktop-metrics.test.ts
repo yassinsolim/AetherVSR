@@ -43,7 +43,7 @@ describe('M11 conditional soak apparatus', () => {
 
   it('validates long media schema, exact bytes/hash, dimensions, cadence and containment', () => soakCheck(`
     import {mkdtempSync,mkdirSync,writeFileSync,symlinkSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {createHash} from 'node:crypto';
-    import {validateLongMediaManifest,soakOutput,SOAK_ARMS,SOAK_DURATION_MS} from './tools/m11/soak.mjs';
+    import {validateLongMediaManifest,soakOutput,SOAK_ARMS,RAW_REPLACEMENT,SOAK_DURATION_MS,integrityPass} from './tools/m11/soak.mjs';
     const root=mkdtempSync(join(tmpdir(),'m11-soak-')),path=join(root,'.cache/m11/replay-60.mp4');mkdirSync(join(root,'.cache/m11'),{recursive:true});writeFileSync(path,'long-media');
     const sha256=createHash('sha256').update('long-media').digest('hex'),manifest={schema:'aethervsr.m11.long-media/1',path:'.cache/m11/replay-60.mp4',seconds:610,fps:60,width:1280,height:720,frames:36600,bytes:10,sha256};
     assert.equal(validateLongMediaManifest(manifest,'.cache/m11/replay-60.mp4',root).durationMs,610000);
@@ -51,7 +51,8 @@ describe('M11 conditional soak apparatus', () => {
     assert.throws(()=>validateLongMediaManifest(manifest,'.cache/m11/missing.mp4',root));assert.throws(()=>validateLongMediaManifest({...manifest,durationSeconds:609.9},'.cache/m11/replay-60.mp4',root));
     symlinkSync(path,join(root,'.cache/m11/link.mp4'));assert.throws(()=>validateLongMediaManifest(manifest,'.cache/m11/link.mp4',root));
     for(const value of ['.cache/m11','../escape','.cache/m11/../escape'])assert.throws(()=>soakOutput(value,root));
-    assert.deepEqual(SOAK_ARMS.map(row=>row.id),['raw60-soak','neural60-soak']);assert.equal(SOAK_ARMS[0].raw,true);assert.equal(SOAK_ARMS[1].raw,false);assert.equal(SOAK_DURATION_MS,600000);rmSync(root,{recursive:true});
+    assert.deepEqual(SOAK_ARMS.map(row=>row.id),['raw60-soak','neural60-soak']);assert.equal(RAW_REPLACEMENT.id,'raw60-soak-replacement-1');assert.equal(RAW_REPLACEMENT.raw,true);assert.equal(SOAK_ARMS[0].raw,true);assert.equal(SOAK_ARMS[1].raw,false);assert.equal(SOAK_DURATION_MS,600000);
+    const witness=[{visibility:'visible',documentFocused:true,nativeFocused:true,nativeVisible:true,bounds:{width:1280,height:720},display:{id:1}}];assert(integrityPass(witness,witness[0]));assert(!integrityPass([{...witness[0],nativeFocused:false}],witness[0]));assert(!integrityPass(witness,{...witness[0],documentFocused:false}));rmSync(root,{recursive:true});
   `));
 
   it('rejects changed short arm artifacts and preserves the 600-second recorder boundary', () => soakCheck(`

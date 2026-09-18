@@ -15,6 +15,7 @@ export const SOAK_ARMS = Object.freeze([
   Object.freeze({ id: 'raw60-soak', raw: true, fps: 60, minDurationMs: SOAK_DURATION_MS }),
   Object.freeze({ id: 'neural60-soak', raw: false, fps: 60, minDurationMs: SOAK_DURATION_MS }),
 ]);
+export const RAW_REPLACEMENT = Object.freeze({ id: 'raw60-soak-replacement-1', raw: true, fps: 60, minDurationMs: SOAK_DURATION_MS });
 const VERSION = '44.4.1';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = args => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', timeout: 10000 }).trim();
@@ -62,6 +63,14 @@ export function validateLongMediaManifest(manifest, mediaPath, root = ROOT, runP
   return { ...manifest, path: relative(root, path), durationMs: Math.round((manifest.durationSeconds ?? manifest.seconds) * 1000) };
 }
 
+export function integrityPass(witness, final) {
+  assert(Array.isArray(witness) && witness.length > 0, 'Missing binding integrity witness');
+  const valid = witness.every(row => row.visibility === 'visible' && row.documentFocused === true && row.nativeFocused === true &&
+    row.nativeVisible === true && row.bounds?.width === 1280 && row.bounds?.height === 720 && row.display?.id !== undefined);
+  return valid && final?.visibility === 'visible' && final.documentFocused === true && final.nativeFocused === true &&
+    final.nativeVisible === true && final.bounds?.width === 1280 && final.bounds?.height === 720;
+}
+
 function readJsonReference(reference) {
   assert(reference?.path && Number.isSafeInteger(reference.bytes) && /^[a-f0-9]{64}$/.test(reference.sha256));
   const actual = pin(reference.path); assert.deepEqual(actual, reference); return JSON.parse(readFileSync(localPath(reference.path), 'utf8'));
@@ -101,9 +110,9 @@ function nativeState({ app, BrowserWindow, screen }) {
     processes: app.getAppMetrics().map(({ pid, type, cpu, memory }) => ({ pid, type, cpu, memory })) };
 }
 
-export async function runSoak(output, { shortPath = '.cache/m11/playback-01/result.json', mediaPath, mediaManifest, ancestor = null } = {}) {
+export async function runSoak(output, { shortPath = '.cache/m11/playback-01/result.json', mediaPath, mediaManifest, ancestor = null, arms = SOAK_ARMS, replacement = false } = {}) {
   const directory = soakOutput(output), report = { schema: 'aethervsr.m11.long-soak/1', output: relative(ROOT, directory), verdict: 'FAIL', startedAt: new Date().toISOString(),
-    arms: SOAK_ARMS.map(spec => ({ ...spec, verdict: 'NOT_RUN', reason: 'Earlier gate not completed' })), errors: [],
+    arms: arms.map(spec => ({ ...spec, verdict: 'NOT_RUN', reason: 'Earlier gate not completed' })), errors: [], replacement,
     bounds: { runMs: 1320000, warmupMs: 9000, observationMs: SOAK_DURATION_MS, closeMs: 10000 },
     host: { hostname: hostname(), platform: platform(), release: release(), arch: arch(), node: process.versions },
     scope: 'Software visual-lag, callback, submission, GPU timestamp and available process/resource snapshots only. No physical scanout, A/V or audio synchronization, thermal, watts or GPU-memory claim; process metrics are opening/midpoint/closing snapshots, not summed physical memory.' };
@@ -127,7 +136,7 @@ export async function runSoak(output, { shortPath = '.cache/m11/playback-01/resu
   try {
     const { buildDesktop } = await import('../../apps/desktop/build.mjs'); const build = localPath('.cache/m11/soak-app'); if (!existsSync(build)) await buildDesktop({ diagnostic: true, outdir: build });
     const executable = realpathSync((await import('electron')).default); const { _electron } = await import('../../.cache/m9/node_modules/playwright/index.mjs');
-    for (const spec of SOAK_ARMS) {
+    for (const spec of arms) {
       if (stopping) break; const active = report.arms.find(row => row.id === spec.id); active.verdict = 'FAIL'; const profile = join(directory, `${spec.id}-profile`);
       const record = { errors: [], console: [], profile, profileRemoved: false, mediaManifest: manifest };
       let fatal = false;
@@ -141,12 +150,39 @@ export async function runSoak(output, { shortPath = '.cache/m11/playback-01/resu
         await waitForObservation(() => page.evaluate(() => typeof window.m11Desktop !== 'undefined')); await page.evaluate(installRecorder, { raw: spec.raw, durationMs: SOAK_DURATION_MS });
         await page.locator('#file').setInputFiles(resolve(ROOT, mediaPath)); record.selected = await page.evaluate(() => window.m11Playback.selected); assert.equal(record.selected.bytes, manifest.bytes); assert.equal(record.selected.sha256, manifest.sha256);
         await waitForObservation(() => page.evaluate(() => window.m11Desktop.video.readyState >= 2)); record.warm = await page.evaluate(() => window.m11Playback.warm()); record.nativeBefore = await app.evaluate(nativeState);
-        const midpoint = setTimeout(async () => { try { record.nativeMiddle = await app.evaluate(nativeState); } catch (error) { record.errors.push(`Midpoint snapshot: ${error}`); } }, SOAK_DURATION_MS / 2);
-        record.observation = await page.evaluate(() => window.m11Playback.start()); clearTimeout(midpoint); record.nativeAfter = await app.evaluate(nativeState);
+        record.integrity = [];
+        const observeIntegrity = async () => {
+          try {
+            const [renderer, native] = await Promise.all([page.evaluate(() => ({ visibility: document.visibilityState, focused: document.hasFocus() })), app.evaluate(nativeState)]);
+            const row = { at: new Date().toISOString(), visibility: renderer.visibility, documentFocused: renderer.focused,
+              nativeFocused: native.focused, nativeVisible: native.visible, bounds: native.bounds, display: native.display };
+            record.integrity.push(row); if (!row.documentFocused || !row.nativeFocused || !row.nativeVisible) record.integrityFailure = row;
+          } catch (error) { record.errors.push(`Integrity observation: ${error}`); record.integrityFailure = { error: String(error) }; }
+        };
+        await observeIntegrity();
+        if (!integrityPass(record.integrity, record.integrity[0])) throw Error('Binding integrity failed before observation');
+        console.log('RAW SOAK BINDING OBSERVATION STARTED — DO NOT INTERACT WITH THIS MAC UNTIL COMPLETE');
+        const integrityTimer = setInterval(() => { void observeIntegrity(); }, 1000);
+        const finalIntegrityTimer = setTimeout(async () => {
+          try {
+            const [renderer, native] = await Promise.all([page.evaluate(() => ({ visibility: document.visibilityState, focused: document.hasFocus() })), app.evaluate(nativeState)]);
+            record.finalIntegrity = { at: new Date().toISOString(), visibility: renderer.visibility, documentFocused: renderer.focused,
+              nativeFocused: native.focused, nativeVisible: native.visible, bounds: native.bounds, display: native.display };
+          } catch (error) { record.errors.push(`Final integrity observation: ${error}`); }
+        }, SOAK_DURATION_MS - 100);
+        try {
+          record.observation = await page.evaluate(() => window.m11Playback.start());
+          await waitForObservation(() => Promise.resolve(record.finalIntegrity), 2000);
+          record.bindingIntegrityPass = integrityPass(record.integrity, record.finalIntegrity);
+          if (!record.bindingIntegrityPass) record.errors.push('Binding integrity failed during or at final snapshot');
+          record.nativeAfter = await app.evaluate(nativeState);
+        } finally { clearInterval(integrityTimer); clearTimeout(finalIntegrityTimer); }
       } catch (error) { fatal = true; record.errors.push(String(error)); try { record.observation ??= await page?.evaluate(() => window.m11Playback?.partial()); } catch (failure) { record.errors.push(String(failure)); } }
       finally {
         if (!record.observation) record.observation = { complete: false, errors: record.errors, unavailable: true }; active.observation = write(`${spec.id}-observation.json`, record.observation); await close(record);
-        const analysis = analyzeArm(record, spec); active.analysis = write(`${spec.id}-analysis.json`, analysis); const { observation: _observation, ...metadata } = record; active.metadata = write(`${spec.id}-metadata.json`, metadata); active.verdict = analysis.outcome; if (!analysis.criteria.cleanup) fatal = true;
+        const analysis = analyzeArm(record, spec); active.analysis = write(`${spec.id}-analysis.json`, analysis); const { observation: _observation, ...metadata } = record; active.metadata = write(`${spec.id}-metadata.json`, metadata); active.verdict = analysis.outcome;
+        if (replacement && (!record.bindingIntegrityPass || !analysis.criteria.cleanup)) { active.verdict = 'FAIL'; fatal = true; }
+        if (!analysis.criteria.cleanup) fatal = true;
       }
       if (fatal) { active.reason = 'Fatal setup, acquisition, or cleanup failure; no retry'; break; }
     }
@@ -161,5 +197,11 @@ export async function runSoak(output, { shortPath = '.cache/m11/playback-01/resu
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv[2] === '--help') console.log('node tools/m11/soak.mjs OUTPUT SHORT_RESULT LONG_MEDIA MANIFEST [EXACT_EVIDENCE_ANCESTOR]');
-  else { assert(process.argv.length >= 6 && process.argv.length <= 7, 'Expected OUTPUT SHORT_RESULT LONG_MEDIA MANIFEST [EXACT_EVIDENCE_ANCESTOR]'); const report = await runSoak(process.argv[2], { shortPath: process.argv[3], mediaPath: process.argv[4], mediaManifest: process.argv[5], ancestor: process.argv[6] ?? null }); console.log(JSON.stringify({ output: report.output, verdict: report.verdict, arms: report.arms.map(({ id, verdict }) => ({ id, verdict })), errors: report.errors })); process.exitCode = report.verdict === 'PASS' ? 0 : 1; }
+  else {
+    assert(process.argv.length >= 7 && process.argv.length <= 8, 'Expected mode OUTPUT SHORT_RESULT LONG_MEDIA MANIFEST [EXACT_EVIDENCE_ANCESTOR]');
+    const replacement = process.argv[2] === 'raw-replacement'; assert(replacement || process.argv[2] === 'soak', 'Expected soak or raw-replacement mode');
+    const report = await runSoak(process.argv[3], { shortPath: process.argv[4], mediaPath: process.argv[5], mediaManifest: process.argv[6], ancestor: process.argv[7] ?? null,
+      arms: replacement ? [RAW_REPLACEMENT] : SOAK_ARMS, replacement });
+    console.log(JSON.stringify({ output: report.output, verdict: report.verdict, arms: report.arms.map(({ id, verdict }) => ({ id, verdict })), errors: report.errors })); process.exitCode = report.verdict === 'PASS' ? 0 : 1;
+  }
 }
