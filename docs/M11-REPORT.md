@@ -98,7 +98,7 @@ All registered mandatory secure/local/audio/parity/control/lifecycle/performance
 AetherVSR Desktop MVP is ready for local 720p30/60 H.264 playback on the measured macOS Apple Silicon apparatus, with native audio authority and production neural enhancement. This does not claim physical A/V sync, physical scanout latency, arbitrary web support, or cross-vendor support.
 
 ## 30. Repository, CI, and Size
-The final source must pass the complete repository gate set, clean-clone reproducibility, frozen extension byte comparison, production/diagnostic package checks, and the 56 MiB tree guard. M11 commits are currently local and unpublished; publication is incomplete until exact final-HEAD CI passes.
+The final source passed the complete repository gate set, clean-clone reproducibility, frozen extension byte comparison, production/diagnostic package checks, and the 56 MiB tree guard. The closure is published on `main`; exact final-HEAD CI run `35312989947` passed both `gate` and `fusion`.
 
 ## 31. M12 Recommendation
 Keep M12 Cross-Vendor Desktop Validation unstarted. Publish M11 only after final gates, clean clone, push, and exact final-HEAD CI verification. No signing, notarization, updater, store, analytics, or account work is part of M11.
