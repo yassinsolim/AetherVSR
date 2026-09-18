@@ -51,7 +51,7 @@ export function buildAppleEnvelope() {
   assert.equal(soak.arms.find(row => row.id === 'neural60-soak').verdict, 'PASS');
   assert.equal(replacement.arms.find(row => row.id === 'raw60-soak-replacement-1').verdict, 'PASS');
   return {
-    vendor: 'apple', machineVerdict: 'PASS', source, environment: smoke.host,
+    vendor: 'apple', machineVerdict: 'UNRESOLVED', source, environment: smoke.host,
     adapter: { class: 'Apple', selected: smoke.environment?.gpu ?? null, physicalSession: true },
     security: smoke.security,
     capabilities: smoke.runs.map(run => ({ forceCopy: run.forceCopy, upscaler: run.upscaler, gpuSamples: run.gpuSamples.length })),
