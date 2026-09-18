@@ -40,7 +40,7 @@ function local(path) {
 export function journeyOutput(directory = '.cache/m11/journeys-01') {
   assert(typeof directory === 'string' && directory.length > 0);
   const output = resolve(ROOT, directory), build = resolve(ROOT, BUILD);
-  assert(output.startsWith(resolve(ROOT, '.cache/m11') + sep), 'Output outside .cache/m11');
+  assert(output.startsWith(resolve(ROOT, '.cache/m11') + sep) || output.startsWith(resolve(ROOT, '.cache/m12') + sep), 'Output outside validation cache');
   assert(output !== build && !output.startsWith(build + sep) && !build.startsWith(output + sep), 'Build overlap');
   return local(output);
 }

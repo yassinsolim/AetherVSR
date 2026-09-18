@@ -55,7 +55,7 @@ export function localPath(path, root = ROOT) {
 }
 export function playbackOutput(directory, root = ROOT) {
   const output = localPath(directory, root), build = resolve(root, BUILD);
-  assert.equal(dirname(output), resolve(root, '.cache/m11'), 'Output must be a direct child of .cache/m11');
+  assert(dirname(output) === resolve(root, '.cache/m11') || dirname(output) === resolve(root, '.cache/m12'), 'Output must be a direct child of validation cache');
   assert(output !== build && !output.startsWith(build + sep) && !build.startsWith(output + sep), 'Build overlap');
   return output;
 }

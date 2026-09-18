@@ -65,7 +65,7 @@ export function summarizeParity(cases) {
 export function parityOutput(directory = '.cache/m11/parity-01') {
   assert(typeof directory === 'string' && directory.length > 0, 'An output directory is required');
   const output = resolve(ROOT, directory), build = resolve(ROOT, BUILD);
-  assert(output.startsWith(resolve(ROOT, '.cache/m11') + sep), 'Output must be under .cache/m11');
+  assert(output.startsWith(resolve(ROOT, '.cache/m11') + sep) || output.startsWith(resolve(ROOT, '.cache/m12') + sep), 'Output must be under validation cache');
   assert(output !== build && !output.startsWith(build + sep) && !build.startsWith(output + sep), 'Output overlaps diagnostic build');
   return output;
 }
