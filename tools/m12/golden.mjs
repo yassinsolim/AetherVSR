@@ -52,7 +52,7 @@ export async function runGolden(directory = '.cache/m12/stage-golden-01') {
       return value && value !== 'pending' ? value : null;
     }));
     const result = JSON.parse(raw); validateGoldenEvidence(result);
-    const envelope = { schema: 'aethervsr.m12.1.stage-golden-envelope/1', sourceCommit: git(['rev-parse', 'HEAD']), modelSha256: model.sha256, modelBytesSha256: MODEL_BYTES,
+    const envelope = { schema: 'aethervsr.m12.1.stage-golden-envelope/1', sourceCommit: git(['rev-parse', 'HEAD']), modelSha256: result.modelSha256, modelBytesSha256: MODEL_BYTES,
       electron: JSON.parse(readFileSync(join(ROOT, 'node_modules/electron/package.json'))).version,
       media: 'not applicable: stage graph uses committed golden input', packageSha256: built.provenance.payloadSha256,
       result, resultSha256: digest(Buffer.from(JSON.stringify(result))) };
