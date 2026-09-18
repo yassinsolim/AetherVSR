@@ -76,7 +76,7 @@ export function verifyShortSoakPrerequisites(short, current, ancestor = null, ru
   if (ancestor !== null) assert.equal(ancestor, shortCommit, 'Explicit ancestor must be the short result source');
   if (shortCommit !== current) { proofAncestor(shortCommit, ancestor); runGit(['merge-base', '--is-ancestor', shortCommit, current]); }
   const proof = verifyPrerequisites(parity, journeys, current, parity.sourceBefore.commit, runGit);
-  assert.equal(shortCommit, proof.runnerCommit); assert.deepEqual(short.sourceAfter, short.sourceBefore);
+  assert.equal(current, proof.runnerCommit); assert.deepEqual(short.sourceAfter, short.sourceBefore);
   assert.deepEqual(short.packageAfter, short.packageBefore);
   assert.deepEqual(short.pinsAfter?.payloadSha256, short.packageBefore?.payloadSha256);
   for (const arm of short.arms) {
