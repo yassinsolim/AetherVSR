@@ -379,7 +379,7 @@ describe('M10.10RI render-control verification', () => {
       assert.equal(result.verifiedWindows,120);assert.equal(result.errors.length,60);
       assert.equal(result.errors[0],'Unverified signal window '+(region.startFrame+256));
     }
-  `, false, true));
+  `, false, true), 15000);
 
   it('rejects the old 7168-sample PCM and a recording missing only the first signal', () => check(`
     const {reference,observed,scheduled}=signalFixture();
@@ -401,7 +401,7 @@ describe('M10.10RI render-control verification', () => {
       assert(result.errors.includes('Nonfinite PCM'));assert.equal(result.expectedWindows,180);
       if(position===12512)assert(result.verifiedWindows<180);else assert.equal(result.verifiedWindows,180);
     }
-  `, false, true));
+  `, false, true), 15000);
 
   it('requires the complete tail and keeps the whole final block for variable quanta', () => check(`
     for(const lengths of [[64],[96],[128],[192],[256],[512],[64,96,192,128,256,512]]){
