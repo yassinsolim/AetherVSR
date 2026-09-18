@@ -5,6 +5,7 @@ dist/
 /dist-desktop/
 /release-desktop/
 /.cache/m11/
+/.cache/m12/
 /.cache/m105/
 /.cache/m106/
 /.cache/m107/
