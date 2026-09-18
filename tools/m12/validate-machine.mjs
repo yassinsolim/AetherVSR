@@ -23,13 +23,15 @@ export async function validateMachine(directory = '.cache/m12.1/machine-01', { r
   const write = (name, value) => { writeFileSync(join(output, name), JSON.stringify(value, null, 2) + '\n', { flag: 'wx' }); };
   write('hashes.json', { sourceCommit: environment.sourceCommit, modelSha256: MODEL, media });
   const stages = ['environment', 'adapter', 'stage-golden', 'parity', 'short-performance', 'lifecycle', 'raw-soak', 'neural-soak'];
-  write('machine-environment.json', environment); write('adapter-capabilities.json', { status: 'NOT_RUN', reason: 'Populate from stage-golden adapter result' });
-  for (const stage of stages.filter(stage => !['environment', 'adapter'].includes(stage))) write(`${stage}.json`, { stage, status: 'NOT_RUN', reason: 'Explicit staged workflow; run only after prior binding gate passes' });
+  write('machine-environment.json', environment);
+  for (const stage of stages.filter(stage => !['environment', 'adapter', 'stage-golden'].includes(stage))) write(`${stage}.json`, { stage, status: 'NOT_RUN', reason: 'Explicit staged workflow; run only after prior binding gate passes' });
   if (runGolden) {
     const goldenDirectory = `.cache/m12.1/${directory.split('/').at(-1)}-golden`;
     command('tools/m12/golden.mjs', [goldenDirectory]);
     const golden = JSON.parse(readFileSync(join(ROOT, goldenDirectory, 'result.json'), 'utf8'));
     write('stage-golden.json', golden); write('adapter-capabilities.json', { status: 'PASS', adapter: golden.result.adapter, features: golden.result.features }); stages[2] = 'stage-golden:PASS'; stages[1] = 'adapter:PASS';
+  } else {
+    write('stage-golden.json', { status: 'NOT_RUN', reason: 'Stage-golden execution disabled' }); write('adapter-capabilities.json', { status: 'NOT_RUN', reason: 'Populate from stage-golden adapter result' });
   }
   const artifacts = Object.fromEntries(['machine-environment.json', 'adapter-capabilities.json', 'stage-golden.json', 'parity.json', 'short-performance.json', 'lifecycle.json', 'raw-soak.json', 'neural-soak.json', 'hashes.json'].filter(name => existsSync(join(output, name))).map(name => [name, { bytes: readFileSync(join(output, name)).length, sha256: hash(join(output, name)) }]));
   const envelope = { schema: 'aethervsr.m12.1.machine-envelope/1', environment, media, stages, artifacts, next: 'Review stage-golden result before parity; never skip the funnel' };
