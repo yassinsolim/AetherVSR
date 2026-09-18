@@ -239,7 +239,7 @@ describe('desktop real build boundaries (no native launches)', () => {
     const normal = await build(false, 'normal');
     rendererBoundary(normal.renderer);
     await secureMain(normal, false);
-    const forbidden = ['m11Desktop', 'aethervsrRuntime', 'm1010r:identity', 'readAfterPause', 'injectLoss'];
+    const forbidden = ['m11Desktop', 'aethervsrRuntime', 'm1010r:identity', 'readAfterPause', 'injectLoss', 'golden-c16d2'];
     assert.deepEqual({ renderer: forbidden.filter(marker => normal.renderer.includes(marker)),
       main: ['AETHERVSR_TEST_PROFILE'].filter(marker => normal.main.includes(marker)) },
       { renderer: [], main: [] }, 'Diagnostic strings retained in normal build');

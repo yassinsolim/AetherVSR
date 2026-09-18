@@ -9,20 +9,21 @@ import { verifyProductionModel } from '../../tools/build-extension.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-export async function buildDesktop({ diagnostic = false, outdir = 'dist-desktop', renderer = 'apps/desktop/renderer.ts' } = {}) {
+export async function buildDesktop({ diagnostic = false, stageGolden = false, outdir = 'dist-desktop', renderer = 'apps/desktop/renderer.ts' } = {}) {
   const output = resolve(ROOT, outdir);
   assert(output.startsWith(resolve(ROOT, '.cache/m11') + '/') || output === resolve(ROOT, 'dist-desktop'));
   const model = readFileSync(join(ROOT, 'public/models/aethersr-c16d2.json')); verifyProductionModel(model);
-  const artifacts = new Map([['index.html', readFileSync(join(ROOT, renderer.endsWith('/smoke.ts') ? 'apps/desktop/smoke.html' : 'apps/desktop/index.html'))],
+  const artifacts = new Map([['index.html', readFileSync(join(ROOT, renderer.endsWith('/smoke.ts') ? 'apps/desktop/smoke.html' : renderer.endsWith('/stage-golden.ts') ? 'apps/desktop/stage-golden.html' : 'apps/desktop/index.html'))],
     ['player.css', readFileSync(join(ROOT, 'apps/desktop/player.css'))], ['models/production.json', model],
     ['package.json', Buffer.from(JSON.stringify({ name: 'aethervsr-desktop', version: '0.1.0', main: 'main.cjs', private: true }))]]);
+  if (stageGolden) artifacts.set('models/golden-c16d2.json', readFileSync(join(ROOT, 'public/models/golden-c16d2.json')));
   const inputs = new Set();
   for (const [entry, name, platform, format] of [['apps/desktop/main.ts', 'main.cjs', 'node', 'cjs'], [renderer, 'renderer.js', 'browser', 'esm']]) {
     const result = await build({ absWorkingDir: ROOT, entryPoints: [entry], bundle: true, write: false, metafile: true,
       minifySyntax: true,
       platform, format, target: platform === 'node' ? 'node22' : 'chrome144', outfile: join(output, name),
       external: platform === 'node' ? ['electron'] : [], loader: { '.wgsl': 'text' },
-      define: { __DESKTOP_DIAGNOSTIC__: String(diagnostic), 'import.meta.env.DEV': 'false', 'import.meta.env.PROD': 'true' } });
+    define: { __DESKTOP_DIAGNOSTIC__: String(diagnostic), __DESKTOP_STAGE_GOLDEN__: String(stageGolden), 'import.meta.env.DEV': 'false', 'import.meta.env.PROD': 'true' } });
     assert.equal(result.outputFiles.length, 1);
     if (platform === 'browser') assert(Object.values(result.metafile.outputs).every(value => value.imports.length === 0));
     for (const path of Object.keys(result.metafile.inputs)) inputs.add(path);

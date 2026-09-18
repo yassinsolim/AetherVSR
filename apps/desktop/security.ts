@@ -1,11 +1,14 @@
 export const APP_ORIGIN = 'aethervsr://app';
 export const APP_URL = `${APP_ORIGIN}/index.html`;
+declare const __DESKTOP_STAGE_GOLDEN__: boolean;
+const stageGolden = typeof __DESKTOP_STAGE_GOLDEN__ !== 'undefined' && __DESKTOP_STAGE_GOLDEN__;
 export const CONTENT_SECURITY_POLICY = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src blob:; connect-src 'self' blob:; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'";
 export const ASSETS: Readonly<Record<string, { file: string; type: string }>> = {
   '/index.html': { file: 'index.html', type: 'text/html; charset=utf-8' },
   '/renderer.js': { file: 'renderer.js', type: 'text/javascript; charset=utf-8' },
   '/player.css': { file: 'player.css', type: 'text/css; charset=utf-8' },
   '/models/production.json': { file: 'models/production.json', type: 'application/json' },
+  ...(stageGolden ? { '/models/golden-c16d2.json': { file: 'models/golden-c16d2.json', type: 'application/json' } } : {}),
 };
 
 export function localAsset(url: string, method = 'GET', origin: string | null = null) {

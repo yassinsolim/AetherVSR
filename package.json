@@ -13,6 +13,7 @@
     "build": "tsc --noEmit && vite build",
     "build:extension": "node tools/build-extension.mjs",
     "desktop:build": "node apps/desktop/build.mjs",
+    "m12:golden": "node tools/m12/golden.mjs",
     "desktop:dev": "npm run desktop:build && electron dist-desktop",
     "desktop:check": "tsc --noEmit && eslint apps/desktop test/desktop*.ts",
     "preview": "vite preview",
