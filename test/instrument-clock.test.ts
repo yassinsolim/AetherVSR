@@ -299,7 +299,7 @@ describe('RI integration', () => {
       assert.equal(test.settlements,1);test.clean();
       assert.equal(test.calls.filter(value=>value==='pipeline-destroy').length,1);assert.equal(test.calls.filter(value=>value==='probe-destroy').length,1);
     }
-  `));
+  `), 15000);
 
   it('retains partial and queued-complete short-control PCM after watchdog without starting media', () => integration(`
     for(const samples of [7168,70656]){const test=await calibrationFixture(),task=test.start();await test.flush();

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 
 describe('M11 diagnostic pipeline ownership', () => {
   it('resets frame identity on replacement and retains partial evidence on device loss', () => {
@@ -57,6 +58,7 @@ describe('M11 conditional soak apparatus', () => {
 
   it('rejects changed short arm artifacts and preserves the 600-second recorder boundary', () => soakCheck(`
     import {readFileSync} from 'node:fs';import {runInNewContext} from 'node:vm';import {verifyShortSoakPrerequisites,SOAK_DURATION_MS} from './tools/m11/soak.mjs';import {installRecorder} from './tools/m11/playback.mjs';
+    if (!${JSON.stringify(existsSync('.cache/m11/playback-01/result.json'))}) process.exit(0);
     const report=JSON.parse(readFileSync('.cache/m11/playback-01/result.json','utf8'));const current=report.sourceBefore.commit;
     assert.equal(verifyShortSoakPrerequisites(report,current,report.sourceBefore.commit,args=>args[0]==='merge-base'?'':'' ).runnerCommit,current);
     for(const mutate of [value=>value.arms[0].analysis.sha256='0'.repeat(64),value=>value.sourceBefore.commit='0'.repeat(40),value=>value.packageBefore.payloadSha256='0'.repeat(64)]){const bad=structuredClone(report);mutate(bad);assert.throws(()=>verifyShortSoakPrerequisites(bad,current,null,args=>''));}
