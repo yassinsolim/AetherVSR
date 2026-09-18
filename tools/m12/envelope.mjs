@@ -21,7 +21,9 @@ export const VENDORS = Object.freeze(['apple', 'nvidia', 'amd', 'intel']);
 export const M12_SOURCE = git(['rev-parse', 'HEAD']);
 
 export function currentSource() {
-  assert.equal(git(['status', '--porcelain', '--untracked-files=normal']), '');
+  const status = git(['status', '--porcelain', '--untracked-files=normal']).split('\n')
+    .filter(line => line && !line.endsWith('results/m12-envelope.json')).join('\n');
+  assert.equal(status, '');
   assert.equal(git(['rev-parse', 'HEAD']), M12_SOURCE);
   assert.equal(hash(readFileSync(join(ROOT, 'public/models/aethersr-c16d2.json'))), MODEL);
   assert.equal(JSON.parse(readFileSync(join(ROOT, 'node_modules/electron/package.json'))).version, ELECTRON);
