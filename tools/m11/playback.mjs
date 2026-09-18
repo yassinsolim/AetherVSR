@@ -142,7 +142,8 @@ export function analyzeRaw(record, { fps, minDurationMs = 60000 } = {}) {
       scope: 'Native video callback acquisition only; no GPU pipeline, texture readback, physical scanout or A/V claim. Decoder drops and callback presented gaps are distinct, never summed. Raw cadence does not qualify neural throughput.' } };
 }
 
-export function installRecorder({ raw }) {
+export function installRecorder({ raw, durationMs = 60000 }) {
+  if (!Number.isFinite(durationMs) || durationMs < 60000) throw new RangeError('durationMs must be at least 60000');
   const api = window.m11Desktop, video = api.video, session = raw ? api.session() : api.replace({ observe: true });
   if (session.runtime || session.gpu || session.snapshot().pending) throw Error('Recorder must precede GPU setup');
   if (raw) { session.destroy(); document.querySelector('#empty').remove(); api.canvas.hidden = true; }
@@ -223,7 +224,7 @@ export function installRecorder({ raw }) {
     phase = 'finished'; detachWarm(); clearTimeout(timer);
     if (callback !== null) video.cancelVideoFrameCallback(callback); callback = null;
     record.stopAt = performance.now(); record.after = environment(); record.qualityAfter = quality();
-    record.complete = reason === 'timer' && record.startAt !== null && record.stopAt - record.startAt >= 60000;
+    record.complete = reason === 'timer' && record.startAt !== null && record.stopAt - record.startAt >= durationMs;
     if (reason !== 'timer') record.errors.push(reason);
     rejectWarm?.(Error(reason));
     finishPromise = (async () => {
@@ -266,12 +267,12 @@ export function installRecorder({ raw }) {
     start() {
       const now = performance.now();
       if (phase !== 'warming' || stableAt === null || now - stableAt < 5000 || now - record.playAt > 9000 || !available() ||
-        (!raw && (!neural() || driver !== session.runtime || !lastSample || now - lastSample.resolvedAt > 500)) || video.duration - video.currentTime < 60.5) throw Error('No bounded five-second actual warmup');
+        (!raw && (!neural() || driver !== session.runtime || !lastSample || now - lastSample.resolvedAt > 500)) || video.duration - video.currentTime < durationMs / 1000 + 0.5) throw Error('No bounded five-second actual warmup');
       detachWarm(); record.before = environment(); record.qualityBefore = quality();
       if (!raw) api.diagnostics.begin();
       record.startAt = raw ? performance.now() : api.diagnostics.startAt;
       phase = 'observing';
-      const result = new Promise((done, reject) => { timer = setTimeout(() => { stop('timer').then(done, reject); }, 60000); });
+      const result = new Promise((done, reject) => { timer = setTimeout(() => { stop('timer').then(done, reject); }, durationMs); });
       if (raw) callback = video.requestVideoFrameCallback(frame);
       return result;
     },
@@ -318,7 +319,7 @@ function nativeState({ app, BrowserWindow, screen }) {
 }
 export function analyzeArm(record, spec) {
   const data = record.observation;
-  const performance = spec.raw ? analyzeRaw(data, { fps: spec.fps }) : analyzePlayback(data, { fps: spec.fps, requireNeural: true, minDurationMs: 60000 });
+  const performance = spec.raw ? analyzeRaw(data, { fps: spec.fps, minDurationMs: spec.minDurationMs ?? 60000 }) : analyzePlayback(data, { fps: spec.fps, requireNeural: true, minDurationMs: spec.minDurationMs ?? 60000 });
   const before = data?.before, after = data?.after, native = record.nativeBefore, last = record.nativeAfter;
   const criteria = { complete: data?.complete === true, errors: record.errors?.length === 0 && data?.errors?.length === 0,
     warmup: finite(record.warm?.stableAt) && record.warm.readyAt - record.warm.stableAt >= 5000 && data?.startAt - record.warm.playAt <= 9000,

@@ -33,6 +33,37 @@ describe('M11 diagnostic pipeline ownership', () => {
   });
 });
 
+describe('M11 conditional soak apparatus', () => {
+  function soakCheck(source: string) {
+    execFileSync(process.execPath, ['--input-type=module', '-e', `
+      import assert from 'node:assert/strict';
+      ${source}
+    `], { cwd: new URL('../', import.meta.url), encoding: 'utf8', timeout: 15000 });
+  }
+
+  it('validates long media schema, exact bytes/hash, dimensions, cadence and containment', () => soakCheck(`
+    import {mkdtempSync,mkdirSync,writeFileSync,symlinkSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {createHash} from 'node:crypto';
+    import {validateLongMediaManifest,soakOutput,SOAK_ARMS,SOAK_DURATION_MS} from './tools/m11/soak.mjs';
+    const root=mkdtempSync(join(tmpdir(),'m11-soak-')),path=join(root,'.cache/m11/replay-60.mp4');mkdirSync(join(root,'.cache/m11'),{recursive:true});writeFileSync(path,'long-media');
+    const sha256=createHash('sha256').update('long-media').digest('hex'),manifest={schema:'aethervsr.m11.long-media/1',path:'.cache/m11/replay-60.mp4',seconds:610,fps:60,width:1280,height:720,frames:36600,bytes:10,sha256};
+    assert.equal(validateLongMediaManifest(manifest,'.cache/m11/replay-60.mp4',root).durationMs,610000);
+    for(const mutate of [value=>value.seconds=609,value=>value.frames--,value=>value.fps=30,value=>value.width=1920,value=>value.bytes++,value=>value.sha256='0'.repeat(64),value=>value.schema='wrong']){const bad=structuredClone(manifest);mutate(bad);assert.throws(()=>validateLongMediaManifest(bad,'.cache/m11/replay-60.mp4',root));}
+    assert.throws(()=>validateLongMediaManifest(manifest,'.cache/m11/missing.mp4',root));assert.throws(()=>validateLongMediaManifest({...manifest,durationSeconds:609.9},'.cache/m11/replay-60.mp4',root));
+    symlinkSync(path,join(root,'.cache/m11/link.mp4'));assert.throws(()=>validateLongMediaManifest(manifest,'.cache/m11/link.mp4',root));
+    for(const value of ['.cache/m11','../escape','.cache/m11/../escape'])assert.throws(()=>soakOutput(value,root));
+    assert.deepEqual(SOAK_ARMS.map(row=>row.id),['raw60-soak','neural60-soak']);assert.equal(SOAK_ARMS[0].raw,true);assert.equal(SOAK_ARMS[1].raw,false);assert.equal(SOAK_DURATION_MS,600000);rmSync(root,{recursive:true});
+  `));
+
+  it('rejects changed short arm artifacts and preserves the 600-second recorder boundary', () => soakCheck(`
+    import {readFileSync} from 'node:fs';import {runInNewContext} from 'node:vm';import {verifyShortSoakPrerequisites,SOAK_DURATION_MS} from './tools/m11/soak.mjs';import {installRecorder} from './tools/m11/playback.mjs';
+    const report=JSON.parse(readFileSync('.cache/m11/playback-01/result.json','utf8'));const current=report.sourceBefore.commit;
+    assert.equal(verifyShortSoakPrerequisites(report,current,report.sourceBefore.commit,args=>args[0]==='merge-base'?'':'' ).runnerCommit,current);
+    for(const mutate of [value=>value.arms[0].analysis.sha256='0'.repeat(64),value=>value.sourceBefore.commit='0'.repeat(40),value=>value.packageBefore.payloadSha256='0'.repeat(64)]){const bad=structuredClone(report);mutate(bad);assert.throws(()=>verifyShortSoakPrerequisites(bad,current,null,args=>''));}
+    let now=0,serial=0,tick;const timers=new Map(),input={addEventListener(){},removeEventListener(){}},video={currentTime:0,duration:605.5,videoWidth:1280,videoHeight:720,playbackRate:1,muted:false,volume:1,paused:true,ended:false,error:null,loop:false,play(){this.paused=false;return Promise.resolve();},pause(){this.paused=true;},load(){},addEventListener(){},removeEventListener(){},getVideoPlaybackQuality(){return{creationTime:now,totalVideoFrames:1,droppedVideoFrames:0};},requestVideoFrameCallback(){return 1;},cancelVideoFrameCallback(){},removeAttribute(){},getAttribute(){return null;}};
+    const session={runtime:null,gpu:null,destroy(){this.runtime=null;this.gpu=null;video.pause();},snapshot(){return{pending:false,resources:{devices:0,pipelines:0,drivers:0,callbacks:0,objectUrls:0},cleanupErrors:[]};}};const empty={remove(){}};const sandbox={performance:{now:()=>now},addEventListener(){},removeEventListener(){},document:{visibilityState:'visible',hasFocus:()=>true,querySelector:selector=>selector==='#file'?input:empty,addEventListener(){},removeEventListener(){}},innerWidth:1280,innerHeight:720,outerWidth:1280,outerHeight:720,screenX:0,screenY:0,devicePixelRatio:1,screen:{width:1280,height:720},navigator:{userAgent:'fake'},setTimeout:(fn,delay)=>{const id=++serial;timers.set(id,{fn,at:now+delay});return id;},clearTimeout:id=>timers.delete(id),setInterval:fn=>{tick=fn;return 99;},clearInterval(){},crypto:{subtle:{digest:async()=>new Uint8Array(32)}}};sandbox.window=sandbox;sandbox.m11Desktop={video,canvas:{hidden:false,width:1280,height:720},session:()=>session};runInNewContext('('+installRecorder.toString()+')({raw:true,durationMs:600000})',sandbox);const recorder=sandbox.m11Playback,warmer=recorder.warm();tick();now=5000;tick();await warmer;const run=recorder.start();now=605000;for(const [id,timer] of [...timers])if(timer.at<=now){timers.delete(id);timer.fn();}const observation=await run;assert.equal(observation.complete,true);assert.equal(observation.stopAt-observation.startAt,600000);recorder.cleanup();
+  `));
+});
+
 function check(source: string) {
   const output = execFileSync(process.execPath, ['--input-type=module', '-e', `
     import assert from 'node:assert/strict';
