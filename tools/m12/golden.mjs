@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { join, relative, resolve } from 'node:path';
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const BUILD = '.cache/m12/stage-golden-app';
-const MODEL = 'd76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a';
+const MODEL_BYTES = 'd76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a';
+const MODEL_FILE_SHA = '9154d9490b02d8fdf136edd990217cfb6f0e9956ed928da7179d7781832c8e02';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = args => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
 const waitForObservation = async (observe, timeout = 12000) => {
@@ -15,7 +16,7 @@ const waitForObservation = async (observe, timeout = 12000) => {
   throw new Error('Stage golden observation deadline');
 };
 export const STAGE_NAMES = Object.freeze(['stem', 'body.0', 'body.1', 'head', 'output']);
-export function validateGoldenEvidence(value, modelSha = MODEL) {
+export function validateGoldenEvidence(value, modelSha = MODEL_FILE_SHA) {
   assert.equal(value?.schema, 'aethervsr.m12.1.stage-golden/1');
   assert.equal(value.outcome, 'PASS'); assert.equal(value.modelSha256, modelSha);
   assert(value.adapter && value.adapter.fallbackAdapter === false);
@@ -51,7 +52,7 @@ export async function runGolden(directory = '.cache/m12/stage-golden-01') {
       return value && value !== 'pending' ? value : null;
     }));
     const result = JSON.parse(raw); validateGoldenEvidence(result);
-    const envelope = { schema: 'aethervsr.m12.1.stage-golden-envelope/1', sourceCommit: git(['rev-parse', 'HEAD']), modelSha256: MODEL,
+    const envelope = { schema: 'aethervsr.m12.1.stage-golden-envelope/1', sourceCommit: git(['rev-parse', 'HEAD']), modelSha256: model.sha256, modelBytesSha256: MODEL_BYTES,
       electron: JSON.parse(readFileSync(join(ROOT, 'node_modules/electron/package.json'))).version,
       media: 'not applicable: stage graph uses committed golden input', packageSha256: built.provenance.payloadSha256,
       result, resultSha256: digest(Buffer.from(JSON.stringify(result))) };
