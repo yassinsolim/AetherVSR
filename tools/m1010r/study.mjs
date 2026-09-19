@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { openNativeChrome } from '../m9-browser.mjs';
 import { nativeWindow } from '../m105-accounting.mjs';
 import { environment } from '../m1010/study.mjs';
-import { ROOT, DEFAULT_EXTENSION, DEFAULT_RI_EXTENSION, PROVENANCE_FILE, cachePath, digest, git, verifyBuild, verifyReference } from './build.mjs';
+import { ROOT, DEFAULT_EXTENSION, DEFAULT_RI_EXTENSION, PROVENANCE_FILE, cachePath, cachePaths, digest, git, verifyBuild, verifyReference, verifyReferences as verifyArtifactReferences } from './build.mjs';
 
 export const FROZEN_BASELINE = '5b1a313e1d603b46471aebb70594e044a67d44d6';
 export const RI_FROZEN_BASELINE = 'f0c3c49fd6e01746ebc232850455da14ac347c63';
@@ -72,9 +72,14 @@ function writeArtifact(directory, name, value) {
 }
 
 function verifyReferences(value) {
-  if (!value || typeof value !== 'object') return;
-  if (typeof value.path === 'string' && 'sha256' in value && 'bytes' in value) verifyReference(value);
-  for (const child of Object.values(value)) verifyReferences(child);
+  const references = [];
+  const collect = value => {
+    if (!value || typeof value !== 'object') return;
+    if (typeof value.path === 'string' && 'sha256' in value && 'bytes' in value) references.push(value);
+    for (const child of Object.values(value)) collect(child);
+  };
+  collect(value);
+  verifyArtifactReferences(references);
 }
 
 export function withRIRepeatability(id, analysis, previous) {
@@ -131,35 +136,45 @@ export function openCalibrationCheckpoint(directory, pin, cases = pin.studyVersi
   assert.deepEqual(state.order, ids); assert.equal(state.requiredNextManualAction, null);
   assert(['READY', 'RUNNING', 'COMPLETE', 'STOPPED'].includes(state.status));
   assert.deepEqual(state.completedExperimentIds, ids.slice(0, state.completedExperimentIds.length), 'Completed IDs must be a fixed-order prefix');
-  const readEnvelope = (id, analysis = false) => {
-    assert(ids.includes(id), 'Unknown calibration ID');
-    const path = cachePath(join(root, `${id}${analysis ? '-analysis' : ''}.json`));
-    const envelope = JSON.parse(readFileSync(path, 'utf8'));
-    assert.equal(envelope.id, id); assert.deepEqual(envelope.pin, pin);
-    verifyReferences(envelope.result);
-    return { envelope, reference: reference(path) };
+  const envelopeKey = (id, analysis = false) => `${id}${analysis ? '-analysis' : ''}`;
+  const readEnvelopes = entries => {
+    const paths = cachePaths(entries.map(([id, analysis]) => {
+      assert(ids.includes(id), 'Unknown calibration ID');
+      return join(root, `${envelopeKey(id, analysis)}.json`);
+    }));
+    const envelopes = new Map(entries.map(([id, analysis], index) => {
+      const path = paths[index], bytes = readFileSync(path), envelope = JSON.parse(bytes.toString('utf8'));
+      assert.equal(envelope.id, id); assert.deepEqual(envelope.pin, pin);
+      return [envelopeKey(id, analysis), { envelope,
+        reference: { path: relative(ROOT, path), bytes: bytes.length, sha256: digest(bytes) } }];
+    }));
+    verifyReferences([...envelopes.values()].map(value => value.envelope.result));
+    return envelopes;
   };
+  const readEnvelope = (id, analysis = false) => readEnvelopes([[id, analysis]]).get(envelopeKey(id, analysis));
   const save = () => {
     const temporary = join(root, `.state-${randomUUID()}.json`);
     writeFileSync(temporary, json(state), { flag: 'wx' }); renameSync(temporary, statePath);
   };
-  const registerRaw = id => {
-    const raw = readEnvelope(id);
+  const registerRaw = (id, opening = null) => {
+    const raw = opening === null ? readEnvelope(id) : opening.get(envelopeKey(id));
     if (state.rawArtifacts[id]) assert.deepEqual(raw.reference, state.rawArtifacts[id], 'Immutable raw JSON changed');
     state.rawArtifacts[id] = raw.reference;
     return raw;
   };
+  const opening = readEnvelopes([...Object.keys(state.rawArtifacts).map(id => [id, false]),
+    ...Object.keys(state.analysisArtifacts).map(id => [id, true])]);
   for (const id of Object.keys(state.rawArtifacts)) {
     assert(state.completedExperimentIds.includes(id) || state.activeExperimentId === id);
-    registerRaw(id);
+    registerRaw(id, opening);
   }
   for (const id of state.completedExperimentIds) {
     assert(state.rawArtifacts[id], 'Missing completed raw reference');
-    const raw = registerRaw(id).envelope.result;
+    const raw = registerRaw(id, opening).envelope.result;
     const interrupted = state.interruption?.path === relative(ROOT, join(root, `${id}-interrupted.json`));
     if (!['NOT_RUN', 'INTERRUPTED'].includes(raw.outcome) && !interrupted) assert(state.analysisArtifacts[id], 'Missing completed analysis');
     if (state.analysisArtifacts[id]) {
-      const analysis = readEnvelope(id, true);
+      const analysis = opening.get(envelopeKey(id, true));
       assert.deepEqual(analysis.reference, state.analysisArtifacts[id], 'Immutable analysis changed');
       assert.deepEqual(analysis.envelope.result.raw, state.rawArtifacts[id]);
       assert(['PASS', 'FAIL', 'UNRESOLVED'].includes(analysis.envelope.result.outcome));
@@ -168,15 +183,15 @@ export function openCalibrationCheckpoint(directory, pin, cases = pin.studyVersi
   }
   for (const id of Object.keys(state.analysisArtifacts)) {
     assert(state.completedExperimentIds.includes(id) || state.activeExperimentId === id);
-    assert.deepEqual(readEnvelope(id, true).reference, state.analysisArtifacts[id]);
+    assert.deepEqual(opening.get(envelopeKey(id, true)).reference, state.analysisArtifacts[id]);
   }
-  const analyses = () => {
+  const analysesFrom = envelopes => {
     const previous = [];
     for (const id of state.completedExperimentIds) {
-      const raw = readEnvelope(id);
+      const raw = envelopes.get(envelopeKey(id));
       assert.deepEqual(raw.reference, state.rawArtifacts[id], 'Immutable raw JSON changed');
       if (!state.analysisArtifacts[id]) continue;
-      const analysis = readEnvelope(id, true);
+      const analysis = envelopes.get(envelopeKey(id, true));
       assert.deepEqual(analysis.reference, state.analysisArtifacts[id], 'Immutable analysis changed');
       assert.deepEqual(analysis.envelope.result.raw, raw.reference);
       if (pin.studyVersion === RI_STUDY_VERSION) validateRIAnalysis(id, analysis.envelope.result, previous);
@@ -184,7 +199,9 @@ export function openCalibrationCheckpoint(directory, pin, cases = pin.studyVersi
     }
     return previous;
   };
-  if (pin.studyVersion === RI_STUDY_VERSION) analyses();
+  const analyses = () => analysesFrom(readEnvelopes(state.completedExperimentIds.flatMap(id =>
+    state.analysisArtifacts[id] ? [[id, false], [id, true]] : [[id, false]])));
+  if (pin.studyVersion === RI_STUDY_VERSION) analysesFrom(opening);
   verifyReferences(state.interruption); verifyReferences(state.runnerError);
   for (const id of ids) if (!state.completedExperimentIds.includes(id) && state.activeExperimentId !== id) {
     assert(!readdirSync(root).some(name => name === `${id}.json` || name.startsWith(`${id}-`)), 'Unregistered attempt artifacts cannot be reused');

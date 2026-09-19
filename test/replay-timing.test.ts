@@ -8,6 +8,96 @@ const check = (body: string): void => { execFileSync(process.execPath, ['--input
   ${body}
 `], { encoding: 'utf8' }); };
 
+describe('RI batched artifact guard', () => {
+  const guardCheck = (body: string) => check(`
+    import {writeFileSync,symlinkSync} from 'node:fs';
+    import {tmpdir} from 'node:os';
+    import {join,resolve} from 'node:path';
+    import {pathToFileURL} from 'node:url';
+    import {execFileSync} from 'node:child_process';
+    import {createRequire} from 'node:module';
+    import {transformSync} from 'esbuild';
+    const root=mkdtempSync(join(tmpdir(),'ri-guard-'));
+    const calls=[];let failGit=false,gitResponse=null;
+    try {
+      const environment={...process.env,GIT_CONFIG_NOSYSTEM:'1',GIT_CONFIG_GLOBAL:join(root,'empty-config')};
+      for(const key of Object.keys(environment))if(key.startsWith('GIT_')&&!['GIT_CONFIG_NOSYSTEM','GIT_CONFIG_GLOBAL'].includes(key))delete environment[key];
+      writeFileSync(environment.GIT_CONFIG_GLOBAL,'');
+      execFileSync('git',['init','--quiet',root],{env:environment});
+      mkdirSync(join(root,'.cache/m1010r'),{recursive:true});
+      writeFileSync(join(root,'.gitignore'),'.cache/m1010r/*\\n!.cache/m1010r/unignored.json\\n');
+      const source=readFileSync('tools/m1010r/build.mjs','utf8');
+      const compiled=transformSync(source.slice(0,source.indexOf('\\nif (process.argv[1]')),{format:'cjs',define:{'import.meta.url':JSON.stringify(pathToFileURL(join(root,'tools/m1010r/build.mjs')).href)}}).code;
+      const require=createRequire(process.cwd()+'/package.json'),module={exports:{}};
+      new Function('require','module','exports','process',compiled)(name=>{
+        if(name==='../build-extension.mjs')return {MODEL_SHA256:'synthetic',verifyProductionModel(){}};
+        if(name==='node:child_process')return {execFileSync(file,args,options){
+          calls.push({file,args,input:options?.input});
+          if(failGit)throw Object.assign(Error('Git check failed'),{status:128});
+          if(gitResponse!==null)return gitResponse;
+          return execFileSync(file,args,{...options,env:environment});
+        }};
+        return require(name);
+      },module,module.exports,{argv:[]});
+      const {cachePath,cachePaths,verifyReference,digest}=module.exports;
+      const ignored='.cache/m1010r/ignored.json',other='.cache/m1010r/other.json',unignored='.cache/m1010r/unignored.json';
+      ${body}
+    } finally {rmSync(root,{recursive:true,force:true});}
+  `);
+
+  it('batches every distinct artifact without accepting a partially ignored set', () => guardCheck(`
+    const paths=[ignored,other,'.cache/m1010r/nested/evidence.json'];
+    for(const path of paths)execFileSync('git',['check-ignore','--quiet','--',path],{cwd:root,env:environment});
+    const before=calls.length;
+    assert.deepEqual(cachePaths(paths),paths.map(path=>resolve(root,path)));
+    assert.equal(calls.length-before,1,'One Git process for a known artifact set');
+    assert.equal(calls.at(-1).input,paths.join('\\0')+'\\0');
+    assert.throws(()=>cachePaths([ignored,unignored]),/ignored/i);
+    assert.equal(cachePath(ignored),resolve(root,ignored));
+    assert.throws(()=>cachePath(unignored));
+  `));
+
+  it('rechecks policy and Git failures without reusing another path result', () => guardCheck(`
+    assert.equal(cachePath(ignored),resolve(root,ignored));
+    writeFileSync(join(root,'.gitignore'),'.cache/m1010r/*\\n!.cache/m1010r/ignored.json\\n');
+    assert.throws(()=>cachePath(ignored));
+    assert.equal(cachePath(other),resolve(root,other));
+    failGit=true;
+    assert.throws(()=>cachePath(other),/Git check failed/);
+    assert.throws(()=>cachePaths([other,unignored]),/Git check failed/);
+    failGit=false;
+    assert.equal(cachePath(other),resolve(root,other));
+  `));
+
+  it('preserves path and provenance rejection before accepting batched artifacts', () => guardCheck(`
+    const before=calls.length;
+    for(const path of ['../escape',root,'.cache/m1010r','.cache/m1010r/../../outside',ignored+'\\0'+other,null,42])assert.throws(()=>cachePaths([ignored,path]));
+    assert.equal(calls.length,before,'Unsafe sets must not reach Git');
+    mkdirSync(join(root,'.cache/m1010r/target'));
+    symlinkSync(join(root,'.cache/m1010r/target'),join(root,'.cache/m1010r/alias'),'dir');
+    assert.throws(()=>cachePaths([ignored,'.cache/m1010r/alias/evidence.json']),/Symlinked/);
+    writeFileSync(join(root,ignored),'evidence');
+    const reference={path:ignored,bytes:8,sha256:digest(Buffer.from('evidence'))};
+    assert.equal(verifyReference(reference).toString(),'evidence');
+    for(const change of [{bytes:7},{sha256:'0'.repeat(64)},{path:unignored},{path:'../outside'},{bytes:-1}])assert.throws(()=>verifyReference({...reference,...change}));
+  `));
+
+  it('preserves tracked-file rules and rejects incomplete or malformed Git responses', () => guardCheck(`
+    const before=calls.length;assert.deepEqual(cachePaths([]),[]);assert.equal(calls.length,before);
+    assert.deepEqual(cachePaths([ignored,resolve(root,ignored)]),[resolve(root,ignored),resolve(root,ignored)]);
+    assert.equal(calls.at(-1).input,ignored+'\\0');
+    for(const output of ['',ignored,other+'\\0',ignored+'\\0'+other+'\\0']){
+      gitResponse=output;assert.throws(()=>cachePath(ignored));
+    }
+    gitResponse=null;
+    writeFileSync(join(root,ignored),'tracked');
+    execFileSync('git',['add','-f','--',ignored],{cwd:root,env:environment});
+    assert.throws(()=>cachePaths([other,ignored]),/ignored/i);
+    const spaced='.cache/m1010r/space and\\nnewline.json';
+    assert.equal(cachePath(spaced),resolve(root,spaced));
+  `));
+});
+
 describe('M10.10R digital timing ground truth', () => {
   it('keeps RI partial render coverage distinct from target overshoot and discontinuity magnitude', () => check(`
     const {renderEvidence,INSTRUMENT_VERDICT}=await import('./tools/m1010r/instrument_report.mjs');
@@ -103,6 +193,37 @@ describe('M10.10R immutable calibration checkpoints', () => {
     mkdirSync('.cache/m1010r',{recursive:true});mkdirSync(directory);
     try { ${body} } finally {rmSync(directory,{recursive:true,force:true});}
   `); };
+
+  it('batches fresh checkpoint reads and materially reduces Git subprocesses', () => checkpointCheck(`
+    const {default:childProcess}=await import('node:child_process');
+    const {syncBuiltinESMExports}=await import('node:module');
+    const {withRIRepeatability,RI_CASES,RI_STUDY_VERSION}=await import('./tools/m1010r/study.mjs');
+    const execute=childProcess.execFileSync,calls=[];let failGit=false;
+    childProcess.execFileSync=function(file,args,...options){
+      if(file==='git'&&args[0]==='check-ignore'){
+        calls.push(args);if(failGit)throw Error('Injected Git failure');
+      }
+      return execute.call(this,file,args,...options);
+    };
+    syncBuiltinESMExports();
+    try {
+      const riPin={...pin,studyVersion:RI_STUDY_VERSION},start=performance.now();
+      const checkpoint=openCalibrationCheckpoint(directory,riPin);
+      for(const entry of RI_CASES){checkpoint.begin(entry.id);checkpoint.raw(entry.id,{outcome:'RECORDED'});
+        checkpoint.complete(entry.id,withRIRepeatability(entry.id,{outcome:'PASS',summary:{medianDigitalPhaseMs:0}},checkpoint.analyses()));}
+      const reopenStart=calls.length;
+      const reopened=openCalibrationCheckpoint(directory,riPin);
+      assert.equal(calls.length-reopenStart,3,'One root, one envelope batch, one reference batch');
+      assert(calls.length<172/2,'Diagnostic baseline: 172 launches for four checkpoints and reopen');
+      console.log(JSON.stringify({probe:'checkpoint-ignore-launches',gitCalls:calls.length,milliseconds:performance.now()-start}));
+      const readStart=calls.length;
+      assert.equal(reopened.analyses().length,4);
+      assert.equal(calls.length-readStart,2,'Every analysis read rechecks both batches');
+      failGit=true;assert.throws(()=>reopened.analyses(),/Injected Git failure/);failGit=false;
+      const file=directory+'/ri-60-2.json',before=readFileSync(file);writeFileSync(file,Buffer.concat([before,Buffer.from(' ')]));
+      assert.throws(()=>reopened.analyses(),/Artifact changed|Immutable raw JSON changed/);
+    } finally {childProcess.execFileSync=execute;syncBuiltinESMExports();}
+  `));
 
   const runnerCheck = (body: string) => checkpointCheck(`
     const {transformSync}=await import('esbuild'),{createRequire}=await import('node:module');

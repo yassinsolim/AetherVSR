@@ -35,7 +35,8 @@ export function verifyInstrumentInputs(inputs) {
   }
 }
 
-export function cachePath(path) {
+function canonicalCachePath(path) {
+  assert(typeof path === 'string' && !path.includes('\0'), 'Invalid artifact path');
   const absolute = resolve(ROOT, path), cache = join(ROOT, '.cache/m1010r');
   assert(absolute.startsWith(cache + sep), 'Artifacts must stay below ignored .cache/m1010r');
   let current = ROOT;
@@ -43,16 +44,41 @@ export function cachePath(path) {
     current = join(current, part);
     if (existsSync(current)) assert(!lstatSync(current).isSymbolicLink(), 'Symlinked artifact paths are forbidden');
   }
-  git(['check-ignore', '--quiet', '--', relative(ROOT, absolute)]);
   return absolute;
 }
 
+export function cachePaths(paths) {
+  assert(Array.isArray(paths), 'Artifact paths must be an array');
+  const absolute = paths.map(canonicalCachePath);
+  const names = [...new Set(absolute.map(path => relative(ROOT, path)))];
+  if (!names.length) return absolute;
+  const output = execFileSync('git', ['check-ignore', '--stdin', '-z'], {
+    cwd: ROOT, encoding: 'utf8', input: names.join('\0') + '\0',
+  });
+  assert(output.endsWith('\0'), 'Malformed Git ignore response');
+  assert.deepEqual(new Set(output.slice(0, -1).split('\0')), new Set(names), 'Every artifact must be ignored');
+  return absolute;
+}
+
+export function cachePath(path) {
+  return cachePaths([path])[0];
+}
+
+export function verifyReferences(references) {
+  const paths = cachePaths(references.map(reference => {
+    assert(reference && typeof reference.path === 'string');
+    assert(Number.isSafeInteger(reference.bytes) && reference.bytes >= 0 && /^[a-f0-9]{64}$/.test(reference.sha256));
+    return reference.path;
+  }));
+  return references.map((reference, index) => {
+    const bytes = readFileSync(paths[index]);
+    assert.deepEqual(fileInfo(bytes), { bytes: reference.bytes, sha256: reference.sha256 }, `Artifact changed: ${reference.path}`);
+    return bytes;
+  });
+}
+
 export function verifyReference(reference) {
-  assert(reference && typeof reference.path === 'string');
-  assert(Number.isSafeInteger(reference.bytes) && reference.bytes >= 0 && /^[a-f0-9]{64}$/.test(reference.sha256));
-  const bytes = readFileSync(cachePath(reference.path));
-  assert.deepEqual(fileInfo(bytes), { bytes: reference.bytes, sha256: reference.sha256 }, `Artifact changed: ${reference.path}`);
-  return bytes;
+  return verifyReferences([reference])[0];
 }
 
 export function verifyMediaManifest(input = DEFAULT_MEDIA) {
