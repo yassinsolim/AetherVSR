@@ -503,7 +503,7 @@ in for measured M5 qualification. Closing documentation-only publication must
 also pass exact-final-HEAD gate/fusion/native-metal CI with clean HEAD equal
 origin/main; the exact closing run is recorded in the publication handoff.
 
-Closing tracked tree: 55,359,240 bytes, leaving 3,361,016 bytes below
+Closing tracked tree: 55,328,779 bytes, leaving 3,391,477 bytes below
 the unchanged 58,720,256-byte cap.
 
 With the retained local evidence, reproduce the complete result without timing:
