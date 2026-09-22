@@ -356,8 +356,9 @@ All requested repairs were validated before the affected gate proceeded:
 Re-reviews passed with no remaining actionable finding in those scopes.
 Reviewers did not claim to execute the GPU tests. The main runner executed the
 tests, measurements and independent numeric recomputation. Final documentation
-review also accepted the scoped qualification verdict. Exact publication CI
-remains the final publication check at this draft.
+review also accepted the scoped qualification verdict, and a scoped re-review
+accepted the hosted-compiler compatibility fixes. Exact code-publication CI
+passed all three jobs as recorded below.
 
 ## 20. Phase-1 verdict
 
@@ -434,8 +435,22 @@ at that repair passed Linux gate/fusion and native release compilation, then
 failed test compilation on an implicitly typed expected value. The runner used
 Swift 6.1.2, Xcode 16.4 build 16F6, target arm64 macOS 15. Explicit Float16
 operands repair that test-only issue; all 13 local native tests pass afterward.
-Both failed publication runs remain recorded. Replacement exact-HEAD CI is
-pending; no performance rerun or new performance result is claimed.
+Both failed publication runs remain recorded. Replacement code commit
+`4d8d8e219e15a23c8fa636651e80225b1e7a1fb9` passed exact CI
+[35766779995](https://github.com/yassinsolim/AetherVSR/actions/runs/35766779995):
+gate, fusion and native-metal all succeeded. Hosted Swift 6.1.2 compiled the
+release target and reported nine CPU tests passed with four explicit physical
+GPU skips. The clean-clone M5 rerun passed all 13 tests. That code-ready tree
+contains 55,026,132 bytes; final documentation/evidence metadata does not alter
+the verified code. No performance rerun or new performance result is claimed.
+
+The closing documentation-only commit is also subject to exact-HEAD CI before
+handoff. Its run identity and clean HEAD/origin equality are recorded in the
+publication handoff; the versioned CI record above identifies the tested code
+without claiming a self-referential commit hash.
+
+Closing tracked tree: 55,029,635 bytes, with 3,690,621 bytes of headroom
+under the unchanged 58,720,256-byte cap.
 
 ## 22. Recommendation for Phase 2
 
