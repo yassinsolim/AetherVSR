@@ -351,6 +351,7 @@ All requested repairs were validated before the affected gate proceeded:
 - Early setup failures lacked an envelope: added tested immutable failure recording.
 - The evidence checker trusted some descriptors/source copies: rehashed actual native/MSL/WebGPU/timing artifacts and rejected contradictory pins.
 - The first publication CI compiler could not type-check the nested CPU tiling expression: replaced it with explicit bounded loops and checked the entire 720p tensor against its measured byte hash.
+- Hosted Swift 6.1.2 then inferred a test's expected arithmetic as Int: made the Float16 operand types explicit without changing its expected value or assertion.
 
 Re-reviews passed with no remaining actionable finding in those scopes.
 Reviewers did not claim to execute the GPU tests. The main runner executed the
@@ -423,8 +424,18 @@ builder. That failed run is retained. The scoped repair changes only fixture
 construction, adds its full input-hash invariant, and logs the hosted toolchain;
 it does not change Metal kernels, model semantics, acceptance limits or timing.
 Local release/native tests and unchanged raw-evidence reproduction pass after
-the repair. Replacement exact-HEAD CI remains pending; no performance rerun
-or new performance result is claimed.
+the repair. Its clean source `e1b6fa306d18532b87f48f24d54d7147a07a7500` also
+reproduced both precision golden/parity reports and all tensor/RGBA artifacts
+byte-for-byte against the measured executable. Clean-clone release, CPU and
+physical GPU checks passed.
+
+CI [35766108065](https://github.com/yassinsolim/AetherVSR/actions/runs/35766108065)
+at that repair passed Linux gate/fusion and native release compilation, then
+failed test compilation on an implicitly typed expected value. The runner used
+Swift 6.1.2, Xcode 16.4 build 16F6, target arm64 macOS 15. Explicit Float16
+operands repair that test-only issue; all 13 local native tests pass afterward.
+Both failed publication runs remain recorded. Replacement exact-HEAD CI is
+pending; no performance rerun or new performance result is claimed.
 
 ## 22. Recommendation for Phase 2
 

@@ -141,7 +141,7 @@ final class MetalTests: XCTestCase {
         }
         let grouped = execute([Float16](repeating: 1, count: 8), weights: [Float16](repeating: 1 / 2048, count: 8),
                               bias: [1], width: 1, height: 1, channels: 8, kernel: 1)
-        XCTAssertEqual(grouped, [1 + 1 / 256])
+        XCTAssertEqual(grouped, [Float16(1) + Float16(1) / Float16(256)])
         var scalar = Float16(1)
         for _ in 0..<8 { scalar += 1 / 2048 }
         XCTAssertNotEqual(grouped, [scalar])
