@@ -535,7 +535,7 @@ replay qualification or M10.11. [Instrument report](docs/M10.10RI-REPORT.md), AD
 
 ---
 
-## Milestone 11 - Desktop-Owned Player MVP [AUTHORIZED]
+## Milestone 11 - Desktop-Owned Player MVP [DESKTOP PLAYER MVP READY]
 
 The owner selected a desktop-owned player as the primary product surface, first
 on macOS / Apple Silicon using Electron and the unchanged production WebGPU core.
@@ -546,9 +546,12 @@ eligible ten-minute soak. No browser product, capture, RI.2 or overlay work.
 The extension and historical outcomes remain frozen. ADR-0058 records the pivot
 and owner-approved56MiB storage cap before implementation.
 
+The published [M11 report](docs/M11-REPORT.md) records readiness within its
+macOS local-file scope. Its measurements and original failed attempts remain frozen.
+
 ---
 
-## Milestone 12 - Cross-Vendor Desktop Validation [AUTHORIZED / IN PROGRESS]
+## Milestone 12 - Cross-Vendor Desktop Validation [PARTIAL]
 
 The owner authorized validation after M11 reached DESKTOP PLAYER MVP READY. M12
 uses one binding source, Electron 44.4.1, the unchanged production model/core and
@@ -557,11 +560,28 @@ hardware as available. Missing physical hardware is NOT_RUN_HARDWARE_UNAVAILABLE
 CI GPUs and software adapters are not substitutes. M12 does not optimize the
 model, redesign the player, expand codecs, or begin distribution work.
 
+M12 closed as [CROSS-VENDOR DESKTOP PARTIAL](docs/M12-REPORT.md). M12.1 closed as
+[CROSS-VENDOR COMPLETION PARTIAL](docs/M12.1-REPORT.md), with Apple M5 PASS and
+NVIDIA/AMD/Intel hardware unavailable. The staged Windows flow is not physical
+Windows qualification. These historical verdicts are unchanged.
+
+---
+
+## Milestone 13 - Native Metal, Phase 1 [INFERENCE QUALIFIED]
+
+The owner-authorized inference-only phase implements the exact production model
+in an isolated Swift/Metal library and CLI. M5 f32/f16 golden, falsification and
+actual WebGPU tensor parity pass at the original tolerances. The fixed unfused
+720p workload is measured, not real-time qualified. No optimization sweep or
+AVFoundation, Core Video, capture, GUI, Core ML or MPSGraph work was performed.
+[Phase-1 report and publication status](docs/M13-PHASE1-METAL.md), ADR-0060.
+Phase 2 requires a separately scoped decision after reviewed publication.
+
 ---
 
 ## Beyond
 
 Explicitly out of scope until the above are done, listed so they are not
 mistaken for near-term plans: compression-artefact removal, temporal
-super-resolution using previous frames, frame interpolation, and an
-Apple-native Core ML / Metal / ANE backend.
+super-resolution using previous frames, frame interpolation, Core ML / ANE,
+and native integration beyond the explicitly authorized Metal inference phase.

@@ -6,6 +6,31 @@ measurement could not be taken, the row says so.
 
 See `AGENTS.md` §2 and §3 for the rules this file exists to enforce.
 
+## M13 Phase 1 - Offline Native Metal
+
+Measured 2026-09-22 on Apple M5 (Mac17,2), 24 GiB, macOS 26.6.2 build 25G83,
+Xcode 27.0 build 27A266a / SDK 27.0 / Swift 6.4. Source
+`f370d6ccac90779aa1028589f08904a5e59dcaf2`. Exact production C16D2, planar
+1280x720 tiled trusted input to 2560x1440 output; no codec, video import,
+drawable, display-refresh or presentation scope. No browser participates in
+native execution. GPU command-buffer timestamps were available for all samples.
+
+| Precision | GPU p50 ms | GPU p95 ms | GPU max ms | Samples | Observation window ms |
+|---|---:|---:|---:|---:|---:|
+| f32 | 83.980375 | 84.548329 | 84.898750 | 60 | 5058.778042 |
+| f16 | 65.852229 | 66.653373 | 67.086625 | 60 | 3970.640292 |
+
+Ten warmups precede each whole-graph series. Each sample brackets all unfused
+convolution/tanh/nearest/residual/clamp/RGBA operations in one completed command
+buffer. Compilation, allocation, upload, CPU readback, decode, ingest and
+presentation are excluded. This is not real-time 720p performance or an
+equivalent-scope comparison with the optimized historical WebGPU pass.
+No tuning followed the slow result. Both precision golden/parity gates and
+post-window finite/range/RGBA checks pass. Separate stage-isolated results,
+their 60-sample windows, raw hashes and limitations are in the
+[22-section report](docs/M13-PHASE1-METAL.md) and
+[compact evidence](results/m13-phase1-metal.json).
+
 ## Benchmark record format
 
 A benchmark result is only meaningful with its environment. Record all of:

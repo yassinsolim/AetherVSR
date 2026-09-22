@@ -3,10 +3,18 @@
 **Primary product direction: AetherVSR Desktop.** M11 is a local-file Electron
 player for macOS / Apple Silicon, reusing the production WebGPU engine, and is
 published as **DESKTOP PLAYER MVP READY**. The browser extension and its results
-below are preserved, not the primary product surface. M12 cross-vendor desktop
-validation is authorized and in progress; it does not broaden the product claim
-until real hardware evidence exists. [Roadmap](ROADMAP.md), ADR-0058 and ADR-0059
-in [DECISIONS.md](DECISIONS.md).
+below are preserved, not the primary product surface. M12 closed as
+**CROSS-VENDOR DESKTOP PARTIAL** and M12.1 as **CROSS-VENDOR COMPLETION PARTIAL**;
+unavailable NVIDIA/AMD/Intel hardware remains unqualified.
+[Roadmap](ROADMAP.md), [M12 report](docs/M12-REPORT.md),
+[M12.1 report](docs/M12.1-REPORT.md).
+
+**M13 Phase 1: METAL INFERENCE QUALIFIED.** The exact production C16D2 model
+passes native M5 f32/f16 golden, falsification and actual WebGPU parity checks.
+This isolated offline engine is not a real-time player: unfused 720p whole-graph
+GPU p50 is 83.98 ms (f32) / 65.85 ms (f16), 60 samples each after ten warmups.
+Production remains WebGPU; no video-ingest, capture or native GUI was added.
+[Full scope, timing windows and publication status](docs/M13-PHASE1-METAL.md).
 
 Real-time 2x neural video super-resolution in the browser, with measured gains
 on selected captured-content and degradation classes. Broad web-video
@@ -23,7 +31,7 @@ proof guards passed local pilots but did not qualify under the fixed cost gates;
 S2 remains research-only. Candidate-dependent public/final acceptance is gated,
 not passed. Independent lifecycle and six exact parity cases are retained with
 their initial failures and scoped rechecks. The former cross-vendor M11 gate is
-historical; current desktop cross-vendor work is M12. The unpacked extension
+historical; desktop cross-vendor results remain partial. The unpacked extension
 does not guarantee synchronized replacement of page video.
 [Full30-section report](docs/M10.7-REPORT.md).
 
