@@ -85,4 +85,49 @@ describe('golden vectors', () => {
       }
     } finally { rmSync(directory, { recursive: true }); }
   `], { cwd: new URL('../', import.meta.url), encoding: 'utf8' }));
+
+  it('independently detects corrupt M13 tensors and timing statistics', () => execFileSync(process.execPath, ['--input-type=module', '-e', `
+    import assert from 'node:assert/strict';
+    import { compareStage, timingSummary, verifyBlob, verifySourceIdentity } from './tools/m13/report.mjs';
+    import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+    import { tmpdir } from 'node:os';
+    import { join } from 'node:path';
+    import { createHash } from 'node:crypto';
+    const directory = mkdtempSync(join(tmpdir(), 'm13-provenance-'));
+    try {
+      const path = join(directory, 'binary'); const bytes = Buffer.from('retained binary bytes');
+      writeFileSync(path, bytes, { flag: 'wx' });
+      const artifact = { path, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') };
+      verifyBlob(artifact);
+      writeFileSync(path, Buffer.from('corrupt')); assert.throws(() => verifyBlob(artifact));
+      rmSync(path); assert.throws(() => verifyBlob(artifact));
+    } finally { rmSync(directory, { recursive: true }); }
+    const sourceCommit = 'f370d6ccac90779aa1028589f08904a5e59dcaf2', sourceTree = 'a'.repeat(40);
+    const provenance = [{ sourceCommit, sourceTree, webgpuBuild: { sourceCommit, sourceDirty: false } },
+      { sourceCommit }, { sourceCommit, sourceTree }, { sourceCommit }];
+    verifySourceIdentity(...provenance);
+    for (const mutate of [value => value[0].sourceCommit = 'bad', value => value[1].sourceCommit = 'bad',
+      value => value[2].sourceCommit = 'bad', value => value[3].sourceCommit = 'bad',
+      value => value[0].webgpuBuild.sourceCommit = 'bad', value => value[0].webgpuBuild.sourceDirty = true,
+      value => value[2].sourceTree = 'bad']) {
+      const wrong = structuredClone(provenance); mutate(wrong); assert.throws(() => verifySourceIdentity(...wrong));
+    }
+    const valid = [0, 0.25, 0.5, 1];
+    assert(compareStage('stem', valid, valid, 2, 2, 1, 0.001).passed);
+    for (const value of [NaN, Infinity, -Infinity, 10]) {
+      const bad = [...valid]; bad[1] = value;
+      const result = compareStage('stem', bad, valid, 2, 2, 1, 0.001);
+      assert.equal(result.passed, false); assert.equal(result.failingElements, 1); assert.equal(result.edgeFailures, 1);
+    }
+    assert.throws(() => compareStage('stem', [], valid, 2, 2, 1, 0.001));
+    assert.throws(() => compareStage('stem', valid, valid, Number.MAX_VALUE, 2, 1, 0.001));
+    const samples = Array.from({ length: 60 }, (_, index) => ({ startSeconds: index + 1, endSeconds: index + 1.5, milliseconds: 500 }));
+    const series = { name: 'synthetic', samples, observationWindowMS: 60000, measuredSamples: 60,
+      status: 'measured', statisticsMS: { p50: 500, p95: 500, max: 500 } };
+    assert.deepEqual(timingSummary(series).statisticsMS, series.statisticsMS);
+    for (const mutate of [value => value.samples.pop(), value => value.samples[0].milliseconds = 0,
+      value => value.samples[0].startSeconds = null, value => value.statisticsMS.p95 = 0, value => value.observationWindowMS = 100]) {
+      const bad = structuredClone(series); mutate(bad); assert.throws(() => timingSummary(bad));
+    }
+  `], { cwd: new URL('../', import.meta.url), encoding: 'utf8' }));
 });
