@@ -1882,3 +1882,22 @@ docs/M13-NATIVE-METAL-ARCHITECTURE.md. No Core Video, AVFoundation,
 ScreenCaptureKit, permissions, UI, Core ML, MPSGraph, signing or distribution
 work belongs to Phase 1. Later integration requires a reviewed, published
 Phase-1 verdict; Metal is not promoted to production by this ADR.
+
+## ADR-0061 - Bounded native Metal execution optimization
+
+**Status:** accepted for owner-authorized M13 Phase 1.5, before kernel changes.
+
+Retain the Phase-1 simple Metal engine and all measured evidence. Add an isolated
+optimized tensor implementation of the identical hash-verified C16D2 graph,
+without changing the public WebGPU pipeline or integrating video. Derived C4
+activation storage, tap-major weights and fused stage execution change internal
+data flow, not the model or its numerical contract. The post-tanh checkpoints and
+prequantized final RGB remain observable in diagnostic mode.
+
+The finite six-candidate matrix, selection rule, thermal policy, two binding runs
+and immutable timing thresholds are preregistered in
+docs/M13-PHASE1.5-OPTIMIZATION-PLAN.md. Existing independently engineered WebGPU
+algorithms inform the MSL design; no external implementation or dependency is
+introduced. Public Metal APIs only. No Core ML/MPSGraph pivot or Phase-2 APIs.
+Only a separately reviewed and published performance verdict can recommend the
+next native integration phase; this ADR does not authorize that integration.
