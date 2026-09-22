@@ -148,9 +148,19 @@ public struct Golden: Decodable {
     }
 
     public func tiledInput(extent: Extent) -> [Float] {
-        (0..<3).flatMap { channel in (0..<extent.pixels).map { pixel in
-            input[channel * width * height + ((pixel / extent.width) % height) * width + (pixel % extent.width) % width]
-        } }
+        var result = [Float](repeating: 0, count: extent.pixels * 3)
+        for channel in 0..<3 {
+            let sourcePlane = channel * width * height
+            let destinationPlane = channel * extent.pixels
+            for row in 0..<extent.height {
+                let sourceRow = sourcePlane + (row % height) * width
+                let destinationRow = destinationPlane + row * extent.width
+                for column in 0..<extent.width {
+                    result[destinationRow + column] = input[sourceRow + column % width]
+                }
+            }
+        }
+        return result
     }
 
     public static func planar(_ interleaved: [Float], width: Int, height: Int, channels: Int) -> [Float] {

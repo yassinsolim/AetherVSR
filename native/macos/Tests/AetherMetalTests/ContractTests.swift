@@ -24,6 +24,9 @@ final class ContractTests: XCTestCase {
             XCTAssertEqual(tiled[channel * extent.pixels + row * extent.width + column],
                 golden.input[channel * golden.width * golden.height + (row % golden.height) * golden.width + column % golden.width])
         } } }
+        let fullSize = golden.tiledInput(extent: try Extent(width: 1280, height: 720))
+        let fullSizeBytes = fullSize.map { $0.bitPattern.littleEndian }.withUnsafeBytes { Data($0) }
+        XCTAssertEqual(sha256(fullSizeBytes), "e43b54d00e708a81b1e537e5345e72195300b5ab3dde75f2e05204d273953c19")
     }
 
     func testWrongHashAndCorruptWeightRejected() throws {

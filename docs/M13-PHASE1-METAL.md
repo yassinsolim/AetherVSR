@@ -350,6 +350,7 @@ All requested repairs were validated before the affected gate proceeded:
 - A half fixture missed channel/rounding mistakes: added distinct taps and discriminating reductions.
 - Early setup failures lacked an envelope: added tested immutable failure recording.
 - The evidence checker trusted some descriptors/source copies: rehashed actual native/MSL/WebGPU/timing artifacts and rejected contradictory pins.
+- The first publication CI compiler could not type-check the nested CPU tiling expression: replaced it with explicit bounded loops and checked the entire 720p tensor against its measured byte hash.
 
 Re-reviews passed with no remaining actionable finding in those scopes.
 Reviewers did not claim to execute the GPU tests. The main runner executed the
@@ -414,9 +415,16 @@ Raw tensors, binaries, build products and logs are ignored, not added to Git.
 The 56 MiB cap and 8 MiB unapproved-file limit are unchanged. A macOS CI job
 now builds the native target and runs CPU contracts, explicitly without claiming
 physical GPU qualification. The verified code/evidence commit tracks 54,989,043
-bytes, leaving 3,731,213 bytes below the cap. Exact closing-HEAD CI and final
-tracked size will be recorded after publication; they are not yet claimed as
-passed here.
+bytes, leaving 3,731,213 bytes below the cap. Initial publication
+`c5b3a9ad32160227b71ca16f45075bc9383eb6bd` tracked 55,023,734 bytes. Its CI
+[35765017443](https://github.com/yassinsolim/AetherVSR/actions/runs/35765017443)
+passed Linux gate/fusion but failed native compilation of the CPU fixture
+builder. That failed run is retained. The scoped repair changes only fixture
+construction, adds its full input-hash invariant, and logs the hosted toolchain;
+it does not change Metal kernels, model semantics, acceptance limits or timing.
+Local release/native tests and unchanged raw-evidence reproduction pass after
+the repair. Replacement exact-HEAD CI remains pending; no performance rerun
+or new performance result is claimed.
 
 ## 22. Recommendation for Phase 2
 
