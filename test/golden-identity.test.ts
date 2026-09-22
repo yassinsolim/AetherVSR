@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 /**
  * Binds the committed golden vectors to the model they were exported from.
@@ -55,4 +56,33 @@ describe('golden vectors', () => {
     expect(golden.input).toHaveLength(3 * 24 * 16);
     expect(golden.output).toHaveLength(3 * 48 * 32);
   });
+
+  it('retains M13 initialization failures and rejects incomplete paired evidence', () => execFileSync(process.execPath, ['--input-type=module', '-e', `
+    import assert from 'node:assert/strict';
+    import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+    import { tmpdir } from 'node:os';
+    import { join } from 'node:path';
+    import { recordAttempt, validateWebGPU } from './tools/m13/qualify.mjs';
+    const directory = mkdtempSync(join(tmpdir(), 'm13-initialization-'));
+    try {
+      const header = { sourceCommit: 'a'.repeat(40), id: 'failure-control' };
+      assert.throws(() => recordAttempt(directory, header, () => { throw new Error('injected probe failure'); }), /injected/);
+      const bytes = readFileSync(join(directory, 'failure.json'));
+      const failed = JSON.parse(bytes);
+      assert.equal(failed.sourceCommit, header.sourceCommit);
+      assert.equal(failed.phase, 'initialization'); assert.equal(failed.outcome, 'FAIL');
+      assert.equal(failed.cleanup, 'no app launched');
+      assert.throws(() => recordAttempt(directory, header, () => { throw new Error('second failure'); }), /EEXIST/);
+      assert.deepEqual(readFileSync(join(directory, 'failure.json')), bytes);
+      const runs = ['f32', 'f16'].map(precision => ({ schema: 'aethervsr.m13.webgpu-golden/1', precision, outcome: 'PASS',
+        summary: { passed: true }, finalFloat: { passed: true }, rgbaAgreement: { passed: true },
+        stages: ['stem', 'body.0', 'body.1', 'final'].map(name => ({ name })) }));
+      const value = { schema: 'aethervsr.m13.webgpu-capture/1', outcome: 'PASS', adapter: { fallbackAdapter: false }, errors: [], runs };
+      validateWebGPU(value);
+      for (const mutate of [value => value.runs.pop(), value => value.runs.reverse(), value => value.adapter.fallbackAdapter = true,
+        value => value.errors.push('GPU error'), value => value.runs[0].stages.pop(), value => value.runs[0].rgbaAgreement.passed = false]) {
+        const wrong = structuredClone(value); mutate(wrong); assert.throws(() => validateWebGPU(wrong));
+      }
+    } finally { rmSync(directory, { recursive: true }); }
+  `], { cwd: new URL('../', import.meta.url), encoding: 'utf8' }));
 });

@@ -1,8 +1,8 @@
 name: CI
 
 # A correctness gate, not a substitute for hardware verification. Everything
-# here runs on a GPU-less Linux runner: typecheck, lint, unit tests and the
-# production build. The GPU numerical checks, the WebGPU benchmarks and model
+# web gate runs on a GPU-less Linux runner; native build/CPU contracts run on
+# macOS. The GPU numerical checks, the WebGPU benchmarks and model
 # training remain on-device tasks and are documented in BENCHMARKS.md.
 on:
   push:
@@ -60,6 +60,17 @@ jobs:
 
       - name: Build desktop
         run: npm run desktop:build
+
+  native-metal:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Native release build
+        run: swift build --configuration release --package-path native/macos --jobs 2
+
+      - name: Native CPU contracts (physical GPU tests opt-in only)
+        run: swift test --package-path native/macos --jobs 2
 
   # The fusion equivalence gate. Milestone 7's entire safety argument is that a
   # training-time reparameterized block collapses *exactly* into the deployed

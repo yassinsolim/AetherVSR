@@ -77,6 +77,36 @@ final class ContractTests: XCTestCase {
         XCTAssertEqual(try Extent(width: 1280, height: 720).pixels, 921600)
     }
 
+    func testWebGPUReferenceIdentityAndFalsification() throws {
+        let golden = try Golden.load(data("golden-c16d2.json"))
+        let stages = try JSONSerialization.jsonObject(with: JSONEncoder().encode(golden.expected))
+        var rgba: [UInt8] = []
+        for pixel in 0..<(golden.width * golden.height * 4) {
+            for channel in 0..<3 { rgba.append(UInt8((golden.output[pixel * 3 + channel] * 255).rounded())) }
+            rgba.append(255)
+        }
+        let inputHash = sha256(golden.input.map { $0.bitPattern.littleEndian }.withUnsafeBytes { Data($0) })
+        for precision in Precision.allCases {
+            let valid: [String: Any] = ["schema": "aethervsr.m13.webgpu-golden/1", "outcome": "PASS",
+                "modelBytesSha256": ProductionModel.fileHash, "modelIdentity": ProductionModel.identity,
+                "goldenBytesSha256": Golden.fileHash, "inputFloat32Sha256": inputHash,
+                "precision": precision.rawValue, "stages": stages, "rgba": rgba]
+            func load(_ object: [String: Any]) throws -> WebGPUReference {
+                try WebGPUReference.load(JSONSerialization.data(withJSONObject: object), golden: golden, precision: precision)
+            }
+            XCTAssertEqual(try load(valid).precision, precision.rawValue)
+            for key in ["schema", "outcome", "modelBytesSha256", "modelIdentity", "goldenBytesSha256", "inputFloat32Sha256", "precision"] {
+                var invalid = valid; invalid[key] = "wrong"
+                XCTAssertThrowsError(try load(invalid))
+            }
+            var invalid = valid; var changed = golden.expected; changed[2].values[7] += 1
+            invalid["stages"] = try JSONSerialization.jsonObject(with: JSONEncoder().encode(changed))
+            XCTAssertThrowsError(try load(invalid))
+            invalid = valid; var alpha = rgba; alpha[3] = 0; invalid["rgba"] = alpha
+            XCTAssertThrowsError(try load(invalid))
+        }
+    }
+
     func testExecutionFailureIsTerminal() throws {
         var state = ExecutionState()
         try state.requireLive()
@@ -86,5 +116,26 @@ final class ContractTests: XCTestCase {
         XCTAssertThrowsError(try state.complete(success: true, message: "must not revive"))
         state.destroy(); state.destroy()
         XCTAssertThrowsError(try state.requireLive())
+    }
+
+    func testConvolutionMetadataAndRGBARejections() throws {
+        let bytes = try data("aethersr-c16d2.json")
+        for (index, key, value) in [(0, "kernel", 3 as Any), (1, "padding", 0 as Any),
+                                    (2, "activation", "relu" as Any), (3, "scale", 3 as Any),
+                                    (4, "residual", "none" as Any), (4, "clamp", [-1, 1] as Any)] {
+            var object = try JSONSerialization.jsonObject(with: bytes) as! [String: Any]
+            var layers = object["layers"] as! [[String: Any]]
+            layers[index][key] = value; object["layers"] = layers
+            XCTAssertThrowsError(try ProductionModel(document: JSONDecoder().decode(ModelDocument.self,
+                from: JSONSerialization.data(withJSONObject: object))))
+        }
+        let expected = StageTensor(name: "final", width: 1, height: 1, channels: 3, values: [0, 0.5, 1])
+        XCTAssertTrue(try Validation.rgba(Data([0, 128, 255, 255]), expected: expected, precision: .f32).passed)
+        XCTAssertThrowsError(try Validation.rgba(Data([0, 128, 255]), expected: expected, precision: .f32))
+        XCTAssertThrowsError(try Validation.rgba(Data([0, 128, 255, 0]), expected: expected, precision: .f32))
+        let oversized = StageTensor(name: "final", width: Int.max, height: 2, channels: 3, values: [])
+        XCTAssertThrowsError(try Validation.rgba(Data(), expected: oversized, precision: .f32))
+        XCTAssertEqual(Float16(1 + Float(1) / 2048).bitPattern, Float16(1).bitPattern)
+        XCTAssertEqual(Float16(1 + Float(3) / 2048).bitPattern, Float16(1 + Float(2) / 1024).bitPattern)
     }
 }

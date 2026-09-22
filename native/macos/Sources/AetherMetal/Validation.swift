@@ -24,15 +24,45 @@ public struct StageComparison: Codable {
     public let passed: Bool
 }
 
+public struct WebGPUReference: Decodable {
+    public let schema: String
+    public let modelBytesSha256: String
+    public let modelIdentity: String
+    public let goldenBytesSha256: String
+    public let inputFloat32Sha256: String
+    public let precision: String
+    public let stages: [StageTensor]
+    public let rgba: [UInt8]
+    public let outcome: String
+
+    public static func load(_ data: Data, golden: Golden, precision: Precision) throws -> WebGPUReference {
+        let reference = try JSONDecoder().decode(WebGPUReference.self, from: data)
+        try require(reference.schema == "aethervsr.m13.webgpu-golden/1" && reference.outcome == "PASS", "Invalid WebGPU evidence")
+        try require(reference.modelBytesSha256 == ProductionModel.fileHash && reference.modelIdentity == ProductionModel.identity &&
+                    reference.goldenBytesSha256 == Golden.fileHash, "WebGPU model/golden identity mismatch")
+        let inputBytes = golden.input.map { $0.bitPattern.littleEndian }.withUnsafeBytes { Data($0) }
+        try require(reference.inputFloat32Sha256 == sha256(inputBytes), "WebGPU input tensor mismatch")
+        let stages = try Validation.qualify(reference.stages, expected: golden.expected, precision: precision, declaredPrecision: reference.precision)
+        let rgba = try Validation.rgba(Data(reference.rgba), expected: golden.expected.last!, precision: precision)
+        try require(stages.allSatisfy(\.passed) && rgba.passed, "WebGPU reference failed independent golden validation")
+        return reference
+    }
+}
+
 public enum Validation {
     public static func rgba(_ bytes: Data, expected: StageTensor, precision: Precision) throws -> StageComparison {
-        let pixels = expected.width * expected.height
-        try require(bytes.count == pixels * 4 && expected.channels == 3, "Wrong RGBA extent")
+        let tensor = try normalizedRGBA(bytes, width: expected.width, height: expected.height)
+        return try compare(actual: tensor, expected: expected, tolerance: max(precision.tolerance, 1.5 / 255))
+    }
+
+    public static func normalizedRGBA(_ bytes: Data, width: Int, height: Int) throws -> StageTensor {
+        try require(width > 0 && height > 0 && width <= 2560 && height <= 1440, "Invalid RGBA expected extent")
+        let pixels = width * height
+        try require(bytes.count == pixels * 4, "Wrong RGBA extent")
         let raw = [UInt8](bytes)
         try require((0..<pixels).allSatisfy { raw[$0 * 4 + 3] == 255 }, "Non-opaque RGBA output")
         let planar = (0..<3).flatMap { channel in (0..<pixels).map { Float(raw[$0 * 4 + channel]) / 255 } }
-        let tensor = StageTensor(name: expected.name, width: expected.width, height: expected.height, channels: 3, values: planar)
-        return try compare(actual: tensor, expected: expected, tolerance: max(precision.tolerance, 1.5 / 255))
+        return StageTensor(name: "final", width: width, height: height, channels: 3, values: planar)
     }
 
     public static func compare(actual: StageTensor, expected: StageTensor, tolerance: Double) throws -> StageComparison {

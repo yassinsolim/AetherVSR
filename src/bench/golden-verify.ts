@@ -35,6 +35,16 @@ export interface GoldenResult {
   readonly output: StageComparison;
   readonly passed: boolean;
   readonly diagnostics: readonly string[];
+  readonly capture?: GoldenCapture;
+}
+
+export interface GoldenCapture {
+  readonly stages: readonly {
+    name: string; width: number; height: number; channels: number; layout: 'CHW'; values: readonly number[];
+  }[];
+  readonly rgba: readonly number[];
+  readonly finalFloat: StageComparison;
+  readonly rgbaAgreement: StageComparison;
 }
 
 /**
@@ -56,6 +66,7 @@ export async function verifyGolden(
   golden: GoldenVectors,
   useF16: boolean,
   tolerance = useF16 ? 5e-2 : 1e-3,
+  capture = false,
 ): Promise<GoldenResult> {
   const model = packModel(modelFile);
   const diagnostics: string[] = [];
@@ -192,25 +203,42 @@ export async function verifyGolden(
       entryPoint: 'main',
     },
   });
+  const headSource = buildUpsampleHeadShader({
+    inChannels: c,
+    scale: 2,
+    useF16,
+    format: 'rgba8unorm',
+    blockX: 2,
+    blockY: 4,
+    tileX: 8,
+    tileY: 4,
+    globalResidual: true,
+  });
   const headPipe = device.createComputePipeline({
     layout: 'auto',
     compute: {
-      module: device.createShaderModule({
-        code: buildUpsampleHeadShader({
-          inChannels: c,
-          scale: 2,
-          useF16,
-          format: 'rgba8unorm',
-          blockX: 2,
-          blockY: 4,
-          tileX: 8,
-          tileY: 4,
-          globalResidual: true,
-        }),
-      }),
+      module: device.createShaderModule({ code: headSource }),
       entryPoint: 'main',
     },
   });
+
+  const floatOutTex = capture ? device.createTexture({
+    size: { width: W * 2, height: H * 2 }, format: 'rgba32float',
+    usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
+  }) : null;
+  const floatBytesPerRow = Math.ceil((W * 2 * 16) / 256) * 256;
+  const floatReadback = capture ? device.createBuffer({
+    size: floatBytesPerRow * H * 2, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+  }) : null;
+  const declaration = 'texture_storage_2d<rgba8unorm, write>';
+  if (capture && headSource.split(declaration).length !== 2) throw new Error('Diagnostic head storage declaration changed');
+  const floatHeadPipe = capture ? device.createComputePipeline({
+    layout: 'auto',
+    compute: {
+      module: device.createShaderModule({ code: headSource.replace(declaration, 'texture_storage_2d<rgba32float, write>') }),
+      entryPoint: 'main',
+    },
+  }) : null;
 
   // One readback buffer per stage, so every intermediate can be compared.
   const stageNames = ['stem', ...Array.from({ length: model.depth }, (_, i) => `body.${i}`)];
@@ -290,12 +318,33 @@ export async function verifyGolden(
     width: W * 2,
     height: H * 2,
   });
+  if (floatHeadPipe && floatOutTex && floatReadback) {
+    const floatPass = encoder.beginComputePass();
+    floatPass.setPipeline(floatHeadPipe);
+    floatPass.setBindGroup(0, device.createBindGroup({
+      layout: floatHeadPipe.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: { buffer: finalBuffer } },
+        { binding: 1, resource: { buffer: headW } },
+        { binding: 2, resource: { buffer: headB } },
+        { binding: 3, resource: floatOutTex.createView() },
+        { binding: 4, resource: { buffer: dims } },
+        { binding: 5, resource: srcTex.createView() },
+      ],
+    }));
+    floatPass.dispatchWorkgroups(Math.ceil((W * 2) / 16), Math.ceil((H * 2) / 16), 1);
+    floatPass.end();
+    encoder.copyTextureToBuffer({ texture: floatOutTex }, { buffer: floatReadback, bytesPerRow: floatBytesPerRow }, {
+      width: W * 2, height: H * 2,
+    });
+  }
   device.queue.submit([encoder.finish()]);
 
   const validation = await device.popErrorScope();
   if (validation) diagnostics.push(`validation ${validation.message}`);
 
   const comparisons: StageComparison[] = [];
+  const capturedStages: GoldenCapture['stages'][number][] = [];
   for (let i = 0; i < stageNames.length; i++) {
     const name = stageNames[i] as string;
     const buf = stageReadbacks[i] as GPUBuffer;
@@ -313,6 +362,7 @@ export async function verifyGolden(
       for (let p = 0; p < pixels; p++) actual[ch * pixels + p] = grouped[(g * pixels + p) * 4 + lane] as number;
     }
     comparisons.push(compare(name, actual, golden.stages[name] ?? [], tolerance));
+    if (capture) capturedStages.push({ name, width: W, height: H, channels: c, layout: 'CHW', values: Array.from(actual) });
   }
 
   await outReadback.mapAsync(GPUMapMode.READ);
@@ -331,6 +381,38 @@ export async function verifyGolden(
   // The output is quantised to 8 bits by the storage texture, so it gets its
   // own tolerance: anything tighter would be measuring the texture format.
   const outputCmp = compare('output', actualOut, golden.output, Math.max(tolerance, 1.5 / 255));
+  let captured: GoldenCapture | undefined;
+  if (floatReadback) {
+    await floatReadback.mapAsync(GPUMapMode.READ);
+    const floatValues = new Float32Array(floatReadback.getMappedRange().slice(0));
+    floatReadback.unmap();
+    const interleaved = new Float32Array(OW * OH * 3);
+    const planar = new Float32Array(OW * OH * 3);
+    const rgba = new Uint8Array(OW * OH * 4);
+    let invalidOutput = false;
+    for (let row = 0; row < OH; row++) {
+      rgba.set(outBytes.subarray(row * outBytesPerRow, row * outBytesPerRow + OW * 4), row * OW * 4);
+      for (let column = 0; column < OW; column++) {
+        const pixel = row * OW + column;
+        const offset = row * floatBytesPerRow / 4 + column * 4;
+        if (floatValues[offset + 3] !== 1 || rgba[pixel * 4 + 3] !== 255) invalidOutput = true;
+        for (let channel = 0; channel < 3; channel++) {
+          const value = floatValues[offset + channel] as number;
+          interleaved[pixel * 3 + channel] = value;
+          planar[channel * OW * OH + pixel] = value;
+          if (!Number.isFinite(value) || value < 0 || value > 1) invalidOutput = true;
+        }
+      }
+    }
+    if (invalidOutput) diagnostics.push('Diagnostic head has invalid RGB or alpha');
+    capturedStages.push({ name: 'final', width: OW, height: OH, channels: 3, layout: 'CHW', values: Array.from(planar) });
+    captured = {
+      stages: capturedStages,
+      rgba: Array.from(rgba),
+      finalFloat: compare('final-float-diagnostic', interleaved, golden.output, tolerance),
+      rgbaAgreement: compare('float-diagnostic-versus-original-rgba8', actualOut, Array.from(interleaved), 1.5 / 255),
+    };
+  }
 
   for (const b of [
     ping,
@@ -350,14 +432,18 @@ export async function verifyGolden(
   }
   srcTex.destroy();
   outTex.destroy();
+  floatOutTex?.destroy();
+  floatReadback?.destroy();
 
   return {
     useF16,
     tolerance,
     stages: comparisons,
     output: outputCmp,
-    passed: diagnostics.length === 0 && comparisons.every((s) => s.passed) && outputCmp.passed,
+    passed: diagnostics.length === 0 && comparisons.every((s) => s.passed) && outputCmp.passed &&
+      (!captured || (captured.finalFloat.passed && captured.rgbaAgreement.passed)),
     diagnostics,
+    ...(captured ? { capture: captured } : {}),
   };
 }
 
