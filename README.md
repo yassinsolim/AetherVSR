@@ -16,6 +16,14 @@ GPU p50 is 83.98 ms (f32) / 65.85 ms (f16), 60 samples each after ten warmups.
 Production remains WebGPU; no video-ingest, capture or native GUI was added.
 [Full scope, timing windows and publication status](docs/M13-PHASE1-METAL.md).
 
+**M13 Phase 1.5: METAL REALTIME BACKEND QUALIFIED.** Optimized candidate F retains
+the exact model and passes f32/f16 golden, falsification and fresh WebGPU parity.
+Two fixed M5 f16 binding runs measured whole-graph GPU p50/p95 of
+3.922/4.458 ms and 3.933/4.452 ms, each 60 samples after ten warmups.
+This qualifies isolated 720p-to-1440p neural timing, not video playback or a
+production rollout. Phase 1 and its simple backend remain unchanged; Phase 2
+has not started. [Optimization report and scope](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md).
+
 Real-time 2x neural video super-resolution in the browser, with measured gains
 on selected captured-content and degradation classes. Broad web-video
 improvement remains under validation.

@@ -579,6 +579,18 @@ Phase 2 requires a separately scoped decision after reviewed publication.
 
 ---
 
+## Milestone 13 - Phase 1.5 [REALTIME BACKEND QUALIFIED]
+
+A preregistered six-candidate Metal search selected F by exploratory p95, then
+two independent 10-warmup/60-sample f16 runs passed the unchanged <=8 ms p50 /
+<=10 ms p95 headroom gates at 720p-to-1440p. Exact model, golden tolerances,
+actual WebGPU parity and falsification pass. The original Phase-1 implementation
+and evidence remain unchanged. This is isolated M5 backend timing, not video
+FPS. [Full candidate and binding report](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md).
+Phase 2 may be separately authorized after publication; it is not implemented.
+
+---
+
 ## Beyond
 
 Explicitly out of scope until the above are done, listed so they are not

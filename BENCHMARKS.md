@@ -6,6 +6,36 @@ measurement could not be taken, the row says so.
 
 See `AGENTS.md` §2 and §3 for the rules this file exists to enforce.
 
+## M13 Phase 1.5 - Optimized Native Metal
+
+Measured Apple M5 / Mac17,2, 24 GiB, macOS 26.6.2 build 25G83, Xcode 27.0
+build 27A266a, SDK 27.0, Swift 6.4. Code
+`523217d336e92f60efae7bcd89bc4489c5012b6d`, candidate F selected prospectively
+at `a6c4ea73d2eee5921dd6ad853a96cdd2147205af` after the complete fixed B-G sweep.
+Exact production C16D2 f16; 1280x720 tiled trusted RGB to 2560x1440 RGBA8.
+No codec, import, display-refresh, drawable or presentation scope applies.
+
+| Binding run | GPU p50 ms | GPU p95 ms | GPU max ms | Valid samples | Wall observation ms |
+|---|---:|---:|---:|---:|---:|
+| 1 | 3.921708 | 4.458015 | 4.757042 | 60/60 | 256.835292 |
+| 2 | 3.932604 | 4.451823 | 4.554542 | 60/60 | 255.409125 |
+
+Ten warmups precede each independent process/engine run. Timestamps bracket
+one whole-graph command buffer containing four fused compute passes, including
+RGBA conversion. Compilation, allocation, upload, CPU readback, decoding and
+presentation are excluded. Thermal state was nominal before, after and at
+every recorded completion. These short windows are not a sustained thermal soak.
+Both fixed <=8 ms p50 / <=10 ms p95 targets pass: **METAL REALTIME BACKEND
+QUALIFIED**, isolated measured-M5 inference only, not 60 FPS video playback.
+
+Configured fast f16 buffers: 88,487,010 bytes plus 14,745,600 logical output
+texture bytes, excluding driver overhead. All six candidate outcomes, exact
+numerical errors, selection rationale and raw hashes are retained in the
+[28-section report](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md) and
+[compact evidence](results/m13-phase15-metal.json). Phase-1 results below are
+unchanged, not relabeled optimized results. No WebGPU API speedup ratio or
+Phase-2 integration claim follows.
+
 ## M13 Phase 1 - Offline Native Metal
 
 Measured 2026-09-22 on Apple M5 (Mac17,2), 24 GiB, macOS 26.6.2 build 25G83,
