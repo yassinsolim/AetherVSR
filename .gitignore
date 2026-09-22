@@ -7,6 +7,9 @@ dist/
 /.cache/m11/
 /.cache/m12/
 /.cache/m12.1/
+/.cache/m13/
+/native/macos/.build/
+/native/macos/.swiftpm/
 /.cache/m105/
 /.cache/m106/
 /.cache/m107/

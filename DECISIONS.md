@@ -1857,3 +1857,28 @@ M12 machine verdicts are exactly `PASS`, `FAIL`, `UNSUPPORTED`, `UNRESOLVED`, or
 `NOT_RUN_HARDWARE_UNAVAILABLE`. The overall verdict is exactly
 `CROSS-VENDOR DESKTOP VALIDATED`, `CROSS-VENDOR DESKTOP PARTIAL`, or
 `CROSS-VENDOR DESKTOP NOT VALIDATED`. No M13 work begins automatically.
+
+## ADR-0060 - Owner-authorized native Metal inference qualification
+
+**Status:** accepted for M13 Phase 1 only, before native implementation.
+
+The owner explicitly replaces the planned M13 distribution milestone with a
+native macOS Metal engine investigation. This first phase is a non-interactive
+SwiftPM inference library/tool, not a player or capture application. Model bytes,
+WebGPU production shaders, RuntimeController, Electron behavior and all M11,
+M12 and M12.1 published evidence remain unchanged. The published prerequisite
+repair `1fc5953496fd029262c51dd1266a6b8c3b4923a5` (CI35417235937) is the baseline.
+
+The native backend reads the same hash-verified C16D2 JSON. Separate unfused
+operations establish f32 correctness first, then f16, then actual common-input
+WebGPU/Metal comparison and a bounded fixed performance measurement. Public
+Metal APIs only; a bundled MSL resource is compiled once at configuration time.
+This is not a replacement for the cross-platform WebGPU backend or its stage
+boundaries. No new third-party dependency is added; Apple frameworks are system
+APIs, and no Apple sample implementation is copied.
+
+The prospective ownership/layout/numerics/timing policy is in
+docs/M13-NATIVE-METAL-ARCHITECTURE.md. No Core Video, AVFoundation,
+ScreenCaptureKit, permissions, UI, Core ML, MPSGraph, signing or distribution
+work belongs to Phase 1. Later integration requires a reviewed, published
+Phase-1 verdict; Metal is not promoted to production by this ADR.
