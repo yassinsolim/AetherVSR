@@ -148,3 +148,28 @@ measurement -> full historical/native gates and independent review -> published
 Phase-1 verdict. Only METAL INFERENCE QUALIFIED permits recommending Phase 2;
 Phase 2 is not implemented here. All raw attempts, failures and binary outputs
 remain ignored; the56MiB cap is unchanged.
+
+## Timing Implementation Detail (Before the First Timing Run)
+
+The first common-input paired capture at source
+`8f952b68e847d72c4a81225bfb0eb12715fb049d` passed both precisions. Its raw tensors
+remain in `.cache/m13/parity-01`. Before timing, inline Metal dispatch constants
+are replaced with configured reusable buffers; shaders and arithmetic remain
+unchanged. The resulting source must pass a new paired capture before timing.
+
+For each precision, run ten whole-graph warmups then sixty whole-graph samples;
+next run ten complete stage-isolated warmup cycles then sixty stage-isolated
+cycles in graph order. Each isolated operation uses its own completed command
+buffer and the same preallocated tensors. Stage samples share the recorded
+wall-clock observation window for those sixty interleaved cycles. Whole-graph
+and isolated-stage series are not interchangeable or additive. Retain each
+command buffer's GPU start/end seconds and derived milliseconds. Percentiles
+use linear interpolation at `(sampleCount - 1) * percentile`; missing GPU
+timestamps are null, counted, and prevent complete timing qualification.
+
+The CLI performs a small golden/parity check before the fixed large workload
+and a separate full-size finite-output/readback check after it. Neither is
+inside a timing window. Tile each RGB golden plane by coordinate modulo its
+24x16 extent to construct the 1280x720 input. Run f32 then f16 serially, once;
+no sweep, workgroup changes, kernel fusion, retries to improve timing, or
+same-scope speedup claim is planned.

@@ -12,6 +12,17 @@ const command = (name, args) => execFileSync(name, args, { cwd: ROOT, encoding: 
 const git = args => command('git', args);
 const write = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' });
 const artifact = path => { const bytes = readFileSync(path); return { path: relative(ROOT, path), bytes: bytes.length, sha256: digest(bytes) }; };
+const environment = () => ({ platform: process.platform, arch: process.arch, node: process.version,
+  machine: command('sysctl', ['-n', 'hw.model']), memoryBytes: Number(command('sysctl', ['-n', 'hw.memsize'])),
+  os: command('sw_vers', ['-productVersion']), osBuild: command('sw_vers', ['-buildVersion']),
+  swift: command('xcrun', ['swift', '--version']), sdk: command('xcrun', ['--show-sdk-version']),
+  xcode: command('xcodebuild', ['-version']), display: 'not applicable: no drawable or presentation',
+  metalCompiler: { api: 'MTLDevice.makeLibrary(source:options:)', language: 'MSL 3.0', fastMathEnabled: false, fpContract: 'OFF' } });
+const runLogged = (name, args, output, log, env = process.env) => {
+  const result = spawnSync(name, args, { cwd: ROOT, env, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  writeFileSync(join(output, log), (result.stdout ?? '') + (result.stderr ?? ''), { flag: 'wx' });
+  assert.equal(result.status, 0, `${name} failed: ${result.error?.message ?? result.signal ?? result.status}; see ${log}`);
+};
 
 export function recordAttempt(output, header, inspect) {
   try {
@@ -57,21 +68,12 @@ export async function qualify(id) {
   mkdirSync(output);
   const attempt = recordAttempt(output, { schema: 'aethervsr.m13.attempt/1', id, sourceCommit, sourceTree, startedAt: new Date().toISOString(),
     scope: 'offline tensor inference only; no decode, import, presentation or performance measurement' }, () => ({
-    environment: { platform: process.platform, arch: process.arch, node: process.version,
-      machine: command('sysctl', ['-n', 'hw.model']), memoryBytes: Number(command('sysctl', ['-n', 'hw.memsize'])),
-      os: command('sw_vers', ['-productVersion']), osBuild: command('sw_vers', ['-buildVersion']),
-      swift: command('xcrun', ['swift', '--version']), sdk: command('xcrun', ['--show-sdk-version']),
-      xcode: command('xcodebuild', ['-version']), display: 'not applicable: no drawable or presentation',
-      metalCompiler: { api: 'MTLDevice.makeLibrary(source:options:)', language: 'MSL 3.0', fastMathEnabled: false, fpContract: 'OFF' } },
+    environment: environment(),
     model: artifact(join(ROOT, 'public/models/aethersr-c16d2.json')), golden: artifact(join(ROOT, 'public/models/golden-c16d2.json')) }));
   let phase = 'build', app, cleanup = 'no app launched';
   const scratch = join(cache, 'swift');
   const env = { ...process.env, CLANG_MODULE_CACHE_PATH: join(cache, 'clang-cache'), SWIFTPM_MODULECACHE_OVERRIDE: join(cache, 'swift-module-cache') };
-  const run = (name, args, log) => {
-    const result = spawnSync(name, args, { cwd: ROOT, env, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
-    writeFileSync(join(output, log), (result.stdout ?? '') + (result.stderr ?? ''), { flag: 'wx' });
-    assert.equal(result.status, 0, `${name} failed: ${result.error?.message ?? result.signal ?? result.status}; see ${log}`);
-  };
+  const run = (name, args, log) => runLogged(name, args, output, log, env);
   try {
     run('xcrun', ['swift', 'build', '--configuration', 'release', '--package-path', 'native/macos', '--scratch-path', scratch, '--jobs', '2'], 'build.log');
     const binary = join(scratch, 'release/aether-metal');
@@ -148,4 +150,73 @@ export async function qualify(id) {
   }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await qualify(process.argv[2]);
+export async function benchmark(id, qualificationPath) {
+  assert.match(id, /^[a-z0-9][a-z0-9-]{0,63}$/);
+  assert.equal(process.platform, 'darwin');
+  assert.equal(git(['status', '--porcelain', '--untracked-files=normal']), '');
+  const cache = join(ROOT, '.cache/m13');
+  assert.equal(realpathSync(cache), cache);
+  const output = join(cache, id);
+  assert(!existsSync(output), 'Attempt IDs are immutable');
+  const sourceCommit = git(['rev-parse', 'HEAD']);
+  const proofPath = resolve(ROOT, qualificationPath);
+  assert(proofPath.startsWith(cache + '/') && realpathSync(proofPath) === proofPath);
+  mkdirSync(output);
+  const attempt = recordAttempt(output, { schema: 'aethervsr.m13.timing-attempt/1', id, sourceCommit,
+    startedAt: new Date().toISOString(), warmup: 10, measured: 60, extent: [1280, 720], order: ['f32', 'f16'],
+    scope: 'completed-command-buffer GPU timing, whole unfused graph and separate isolated operations; excludes setup/upload/readback/decode/import/presentation' },
+  () => ({ environment: environment(), qualification: artifact(proofPath) }));
+  let phase = 'qualification-verification';
+  try {
+    const proof = JSON.parse(readFileSync(proofPath));
+    assert.equal(proof.schema, 'aethervsr.m13.qualification/1');
+    assert.equal(proof.sourceCommit, sourceCommit);
+    assert.equal(proof.outcome, 'PASS');
+    assert.deepEqual(proof.runs.map(run => run.precision), ['f32', 'f16']);
+    const verify = record => {
+      const path = resolve(ROOT, record.path);
+      assert(path.startsWith(cache + '/'));
+      assert.deepEqual(artifact(path), record);
+      return path;
+    };
+    const binary = verify(proof.nativeBinary);
+    verify(proof.shader); verify(proof.attempt);
+    validateWebGPU(JSON.parse(readFileSync(verify(proof.rawWebGPU))));
+    const runs = [];
+    for (const previous of proof.runs) {
+      const native = JSON.parse(readFileSync(verify(previous.native)));
+      assert.deepEqual(native, previous.nativeSummary);
+      assert.equal(native.outcome, 'PASS');
+      assert(native.webgpu.stages.every(stage => stage.passed) && native.webgpu.normalizedRGBA.passed);
+      const reference = verify(previous.webgpu);
+      assert.equal(native.webgpu.referenceSha256, previous.webgpu.sha256);
+      phase = `timing-${previous.precision}`;
+      const directory = join(output, previous.precision);
+      runLogged(binary, ['--model', 'public/models/aethersr-c16d2.json', '--input', 'public/models/golden-c16d2.json',
+        '--precision', previous.precision, '--output', directory, '--webgpu', reference, '--benchmark'], output, `${previous.precision}.log`);
+      const timingPath = join(directory, 'timing.json');
+      const timing = JSON.parse(readFileSync(timingPath));
+      assert.equal(timing.outcome, 'PASS');
+      assert.equal(timing.correctnessSha256, artifact(join(directory, 'result.json')).sha256);
+      runs.push({ precision: previous.precision, timing: artifact(timingPath), correctness: artifact(join(directory, 'result.json')),
+        wholeGraph: timing.timings.wholeGraph.statisticsMS, wholeWindowMS: timing.timings.wholeGraph.observationWindowMS });
+    }
+    assert.equal(git(['rev-parse', 'HEAD']), sourceCommit);
+    assert.equal(git(['status', '--porcelain', '--untracked-files=normal']), '');
+    verify(proof.nativeBinary); verify(proof.shader);
+    const result = { schema: 'aethervsr.m13.performance/1', sourceCommit, attempt: artifact(join(output, 'attempt.json')),
+      qualification: attempt.qualification, nativeBinary: proof.nativeBinary, shader: proof.shader, environment: attempt.environment,
+      runs, finishedAt: new Date().toISOString(), outcome: 'PASS' };
+    write(join(output, 'result.json'), result);
+    console.log(JSON.stringify({ result: artifact(join(output, 'result.json')), runs, outcome: 'PASS' }));
+    return result;
+  } catch (error) {
+    write(join(output, 'failure.json'), { sourceCommit, phase, error: String(error), finishedAt: new Date().toISOString(), outcome: 'FAIL' });
+    throw error;
+  }
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (process.argv[2] === 'benchmark') await benchmark(process.argv[3], process.argv[4]);
+  else await qualify(process.argv[2]);
+}

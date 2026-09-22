@@ -147,6 +147,12 @@ public struct Golden: Decodable {
                          values: Self.planar(output, width: width * 2, height: height * 2, channels: 3))]
     }
 
+    public func tiledInput(extent: Extent) -> [Float] {
+        (0..<3).flatMap { channel in (0..<extent.pixels).map { pixel in
+            input[channel * width * height + ((pixel / extent.width) % height) * width + (pixel % extent.width) % width]
+        } }
+    }
+
     public static func planar(_ interleaved: [Float], width: Int, height: Int, channels: Int) -> [Float] {
         let pixels = width * height
         return (0..<channels).flatMap { channel in (0..<pixels).map { interleaved[$0 * channels + channel] } }

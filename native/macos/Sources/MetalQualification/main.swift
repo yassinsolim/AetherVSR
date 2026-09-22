@@ -24,13 +24,46 @@ struct Evidence: Encodable {
     let outcome: String
 }
 
+struct OutputAudit: Encodable {
+    let stage: String
+    let elements: Int
+    let nonFinite: Int
+    let outsideRange: Int
+    let sha256: String
+    var passed: Bool { nonFinite == 0 && outsideRange == 0 }
+}
+
+struct PerformanceEvidence: Encodable {
+    let schema = "aethervsr.m13.metal-timing/1"
+    let modelBytesSha256 = ProductionModel.fileHash
+    let modelIdentity = ProductionModel.identity
+    let goldenBytesSha256 = Golden.fileHash
+    let precision: String
+    let device: String
+    let inputExtent: Extent
+    let inputFloat32Sha256: String
+    let correctnessSha256: String
+    let thermalStateBefore: Int
+    let thermalStateAfter: Int
+    let startedAt: String
+    let finishedAt: String
+    let timings: TimingCapture
+    let postTimingStages: [OutputAudit]
+    let postTimingRGBA: StageComparison
+    let postTimingRGBAHash: String
+    let outcome: String
+}
+
 do {
-    let arguments = Array(CommandLine.arguments.dropFirst())
+    var arguments = Array(CommandLine.arguments.dropFirst())
+    let benchmark = arguments.last == "--benchmark"
+    if benchmark { arguments.removeLast() }
         guard (arguments.count == 8 || arguments.count == 10) && arguments[0] == "--model" && arguments[2] == "--input" && arguments[4] == "--precision" && arguments[6] == "--output",
                     (arguments.count == 8 || arguments[8] == "--webgpu"),
           let precision = Precision(rawValue: arguments[5]) else {
-                throw QualificationError("Usage: aether-metal --model MODEL.json --input GOLDEN.json --precision f32|f16 --output NEW_DIRECTORY [--webgpu REFERENCE.json]")
+                throw QualificationError("Usage: aether-metal --model MODEL.json --input GOLDEN.json --precision f32|f16 --output NEW_DIRECTORY [--webgpu REFERENCE.json] [--benchmark]")
     }
+            if benchmark && arguments.count != 10 { throw QualificationError("Benchmark requires a verified WebGPU reference") }
     let model = try ProductionModel(data: Data(contentsOf: URL(fileURLWithPath: arguments[1])))
     let golden = try Golden.load(Data(contentsOf: URL(fileURLWithPath: arguments[3])))
     let referenceBytes = arguments.count == 10 ? try Data(contentsOf: URL(fileURLWithPath: arguments[9])) : nil
@@ -71,6 +104,38 @@ do {
     try bytes.write(to: output.appendingPathComponent("result.json"), options: .withoutOverwriting)
     print(String(decoding: bytes, as: UTF8.self))
     if evidence.outcome != "PASS" { exit(1) }
+    if benchmark {
+        engine.destroy()
+        let extent = try Extent(width: 1280, height: 720)
+        let input = golden.tiledInput(extent: extent)
+        let inputHash = sha256(input.map { $0.bitPattern.littleEndian }.withUnsafeBytes { Data($0) })
+        let workload = try MetalEngine(model: model, extent: extent, precision: precision)
+        defer { workload.destroy() }
+        try workload.loadInput(input)
+        let startedAt = ISO8601DateFormatter().string(from: Date())
+        let thermalBefore = ProcessInfo.processInfo.thermalState.rawValue
+        let timings = try workload.benchmark()
+        let thermalAfter = ProcessInfo.processInfo.thermalState.rawValue
+        let finishedAt = ISO8601DateFormatter().string(from: Date())
+        let actual = try workload.capture()
+        let audits = actual.checkpoints.map { stage in
+            let lower: Float = stage.name == "final" ? 0 : -1
+            return OutputAudit(stage: stage.name, elements: stage.values.count,
+                nonFinite: stage.values.filter { !$0.isFinite }.count,
+                outsideRange: stage.values.filter { $0 < lower || $0 > 1 }.count,
+                sha256: sha256(stage.values.map { $0.bitPattern.littleEndian }.withUnsafeBytes { Data($0) }))
+        }
+        let rgba = try Validation.rgba(actual.rgba, expected: actual.checkpoints.last!, precision: .f32)
+        let performance = PerformanceEvidence(precision: precision.rawValue, device: workload.device.name,
+            inputExtent: extent, inputFloat32Sha256: inputHash, correctnessSha256: sha256(bytes),
+            thermalStateBefore: thermalBefore, thermalStateAfter: thermalAfter, startedAt: startedAt, finishedAt: finishedAt,
+            timings: timings, postTimingStages: audits, postTimingRGBA: rgba, postTimingRGBAHash: sha256(actual.rgba),
+            outcome: timings.complete && audits.allSatisfy(\.passed) && rgba.passed ? "PASS" : "FAIL")
+        let timingBytes = try encoder.encode(performance)
+        try timingBytes.write(to: output.appendingPathComponent("timing.json"), options: .withoutOverwriting)
+        print("Metal timing \(precision.rawValue): \(performance.outcome)")
+        if performance.outcome != "PASS" { exit(1) }
+    }
 } catch {
     FileHandle.standardError.write(Data("\(error)\n".utf8))
     exit(1)

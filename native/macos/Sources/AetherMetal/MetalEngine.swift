@@ -11,6 +11,59 @@ public struct TensorCapture {
     public let rgba: Data
 }
 
+public struct GPUInterval: Encodable {
+    public let startSeconds: Double?
+    public let endSeconds: Double?
+    public var milliseconds: Double? {
+        guard let start = startSeconds, let end = endSeconds else { return nil }
+        return (end - start) * 1000
+    }
+    init(start: Double, end: Double) {
+        let valid = start.isFinite && end.isFinite && start > 0 && end > start && ((end - start) * 1000).isFinite
+        startSeconds = valid ? start : nil; endSeconds = valid ? end : nil
+    }
+    private enum CodingKeys: String, CodingKey { case startSeconds, endSeconds, milliseconds }
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(startSeconds, forKey: .startSeconds)
+        try container.encode(endSeconds, forKey: .endSeconds)
+        try container.encode(milliseconds, forKey: .milliseconds)
+    }
+}
+
+public struct TimingSeries: Encodable {
+    public let name: String
+    public let samples: [GPUInterval]
+    public let observationWindowMS: Double
+    public let measuredSamples: Int
+    public let statisticsMS: [String: Double?]
+    public let status: String
+    public var complete: Bool { !samples.isEmpty && measuredSamples == samples.count }
+
+    init(name: String, samples: [GPUInterval], windowMS: Double) {
+        self.name = name; self.samples = samples; observationWindowMS = windowMS
+        let sorted = samples.compactMap(\.milliseconds).sorted()
+        measuredSamples = sorted.count
+        status = sorted.isEmpty ? "not measured" : sorted.count == samples.count ? "measured" : "partially measured"
+        func percentile(_ fraction: Double) -> Double? {
+            guard !sorted.isEmpty else { return nil }
+            let position = Double(sorted.count - 1) * fraction
+            let lower = Int(position), upper = min(lower + 1, sorted.count - 1)
+            return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - Double(lower))
+        }
+        statisticsMS = ["p50": percentile(0.5), "p95": percentile(0.95), "max": sorted.last]
+    }
+}
+
+public struct TimingCapture: Encodable {
+    public let warmupIterations = 10
+    public let measuredIterations = 60
+    public let wholeGraph: TimingSeries
+    public let isolatedStages: [TimingSeries]
+    public let configuredBufferBytes: Int
+    public var complete: Bool { wholeGraph.complete && isolatedStages.allSatisfy(\.complete) }
+}
+
 struct ExecutionState {
     private var failed = false
     private var destroyed = false
@@ -68,6 +121,17 @@ public final class MetalEngine {
         }
         buffers["input"] = try allocate(extent.pixels * 3 * 4)
         if precision == .f16 { buffers["input.half"] = try allocate(extent.pixels * 3 * 2) }
+        buffers["params.stem"] = try parameter(ConvolutionShape(width: UInt32(extent.width), height: UInt32(extent.height),
+            inputChannels: 3, outputChannels: 16, kernel: 5))
+        buffers["params.body"] = try parameter(ConvolutionShape(width: UInt32(extent.width), height: UInt32(extent.height),
+            inputChannels: 16, outputChannels: 16, kernel: 3))
+        buffers["params.head"] = try parameter(ConvolutionShape(width: UInt32(extent.width * 2), height: UInt32(extent.height * 2),
+            inputChannels: 16, outputChannels: 3, kernel: 3))
+        buffers["params.nearest.features"] = try parameter(TensorShape(width: UInt32(extent.width), height: UInt32(extent.height), channels: 16))
+        buffers["params.nearest.input"] = try parameter(TensorShape(width: UInt32(extent.width), height: UInt32(extent.height), channels: 3))
+        buffers["params.rgba"] = try parameter(TensorShape(width: UInt32(extent.width * 2), height: UInt32(extent.height * 2), channels: 3))
+        buffers["params.hiddenCount"] = try parameter(UInt32(extent.pixels * 16))
+        buffers["params.outputCount"] = try parameter(UInt32(extent.pixels * 12))
         for name in ["stem.conv", "stem", "body.0.conv", "body.0", "body.1.conv", "body.1"] {
             buffers[name] = try allocate(extent.pixels * 16 * elementBytes)
         }
@@ -99,6 +163,13 @@ public final class MetalEngine {
         return buffer
     }
 
+    private func parameter<Value>(_ value: Value) throws -> MTLBuffer {
+        var value = value
+        let buffer = try allocate(MemoryLayout<Value>.stride)
+        withUnsafeBytes(of: &value) { buffer.contents().copyMemory(from: $0.baseAddress!, byteCount: $0.count) }
+        return buffer
+    }
+
     public func loadInput(_ input: [Float]) throws {
         lock.lock(); defer { lock.unlock() }
         try state.requireLive()
@@ -119,56 +190,52 @@ public final class MetalEngine {
         encoder.label = name
         let pixels = extent.pixels
         let suffix = precision == .f16 ? "16" : "32"
-        var count = UInt32(pixels * 16), kernel = "", length = pixels * 16
+        var kernel = "", length = pixels * 16
         switch name {
         case "stem.conv", "body.0.conv", "body.1.conv", "head":
             let stem = name == "stem.conv", head = name == "head"
             let source = stem ? (precision == .f16 ? "input.half" : "input") : head ? "nearest.features" : name == "body.0.conv" ? "stem" : "body.0"
             let layer = name.replacingOccurrences(of: ".conv", with: "")
             kernel = "convolution" + suffix
-            var shape = ConvolutionShape(width: UInt32(extent.width * (head ? 2 : 1)), height: UInt32(extent.height * (head ? 2 : 1)),
-                                         inputChannels: UInt32(stem ? 3 : 16), outputChannels: UInt32(head ? 3 : 16), kernel: UInt32(stem ? 5 : 3))
             encoder.setBuffer(buffers[source], offset: 0, index: 0)
             encoder.setBuffer(buffers[layer + ".weight"], offset: 0, index: 1)
             encoder.setBuffer(buffers[layer + ".bias"], offset: 0, index: 2)
             encoder.setBuffer(buffers[name], offset: 0, index: 3)
-            encoder.setBytes(&shape, length: MemoryLayout<ConvolutionShape>.stride, index: 4)
-            length = Int(shape.width * shape.height * shape.outputChannels)
+            encoder.setBuffer(buffers[stem ? "params.stem" : head ? "params.head" : "params.body"], offset: 0, index: 4)
+            length = pixels * (head ? 12 : 16)
         case "stem", "body.0", "body.1":
             kernel = "activation" + suffix
             encoder.setBuffer(buffers[name + ".conv"], offset: 0, index: 0)
             encoder.setBuffer(buffers[name], offset: 0, index: 1)
-            encoder.setBytes(&count, length: 4, index: 2)
+            encoder.setBuffer(buffers["params.hiddenCount"], offset: 0, index: 2)
         case "nearest.features", "nearest.input":
             kernel = "nearest" + (name == "nearest.input" ? "32" : suffix)
             let channels = name == "nearest.features" ? 16 : 3
-            var shape = TensorShape(width: UInt32(extent.width), height: UInt32(extent.height), channels: UInt32(channels))
             encoder.setBuffer(buffers[channels == 16 ? "body.1" : "input"], offset: 0, index: 0)
             encoder.setBuffer(buffers[name], offset: 0, index: 1)
-            encoder.setBytes(&shape, length: MemoryLayout<TensorShape>.stride, index: 2)
+            encoder.setBuffer(buffers["params." + name], offset: 0, index: 2)
             length = pixels * 4 * channels
         case "residual":
-            kernel = "residual" + suffix; count = UInt32(pixels * 12); length = Int(count)
+            kernel = "residual" + suffix; length = pixels * 12
             for (index, buffer) in ["head", "nearest.input", "residual"].enumerated() { encoder.setBuffer(buffers[buffer], offset: 0, index: index) }
-            encoder.setBytes(&count, length: 4, index: 3)
+            encoder.setBuffer(buffers["params.outputCount"], offset: 0, index: 3)
         case "final":
-            kernel = "clamp32"; count = UInt32(pixels * 12); length = Int(count)
+            kernel = "clamp32"; length = pixels * 12
             encoder.setBuffer(buffers["residual"], offset: 0, index: 0); encoder.setBuffer(buffers["final"], offset: 0, index: 1)
-            encoder.setBytes(&count, length: 4, index: 2)
+            encoder.setBuffer(buffers["params.outputCount"], offset: 0, index: 2)
         case "rgba":
             kernel = "rgba32"; length = pixels * 4
-            var shape = TensorShape(width: UInt32(extent.width * 2), height: UInt32(extent.height * 2), channels: 3)
             encoder.setBuffer(buffers["final"], offset: 0, index: 0); encoder.setTexture(texture, index: 0)
-            encoder.setBytes(&shape, length: MemoryLayout<TensorShape>.stride, index: 1)
+            encoder.setBuffer(buffers["params.rgba"], offset: 0, index: 1)
         default: throw QualificationError("Unknown Metal stage")
         }
         encoder.setComputePipelineState(pipelines[kernel]!)
         encoder.dispatchThreads(MTLSize(width: length, height: 1, depth: 1), threadsPerThreadgroup: MTLSize(width: 64, height: 1, depth: 1))
     }
 
-    private func submit(readback: Bool) throws -> MTLCommandBuffer {
+    private func submit(readback: Bool, stages: [String]? = nil) throws -> MTLCommandBuffer {
         guard let command = queue.makeCommandBuffer() else { throw QualificationError("Metal command buffer unavailable") }
-        for name in stageOrder { try encode(name, command: command) }
+        for name in stages ?? stageOrder { try encode(name, command: command) }
         if readback {
             guard let blit = command.makeBlitCommandEncoder() else { throw QualificationError("Metal readback encoder unavailable") }
             blit.copy(from: texture!, sourceSlice: 0, sourceLevel: 0, sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
@@ -181,6 +248,34 @@ public final class MetalEngine {
         try state.complete(success: command.status == .completed && command.error == nil,
                    message: "Metal execution failed: \(String(describing: command.error))")
         return command
+    }
+
+    public func benchmark() throws -> TimingCapture {
+        lock.lock(); defer { lock.unlock() }
+        try state.requireLive()
+        try require(inputLoaded && extent.width == 1280 && extent.height == 720, "Benchmark requires configured 1280x720 input")
+        func interval(_ stages: [String]? = nil) throws -> GPUInterval {
+            try autoreleasepool {
+                let command = try submit(readback: false, stages: stages)
+                return GPUInterval(start: command.gpuStartTime, end: command.gpuEndTime)
+            }
+        }
+        for _ in 0..<10 { _ = try interval() }
+        let wholeStart = ProcessInfo.processInfo.systemUptime
+        var whole: [GPUInterval] = []; whole.reserveCapacity(60)
+        for _ in 0..<60 { whole.append(try interval()) }
+        let wholeWindow = (ProcessInfo.processInfo.systemUptime - wholeStart) * 1000
+        for _ in 0..<10 { for stage in stageOrder { _ = try interval([stage]) } }
+        var isolated = stageOrder.map { _ in [GPUInterval]() }
+        for index in isolated.indices { isolated[index].reserveCapacity(60) }
+        let isolatedStart = ProcessInfo.processInfo.systemUptime
+        for _ in 0..<60 {
+            for (index, stage) in stageOrder.enumerated() { isolated[index].append(try interval([stage])) }
+        }
+        let isolatedWindow = (ProcessInfo.processInfo.systemUptime - isolatedStart) * 1000
+        return TimingCapture(wholeGraph: TimingSeries(name: "whole-graph", samples: whole, windowMS: wholeWindow),
+            isolatedStages: stageOrder.enumerated().map { TimingSeries(name: $0.element, samples: isolated[$0.offset], windowMS: isolatedWindow) },
+            configuredBufferBytes: buffers.values.reduce(0) { $0 + $1.length })
     }
 
     public func capture() throws -> TensorCapture {

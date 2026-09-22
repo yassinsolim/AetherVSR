@@ -17,6 +17,13 @@ final class ContractTests: XCTestCase {
         XCTAssertEqual(golden.expected.map(\.name), ["stem", "body.0", "body.1", "final"])
         XCTAssertEqual(golden.expected[0].values.count, 6144)
         XCTAssertEqual(golden.expected[3].values.count, 4608)
+        let extent = try Extent(width: golden.width * 2 + 1, height: golden.height * 2 + 1)
+        let tiled = golden.tiledInput(extent: extent)
+        XCTAssertEqual(tiled.count, extent.pixels * 3)
+        for channel in 0..<3 { for row in 0..<extent.height { for column in 0..<extent.width {
+            XCTAssertEqual(tiled[channel * extent.pixels + row * extent.width + column],
+                golden.input[channel * golden.width * golden.height + (row % golden.height) * golden.width + column % golden.width])
+        } } }
     }
 
     func testWrongHashAndCorruptWeightRejected() throws {
@@ -116,6 +123,28 @@ final class ContractTests: XCTestCase {
         XCTAssertThrowsError(try state.complete(success: true, message: "must not revive"))
         state.destroy(); state.destroy()
         XCTAssertThrowsError(try state.requireLive())
+    }
+
+    func testGPUTimeAvailabilityAndPercentiles() throws {
+        let samples = [1.0, 2.0, 3.0, 4.0].map { GPUInterval(start: 1, end: 1 + $0 / 1000) }
+        let series = TimingSeries(name: "synthetic", samples: samples, windowMS: 20)
+        XCTAssertTrue(series.complete); XCTAssertEqual(series.measuredSamples, 4)
+        XCTAssertEqual(series.statisticsMS["p50"]!!, 2.5, accuracy: 1e-9)
+        XCTAssertEqual(series.statisticsMS["p95"]!!, 3.85, accuracy: 1e-9)
+        XCTAssertEqual(series.statisticsMS["max"]!!, 4, accuracy: 1e-9)
+        for (start, end) in [(0.0, 0.0), (1.0, 1.0), (2.0, 1.0), (.nan, 2.0), (1.0, .infinity)] {
+            let invalid = GPUInterval(start: start, end: end)
+            XCTAssertNil(invalid.milliseconds)
+            let missing = TimingSeries(name: "synthetic", samples: [invalid], windowMS: 20)
+            XCTAssertFalse(missing.complete); XCTAssertEqual(missing.status, "not measured")
+            let json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(missing)) as! [String: Any]
+            let statistics = json["statisticsMS"] as! [String: Any]
+            XCTAssertTrue(statistics.values.allSatisfy { $0 is NSNull })
+            let raw = (json["samples"] as! [[String: Any]])[0]
+            XCTAssertTrue(raw.values.allSatisfy { $0 is NSNull })
+        }
+        let partial = TimingSeries(name: "synthetic", samples: samples + [GPUInterval(start: 0, end: 0)], windowMS: 20)
+        XCTAssertFalse(partial.complete); XCTAssertEqual(partial.status, "partially measured")
     }
 
     func testConvolutionMetadataAndRGBARejections() throws {
