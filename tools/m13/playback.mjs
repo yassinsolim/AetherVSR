@@ -222,6 +222,22 @@ export function prerequisiteIDs(id) {
   return ['lifecycle', 'parity30', ...(CASES[id][1] === 60 ? ['parity60'] : []), ...keys.slice(3, index)];
 }
 
+export function checkGeometry(rows) {
+  const frames = rows.filter(row => row.kind === 'frame'); assert(frames.length > 0);
+  assert(frames.every(row => JSON.stringify(row.networkOutput) === '[2560,1440]' && Array.isArray(row.drawable) && row.drawable.length === 2 && row.drawable.every(value => Number.isSafeInteger(value) && value > 0)));
+  const initial = frames[0].drawable, resize = rows.filter(row => row.kind === 'drawable-resize');
+  assert(resize.length >= 4);
+  for (const row of resize) {
+    assert(Number.isFinite(row.backingScale) && row.backingScale > 0);
+    assert.deepEqual(row.drawable, row.viewPoints.map(value => Math.round(value * row.backingScale)));
+  }
+  assert(frames.some(row => row.drawable[0] < initial[0] && row.drawable[1] < initial[1]));
+  const entry = rows.find(row => row.kind === 'fullscreen-enter'), exit = rows.find(row => row.kind === 'fullscreen-exit');
+  assert(entry && exit && exit.host > entry.host);
+  assert(frames.some(row => row.opportunityHost >= entry.host && row.opportunityHost < exit.host && JSON.stringify(row.drawable) !== JSON.stringify(initial)));
+  assert(frames.some(row => row.opportunityHost >= exit.host && JSON.stringify(row.drawable) === JSON.stringify(initial)));
+}
+
 export function evaluateCase(output, id) {
   let checked;
   try {
@@ -236,6 +252,7 @@ export function evaluateCase(output, id) {
     assert(zeroResources(observation.cleanup)); assert.equal(observation.checks.length, id === 'lifecycle' ? 17 : 3);
     assert(observation.checks.every(value => value.passed));
     assert.deepEqual(rows.filter(row => row.kind === 'check').map(({ name, passed }) => ({ name, passed })), observation.checks);
+    if (id === 'lifecycle') checkGeometry(rows);
     const parity = id.startsWith('parity') ? [1, 2, 3].map(target => {
         const path = join(output, `native/frame-${target}/result.json`);
         return { reference: reference(relative(ROOT, path)), result: parityCheck(path, target) };

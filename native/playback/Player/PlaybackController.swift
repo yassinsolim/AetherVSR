@@ -53,6 +53,8 @@ import QuartzCore
     public private(set) var opportunities: UInt64 = 0
     public private(set) var gaps: UInt64 = 0
     public private(set) var loops: UInt64 = 0
+    public private(set) var lastPresentedDrawable = CGSize.zero
+    public private(set) var lastPresentedOutput = CGSize.zero
     public var isSeeking: Bool { seeking || seekTarget != nil }
     public var surfaceCovered: Bool { !cover.isHidden }
     public var playbackIntended: Bool { desiredPlaying }
@@ -106,12 +108,28 @@ import QuartzCore
     public func attach(_ view: MTKView) {
         self.view = view; view.device = device; view.colorPixelFormat = .bgra8Unorm
         view.framebufferOnly = true; view.isPaused = true; view.enableSetNeedsDisplay = false
-        view.autoResizeDrawable = true; view.colorspace = CGColorSpace(name: CGColorSpace.itur_709)
+        view.autoResizeDrawable = false; view.colorspace = CGColorSpace(name: CGColorSpace.itur_709)
         view.layer?.isOpaque = true
         cover.backgroundColor = NSColor.black.cgColor; cover.frame = view.bounds
         cover.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]; cover.actions = ["hidden": NSNull(), "bounds": NSNull(), "position": NSNull()]
         view.layer?.addSublayer(cover)
+        resizeDrawable()
         startScheduler()
+    }
+
+    public func resizeDrawable() {
+        guard let view = view, let layer = view.layer as? CAMetalLayer else { return }
+        view.window?.contentView?.layoutSubtreeIfNeeded()
+        let backing = view.convertToBacking(view.bounds).size
+        guard backing.width > 0 && backing.height > 0 else { return }
+        let size = CGSize(width: backing.width.rounded(), height: backing.height.rounded())
+        layer.contentsScale = view.window?.backingScaleFactor ?? 1
+        if view.drawableSize != size || layer.drawableSize != size {
+            view.drawableSize = size; layer.drawableSize = size
+            event("drawable-resize", ["drawable": [Int(size.width), Int(size.height)],
+                "viewPoints": [Double(view.bounds.width), Double(view.bounds.height)], "backingScale": layer.contentsScale])
+        }
+        redrawStill()
     }
 
     private func startScheduler() {
@@ -323,7 +341,7 @@ import QuartzCore
         network.addCompletedHandler { [frame, lease, ingest, network] _ in
             withExtendedLifetime((frame, lease)) {
                 let finished = CACurrentMediaTime()
-                Task { @MainActor in
+                Task<Void, Never> { @MainActor in
                     slot.processing = false; slot.frame = nil; slot.lease = nil; slot.completionHost = finished
                     if network.status != .completed || ingest.status != .completed || network.error != nil || ingest.error != nil {
                         self.fail("GPU frame failure: \(String(describing: network.error ?? ingest.error))")
@@ -370,11 +388,13 @@ import QuartzCore
         slot.presenting = true
         command.addCompletedHandler { [drawable, command] _ in
             withExtendedLifetime(drawable) {
-                Task { @MainActor in
+                Task<Void, Never> { @MainActor in
                     slot.presenting = false
                     if command.status != .completed || command.error != nil { self.fail("Presentation GPU failure") }
                     else if self.state.accepts(identity) && item === self.source.player.currentItem && !slot.recorded {
                         slot.recorded = true; self.presented &+= 1; self.cover.isHidden = true
+                        self.lastPresentedDrawable = CGSize(width: width, height: height)
+                        self.lastPresentedOutput = CGSize(width: slot.network.output.width, height: slot.network.output.height)
                         let copy = Self.duration(command)
                         let total = slot.ingestMS.flatMap { ingest in slot.neuralMS.flatMap { neural in copy.map { ingest + neural + $0 } } }
                         self.event("frame", ["sequence": identity.sequence, "frameGeneration": identity.generation, "pts": identity.presentationTime,
@@ -391,7 +411,8 @@ import QuartzCore
                             "gpuIngestMS": slot.ingestMS as Any? ?? NSNull(), "gpuNeuralMS": slot.neuralMS as Any? ?? NSNull(),
                             "gpuProcessingSpanMS": slot.processingMS as Any? ?? NSNull(), "gpuPresentationMS": copy as Any? ?? NSNull(), "gpuFramePathMS": total as Any? ?? NSNull(),
                             "rate": self.source.player.rate, "timeControl": self.source.player.timeControlStatus.rawValue,
-                            "sourceFPS": self.source.sourceFPS, "drawable": [Int(width), Int(height)], "resources": self.resources(),
+                            "sourceFPS": self.source.sourceFPS, "drawable": [Int(width), Int(height)],
+                            "networkOutput": [slot.network.output.width, slot.network.output.height], "resources": self.resources(),
                             "acquired": self.acquired, "submitted": self.submitted, "completed": self.completed, "presented": self.presented,
                             "busy": self.busy, "duplicates": self.duplicate, "gaps": self.gaps, "loops": self.loops])
                     }

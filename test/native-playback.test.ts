@@ -3,7 +3,7 @@ import { it } from 'vitest';
 
 it('rejects invalid native cadence, identity, timing, mode and cleanup evidence', () => execFileSync(process.execPath, ['--input-type=module', '-e', `
   import assert from 'node:assert/strict';
-  import { analyze, zeroResources, prerequisiteIDs, CASES, studyStatus } from './tools/m13/playback.mjs';
+  import { analyze, zeroResources, prerequisiteIDs, CASES, studyStatus, checkGeometry } from './tools/m13/playback.mjs';
   const zero = { activeOutputs: 0, configuredSlots: 0, displayLinks: 0, occupiedSlots: 0, pixelBuffers: 0, presentationCommands: 0,
     processingSlots: 0, textureCaches: 0, textureWrappers: 0, retainedOwners: { decodedSampleOwners: 0, leasedPixelBuffers: 0, liveTextureWrappers: 0 } };
   assert(zeroResources(zero)); for (const value of [{}, [], { occupiedSlots: 0 }, { ...zero, textureCaches: 1 }]) assert(!zeroResources(value));
@@ -44,6 +44,14 @@ it('rejects invalid native cadence, identity, timing, mode and cleanup evidence'
   assert.equal(studyStatus({ ...outcomes, lifecycle: 'PASS', parity30: 'PASS', baseline30: 'FAIL' }), 'FAIL');
   assert.equal(studyStatus(Object.fromEntries(Object.keys(CASES).map(id => [id, 'PASS']))), 'PASS');
   assert.throws(() => studyStatus({ ...outcomes, retry: 'PASS' }));
+  const geometry = [{ kind: 'fullscreen-enter', host: 3 }, { kind: 'fullscreen-exit', host: 5 },
+    ...[[1000,600],[600,400],[1000,600],[1400,900],[1000,600]].map((drawable, index) => ({ kind: 'frame', opportunityHost: index + 1, drawable, networkOutput: [2560,1440] })),
+    ...[[600,400],[1000,600],[1400,900],[1000,600]].map(drawable => ({ kind: 'drawable-resize', drawable, viewPoints: drawable.map(value => value / 2), backingScale: 2 }))];
+  checkGeometry(geometry);
+  const fixed = structuredClone(geometry); fixed.filter(row => row.kind === 'frame').forEach(row => row.drawable = [1000,600]);
+  assert.throws(() => checkGeometry(fixed));
+  const changedOutput = structuredClone(geometry); changedOutput.find(row => row.kind === 'frame').networkOutput = [1280,720];
+  assert.throws(() => checkGeometry(changedOutput));
 `], { cwd: new URL('../', import.meta.url), encoding: 'utf8' }));
 
 it('rejects substituted parity snapshots and redirected evidence paths', () => execFileSync(process.execPath, ['--input-type=module', '-e', `

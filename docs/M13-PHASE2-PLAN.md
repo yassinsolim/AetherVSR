@@ -62,6 +62,11 @@ of points, backing scale or drawable resize. Baseline uses identical acquisition
 bridge and scheduler but bypasses F. Use current display-link callbacks, not
 polling/timers, and deduplicate sample PTS within source/loop generation.
 
+The paused MTKView is externally driven, so drawable size is explicitly updated
+from backing-pixel bounds after layout, fullscreen and backing-scale changes.
+Lifecycle evidence must observe smaller, restored and fullscreen drawable sizes
+while the network output stays2560x1440; playback liveness alone is insufficient.
+
 Maximum two owned frame slots, no unbounded pending queue. Skip stale/unprocessed
 input when slots are busy. Retain input leases until completion, never reuse a
 slot while GPU work or presentation uses it. Generation invalidation on pause,

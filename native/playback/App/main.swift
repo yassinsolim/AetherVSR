@@ -186,16 +186,23 @@ import UniformTypeIdentifiers
         try await wait("baseline mode") { self.controller.presented > count + 5 }; try check("baseline same source path", !controller.neural && controller.error == nil)
         controller.setNeural(true); count = controller.presented
         try await wait("neural mode") { self.controller.presented > count + 5 }
+        let windowedSize = controller.lastPresentedDrawable
         window.setContentSize(NSSize(width: 640, height: 400)); count = controller.presented
-        try await wait("resize smaller") { self.controller.presented > count + 5 }
-        window.setContentSize(NSSize(width: 1000, height: 640)); try check("resize preserves source/output contract", controller.source.sourceFPS > 0 && controller.error == nil)
+        try await wait("resize smaller") { self.controller.presented > count + 5 && self.controller.lastPresentedDrawable.width < windowedSize.width }
+        let smallerSize = controller.lastPresentedDrawable
+        window.setContentSize(NSSize(width: 1000, height: 640))
+        try await wait("resize larger") { self.controller.lastPresentedDrawable == windowedSize }
+        try check("resize preserves source/output contract", smallerSize.height < windowedSize.height && controller.lastPresentedOutput == CGSize(width: 2560, height: 1440) && controller.error == nil)
         window.toggleFullScreen(nil)
         try await wait("fullscreen enter", timeout: 15) { self.window.styleMask.contains(.fullScreen) }
         await delay(1); count = controller.presented
-        try await wait("fullscreen output") { self.controller.presented > count + 5 }; try check("fullscreen enter", true)
+        try await wait("fullscreen output") { self.controller.presented > count + 5 && self.controller.lastPresentedDrawable != windowedSize }
+        try check("fullscreen enter", controller.lastPresentedOutput == CGSize(width: 2560, height: 1440))
         window.toggleFullScreen(nil)
         try await wait("fullscreen exit", timeout: 15) { !self.window.styleMask.contains(.fullScreen) }
-        await delay(1); try check("fullscreen exit", controller.error == nil)
+        await delay(1)
+        try await wait("windowed drawable restored") { self.controller.lastPresentedDrawable == windowedSize }
+        try check("fullscreen exit", controller.lastPresentedOutput == CGSize(width: 2560, height: 1440) && controller.error == nil)
         try await controller.open(URL(fileURLWithPath: "public/media/aethervsr-testclip-720p60-h264.mp4"))
         try check("replacement hides old output", controller.surfaceCovered)
         controller.play(); count = controller.presented
@@ -240,9 +247,10 @@ import UniformTypeIdentifiers
     @objc func modeChanged(_ sender: NSSegmentedControl) { controller.setNeural(sender.selectedSegment == 1) }
     @objc func fullscreen() { window.toggleFullScreen(nil) }
     func windowShouldClose(_ sender: NSWindow) -> Bool { Task { await finish() }; return false }
-    func windowDidResize(_ notification: Notification) { controller?.redrawStill() }
-    func windowDidEnterFullScreen(_ notification: Notification) { record(["kind": "fullscreen-enter", "host": CACurrentMediaTime()]); controller.redrawStill() }
-    func windowDidExitFullScreen(_ notification: Notification) { record(["kind": "fullscreen-exit", "host": CACurrentMediaTime()]); controller.redrawStill() }
+    func windowDidResize(_ notification: Notification) { controller?.resizeDrawable() }
+    func windowDidChangeBackingProperties(_ notification: Notification) { controller?.resizeDrawable() }
+    func windowDidEnterFullScreen(_ notification: Notification) { record(["kind": "fullscreen-enter", "host": CACurrentMediaTime()]); controller.resizeDrawable() }
+    func windowDidExitFullScreen(_ notification: Notification) { record(["kind": "fullscreen-exit", "host": CACurrentMediaTime()]); controller.resizeDrawable() }
     func finish() async {
         guard !closing else { return }; closing = true
         let waiting = waiters; waiters.removeAll(); waiting.values.forEach { $0.1.resume(throwing: CancellationError()) }
