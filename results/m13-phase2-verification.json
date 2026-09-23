@@ -1,0 +1,163 @@
+{
+  "schema": "aethervsr.m13.phase2-verification/1",
+  "baseline": "e381bd9366803fe91c048a97bbe5088844627f10",
+  "sourceCommit": "c20e066971a3c7c4c3f0d81bb561f624e485e3c8",
+  "verdict": "NATIVE LOCAL PLAYBACK PARTIAL",
+  "study": {
+    "path": ".cache/m13/phase2-study-03/derived.json",
+    "bytes": 110530,
+    "sha256": "47b67bdfa5577651cc8de8aa07758860174138e157e09f74cff3d9a688c1cc4e"
+  },
+  "sourceCI": {
+    "reference": {
+      "path": ".cache/m13/phase2-study-03/source-ci.json",
+      "bytes": 5972,
+      "sha256": "a7935a3f337b031d7c5f3bd25239756394d05acac53f4157e58702624459949b"
+    },
+    "id": 35804039192,
+    "url": "https://github.com/yassinsolim/AetherVSR/actions/runs/35804039192",
+    "jobs": [
+      {
+        "name": "fusion",
+        "conclusion": "success"
+      },
+      {
+        "name": "native-metal",
+        "conclusion": "success"
+      },
+      {
+        "name": "gate",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "baselineGates": {
+    "path": ".cache/m13/phase2-baseline-01/result.json",
+    "bytes": 4769,
+    "sha256": "c2f7cbc2613e8866506341a99e132970f4407c0923b62dff917ad73b17d3adb7"
+  },
+  "localJavaScript": {
+    "path": ".cache/m13/phase2-gates-01/javascript.json",
+    "bytes": 3101,
+    "sha256": "442e445e0af2ff28e95a7dd912ac72d1fa8dc49808026536d04d0a800d8f1f3e"
+  },
+  "localNativePython": {
+    "path": ".cache/m13/phase2-gates-02/result.json",
+    "bytes": 5887,
+    "sha256": "0f8a242b4c333e5d3a98c50cbaa715539855f07f98c545a6ea93404e47dbc5cf"
+  },
+  "localGateCaveat": "The phase15 replay in gates-02 was blocked only by the dirty-tree guard; complete replay passed after commits4272a59 and8d936c0. Source-bound clean closure replays are recorded separately.",
+  "cleanClone": {
+    "reference": {
+      "path": ".cache/m13/phase2-clean-clone-01/result.json",
+      "bytes": 9075,
+      "sha256": "afd64f64d0bbfa018495ca05f72aa63592148a8aba30b55bcca47c8934a16d47"
+    },
+    "cleanup": {
+      "path": ".cache/m13/phase2-clean-clone-01/cleanup.json",
+      "bytes": 149,
+      "sha256": "c4f000129640e190078529d9e585e0122e082ceb25589bd9985ab583ce67ff95"
+    },
+    "checks": 18,
+    "dependencies": "own npm and native builds; explicitly shared preexisting Python .cache/m8-venv interpreter",
+    "testCounts": {
+      "vitest": {
+        "passed": 1504,
+        "skipped": 3
+      },
+      "python": 612,
+      "optIn": 80,
+      "desktop": 71,
+      "originalNative": {
+        "physicalPassed": 18,
+        "cpuPassed": 10,
+        "hostedPhysicalSkipped": 8
+      },
+      "playbackNative": {
+        "physicalPassed": 7,
+        "cpuPassed": 4,
+        "hostedPhysicalSkipped": 3
+      }
+    }
+  },
+  "unchangedPaths": [
+    "native/macos",
+    "src/core",
+    "apps/desktop",
+    "public/models",
+    "docs/M13-PHASE1-METAL.md",
+    "docs/M13-PHASE1.5-METAL-OPTIMIZATION.md",
+    "results/m13-phase1-metal.json",
+    "results/m13-phase15-metal.json"
+  ],
+  "earlierFrozenStudies": [
+    {
+      "manifest": {
+        "path": ".cache/m13/phase2-study-01/manifest.json",
+        "bytes": 8280,
+        "sha256": "c90fe6b220adefe3fb383f0eac1e75b5b2fb75abe89de202cd960b9262f1ffbd"
+      },
+      "superseded": {
+        "path": ".cache/m13/phase2-study-01/superseded.json",
+        "bytes": 442,
+        "sha256": "b14cad674961ba041451a8303ad7766bab8a38cf482034d9ef8d1ea4614a5b89"
+      },
+      "ciFailure": {
+        "path": ".cache/m13/phase2-ci-35803164621-failure.log",
+        "bytes": 15547,
+        "sha256": "1d88f874d885d09cfa37349761d3903ff55e5a980ab27ff882162524a1a697ee"
+      },
+      "performanceTrials": 0
+    },
+    {
+      "manifest": {
+        "path": ".cache/m13/phase2-study-02/manifest.json",
+        "bytes": 8281,
+        "sha256": "b9f1c91bf95af29b1dd885b6b19ccbf28d2bf437358d382b88015c02b3fbf75e"
+      },
+      "ci": {
+        "path": ".cache/m13/phase2-study-02/source-ci.json",
+        "bytes": 5972,
+        "sha256": "8224ff040b8390a37ef65ecc36630a3b849264fedd8b34abd2cd7febc4058787"
+      },
+      "ciFailure": {
+        "path": ".cache/m13/phase2-ci-35803762288-failure.log",
+        "bytes": 13494,
+        "sha256": "f757f0916fd808b4c87080a31a43136f522c3fd7cacf9d996bf7e73a8d92873c"
+      },
+      "performanceTrials": 0
+    }
+  ],
+  "bindingDiagnosis": {
+    "path": ".cache/m13/phase2-study-03/baseline30/diagnosis.json",
+    "bytes": 6239,
+    "sha256": "047ff4796cdcbce09fa2c42f7d875423cb09f5a0faf51246350d0bf4f24013d8"
+  },
+  "review": {
+    "requestedAreas": 17,
+    "finalEvidenceAndReport": "PASS with product cadence, warmup, age and unmeasured gates explicitly retained; not READY",
+    "executionScope": "Independent reviewers read source/raw evidence; physical execution and numerical replay performed by the main workflow"
+  },
+  "size": {
+    "sourceTree": "3b4bfaa00bb78eaf47df2bb129c5960d6290d0ea",
+    "sourceGitObjectBytes": 55482498,
+    "capBytes": 58720256,
+    "headroomBeforePublication": 3237758
+  },
+  "permissionsRequested": [],
+  "captureIntegration": "not implemented",
+  "phase3": "not authorized",
+  "measurementCasesRun": [
+    "baseline30"
+  ],
+  "measurementCasesNotRun": [
+    "neural30",
+    "baseline60a",
+    "neural60a",
+    "neural60b",
+    "baseline60b",
+    "baseline60c",
+    "neural60c",
+    "soak"
+  ]
+}

@@ -6,6 +6,38 @@ measurement could not be taken, the row says so.
 
 See `AGENTS.md` §2 and §3 for the rules this file exists to enforce.
 
+## M13 Phase 2 - Native Local Playback, Partial
+
+Apple M5 / Mac17,2,24GiB, macOS26.6.2 build25G83, Xcode27.0 build27A266a,
+SDK27.0, Swift6.4. Source `c20e066971a3c7c4c3f0d81bb561f624e485e3c8`.
+Native AVFoundation420v BT.709 ingest, nearest2x baseline and Metal presentation;
+no browser. Committed720p30 H.264 fixture, complete AVPlayer loops. Display
+maximum120Hz, requested60Hz, backing scale2; GPU timestamps available.
+WindowVisible=true but windowKey=false/occlusionVisible=false in all recorded
+heartbeats. This is an **occluded failed trial, not a foreground benchmark**.
+
+| Binding case |Wall window s|Unique frames|Overall fps|Final20 fps|Age p95/max ms|Outcome|
+|---|---:|---:|---:|---:|---:|---|
+| Baseline30 |60.033667|110|1.832305|1.75|981.263103 /985.343416|FAIL|
+| Neural30 |not measured|not measured|not measured|not measured|not measured|NOT_RUN|
+| All baseline/neural60 |not measured|not measured|not measured|not measured|not measured|NOT_RUN|
+| Ten-minute neural soak |not measured|not measured|not measured|not measured|not measured|NOT_RUN|
+
+Five elapsed warmup seconds produced only11 useful frames, below116 required.
+The29fps overall/final floors and66.667/250ms age bounds fail. Every loop gap
+remains in the denominator. Software age is originating item time minus decoded
+PTS at presentation opportunity, not physical scanout latency. No favorable rerun.
+
+Descriptive baseline active-GPU-path p50/p95/max:3.532000/3.839542/4.159625ms,
+110 completed samples over the full window. Each sample sums its own ingest,
+nearest-compute and presentation-render intervals; queue/display gaps, decode,
+CPU logging and physical display are excluded. This headroom does not qualify
+cadence or replace neural timing. Foreground performance, observer cost and
+causation of the recorded long presentation waits are unresolved. Thermal state
+was nominal; no sustained thermal claim. Audio tracks are absent from both clips.
+[34-section report](docs/M13-PHASE2-NATIVE-PLAYBACK.md) and
+[replayable evidence index](results/m13-phase2-playback.json).
+
 ## M13 Phase 1.5 - Optimized Native Metal
 
 Measured Apple M5 / Mac17,2, 24 GiB, macOS 26.6.2 build 25G83, Xcode 27.0

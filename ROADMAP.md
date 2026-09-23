@@ -587,7 +587,24 @@ two independent 10-warmup/60-sample f16 runs passed the unchanged <=8 ms p50 /
 actual WebGPU parity and falsification pass. The original Phase-1 implementation
 and evidence remain unchanged. This is isolated M5 backend timing, not video
 FPS. [Full candidate and binding report](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md).
-Phase 2 may be separately authorized after publication; it is not implemented.
+Phase 2 was subsequently authorized separately; its results do not change these
+isolated backend measurements.
+
+---
+
+## Milestone 13 - Phase 2 [NATIVE LOCAL PLAYBACK PARTIAL]
+
+Current macOS26 AVFoundation/Core Video acquisition, validated GPU SDR ingest,
+unchanged F and native Metal presentation are implemented. Real decoded-frame
+parity for both fixtures/precisions and17 native lifecycle checks pass, including
+observed drawable resize/fullscreen transitions and zero owned resources on stop.
+
+The one binding baseline30 trial is occluded and fails cadence, software-age
+tails and useful-frame warmup. Neural30, all three60fps pairs and the single
+ten-minute soak remain gated NOT_RUN. No foreground real-time or audible/A/V
+qualification follows. [Full report](docs/M13-PHASE2-NATIVE-PLAYBACK.md).
+No favorable rerun, ScreenCaptureKit, browser/Stremio integration, new permission,
+model change or Phase3 is authorized by this partial result.
 
 ---
 
@@ -596,4 +613,4 @@ Phase 2 may be separately authorized after publication; it is not implemented.
 Explicitly out of scope until the above are done, listed so they are not
 mistaken for near-term plans: compression-artefact removal, temporal
 super-resolution using previous frames, frame interpolation, Core ML / ANE,
-and native integration beyond the explicitly authorized Metal inference phase.
+and native integration beyond the explicitly authorized local-playback phase.

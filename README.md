@@ -21,8 +21,17 @@ the exact model and passes f32/f16 golden, falsification and fresh WebGPU parity
 Two fixed M5 f16 binding runs measured whole-graph GPU p50/p95 of
 3.922/4.458 ms and 3.933/4.452 ms, each 60 samples after ten warmups.
 This qualifies isolated 720p-to-1440p neural timing, not video playback or a
-production rollout. Phase 1 and its simple backend remain unchanged; Phase 2
-has not started. [Optimization report and scope](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md).
+production rollout. Phase 1 and its simple backend remain unchanged.
+[Optimization report and scope](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md).
+
+**M13 Phase 2: NATIVE LOCAL PLAYBACK PARTIAL.** The macOS26 AVFoundation/Core
+Video player passes decoded-frame f32/f16 parity, lifecycle and native resize
+checks with unchanged F. The first binding baseline30 trial, recorded with an
+occluded window, fails cadence and software age:1.832fps overall,1.75fps final20,
+age p95 981.263ms. Foreground performance is unqualified; neural30, all60fps
+timing and the ten-minute soak are NOT_RUN. No favorable rerun, capture API,
+new permission or Phase3 followed. Audio fixtures contain no audio track.
+[Full scope, reproduction and retained failures](docs/M13-PHASE2-NATIVE-PLAYBACK.md).
 
 Real-time 2x neural video super-resolution in the browser, with measured gains
 on selected captured-content and degradation classes. Broad web-video

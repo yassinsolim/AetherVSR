@@ -1,0 +1,2864 @@
+{
+  "schema": "aethervsr.m13.phase2-study/1",
+  "baseline": "e381bd9366803fe91c048a97bbe5088844627f10",
+  "sourceCommit": "c20e066971a3c7c4c3f0d81bb561f624e485e3c8",
+  "manifest": {
+    "path": ".cache/m13/phase2-study-03/manifest.json",
+    "bytes": 8280,
+    "sha256": "6a221a297e97c61e5799b6658f51b5a453d4331cf26f8b806d55e12c4742230a"
+  },
+  "binary": {
+    "path": ".cache/m13/phase2-study-03/program/aether-player",
+    "bytes": 1275616,
+    "sha256": "3bb2f9e49adc6d3fb6afb938091323e17141a16a3a0a8c58f31609339ebdf70f"
+  },
+  "clips": [
+    {
+      "path": "public/media/aethervsr-testclip-720p30-h264.mp4",
+      "bytes": 1492814,
+      "sha256": "d53df7631d9c279f1ec88f53bb2b9c8be8367c8da7ccd0bfe1e7bf11548cd730"
+    },
+    {
+      "path": "public/media/aethervsr-testclip-720p60-h264.mp4",
+      "bytes": 1882760,
+      "sha256": "a259336c3dbd9af83c51a4da05eb0b7100ae6927865cc92b56323a7d01561f79"
+    }
+  ],
+  "environment": {
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83\n",
+    "hardware": "Mac17,2",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx26.0\n"
+  },
+  "cases": {
+    "lifecycle": {
+      "outcome": "PASS",
+      "checks": [
+        {
+          "name": "720p30 initial native frames",
+          "passed": true
+        },
+        {
+          "name": "pause stops neural submission",
+          "passed": true
+        },
+        {
+          "name": "pause remains AVPlayer authority",
+          "passed": true
+        },
+        {
+          "name": "resume advances unique output",
+          "passed": true
+        },
+        {
+          "name": "forward seek recovered",
+          "passed": true
+        },
+        {
+          "name": "backward seek recovered",
+          "passed": true
+        },
+        {
+          "name": "pause during seek preserved",
+          "passed": true
+        },
+        {
+          "name": "successive seeks preserve play intent",
+          "passed": true
+        },
+        {
+          "name": "AVPlayer mute and volume",
+          "passed": true
+        },
+        {
+          "name": "baseline same source path",
+          "passed": true
+        },
+        {
+          "name": "resize preserves source/output contract",
+          "passed": true
+        },
+        {
+          "name": "fullscreen enter",
+          "passed": true
+        },
+        {
+          "name": "fullscreen exit",
+          "passed": true
+        },
+        {
+          "name": "replacement hides old output",
+          "passed": true
+        },
+        {
+          "name": "720p60 becomes sole authority",
+          "passed": true
+        },
+        {
+          "name": "superseded source cannot poison current",
+          "passed": true
+        },
+        {
+          "name": "terminal enhancement hides and stops",
+          "passed": true
+        }
+      ],
+      "cleanup": {
+        "activeOutputs": 0,
+        "configuredSlots": 0,
+        "displayLinks": 0,
+        "occupiedSlots": 0,
+        "pixelBuffers": 0,
+        "presentationCommands": 0,
+        "processingSlots": 0,
+        "retainedOwners": {
+          "decodedSampleOwners": 0,
+          "leasedPixelBuffers": 0,
+          "liveTextureWrappers": 0
+        },
+        "textureCaches": 0,
+        "textureWrappers": 0
+      },
+      "parity": null,
+      "launch": {
+        "path": ".cache/m13/phase2-study-03/lifecycle/launch.json",
+        "bytes": 786,
+        "sha256": "6da3c1fbd7b95adcc26890a1ce0d67f1e7a0c87e594faa14eb2a3af101929056"
+      },
+      "process": {
+        "path": ".cache/m13/phase2-study-03/lifecycle/process.json",
+        "bytes": 279,
+        "sha256": "af4f58f0e65b6ad7858a75d3e58cec9abbb4e26b10eafea2e1dd7749052b4bcf"
+      },
+      "observation": {
+        "path": ".cache/m13/phase2-study-03/lifecycle/native/result.json",
+        "bytes": 2090,
+        "sha256": "352be68eff2cd7f6af448ddfe23c191d7fb8d2170e756c538a5d7c359cac4df9"
+      },
+      "events": {
+        "path": ".cache/m13/phase2-study-03/lifecycle/native/events.jsonl",
+        "bytes": 193469,
+        "sha256": "6a8d6626bba700b770536c0216656b86a93e91017f7b6dc5dbf42e389fe4fde5"
+      },
+      "reference": {
+        "path": ".cache/m13/phase2-study-03/lifecycle/result.json",
+        "bytes": 2547,
+        "sha256": "674d12563c75f80e06fcb04decf059d0324a684cab9a19e50b97e0d189fd4955"
+      }
+    },
+    "parity30": {
+      "outcome": "PASS",
+      "checks": [
+        {
+          "name": "exact decoded parity 1",
+          "passed": true
+        },
+        {
+          "name": "exact decoded parity 2",
+          "passed": true
+        },
+        {
+          "name": "exact decoded parity 3",
+          "passed": true
+        }
+      ],
+      "cleanup": {
+        "activeOutputs": 0,
+        "configuredSlots": 0,
+        "displayLinks": 0,
+        "occupiedSlots": 0,
+        "pixelBuffers": 0,
+        "presentationCommands": 0,
+        "processingSlots": 0,
+        "retainedOwners": {
+          "decodedSampleOwners": 0,
+          "leasedPixelBuffers": 0,
+          "liveTextureWrappers": 0
+        },
+        "textureCaches": 0,
+        "textureWrappers": 0
+      },
+      "parity": [
+        {
+          "reference": {
+            "path": ".cache/m13/phase2-study-03/parity30/native/frame-1/result.json",
+            "bytes": 11652,
+            "sha256": "9d279ca1fedb2226be9776a12146be0501f1534c5fa212bab81bba0d0df1b3fb"
+          },
+          "result": {
+            "color": {
+              "chroma": "Left",
+              "format": 875704438,
+              "height": 720,
+              "matrix": "ITU_R_709_2",
+              "primaries": "ITU_R_709_2",
+              "transfer": "ITU_R_709_2",
+              "width": 1280
+            },
+            "modelSHA": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+            "outcome": "PASS",
+            "planes": [
+              {
+                "bytes": 921600,
+                "file": "plane-0.bin",
+                "height": 720,
+                "sha256": "9a76e9ba15104c8ad6fa0525d428c668375e04e6e898863c3e2b4ea14426cc44",
+                "stride": 1280
+              },
+              {
+                "bytes": 460800,
+                "file": "plane-1.bin",
+                "height": 360,
+                "sha256": "e94de3d3589fddc019943160cdd8c87f2da389d85d21001abd045fabe2427ce9",
+                "stride": 1280
+              }
+            ],
+            "pts": 0.9792666666666666,
+            "runs": [
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-input.f32le",
+                    "sha256": "4a4951fa005faf48f8bf90ddd45d3e8284215071e4bb459b558e38d913c830bc"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f32-reference-input.f32le",
+                    "sha256": "c8cf56df7e99d12a4cbb87e3d1a909183a3e4c997a3c4dfeceb6b3be8c767e65"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-stem.f32le",
+                    "sha256": "272489af592d849ee569a83f9837f5d56aa57cd599ec52f5d0e06d5b957da8fb"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-stem.f32le",
+                    "sha256": "4ac69e7c387631a6fa26f81caf9bf082cc6818dd68ec10daf9582a55eb60b06f"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.0.f32le",
+                    "sha256": "daee0be7ea90d9531d998d1b99a479e04045adf974621a7401532071873b02a0"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.0.f32le",
+                    "sha256": "b50d964d72d6587718255e13068859b28e4468d46a615ed1829e87cf2a9f8cee"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.1.f32le",
+                    "sha256": "03d8f51e01ae4d5b35fc5753f93e77d02756960db536ead2e1b8d08032c4e98b"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.1.f32le",
+                    "sha256": "3aa07339338ee8178d90a7595d674be2527e4e9bca9f9b04897749b50ef3053b"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-final.f32le",
+                    "sha256": "fa37e1e3f004fbd156ddd7062c2563a028e885ad5cc1f1238fec098d2ea7bf0e"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-reference-final.f32le",
+                    "sha256": "bb166ade987edb641a858d28830602f8d458383c0d231484e69d7b09f8e08879"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-output.rgba8",
+                    "sha256": "67f18bc79336098b858368648fd4c74e8d7eab29440fd3358d38e0407311cef2"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-reference-output.rgba8",
+                    "sha256": "f832bc12071066d3408c844c68f7eaac8ac8814255c8b074db83cbc86f9ad059"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.581260407287573e-8,
+                "inputMeanError": 3.692381372088689e-9,
+                "integratedRGBAHash": "67f18bc79336098b858368648fd4c74e8d7eab29440fd3358d38e0407311cef2",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f32",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "f832bc12071066d3408c844c68f7eaac8ac8814255c8b074db83cbc86f9ad059",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.001960843801498413,
+                  "meanAbsError": 0.0009326938364706885,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 7237817
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 1.772989182629519e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 4267315
+                },
+                "shaderSHA": "d3659f7c0e63a157753d194a976dfee765868e9938a8d1d0ccbb0ca2636bfd65",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000013709068298339844,
+                    "meanAbsError": 8.917711397968573e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.001,
+                    "worstIndex": 9923474
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000034570693969726562,
+                    "meanAbsError": 1.9565939308247633e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.001,
+                    "worstIndex": 628117
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.000003952533006668091,
+                    "meanAbsError": 1.8411979357072876e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.001,
+                    "worstIndex": 12680493
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 2.682209014892578e-7,
+                    "meanAbsError": 5.081002189523655e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.001,
+                    "worstIndex": 3558519
+                  }
+                ]
+              },
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-input.f32le",
+                    "sha256": "4a4951fa005faf48f8bf90ddd45d3e8284215071e4bb459b558e38d913c830bc"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f16-reference-input.f32le",
+                    "sha256": "c8cf56df7e99d12a4cbb87e3d1a909183a3e4c997a3c4dfeceb6b3be8c767e65"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-stem.f32le",
+                    "sha256": "014ab62d3dd42b1565e7e09f6a794b0fb9c365badc814ff11fbb893b8a687a42"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-stem.f32le",
+                    "sha256": "014ab62d3dd42b1565e7e09f6a794b0fb9c365badc814ff11fbb893b8a687a42"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.0.f32le",
+                    "sha256": "6191761d983d796588784ee0844cc065155e251be6968261dc5cedf55d9e5bfd"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.0.f32le",
+                    "sha256": "6191761d983d796588784ee0844cc065155e251be6968261dc5cedf55d9e5bfd"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.1.f32le",
+                    "sha256": "cea40ce185cac9cb2b0f54b1d2ed2b73a712d1b573250c1972ce73b4724372f5"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.1.f32le",
+                    "sha256": "cea40ce185cac9cb2b0f54b1d2ed2b73a712d1b573250c1972ce73b4724372f5"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-final.f32le",
+                    "sha256": "7899250d7f87462d95d9e049da34eda5a20caeb5922c0066ecce400719047c7d"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-reference-final.f32le",
+                    "sha256": "720ef0bbbf65737690f53d3841f8ec34ddb4871095bdc671606aecf6f97fc53a"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-output.rgba8",
+                    "sha256": "6bc0ce0d74cac0ac398430f45cdf8c5e46de94ba88efbdfe1a040f1ca7497fe0"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-reference-output.rgba8",
+                    "sha256": "07138439112ec187a607fbfe13170c8cec0c0b95fefc64e7473cf1982d35fbf0"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.581260407287573e-8,
+                "inputMeanError": 3.692381372088689e-9,
+                "integratedRGBAHash": "6bc0ce0d74cac0ac398430f45cdf8c5e46de94ba88efbdfe1a040f1ca7497fe0",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f16",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "07138439112ec187a607fbfe13170c8cec0c0b95fefc64e7473cf1982d35fbf0",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608139991760254,
+                  "meanAbsError": 0.0009137986336033119,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 9732382
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 3.545978365259038e-10,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 9732382
+                },
+                "shaderSHA": "3040f07cf71480920b66436f43aeef4dffa82e99f719f4e8b4ef01440dd4b338",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 1.1920928955078125e-7,
+                    "meanAbsError": 1.7965927912444857e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.05,
+                    "worstIndex": 2587499
+                  }
+                ]
+              }
+            ],
+            "schema": "aethervsr.m13.phase2-paused-parity/1"
+          }
+        },
+        {
+          "reference": {
+            "path": ".cache/m13/phase2-study-03/parity30/native/frame-2/result.json",
+            "bytes": 11652,
+            "sha256": "0e347cb9077b4d9b5f462dda0a6b80e51168a7a58ea7aa4de5feb6e4cb3fcbba"
+          },
+          "result": {
+            "color": {
+              "chroma": "Left",
+              "format": 875704438,
+              "height": 720,
+              "matrix": "ITU_R_709_2",
+              "primaries": "ITU_R_709_2",
+              "transfer": "ITU_R_709_2",
+              "width": 1280
+            },
+            "modelSHA": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+            "outcome": "PASS",
+            "planes": [
+              {
+                "bytes": 921600,
+                "file": "plane-0.bin",
+                "height": 720,
+                "sha256": "a2c3cc508bfcc9961d9f166f006fe22c9f240136e854d0ad3cdc2c6a4973691c",
+                "stride": 1280
+              },
+              {
+                "bytes": 460800,
+                "file": "plane-1.bin",
+                "height": 360,
+                "sha256": "7c454d94bf7d281c7a77dc085a6d0544f262caec07df1427d29caace33df6090",
+                "stride": 1280
+              }
+            ],
+            "pts": 1.9795666666666667,
+            "runs": [
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-input.f32le",
+                    "sha256": "78833cf4b011a4071e6602cb953c266e386b6fe2d78ecb3587db39ff59c6df26"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f32-reference-input.f32le",
+                    "sha256": "a47dcec83be1d84ef29cfaf471dbc06126d6c813a4b4ee22e4b4a26db9d98969"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-stem.f32le",
+                    "sha256": "b7dba87709ddbead91b0098b062189e94296c6e1ba06a1e9617441bcf3614b6f"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-stem.f32le",
+                    "sha256": "6fe27da2486b5ea64a5e7afe7e5f7355559f94dff7e08e9d2cf2458abce4a559"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.0.f32le",
+                    "sha256": "6eebdb55792bcec86089a1de9f6c3a1a57d790f31940f370913abf813a9a53a4"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.0.f32le",
+                    "sha256": "b1adb04a67b8f204707a1be9b86f32fa18b9528c05ecbba7f37e509435594ad0"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.1.f32le",
+                    "sha256": "b31e34650c34c3341f9ffaccbe4948eed7ac67a7e122b14d9e1b35dedeee4c7d"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.1.f32le",
+                    "sha256": "0fc9423da553b6cee986cf2dad0469aeb4a61d2cff847cbe735cf1a5bfdbc71b"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-final.f32le",
+                    "sha256": "39a043ad1effb9b3e4475ac830004f822f67970b5f603691e1590e79f0b21cdb"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-reference-final.f32le",
+                    "sha256": "59ee8715b4abfc07461e0425d597f2fdba5129fbd8889c2eeeaad736626a1fd4"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-output.rgba8",
+                    "sha256": "5ff9c46a7ad2acfd872d6afafa4136cacd4855e29e84c7e25308fbbb4141f7fa"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-reference-output.rgba8",
+                    "sha256": "836e34c4bad6b4aa553cbbf1f48f2ad9da6d0bd0805109f7485e9cca3361dde0"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.581260407287573e-8,
+                "inputMeanError": 3.6825434504467584e-9,
+                "integratedRGBAHash": "5ff9c46a7ad2acfd872d6afafa4136cacd4855e29e84c7e25308fbbb4141f7fa",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f32",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "836e34c4bad6b4aa553cbbf1f48f2ad9da6d0bd0805109f7485e9cca3361dde0",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608289003372192,
+                  "meanAbsError": 0.0009353994569243848,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 6560647
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921572118997574,
+                  "meanAbsError": 3.5459787021089278e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 9071959
+                },
+                "shaderSHA": "d3659f7c0e63a157753d194a976dfee765868e9938a8d1d0ccbb0ca2636bfd65",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000014528632164001465,
+                    "meanAbsError": 8.657904802965454e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.001,
+                    "worstIndex": 4073919
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.000004231929779052734,
+                    "meanAbsError": 1.9109443782423026e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.001,
+                    "worstIndex": 427143
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.000003993511199951172,
+                    "meanAbsError": 1.79753962016428e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.001,
+                    "worstIndex": 12418276
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 2.682209014892578e-7,
+                    "meanAbsError": 5.001637668642531e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.001,
+                    "worstIndex": 2678514
+                  }
+                ]
+              },
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-input.f32le",
+                    "sha256": "78833cf4b011a4071e6602cb953c266e386b6fe2d78ecb3587db39ff59c6df26"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f16-reference-input.f32le",
+                    "sha256": "a47dcec83be1d84ef29cfaf471dbc06126d6c813a4b4ee22e4b4a26db9d98969"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-stem.f32le",
+                    "sha256": "1cad84908a54caa9b8126468cfcbb59655d4951b7ce654e5400cb96b39b94838"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-stem.f32le",
+                    "sha256": "1cad84908a54caa9b8126468cfcbb59655d4951b7ce654e5400cb96b39b94838"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.0.f32le",
+                    "sha256": "dd571cbd281ace3c6dba07113772df13fce7d4c7a5b295edb2d43d818f04c9f2"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.0.f32le",
+                    "sha256": "dd571cbd281ace3c6dba07113772df13fce7d4c7a5b295edb2d43d818f04c9f2"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.1.f32le",
+                    "sha256": "d9e4f09f2afd513f77a76860122822d73a3958f1d7135fd09d0ced9a185b3af6"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.1.f32le",
+                    "sha256": "d9e4f09f2afd513f77a76860122822d73a3958f1d7135fd09d0ced9a185b3af6"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-final.f32le",
+                    "sha256": "1f707bed0838ad6cfc674900ada4ced375f42843a9604867cfd989c734c06e37"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-reference-final.f32le",
+                    "sha256": "c06a4ac63094aad19ae4430df3797f01b8c11550dea34aab3c30366c8f23c7c2"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-output.rgba8",
+                    "sha256": "492bac550b31036d9c56cce60987bf69e326e4d56d5b6741b7bdcd6eba1d833b"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-reference-output.rgba8",
+                    "sha256": "0a19ee90e2e1268de9f4531ca0e2ceda082f0451f6a789889533012e06101a61"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.581260407287573e-8,
+                "inputMeanError": 3.6825434504467584e-9,
+                "integratedRGBAHash": "492bac550b31036d9c56cce60987bf69e326e4d56d5b6741b7bdcd6eba1d833b",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f16",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "0a19ee90e2e1268de9f4531ca0e2ceda082f0451f6a789889533012e06101a61",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.001960843801498413,
+                  "meanAbsError": 0.0009161916269409142,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 10931828
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 1.4183913461036153e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 555681
+                },
+                "shaderSHA": "3040f07cf71480920b66436f43aeef4dffa82e99f719f4e8b4ef01440dd4b338",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 1.1920928955078125e-7,
+                    "meanAbsError": 1.7522823356928171e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.05,
+                    "worstIndex": 1870802
+                  }
+                ]
+              }
+            ],
+            "schema": "aethervsr.m13.phase2-paused-parity/1"
+          }
+        },
+        {
+          "reference": {
+            "path": ".cache/m13/phase2-study-03/parity30/native/frame-3/result.json",
+            "bytes": 11654,
+            "sha256": "9750bae390fd5bdb150e0dd3802f5df0e8ddcd2d26ae7200650667e367bfaa37"
+          },
+          "result": {
+            "color": {
+              "chroma": "Left",
+              "format": 875704438,
+              "height": 720,
+              "matrix": "ITU_R_709_2",
+              "primaries": "ITU_R_709_2",
+              "transfer": "ITU_R_709_2",
+              "width": 1280
+            },
+            "modelSHA": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+            "outcome": "PASS",
+            "planes": [
+              {
+                "bytes": 921600,
+                "file": "plane-0.bin",
+                "height": 720,
+                "sha256": "332fa586d0c53170f9d7bce13ecd77446c31b7a74c679c826e79b6c6e85091d0",
+                "stride": 1280
+              },
+              {
+                "bytes": 460800,
+                "file": "plane-1.bin",
+                "height": 360,
+                "sha256": "73d4fc26b1ab4ad390de3a6df1d7560ceda46a05bf047c7a3c77bec858c6c151",
+                "stride": 1280
+              }
+            ],
+            "pts": 2.9788,
+            "runs": [
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-input.f32le",
+                    "sha256": "f3251ef0369896fb167d2fd95201b3726598dfab636a79234a06a968bf5de673"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f32-reference-input.f32le",
+                    "sha256": "5c40b314bacd1c9974be20a09bd439642517a1c3aa2cad85c6f197deaab26971"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-stem.f32le",
+                    "sha256": "8f3426ddff9b8135a193c69baa09a581e961914211c556b3f4311fe9813382c5"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-stem.f32le",
+                    "sha256": "f9dbcf2a5d25e4ac8abcb15f468d2a7da6b9e4d2238c8fc587a3fd19308adab1"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.0.f32le",
+                    "sha256": "cc571c8d895d8f8926e203564bd13e79ea8a4ba57fd26e56c0eddaae70ff12ad"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.0.f32le",
+                    "sha256": "0ba2bc7b8b793bb26e177c0bd173232b15505645c8df55f1ecd63e2551d7e6ca"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.1.f32le",
+                    "sha256": "15ae8fcda2289d25aea1036a9092ab9855824e6a7889cf93350caac0034e16eb"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.1.f32le",
+                    "sha256": "196eb710fe20e23b145b9ca20002f6f525eba21619dd837eb92bf8d9ae34b897"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-final.f32le",
+                    "sha256": "ccc464dbb718b96e8a90e63e8f85c675a74abd2eddf53bcfaf7ed53ebfa3243d"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-reference-final.f32le",
+                    "sha256": "bf0ebb615f25e1e29c4f070e1e638e4fe84be66629d4197915c63860e3dea625"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-output.rgba8",
+                    "sha256": "070db56257ffc530592c74cb9eab9e80c423a75293ef07c5ef6cf07c7eb7da28"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-reference-output.rgba8",
+                    "sha256": "3e1ce8fe7050110b9ac8eeec2873c548e98203e5775af2b1dc2c742e2847805d"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.897857888852002e-8,
+                "inputMeanError": 3.6468544331021264e-9,
+                "integratedRGBAHash": "070db56257ffc530592c74cb9eab9e80c423a75293ef07c5ef6cf07c7eb7da28",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f32",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "3e1ce8fe7050110b9ac8eeec2873c548e98203e5775af2b1dc2c742e2847805d",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608139991760254,
+                  "meanAbsError": 0.0009315478794557813,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 8090947
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 7.091956730518076e-10,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 8090947
+                },
+                "shaderSHA": "d3659f7c0e63a157753d194a976dfee765868e9938a8d1d0ccbb0ca2636bfd65",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000015348196029663086,
+                    "meanAbsError": 8.746996905549685e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.001,
+                    "worstIndex": 4246580
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.000003606081008911133,
+                    "meanAbsError": 1.9708587640653183e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.001,
+                    "worstIndex": 435991
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.000003777444362640381,
+                    "meanAbsError": 1.8836200206262533e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.001,
+                    "worstIndex": 12519113
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 2.980232238769531e-7,
+                    "meanAbsError": 5.196066281440734e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.001,
+                    "worstIndex": 7237255
+                  }
+                ]
+              },
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-input.f32le",
+                    "sha256": "f3251ef0369896fb167d2fd95201b3726598dfab636a79234a06a968bf5de673"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f16-reference-input.f32le",
+                    "sha256": "5c40b314bacd1c9974be20a09bd439642517a1c3aa2cad85c6f197deaab26971"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-stem.f32le",
+                    "sha256": "5777279cf4f5f16866f5e4d303bc1cb05729ac310fc930f21ee072b58344f38b"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-stem.f32le",
+                    "sha256": "5777279cf4f5f16866f5e4d303bc1cb05729ac310fc930f21ee072b58344f38b"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.0.f32le",
+                    "sha256": "f1b990fae04ff3cff48f607ee69a997b092a545017da9bd4399f80c928784f30"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.0.f32le",
+                    "sha256": "f1b990fae04ff3cff48f607ee69a997b092a545017da9bd4399f80c928784f30"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.1.f32le",
+                    "sha256": "df0796cd67fa65c1597c797786c9cf0337f5cdb50f764f8e4659020c26c37025"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.1.f32le",
+                    "sha256": "df0796cd67fa65c1597c797786c9cf0337f5cdb50f764f8e4659020c26c37025"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-final.f32le",
+                    "sha256": "3aaa0d6d28d7362244dc20da0e09846e02d9529946d9c16afa871729dad72a53"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-reference-final.f32le",
+                    "sha256": "304b5cd76b05da26a1f70e5a8723cfb47f81c328f61419be1271848793c93b31"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-output.rgba8",
+                    "sha256": "e7ce2391c1c85d0141b7fb290c1abb64679acf0125c84783fdfc17f7577f559e"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-reference-output.rgba8",
+                    "sha256": "2a3ed3b7a023a38fbcda8fd600e1f06d9e4451db3dff39c67166b5a50ab9447e"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.897857888852002e-8,
+                "inputMeanError": 3.6468544331021264e-9,
+                "integratedRGBAHash": "e7ce2391c1c85d0141b7fb290c1abb64679acf0125c84783fdfc17f7577f559e",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f16",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "2a3ed3b7a023a38fbcda8fd600e1f06d9e4451db3dff39c67166b5a50ab9447e",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608139991760254,
+                  "meanAbsError": 0.0009124478426006304,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 5336660
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 1.4183913461036153e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 5336660
+                },
+                "shaderSHA": "3040f07cf71480920b66436f43aeef4dffa82e99f719f4e8b4ef01440dd4b338",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 1.1920928955078125e-7,
+                    "meanAbsError": 1.7088932593280871e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.05,
+                    "worstIndex": 1527243
+                  }
+                ]
+              }
+            ],
+            "schema": "aethervsr.m13.phase2-paused-parity/1"
+          }
+        }
+      ],
+      "launch": {
+        "path": ".cache/m13/phase2-study-03/parity30/launch.json",
+        "bytes": 785,
+        "sha256": "86594cdbe223b2fa09ec7444ec70ebc033d9955c19726d0ac7904cd6370c5220"
+      },
+      "process": {
+        "path": ".cache/m13/phase2-study-03/parity30/process.json",
+        "bytes": 277,
+        "sha256": "7b6de97ed8b3ff2e58344b13cb1c817ee265f74a3dc21c03b8949615b5138090"
+      },
+      "observation": {
+        "path": ".cache/m13/phase2-study-03/parity30/native/result.json",
+        "bytes": 885,
+        "sha256": "141d5e3a76ed661a80c32c8ddc035dded3c4d1557700d0b413732f067557a306"
+      },
+      "events": {
+        "path": ".cache/m13/phase2-study-03/parity30/native/events.jsonl",
+        "bytes": 18531,
+        "sha256": "85f99a37001a5446dc39a3f69ec5cb6375448bf9b82aa542eaa29f588448847a"
+      },
+      "reference": {
+        "path": ".cache/m13/phase2-study-03/parity30/result.json",
+        "bytes": 42450,
+        "sha256": "5cfea240e67a6c74aadea6b9d2baf7377966eada8c720b62a31a9ba914587e23"
+      }
+    },
+    "parity60": {
+      "outcome": "PASS",
+      "checks": [
+        {
+          "name": "exact decoded parity 1",
+          "passed": true
+        },
+        {
+          "name": "exact decoded parity 2",
+          "passed": true
+        },
+        {
+          "name": "exact decoded parity 3",
+          "passed": true
+        }
+      ],
+      "cleanup": {
+        "activeOutputs": 0,
+        "configuredSlots": 0,
+        "displayLinks": 0,
+        "occupiedSlots": 0,
+        "pixelBuffers": 0,
+        "presentationCommands": 0,
+        "processingSlots": 0,
+        "retainedOwners": {
+          "decodedSampleOwners": 0,
+          "leasedPixelBuffers": 0,
+          "liveTextureWrappers": 0
+        },
+        "textureCaches": 0,
+        "textureWrappers": 0
+      },
+      "parity": [
+        {
+          "reference": {
+            "path": ".cache/m13/phase2-study-03/parity60/native/frame-1/result.json",
+            "bytes": 11654,
+            "sha256": "87bf79db2fddbb66140e49fe75295623467205bbb09687fb51c398e170f5d9a8"
+          },
+          "result": {
+            "color": {
+              "chroma": "Left",
+              "format": 875704438,
+              "height": 720,
+              "matrix": "ITU_R_709_2",
+              "primaries": "ITU_R_709_2",
+              "transfer": "ITU_R_709_2",
+              "width": 1280
+            },
+            "modelSHA": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+            "outcome": "PASS",
+            "planes": [
+              {
+                "bytes": 921600,
+                "file": "plane-0.bin",
+                "height": 720,
+                "sha256": "ec780348ded51a26294d9e9f42f178bfb950d1b8a12255aedc8f10c81cd4e47a",
+                "stride": 1280
+              },
+              {
+                "bytes": 460800,
+                "file": "plane-1.bin",
+                "height": 360,
+                "sha256": "02bfe3c1312f1c3d5130bb8412620ca3e3cdde9506e165b16275a1cf3d75198e",
+                "stride": 1280
+              }
+            ],
+            "pts": 0.9961666666666666,
+            "runs": [
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-input.f32le",
+                    "sha256": "624f339adf3f3bee9940c27cdcda7ca6453cab34bda307624307b87134a7fe65"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f32-reference-input.f32le",
+                    "sha256": "4d42ed78671f57e13409bfcc4dc607c2cfac20175bacbc6df73fc4c75018775e"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-stem.f32le",
+                    "sha256": "ec4bf7c7546ab6393bb82058895c1fffcaf8525357ec5371da1564a21d89a105"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-stem.f32le",
+                    "sha256": "233d241fcee844af823ee94daa1cdd205bc545f4b73b970250f3fad4bcae3ff6"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.0.f32le",
+                    "sha256": "7971d0ed7f1f862719e26458bdbb3c13bfb54c0839e41e6ebfda241b62ffa4ff"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.0.f32le",
+                    "sha256": "455948885a9863de8996cd16171222a3f99e2c79a18cc3be3d0660176a514041"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.1.f32le",
+                    "sha256": "39388970073c3949474e1cdc7e436ef03ffaef5ee5d268b631516002c2a9bb21"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.1.f32le",
+                    "sha256": "46bee4a129bb69639bae5d7c6b5e6b8afb8a81cded4ba59baea3c10421530d11"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-final.f32le",
+                    "sha256": "530cb363b667dfb28e47ff62bee5f3fdecd0960ef252a380adcf81e648300b1f"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-reference-final.f32le",
+                    "sha256": "8f4ec2c7f7dfdf6b594acfd6875b211cf94100e673fbf1a00156fba81c631525"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-output.rgba8",
+                    "sha256": "f80b52e2fb2747b0d92d0fbd8aa8d1430fe84b96fa5e507af13209051514ec5f"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-reference-output.rgba8",
+                    "sha256": "7add11b40b2153ae5ee539c0cd38d030dff801abdffc542a9c14b0ada50821a0"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.581260407287573e-8,
+                "inputMeanError": 3.6867547448943474e-9,
+                "integratedRGBAHash": "f80b52e2fb2747b0d92d0fbd8aa8d1430fe84b96fa5e507af13209051514ec5f",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f32",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "7add11b40b2153ae5ee539c0cd38d030dff801abdffc542a9c14b0ada50821a0",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608289003372192,
+                  "meanAbsError": 0.0009327535014296163,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 6560647
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921572118997574,
+                  "meanAbsError": 2.482185192531216e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 3525979
+                },
+                "shaderSHA": "d3659f7c0e63a157753d194a976dfee765868e9938a8d1d0ccbb0ca2636bfd65",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000013634562492370605,
+                    "meanAbsError": 8.731410205224204e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.001,
+                    "worstIndex": 9744222
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000033229589462280273,
+                    "meanAbsError": 1.9250494991654124e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.001,
+                    "worstIndex": 685701
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000036424025893211365,
+                    "meanAbsError": 1.8088660411875857e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.001,
+                    "worstIndex": 12706185
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 2.682209014892578e-7,
+                    "meanAbsError": 5.070722308544276e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.001,
+                    "worstIndex": 2678514
+                  }
+                ]
+              },
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-input.f32le",
+                    "sha256": "624f339adf3f3bee9940c27cdcda7ca6453cab34bda307624307b87134a7fe65"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f16-reference-input.f32le",
+                    "sha256": "4d42ed78671f57e13409bfcc4dc607c2cfac20175bacbc6df73fc4c75018775e"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-stem.f32le",
+                    "sha256": "432b968ecd138be5f19e43a4cdd7358fba875d6c25dcafb6bbcaba22b26c5d33"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-stem.f32le",
+                    "sha256": "432b968ecd138be5f19e43a4cdd7358fba875d6c25dcafb6bbcaba22b26c5d33"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.0.f32le",
+                    "sha256": "afdfff7632db6b3b4c5ad82f0c948fbbbed2b32c12b6a4ab358161612e8f27d9"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.0.f32le",
+                    "sha256": "afdfff7632db6b3b4c5ad82f0c948fbbbed2b32c12b6a4ab358161612e8f27d9"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.1.f32le",
+                    "sha256": "2188de092de42e835cf81e2be950c69e6c6ca27602813f95952cb9eb1b119825"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.1.f32le",
+                    "sha256": "2188de092de42e835cf81e2be950c69e6c6ca27602813f95952cb9eb1b119825"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-final.f32le",
+                    "sha256": "f40bfef7fd90d30ef3e3f92548249d0325be57350ebf27b4e7a81084b5d691c3"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-reference-final.f32le",
+                    "sha256": "20a766ced4b4d2ac7d38fadea6e71526e83bb38b6c47d147a67187e2577d1128"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-output.rgba8",
+                    "sha256": "6ae9ed0f6752cb8ab36fb4915c3d120b0cb95d5bb87bcc1a52c630bb2374ed1a"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-reference-output.rgba8",
+                    "sha256": "d7e300b0ac0b8945671c485771b5c249a63e874ea5323ef87db6be77823bebb4"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 9.581260407287573e-8,
+                "inputMeanError": 3.6867547448943474e-9,
+                "integratedRGBAHash": "6ae9ed0f6752cb8ab36fb4915c3d120b0cb95d5bb87bcc1a52c630bb2374ed1a",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f16",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "d7e300b0ac0b8945671c485771b5c249a63e874ea5323ef87db6be77823bebb4",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.001960843801498413,
+                  "meanAbsError": 0.0009137576074669735,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 10939199
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 1.4183913461036153e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 555681
+                },
+                "shaderSHA": "3040f07cf71480920b66436f43aeef4dffa82e99f719f4e8b4ef01440dd4b338",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 1.1920928955078125e-7,
+                    "meanAbsError": 1.7706182015225985e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.05,
+                    "worstIndex": 2338923
+                  }
+                ]
+              }
+            ],
+            "schema": "aethervsr.m13.phase2-paused-parity/1"
+          }
+        },
+        {
+          "reference": {
+            "path": ".cache/m13/phase2-study-03/parity60/native/frame-2/result.json",
+            "bytes": 11580,
+            "sha256": "58e58ec1d8ed0db2b8d15157fb6827efa650a9167a37138b4e90b1951edcf9ce"
+          },
+          "result": {
+            "color": {
+              "chroma": "Left",
+              "format": 875704438,
+              "height": 720,
+              "matrix": "ITU_R_709_2",
+              "primaries": "ITU_R_709_2",
+              "transfer": "ITU_R_709_2",
+              "width": 1280
+            },
+            "modelSHA": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+            "outcome": "PASS",
+            "planes": [
+              {
+                "bytes": 921600,
+                "file": "plane-0.bin",
+                "height": 720,
+                "sha256": "40e238c74243021a3a84591c7296a9bc3d66ba1b3cd34084b52f1f09fcc8ca9f",
+                "stride": 1280
+              },
+              {
+                "bytes": 460800,
+                "file": "plane-1.bin",
+                "height": 360,
+                "sha256": "22d0917b3fd9ebb178f25af40d15cc7f83803aa8980f2df8a935a31cc0fab0f2",
+                "stride": 1280
+              }
+            ],
+            "pts": 1.9950666666666668,
+            "runs": [
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-input.f32le",
+                    "sha256": "0d05acb36ffebee6f7ade50c24aaeb7f9034b4cb7c40aa299e079135a86996cf"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f32-reference-input.f32le",
+                    "sha256": "c192f88dcf0683ee9007e65e455915c1947c9562d75154d62d7d6d0d97ac09c5"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-stem.f32le",
+                    "sha256": "ff820c016055dafda5e0de5a4ea1ff35b8b16df6001aaa5dec8a26803e2c3d37"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-stem.f32le",
+                    "sha256": "668365f38ba729d8f439bff6efe350ee4ee1c4dc833c0a07d0b4a2fac3fc2ca1"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.0.f32le",
+                    "sha256": "3bf0af4f0d0e411318ec63b937a7b64537684d5ca780209b640097f2531f343c"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.0.f32le",
+                    "sha256": "6414da8c8cb52d1fd2c6e1071172d53e6dfd6737f3f255a06819c8ed4dd8c516"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.1.f32le",
+                    "sha256": "396bef6290f3c8030f911a0aaf69b796e35e637a2b881e3ec8656f9e21986283"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.1.f32le",
+                    "sha256": "6c5579dca4346ed67241189eab8cc8d7ff5d6bf34588d5ecbfa03f28d2776901"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-final.f32le",
+                    "sha256": "878f19075ddc0b3ebd6357dea6b3162ed62f4695bc8d18caf7120fdf6ecac6ba"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-reference-final.f32le",
+                    "sha256": "72af7879b43e25f5f2da30a24797c9a8a3b20fdb7414ad8e1d28364e0601a612"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-output.rgba8",
+                    "sha256": "51b01c41605ffb1663b1e5454b2854bce5d6ddcd9eb99488f8a627ac1de0e47a"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-reference-output.rgba8",
+                    "sha256": "38d2adb73799ff2c1577dd0c5598cc8c5737ea0dfd082be7705d169338a08086"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 8.574241294745377e-8,
+                "inputMeanError": 3.646004826969151e-9,
+                "integratedRGBAHash": "51b01c41605ffb1663b1e5454b2854bce5d6ddcd9eb99488f8a627ac1de0e47a",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f32",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "38d2adb73799ff2c1577dd0c5598cc8c5737ea0dfd082be7705d169338a08086",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608214497566223,
+                  "meanAbsError": 0.0009356853630637474,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 5969200
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 5.318967547888557e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 3538770
+                },
+                "shaderSHA": "d3659f7c0e63a157753d194a976dfee765868e9938a8d1d0ccbb0ca2636bfd65",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.00000130385160446167,
+                    "meanAbsError": 8.868841357114989e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.001,
+                    "worstIndex": 9227455
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.000003375113010406494,
+                    "meanAbsError": 2.0466987686873496e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.001,
+                    "worstIndex": 498922
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000033676624298095703,
+                    "meanAbsError": 1.9773036043995655e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.001,
+                    "worstIndex": 12524524
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 2.980232238769531e-7,
+                    "meanAbsError": 5.137439743742157e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.001,
+                    "worstIndex": 6651221
+                  }
+                ]
+              },
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-input.f32le",
+                    "sha256": "0d05acb36ffebee6f7ade50c24aaeb7f9034b4cb7c40aa299e079135a86996cf"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f16-reference-input.f32le",
+                    "sha256": "c192f88dcf0683ee9007e65e455915c1947c9562d75154d62d7d6d0d97ac09c5"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-stem.f32le",
+                    "sha256": "f43464e4b425a7a2d7e4d71baa120603b26bfe3c44d3a783526dbcc1cf35f939"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-stem.f32le",
+                    "sha256": "f43464e4b425a7a2d7e4d71baa120603b26bfe3c44d3a783526dbcc1cf35f939"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.0.f32le",
+                    "sha256": "c0323afc75a5ddcc40026b5e75677f3e7a82e33db3627f2b3e895837652f94db"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.0.f32le",
+                    "sha256": "c0323afc75a5ddcc40026b5e75677f3e7a82e33db3627f2b3e895837652f94db"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.1.f32le",
+                    "sha256": "68589a1fd7d8ec68b36749cf77cd557235f4f2386046e16a2d979d954d960f16"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.1.f32le",
+                    "sha256": "68589a1fd7d8ec68b36749cf77cd557235f4f2386046e16a2d979d954d960f16"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-final.f32le",
+                    "sha256": "094d666a3eaeccc0ba43978da5f6cd4cafd600d1de0955ac3ca5e6ca2227bccf"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-reference-final.f32le",
+                    "sha256": "3988be0f3b6552f44242775fcb15a5ebcf3b82eb3d4f178333d9db91594a0abc"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-output.rgba8",
+                    "sha256": "67ff6283106d83b81dd1707b4026784eae9364da99fac1eb2730b26c166a2207"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-reference-output.rgba8",
+                    "sha256": "67ff6283106d83b81dd1707b4026784eae9364da99fac1eb2730b26c166a2207"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 8.574241294745377e-8,
+                "inputMeanError": 3.646004826969151e-9,
+                "integratedRGBAHash": "67ff6283106d83b81dd1707b4026784eae9364da99fac1eb2730b26c166a2207",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f16",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "67ff6283106d83b81dd1707b4026784eae9364da99fac1eb2730b26c166a2207",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608139991760254,
+                  "meanAbsError": 0.000916134525612246,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 3691115
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": true,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0,
+                  "meanAbsError": 0,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05
+                },
+                "shaderSHA": "3040f07cf71480920b66436f43aeef4dffa82e99f719f4e8b4ef01440dd4b338",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 1.1920928955078125e-7,
+                    "meanAbsError": 1.6947944019378795e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.05,
+                    "worstIndex": 2100942
+                  }
+                ]
+              }
+            ],
+            "schema": "aethervsr.m13.phase2-paused-parity/1"
+          }
+        },
+        {
+          "reference": {
+            "path": ".cache/m13/phase2-study-03/parity60/native/frame-3/result.json",
+            "bytes": 11581,
+            "sha256": "2d1da7ad826a387e752f9a42cf3248b55b605c3e6285fcf940d69f64c17fbfa8"
+          },
+          "result": {
+            "color": {
+              "chroma": "Left",
+              "format": 875704438,
+              "height": 720,
+              "matrix": "ITU_R_709_2",
+              "primaries": "ITU_R_709_2",
+              "transfer": "ITU_R_709_2",
+              "width": 1280
+            },
+            "modelSHA": "d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a",
+            "outcome": "PASS",
+            "planes": [
+              {
+                "bytes": 921600,
+                "file": "plane-0.bin",
+                "height": 720,
+                "sha256": "ec29de44537d9e9e06ac9fe613917ec31ced468f32a81c1de526f5665139b631",
+                "stride": 1280
+              },
+              {
+                "bytes": 460800,
+                "file": "plane-1.bin",
+                "height": 360,
+                "sha256": "57a1401afe3e2c3106e3616a45cb27c7b58b90a496aa60f71df7afe35229b1f7",
+                "stride": 1280
+              }
+            ],
+            "pts": 2.9943666666666666,
+            "runs": [
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-input.f32le",
+                    "sha256": "e25689a3314b67724a1047befd19c2d12516f7b36d0a2ffb635ec2733023e453"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f32-reference-input.f32le",
+                    "sha256": "358ab50d57521cbadf23083f2593628b5e78c399501e0cbac9dcd42b39da831c"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-stem.f32le",
+                    "sha256": "120ada0e8121e6c4a902faa290fc20d1ae27eee584692d3ad834d528eaa729b9"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-stem.f32le",
+                    "sha256": "74b151276261f15c8d04a57f35a72c2ec3e8c79063e8cb305f80829003ff715c"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.0.f32le",
+                    "sha256": "f945f1563655d4bedaaf15db251b2dd7ca19c5797f8de46d41047f027b09a79b"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.0.f32le",
+                    "sha256": "7feb2c294e0775f9ac16ac3ba33dda0eb94819bda11decdfe4d13642ec8ae65c"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-body.1.f32le",
+                    "sha256": "1c4e0e2fa749afda0226a24bb50db7fcda700cb5cd75fee4c9f5650dc7bb72c2"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f32-reference-body.1.f32le",
+                    "sha256": "2031e2fe5018ecc4dcd9e97a7f5028124c24f5b35d61dd735889e716977df8fd"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-final.f32le",
+                    "sha256": "d2d056cc289d9bcbe4c5d802396b0018123193f1d5b2040062f3ca416d29201f"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f32-reference-final.f32le",
+                    "sha256": "4afab621c630b9abfc02a85836a0200d791d5b8d147118f86c6db237f8cc2106"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-output.rgba8",
+                    "sha256": "730585d71ca8fb3973f98a158a3ca8a966f90f6c3f6f32ec86e48f172f168d7e"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f32-reference-output.rgba8",
+                    "sha256": "edce3fd96c91f6290d99fd651182431da59c34df2a078f626946bb0aef42cbf5"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 8.574241294745377e-8,
+                "inputMeanError": 3.655741533433583e-9,
+                "integratedRGBAHash": "730585d71ca8fb3973f98a158a3ca8a966f90f6c3f6f32ec86e48f172f168d7e",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f32",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "edce3fd96c91f6290d99fd651182431da59c34df2a078f626946bb0aef42cbf5",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608139991760254,
+                  "meanAbsError": 0.0009327338163801318,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 3538770
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.003921568393707275,
+                  "meanAbsError": 5.318967547888557e-9,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.0058823529411764705,
+                  "worstIndex": 3538770
+                },
+                "shaderSHA": "d3659f7c0e63a157753d194a976dfee765868e9938a8d1d0ccbb0ca2636bfd65",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000013262033462524414,
+                    "meanAbsError": 8.928019162487052e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.001,
+                    "worstIndex": 9772259
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.0000033974647521972656,
+                    "meanAbsError": 2.0516029067212887e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.001,
+                    "worstIndex": 496208
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0.000003471970558166504,
+                    "meanAbsError": 1.9783020306794896e-8,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.001,
+                    "worstIndex": 12516596
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 2.980232238769531e-7,
+                    "meanAbsError": 5.236024879846152e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.001,
+                    "worstIndex": 6651221
+                  }
+                ]
+              },
+              {
+                "artifacts": [
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-input.f32le",
+                    "sha256": "e25689a3314b67724a1047befd19c2d12516f7b36d0a2ffb635ec2733023e453"
+                  },
+                  {
+                    "bytes": 11059200,
+                    "file": "f16-reference-input.f32le",
+                    "sha256": "358ab50d57521cbadf23083f2593628b5e78c399501e0cbac9dcd42b39da831c"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-stem.f32le",
+                    "sha256": "4ee854c94612ae97ad60576344697aa9ca3f5285d32bbf1e678a6c37b11d92e9"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-stem.f32le",
+                    "sha256": "4ee854c94612ae97ad60576344697aa9ca3f5285d32bbf1e678a6c37b11d92e9"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.0.f32le",
+                    "sha256": "c67c2a7c0c508e383f837714b90db5e20fa4b0a28f67055dd96d7efd79bbe2f9"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.0.f32le",
+                    "sha256": "c67c2a7c0c508e383f837714b90db5e20fa4b0a28f67055dd96d7efd79bbe2f9"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-body.1.f32le",
+                    "sha256": "81696955048891d01d38e778e73170ad45aacc07cbc8ee30513c7479bd1cf4a4"
+                  },
+                  {
+                    "bytes": 58982400,
+                    "file": "f16-reference-body.1.f32le",
+                    "sha256": "81696955048891d01d38e778e73170ad45aacc07cbc8ee30513c7479bd1cf4a4"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-final.f32le",
+                    "sha256": "59cea0316439c52e2e9b68be185232fb0dc1974072e154f2cae5a06c24629276"
+                  },
+                  {
+                    "bytes": 44236800,
+                    "file": "f16-reference-final.f32le",
+                    "sha256": "ffde67afa07ce140e59d58adfce7d4d570e469c902e7d8ec5dc09abee3b08a37"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-output.rgba8",
+                    "sha256": "8400ca1c89b5d421402ce3ced2eece17b176cd121e29bd43ed84b306d5531a21"
+                  },
+                  {
+                    "bytes": 14745600,
+                    "file": "f16-reference-output.rgba8",
+                    "sha256": "8400ca1c89b5d421402ce3ced2eece17b176cd121e29bd43ed84b306d5531a21"
+                  }
+                ],
+                "inputFailures": 0,
+                "inputLayout": "HWC4",
+                "inputMaximumError": 8.574241294745377e-8,
+                "inputMeanError": 3.655741533433583e-9,
+                "integratedRGBAHash": "8400ca1c89b5d421402ce3ced2eece17b176cd121e29bd43ed84b306d5531a21",
+                "invalidOutputFlags": 0,
+                "outcome": "PASS",
+                "precision": "f16",
+                "referenceInputLayout": "CHW",
+                "referenceRGBAHash": "8400ca1c89b5d421402ce3ced2eece17b176cd121e29bd43ed84b306d5531a21",
+                "rgbaVsFloat": {
+                  "bitIdentical": false,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0.0019608139991760254,
+                  "meanAbsError": 0.0009134245815789391,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05,
+                  "worstIndex": 3691115
+                },
+                "rgbaVsRGBA": {
+                  "bitIdentical": true,
+                  "edgeFailures": 0,
+                  "elements": 11059200,
+                  "failingElements": 0,
+                  "interiorFailures": 0,
+                  "maxAbsError": 0,
+                  "meanAbsError": 0,
+                  "nonFinite": 0,
+                  "passed": true,
+                  "stage": "final",
+                  "tolerance": 0.05
+                },
+                "shaderSHA": "3040f07cf71480920b66436f43aeef4dffa82e99f719f4e8b4ef01440dd4b338",
+                "shape": [
+                  1280,
+                  720
+                ],
+                "stageLayout": "CHW",
+                "stages": [
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "stem",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.0",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": true,
+                    "edgeFailures": 0,
+                    "elements": 14745600,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 0,
+                    "meanAbsError": 0,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "body.1",
+                    "tolerance": 0.05
+                  },
+                  {
+                    "bitIdentical": false,
+                    "edgeFailures": 0,
+                    "elements": 11059200,
+                    "failingElements": 0,
+                    "interiorFailures": 0,
+                    "maxAbsError": 1.1920928955078125e-7,
+                    "meanAbsError": 1.7087500612820737e-9,
+                    "nonFinite": 0,
+                    "passed": true,
+                    "stage": "final",
+                    "tolerance": 0.05,
+                    "worstIndex": 1527243
+                  }
+                ]
+              }
+            ],
+            "schema": "aethervsr.m13.phase2-paused-parity/1"
+          }
+        }
+      ],
+      "launch": {
+        "path": ".cache/m13/phase2-study-03/parity60/launch.json",
+        "bytes": 785,
+        "sha256": "fcb8ed6bb8391b7db59b3d7e1d6b006c31dbadcba394685f962bd3db3439d674"
+      },
+      "process": {
+        "path": ".cache/m13/phase2-study-03/parity60/process.json",
+        "bytes": 277,
+        "sha256": "07f032fe531367ff7d9b11b04108401a71ae1ae59424d9a891a00d1269bc854f"
+      },
+      "observation": {
+        "path": ".cache/m13/phase2-study-03/parity60/native/result.json",
+        "bytes": 887,
+        "sha256": "bcbd9021f463c1e5fab0db8c87fd59d1135253d4abfd8fd31bb8e09b6ef27b91"
+      },
+      "events": {
+        "path": ".cache/m13/phase2-study-03/parity60/native/events.jsonl",
+        "bytes": 17989,
+        "sha256": "62ec8c57795f879b01e3d26b386b235634cd4a975e3ed3389075bd276bd08b9e"
+      },
+      "reference": {
+        "path": ".cache/m13/phase2-study-03/parity60/result.json",
+        "bytes": 42307,
+        "sha256": "5cd0cf6438b01eb86109427583aa3620351074ddfad8319fc8744ed8a9d2dee9"
+      }
+    },
+    "baseline30": {
+      "schema": "aethervsr.m13.phase2-analysis/1",
+      "fps": 30,
+      "mode": "baseline",
+      "requestedSeconds": 60,
+      "durationSeconds": 60.033666750008706,
+      "usefulFrames": 110,
+      "cadence": 1.8323052039792995,
+      "final20Frames": 35,
+      "finalCadence": 1.75,
+      "floor": 29,
+      "age": {
+        "count": 110,
+        "p50": -16.842771166666687,
+        "p95": 981.2631034999998,
+        "min": -31.525584000000606,
+        "max": 985.3434159999998
+      },
+      "first20Age": {
+        "count": 38,
+        "p50": -17.372750333333187,
+        "p95": 980.733976516667,
+        "min": -27.80041733333327,
+        "max": 982.916458
+      },
+      "final20Age": {
+        "count": 35,
+        "p50": -16.281041666666773,
+        "p95": 980.3005663333334,
+        "min": -29.306833999999782,
+        "max": 985.3434159999998
+      },
+      "ageMedianDriftMS": 1.0917086666664133,
+      "fiveSecondAgeMedians": [
+        -17.433562499999834,
+        -14.206625666666529,
+        -11.024896500000159,
+        -12.769000499999628,
+        -31.23383350000003,
+        -24.878771166666702,
+        -13.08516733333348,
+        -11.979375000000001,
+        -22.587583999999993,
+        -22.27237500000001,
+        -16.022771333333186,
+        -16.274666666665993
+      ],
+      "gpu": {
+        "gpuIngestMS": {
+          "count": 110,
+          "p50": 0.3691041492857039,
+          "p95": 3.043791670643259,
+          "min": 0.19462499767541885,
+          "max": 3.2262083259411156
+        },
+        "gpuNeuralMS": {
+          "count": 110,
+          "p50": 0.5156250117579475,
+          "p95": 2.189831252326252,
+          "min": 0.2865416754502803,
+          "max": 3.00062500173226
+        },
+        "gpuPresentationMS": {
+          "count": 110,
+          "p50": 0.19858333689626306,
+          "p95": 2.9612791593535803,
+          "min": 0.19020831678062677,
+          "max": 3.329375002067536
+        },
+        "gpuProcessingSpanMS": {
+          "count": 110,
+          "p50": 1.0218333336524665,
+          "p95": 3.5885916819097474,
+          "min": 0.4821250040549785,
+          "max": 3.7764583248645067
+        },
+        "gpuFramePathMS": {
+          "count": 110,
+          "p50": 3.5319999733474106,
+          "p95": 3.8395416529965587,
+          "min": 0.7925416866783053,
+          "max": 4.1596250084694475
+        }
+      },
+      "preferredGPUHeadroomPass": true,
+      "gpuScope": "per-frame sum of actual ingest, network and presentation-render GPU durations; queue/display gaps excluded; processingSpan separately records ingest-start through network-end",
+      "loops": 10,
+      "heartbeatCount": 57,
+      "first": {
+        "acquired": 19,
+        "acquisitionHost": 133788.4234594167,
+        "ageMS": -23.70487533333332,
+        "busy": 0,
+        "completed": 12,
+        "completionHost": 133788.4244422917,
+        "drawable": [
+          1960,
+          1136
+        ],
+        "duplicates": 7,
+        "frameGeneration": 4,
+        "gaps": 144,
+        "generation": 4,
+        "gpuFramePathMS": 3.653541672974825,
+        "gpuIngestEnd": 133788.424096375,
+        "gpuIngestMS": 0.3216250042896718,
+        "gpuIngestStart": 133788.42377475,
+        "gpuNetworkEnd": 133788.4243895,
+        "gpuNetworkStart": 133788.42409725,
+        "gpuNeuralMS": 0.29224998434074223,
+        "gpuPresentationEnd": 133788.44346679168,
+        "gpuPresentationMS": 3.039666684344411,
+        "gpuPresentationStart": 133788.440427125,
+        "gpuProcessingSpanMS": 0.6147499952930957,
+        "host": 133788.44357970837,
+        "invalidOutputFlags": 0,
+        "itemIdentity": "ObjectIdentifier(0x0000000966da1af0)",
+        "itemMatched": true,
+        "kind": "frame",
+        "loops": 0,
+        "networkOutput": [
+          2560,
+          1440
+        ],
+        "neural": false,
+        "opportunityHost": 133788.43992912502,
+        "outputValidation": "format-validated-unorm-baseline",
+        "playerTime": 5.359628458,
+        "presentationCompleteHost": 133788.4435716667,
+        "presented": 12,
+        "pts": 5.383333333333334,
+        "rate": 1,
+        "resources": {
+          "activeOutputs": 1,
+          "configuredSlots": 2,
+          "displayLinks": 1,
+          "occupiedSlots": 1,
+          "pixelBuffers": 0,
+          "presentationCommands": 0,
+          "processingSlots": 0,
+          "retainedOwners": {
+            "decodedSampleOwners": 0,
+            "leasedPixelBuffers": 0,
+            "liveTextureWrappers": 0
+          },
+          "textureCaches": 1,
+          "textureWrappers": 0
+        },
+        "sequence": 12,
+        "sourceFile": "aethervsr-testclip-720p30-h264.mp4",
+        "sourceFPS": 29.138315200805664,
+        "submissionHost": 133788.4234872917,
+        "submitted": 12,
+        "timeControl": 2
+      },
+      "last": {
+        "acquired": 198,
+        "acquisitionHost": 133847.4245481667,
+        "ageMS": -26.783708666666683,
+        "busy": 0,
+        "completed": 126,
+        "completionHost": 133847.42627408335,
+        "drawable": [
+          1960,
+          1136
+        ],
+        "duplicates": 72,
+        "frameGeneration": 14,
+        "gaps": 1453,
+        "generation": 14,
+        "gpuFramePathMS": 4.102666687685996,
+        "gpuIngestEnd": 133847.425633625,
+        "gpuIngestMS": 0.4852499987464398,
+        "gpuIngestStart": 133847.425148375,
+        "gpuNetworkEnd": 133847.4261685417,
+        "gpuNetworkStart": 133847.4256355,
+        "gpuNeuralMS": 0.5330416897777468,
+        "gpuPresentationEnd": 133847.443716125,
+        "gpuPresentationMS": 3.0843749991618097,
+        "gpuPresentationStart": 133847.44063175,
+        "gpuProcessingSpanMS": 1.0201666736975312,
+        "host": 133847.44394295837,
+        "invalidOutputFlags": 0,
+        "itemIdentity": "ObjectIdentifier(0x0000000966da1b30)",
+        "itemMatched": true,
+        "kind": "frame",
+        "loops": 10,
+        "networkOutput": [
+          2560,
+          1440
+        ],
+        "neural": false,
+        "opportunityHost": 133847.44017562503,
+        "outputValidation": "format-validated-unorm-baseline",
+        "playerTime": 2.589882958,
+        "presentationCompleteHost": 133847.4439247917,
+        "presented": 121,
+        "pts": 2.6166666666666667,
+        "rate": 1,
+        "resources": {
+          "activeOutputs": 1,
+          "configuredSlots": 2,
+          "displayLinks": 1,
+          "occupiedSlots": 1,
+          "pixelBuffers": 0,
+          "presentationCommands": 0,
+          "processingSlots": 0,
+          "retainedOwners": {
+            "decodedSampleOwners": 0,
+            "leasedPixelBuffers": 0,
+            "liveTextureWrappers": 0
+          },
+          "textureCaches": 1,
+          "textureWrappers": 0
+        },
+        "sequence": 126,
+        "sourceFile": "aethervsr-testclip-720p30-h264.mp4",
+        "sourceFPS": 29.138315200805664,
+        "submissionHost": 133847.42464325004,
+        "submitted": 126,
+        "timeControl": 2
+      },
+      "cleanup": {
+        "activeOutputs": 0,
+        "configuredSlots": 0,
+        "displayLinks": 0,
+        "occupiedSlots": 0,
+        "pixelBuffers": 0,
+        "presentationCommands": 0,
+        "processingSlots": 0,
+        "retainedOwners": {
+          "decodedSampleOwners": 0,
+          "leasedPixelBuffers": 0,
+          "liveTextureWrappers": 0
+        },
+        "textureCaches": 0,
+        "textureWrappers": 0
+      },
+      "failures": [
+        "invalid actual-frame warmup",
+        "overall useful cadence below floor",
+        "final20s useful cadence below floor",
+        "software age bound"
+      ],
+      "outcome": "FAIL",
+      "launch": {
+        "path": ".cache/m13/phase2-study-03/baseline30/launch.json",
+        "bytes": 787,
+        "sha256": "ae5f3ac52f4d19822114a1253c66a86ebb64153ebea81e2ad431e7edcdfc237a"
+      },
+      "process": {
+        "path": ".cache/m13/phase2-study-03/baseline30/process.json",
+        "bytes": 279,
+        "sha256": "012f9426a5ddc8ea2900318a1770362b594b447d7209b6456c4171c98a0a6d28"
+      },
+      "observation": {
+        "path": ".cache/m13/phase2-study-03/baseline30/native/result.json",
+        "bytes": 667,
+        "sha256": "93fdba2f62a5a6c7c71cd4525370719a08bda1bcfb41e39b31df6c5490f8e253"
+      },
+      "events": {
+        "path": ".cache/m13/phase2-study-03/baseline30/native/events.jsonl",
+        "bytes": 220331,
+        "sha256": "74cbc11c7aa7c0281f5aa2a9cd05a37edc3d051274ae97bc58e17b8b8ebd62ab"
+      },
+      "reference": {
+        "path": ".cache/m13/phase2-study-03/baseline30/result.json",
+        "bytes": 7411,
+        "sha256": "189d20ee2c0a44645828d54931999eb6880ee5a242a9d2c2ebbeee22916f26b1"
+      }
+    },
+    "neural30": {
+      "outcome": "NOT_RUN",
+      "mode": "neural",
+      "fps": 30,
+      "seconds": 60,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30"
+      ]
+    },
+    "baseline60a": {
+      "outcome": "NOT_RUN",
+      "mode": "baseline",
+      "fps": 60,
+      "seconds": 60,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30",
+        "neural30"
+      ]
+    },
+    "neural60a": {
+      "outcome": "NOT_RUN",
+      "mode": "neural",
+      "fps": 60,
+      "seconds": 60,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30",
+        "neural30",
+        "baseline60a"
+      ]
+    },
+    "neural60b": {
+      "outcome": "NOT_RUN",
+      "mode": "neural",
+      "fps": 60,
+      "seconds": 60,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30",
+        "neural30",
+        "baseline60a",
+        "neural60a"
+      ]
+    },
+    "baseline60b": {
+      "outcome": "NOT_RUN",
+      "mode": "baseline",
+      "fps": 60,
+      "seconds": 60,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30",
+        "neural30",
+        "baseline60a",
+        "neural60a",
+        "neural60b"
+      ]
+    },
+    "baseline60c": {
+      "outcome": "NOT_RUN",
+      "mode": "baseline",
+      "fps": 60,
+      "seconds": 60,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30",
+        "neural30",
+        "baseline60a",
+        "neural60a",
+        "neural60b",
+        "baseline60b"
+      ]
+    },
+    "neural60c": {
+      "outcome": "NOT_RUN",
+      "mode": "neural",
+      "fps": 60,
+      "seconds": 60,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30",
+        "neural30",
+        "baseline60a",
+        "neural60a",
+        "neural60b",
+        "baseline60b",
+        "baseline60c"
+      ]
+    },
+    "soak": {
+      "outcome": "NOT_RUN",
+      "mode": "neural",
+      "fps": 60,
+      "seconds": 600,
+      "reason": "Registered trial not enabled or not yet executed",
+      "blockedBy": [
+        "baseline30",
+        "neural30",
+        "baseline60a",
+        "neural60a",
+        "neural60b",
+        "baseline60b",
+        "baseline60c",
+        "neural60c"
+      ]
+    }
+  },
+  "evidenceOutcome": "FAIL",
+  "timingScope": "GPU command endpoints after completion; per-frame active durations exclude display/queue gaps; neural command includes validation audits",
+  "ageScope": "originating AVPlayerItem time minus exact decoded PTS at software presentation opportunity; not physical scanout latency",
+  "audio": "Committed fixtures contain no audio track; AVPlayer authority/control checks do not qualify audible playback or speaker synchronization"
+}
