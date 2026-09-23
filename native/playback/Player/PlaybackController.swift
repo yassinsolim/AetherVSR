@@ -341,7 +341,7 @@ import QuartzCore
         network.addCompletedHandler { [frame, lease, ingest, network] _ in
             withExtendedLifetime((frame, lease)) {
                 let finished = CACurrentMediaTime()
-                Task<Void, Never> { @MainActor in
+                _ = Task<Void, Never> { @MainActor in
                     slot.processing = false; slot.frame = nil; slot.lease = nil; slot.completionHost = finished
                     if network.status != .completed || ingest.status != .completed || network.error != nil || ingest.error != nil {
                         self.fail("GPU frame failure: \(String(describing: network.error ?? ingest.error))")
@@ -388,7 +388,7 @@ import QuartzCore
         slot.presenting = true
         command.addCompletedHandler { [drawable, command] _ in
             withExtendedLifetime(drawable) {
-                Task<Void, Never> { @MainActor in
+                _ = Task<Void, Never> { @MainActor in
                     slot.presenting = false
                     if command.status != .completed || command.error != nil { self.fail("Presentation GPU failure") }
                     else if self.state.accepts(identity) && item === self.source.player.currentItem && !slot.recorded {
