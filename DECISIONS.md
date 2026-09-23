@@ -1901,3 +1901,24 @@ algorithms inform the MSL design; no external implementation or dependency is
 introduced. Public Metal APIs only. No Core ML/MPSGraph pivot or Phase-2 APIs.
 Only a separately reviewed and published performance verdict can recommend the
 next native integration phase; this ADR does not authorize that integration.
+
+## ADR-0062 - Current native local playback APIs and frozen network adapter
+
+**Status:** accepted for owner-authorized M13 Phase 2, before playback evidence.
+
+Choose macOS26 and AVPlayerVideoOutput.sample(forHostTime:) with current output
+settings, avoiding deprecated taggedBuffers/copyPixelBuffer APIs. AVPlayer owns
+all media/audio authority. A device-scoped Core Video texture cache, explicitly
+retained frame leases, verified GPU color conversion and native Metal presentation
+bridge decoded local SDR H.264 to candidate F. No recording or Accessibility
+permission, ScreenCaptureKit, browser integration or Phase3 is part of this work.
+
+A new top-level native package includes the original AetherMetal source paths
+unchanged, plus a narrow command-encoding adapter. Candidate F's generated MSL,
+weights, packing and geometry remain byte/identity checked. The original native
+package and prior reports/evidence are retained. Initial ingest uses a float4
+GPU intermediate; correctness precedes any integration fusion, and no new kernel
+sweep is permitted. MTKView provides the drawable; host-time display scheduling
+and bounded in-flight work preserve media identity. Protocol and current Apple
+documentation are recorded in docs/M13-PHASE2-PLAN.md. Apple system frameworks,
+no new external library and no copied Apple example implementation.

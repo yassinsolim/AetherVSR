@@ -10,6 +10,8 @@ dist/
 /.cache/m13/
 /native/macos/.build/
 /native/macos/.swiftpm/
+/native/.build/
+/native/.swiftpm/
 /.cache/m105/
 /.cache/m106/
 /.cache/m107/

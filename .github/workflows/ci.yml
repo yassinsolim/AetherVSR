@@ -62,7 +62,7 @@ jobs:
         run: npm run desktop:build
 
   native-metal:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
@@ -74,6 +74,12 @@ jobs:
 
       - name: Native CPU contracts (physical GPU tests opt-in only)
         run: swift test --package-path native/macos --jobs 2
+
+      - name: Native playback release build (current macOS APIs)
+        run: swift build --configuration release --package-path native --jobs 2
+
+      - name: Native playback CPU contracts (physical tests explicitly skipped)
+        run: swift test --package-path native --jobs 2
 
   # The fusion equivalence gate. Milestone 7's entire safety argument is that a
   # training-time reparameterized block collapses *exactly* into the deployed
