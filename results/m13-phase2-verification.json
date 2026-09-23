@@ -3,6 +3,45 @@
   "baseline": "e381bd9366803fe91c048a97bbe5088844627f10",
   "sourceCommit": "c20e066971a3c7c4c3f0d81bb561f624e485e3c8",
   "verdict": "NATIVE LOCAL PLAYBACK PARTIAL",
+  "closure": {
+    "verifiedPublicationCommit": "a2f20b20c2b2dec206fcfa7ce36ad157d7c6c44b",
+    "localGateCount": 21,
+    "localGates": {
+      "path": ".cache/m13/phase2-final-local-01/result.json",
+      "bytes": 10347,
+      "sha256": "83b7bb312fd234d1a6ae598a0151b4c184ac049c24c21860573482b7e71d387e"
+    },
+    "cloneReplay": {
+      "path": ".cache/m13/phase2-clone-replay-02/result.json",
+      "bytes": 941,
+      "sha256": "e41f3150250b3a856fc09e5f68cd2bc4d504e8a833ca229dcab296c0ff71318f"
+    },
+    "packages": {
+      "path": ".cache/m13/phase2-final-package-checks.json",
+      "bytes": 5135,
+      "sha256": "3a76d2523053f1afd5b541e28e4dae4be35cc7e085b2febdacc5ddfc11b05d75"
+    },
+    "publicationCI": {
+      "path": ".cache/m13/phase2-publication-ci.json",
+      "bytes": 5972,
+      "sha256": "647588684a41662a7f3da7c3a8fad5b7168e5cf40adf790dcec154e3d77acf22"
+    },
+    "publicationSize": {
+      "path": ".cache/m13/phase2-publication-size-01.json",
+      "bytes": 119,
+      "sha256": "c0a087e9245b32802a069a7d59068fd41844d5ee55bed50c7d2ed8bcb054a0cb"
+    },
+    "publicationCIRun": 35805449220,
+    "publicationGitObjectBytes": 55627183,
+    "payloadHashes": {
+      "production": "46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551",
+      "diagnostic": "7334c5db0f476048a10b63a2e0d9e4b240436fa3a669925e113cedc93cb1003f",
+      "desktop": "d9e1f8e9bdc544084ae1ce5a7857562e4ce047b7046478b6936413fed09246b7"
+    },
+    "packageRepeatScope": "Four same-commit builds per package, two each in root and clean clone; all bytes including provenance identical; payloads identical to frozen baseline",
+    "outcome": "PASS",
+    "scope": "Regression, provenance and evidence replay only; baseline30 acceptance remains FAIL and later playback trials remain NOT_RUN"
+  },
   "study": {
     "path": ".cache/m13/phase2-study-03/derived.json",
     "bytes": 110530,
@@ -46,7 +85,7 @@
     "bytes": 5887,
     "sha256": "0f8a242b4c333e5d3a98c50cbaa715539855f07f98c545a6ea93404e47dbc5cf"
   },
-  "localGateCaveat": "The phase15 replay in gates-02 was blocked only by the dirty-tree guard; complete replay passed after commits4272a59 and8d936c0. Source-bound clean closure replays are recorded separately.",
+  "localGateCaveat": "The earlier phase15 replay in gates-02 was blocked only by the dirty-tree guard; all three final clean-tree replays pass under closure.localGates and closure.cloneReplay. Earlier failed attempts remain retained.",
   "cleanClone": {
     "reference": {
       "path": ".cache/m13/phase2-clean-clone-01/result.json",

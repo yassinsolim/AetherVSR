@@ -453,6 +453,16 @@ Original Phase1/1.5 evidence remains replayable. Two existing moderate npm
 advisories are unchanged, not silently remediated. Production model/core,
 Electron/extension implementations and frozen reports are not edited.
 
+Publication `a2f20b20c2b2dec206fcfa7ce36ad157d7c6c44b` passes all21 local
+closure gates and CI35805449220's three jobs. All three evidence checkers pass
+in root and the clean clone with explicitly copied raw artifacts. Four fresh
+builds per product package, two in each tree, are byte-identical including
+same-commit provenance. Payload hashes remain production46cebd53...159ac551,
+diagnostic7334c5db...cb1003f and desktopd9e1f8e9...09246b7; full identities
+and raw verification references are in the verification index. That publication
+tree is55,627,183 Git-object bytes; this later closure-note update is checked
+again before its final commit. No measured source changed.
+
 Source tree before compact publication:55,482,498 Git-object bytes,3,237,758
 bytes below58,720,256. The8MiB per-file guard is unchanged. Publication checks
 use Git object sizes, not symlink-following filesystem sizes. Final documentation/
