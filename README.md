@@ -1,13 +1,89 @@
 # AetherVSR
 
-**Primary product direction: AetherVSR Desktop.** M11 is a local-file Electron
-player for macOS / Apple Silicon, reusing the production WebGPU engine, and is
-published as **DESKTOP PLAYER MVP READY**. The browser extension and its results
-below are preserved, not the primary product surface. M12 closed as
-**CROSS-VENDOR DESKTOP PARTIAL** and M12.1 as **CROSS-VENDOR COMPLETION PARTIAL**;
-unavailable NVIDIA/AMD/Intel hardware remains unqualified.
-[Roadmap](ROADMAP.md), [M12 report](docs/M12-REPORT.md),
-[M12.1 report](docs/M12.1-REPORT.md).
+Local GPU video super-resolution, with an Electron/WebGPU desktop player and
+a native Metal/AVFoundation research player. The production C16D2 model performs
+2x upscaling on your machine; local video is not uploaded for processing.
+
+## Current Status
+
+**The primary product is AetherVSR Desktop.** Its local 720p30/60 H.264 MVP is
+qualified on the measured macOS / Apple Silicon setup. The native Metal path
+and browser extension have separate, narrower qualification limits.
+
+| Surface | Current qualification | Evidence |
+|---|---|---|
+| Electron desktop / WebGPU | **DESKTOP PLAYER MVP READY** on measured Apple Silicon; cross-vendor completion remains **PARTIAL** | [M11](docs/M11-REPORT.md), [M12](docs/M12-REPORT.md), [M12.1](docs/M12.1-REPORT.md) |
+| Native Metal inference | **METAL REALTIME BACKEND QUALIFIED** for isolated M5 candidate-F inference, not playback | [M13 Phase 1](docs/M13-PHASE1-METAL.md), [Phase 1.5](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md) |
+| Native AVFoundation playback | **NATIVE LOCAL PLAYBACK PARTIAL**; decoded-frame parity and lifecycle pass, real-time playback remains unqualified | [M13 Phase 2](docs/M13-PHASE2-NATIVE-PLAYBACK.md) |
+| Browser extension | **PARTIAL**; page-video presentation synchronization remains unqualified | [M10.7](docs/M10.7-REPORT.md) |
+
+The latest native binding baseline30 trial ran with an occluded window on M5:
+110 useful presentation opportunities in 60.033667 seconds, **1.832 FPS** overall,
+**1.75 FPS** in the final 20 seconds, and software-age p95 **981.263 ms**. It
+failed the registered gates. Foreground performance, neural30, all 60 FPS timing
+and the ten-minute soak remain unqualified or `NOT_RUN`; no favorable rerun was
+performed. Both native test clips lack audio tracks, so audible playback and A/V
+synchronization are not qualified by those tests. No Phase 3 or capture
+integration has started. NVIDIA/AMD/Intel hardware remains unqualified.
+
+[Benchmarks and measurement scopes](BENCHMARKS.md) | [Roadmap](ROADMAP.md) |
+[Architecture](ARCHITECTURE.md) | [Engineering rules](AGENTS.md)
+
+## Quick Start
+
+Commands run from the repository root. These are source-build workflows;
+there are no published release binaries or installers.
+
+### Desktop Player
+
+Requires **Node.js 22.12.0 or newer**. The qualified setup is macOS on Apple
+Silicon; other desktop platforms are not hardware-qualified.
+
+```sh
+npm ci
+npm run desktop:dev
+```
+
+The command builds and launches the Electron player. Select a local H.264/MP4;
+the committed [30 FPS](public/media/aethervsr-testclip-720p30-h264.mp4) and
+[60 FPS](public/media/aethervsr-testclip-720p60-h264.mp4) clips match the tested
+720p scope. [Desktop behavior and limits](docs/M11-REPORT.md).
+
+### Native Metal Player
+
+Requires macOS 26 or newer and an Xcode toolchain with the macOS 26 SDK or newer.
+The measured hardware is Apple M5. Run the separate Swift package:
+
+```sh
+swift run --package-path native -c release aether-player
+```
+
+Use **Open Video** to select a local 720p H.264/MP4. This is the **partial native
+research path**, not a real-time-qualified replacement for the desktop player.
+It needs no Screen Recording or Accessibility permission.
+[Native playback scope](docs/M13-PHASE2-NATIVE-PLAYBACK.md).
+
+### Web Harness
+
+Requires Node.js 22.12.0+ and a Chromium browser with WebGPU.
+
+```sh
+npm ci
+npm run dev
+```
+
+Open the printed URL. A bundled clip loads automatically; the clip picker
+accepts local video. The harness is a development and measurement surface,
+not the primary product. [Unpacked extension setup](#install-the-unpacked-extension)
+is documented below with its compatibility limits.
+
+## Milestone History
+
+<details>
+<summary>Earlier results, retained failures and qualification boundaries</summary>
+
+The summaries below describe their original milestone scopes, not the current
+status of every player. Historical measurements and verdicts remain unchanged.
 
 **M13 Phase 1: METAL INFERENCE QUALIFIED.** The exact production C16D2 model
 passes native M5 f32/f16 golden, falsification and actual WebGPU parity checks.
@@ -33,15 +109,7 @@ timing and the ten-minute soak are NOT_RUN. No favorable rerun, capture API,
 new permission or Phase3 followed. Audio fixtures contain no audio track.
 [Full scope, reproduction and retained failures](docs/M13-PHASE2-NATIVE-PLAYBACK.md).
 
-Real-time 2x neural video super-resolution in the browser, with measured gains
-on selected captured-content and degradation classes. Broad web-video
-improvement remains under validation.
-
-AetherVSR upscales video in the browser using WebGPU, entirely on your machine —
-no uploads, no server. Apple Silicon is a first-class target; the architecture
-is cross-platform through WebGPU.
-
-**Status: M10.7 presentation synchronization FAIL; extension MVP PARTIAL.**
+**M10.7: presentation synchronization FAIL; extension MVP PARTIAL.**
 Known scroll/source invalidations now hide stale output before reconciliation,
 but production S1 still misses unannounced layout changes. Stronger diagnostic
 proof guards passed local pilots but did not qualify under the fixed cost gates;
@@ -144,6 +212,8 @@ with the verified CPU reference. No candidate or confirmation scoring followed.
 See [BENCHMARKS.md](BENCHMARKS.md) for the CPU evidence, unresolved deterioration
 and the separate historical M7 result. M9 performs no new model training.
 
+</details>
+
 ## What the evidence supports
 
 Measured on **17 independently sourced captured clips** that share no creator
@@ -189,24 +259,30 @@ photograph appears in two splits. Training never reads the test split. See
 and what was rerun because of them.
 
 
-## What works today
+## WebGPU Pipeline
 
-- Standalone harness: local video decoded into an `HTMLVideoElement`, never
-  displayed directly. The extension instead keeps the original page video
-  under an owned canvas and reveals it whenever enhancement is unsupported.
-- Both consumers reuse `RuntimeDriver`, `RuntimeController` and `VideoPipeline`;
-  the extension does not introduce a second inference or runtime policy path.
+- The Electron desktop player, standalone harness and browser extension reuse
+  the production WebGPU pipeline and C16D2 model. The native Metal player is
+  a separate implementation with independently checked numerical parity.
+- Desktop and harness video is decoded through an `HTMLVideoElement`. The
+  extension preserves page playback and reveals the original video when
+  enhancement is unsupported.
 - `requestVideoFrameCallback()` as the frame clock, so work is synchronised to
   presented video frames rather than to display refresh.
 - `GPUDevice.importExternalTexture()` for the frame import, with a
   `copyExternalImageToTexture()` fallback that can be forced for testing.
 - Exact 2x output: 1280x720 in, 2560x1440 out, always.
+- Production neural upscaling uses the 6,291-parameter C16D2 model, with runtime
+  performance policy and explicit baseline controls.
 - Two non-neural GPU scalers: hardware bilinear, and a 9-tap bilinear-fused
   Catmull-Rom bicubic.
 - A diagnostic overlay with real GPU timings where `timestamp-query` is
   available, and an explicit "not measured" where it is not.
 - No CPU pixel readback anywhere in the frame loop.
 
+### Historical Non-Neural Baseline
+
+These earlier harness measurements are not M13 native-playback results.
 Measured on a MacBook Pro (Apple M5, 24 GB), Chrome for Testing 152, 720p60
 H.264 → 1440p:
 
@@ -221,30 +297,18 @@ samples (~4 s at 60 fps). 1779 and 1786 frames upscaled respectively, with
 measured are in `BENCHMARKS.md`. Numbers here are never estimates — see
 `AGENTS.md` §2.
 
-## Requirements
+### Browser Support
 
-- A Chromium-based browser with WebGPU (Chrome/Edge/Brave 113+). Safari 26+
-  should work but has not been tested.
-- Any browser without `requestVideoFrameCallback` falls back to a labelled
-  degraded rAF clock. Firefox has supported rVFC since 132, so the clock is not
-  the blocker there; its WebGPU availability is, and Firefox was not tested.
-- Node.js 20+.
+The web harness and extension require WebGPU. Tested Chromium builds and
+hardware are recorded in [BENCHMARKS.md](BENCHMARKS.md); Safari and Firefox
+are not qualified. Without `requestVideoFrameCallback`, the harness uses an
+explicitly degraded animation-frame clock, not an equivalent timing source.
 
-## Quick start
+**Record focus and visibility while measuring.** Backgrounded or occluded
+windows can throttle frame callbacks. A failed or backgrounded run is not
+discarded or relabeled as a foreground performance result.
 
-```bash
-npm install
-npm run dev
-```
-
-Open the printed URL. A bundled test clip loads automatically; use the **clip**
-picker to load any local video instead (it never leaves your machine).
-
-**Keep the window frontmost while measuring.** A backgrounded tab suspends
-`requestVideoFrameCallback` and clamps timers, and every number becomes
-meaningless.
-
-### Install the unpacked extension
+## Install the unpacked extension
 
 Run these commands separately from the repository root:
 
@@ -274,18 +338,19 @@ playback, audio, source, seeking and controls: no page-owned node, style or medi
 attribute is modified, replaced or reparented; only extension-owned DOM is added
 and removed.
 
-The measured M10.5 production payload is **265,958 bytes**. Its SHA256 is
-`a796a9ec1b0a1f050f992d3d712bf1164799eeb073ca23d5035a61199ee228c3`.
+The production extension payload remains byte-identical to the M13 Phase 2
+freeze: SHA256 `46cebd53b7665ce48772792d2ec2eb73057e915d93ef76374900f30a159ac551`.
 The unchanged 6,291-parameter C16D2 model SHA256 is
 `d76fae7a295cdcdaecb44e39f8c87ff68a59ca1e07fc7cfc347d252d3cad358a`.
-This is a load-unpacked MVP, not store publication or broad player compatibility.
+[Payload verification](results/m13-phase2-verification.json). This is a
+load-unpacked MVP, not store publication or broad player compatibility.
 
-### Commands
+## Development Commands
 
 Each of these is a separate command; run them individually.
 
 ```bash
-npm install
+npm ci
 npm run dev
 npm run typecheck
 npm run lint
@@ -295,13 +360,18 @@ npm run build
 
 | Command | Purpose |
 |---|---|
-| `npm install` | Install dev dependencies |
+| `npm ci` | Install exact locked dependencies |
+| `npm run desktop:dev` | Build and launch the Electron desktop player |
+| `npm run desktop:build` | Build the desktop app without launching it |
+| `npm run desktop:check` | Desktop typecheck and lint |
 | `npm run dev` | Vite dev server with the harness |
 | `npm run typecheck` | `tsc --noEmit`, strict |
 | `npm run lint` | ESLint (type-aware) |
 | `npm run test` | Vitest unit tests (`npm test` is equivalent) |
 | `npm run build` | Typecheck and production build |
 | `npm run build:extension` | Generate the load-unpacked MV3 extension in `dist-extension` |
+| `swift test --package-path native/macos --jobs 2` | Original Metal package CPU contracts; GPU tests opt-in |
+| `swift test --package-path native --jobs 2` | Native bridge/playback CPU contracts; GPU tests opt-in |
 
 ### Reproducible runs
 
@@ -368,16 +438,21 @@ paced on `requestAnimationFrame` for a reason — see `DECISIONS.md` ADR-0009.
 
 ## Testing
 
-`npm test` covers the logic that can be tested without a GPU: the statistics
-and rate meters that produce every published number, and the frame-clock state
-machine including skipped-frame accounting and stop/start reentrancy.
+`npm test` covers metrics, frame clocks, model and shader contracts, runtime
+policy, desktop/extension ownership and the evidence checkers. CI also runs
+Python experiment-integrity tests and both Swift packages' build/CPU contracts.
+CPU and source-text tests do not establish GPU pixel correctness or performance.
 
-One test asserts on generated WGSL text — that the external-texture variant
-uses `textureSampleBaseClampToEdge` and the 2D variant `textureSampleLevel`,
-and that the bicubic kernel emits nine taps. That is a source-text assertion,
-not a rendering test: it pins a contract whose violation fails at pipeline
-creation inside a browser, where no unit test can reach it. Whether pixels are
-correct is established by running the harness and looking.
+At the M13 Phase 2 closure: **1,504 Vitest tests passed**, with three explicit
+skips; **612 Python tests**, **80 opt-in fixture tests**, and **71 desktop tests**
+passed. The desktop and opt-in groups overlap the main suite and are not additive.
+Physical native suites passed **18 original Metal tests** and **7 playback tests**.
+Hosted native CI skips GPU-only tests; set `AETHERVSR_METAL_TESTS=1` only for an
+intentional physical-device run. [Verification and scopes](results/m13-phase2-verification.json).
+
+Hardware correctness uses golden tensors, cross-backend comparisons and
+same-decoded-frame CPU/GPU parity with retained numerical artifacts. Native
+performance, lifecycle and long-run stability are separate acceptance gates.
 
 Resource-lifetime and control contracts use mocked WebGPU objects in unit tests.
 Those tests check allocation, ownership and control flow, not hardware pixel
@@ -390,43 +465,40 @@ evidence; their scopes and unresolved gates are in [BENCHMARKS.md](BENCHMARKS.md
 
 ## Repository layout
 
-```
+```text
+apps/desktop/                  Electron desktop player and build tooling
+native/
+  Package.swift                macOS 26 playback package
+  macos/                       frozen original/optimized Metal engines and tests
+  playback/                    Core Video bridge, F adapter, native player and tests
 src/
-  main.ts                      harness bootstrap and wiring
-  core/
-    types.ts                   Upscaler, FrameTexture, FrameTick contracts
-    pipeline.ts                stage orchestration, the hot path
-    acquisition/
-      video-source.ts          rVFC frame clock (no GPU)
-      frame-importer.ts        external texture / copy fallback
-    gpu/
-      device.ts                adapter/device acquisition, capability probing
-    upscale/
-      baseline-scaler.ts       Milestone 1 Upscaler implementation
-      baseline.wgsl.ts         WGSL, specialised per source kind and filter
-    present/
-      canvas-target.ts         swap chain, exact-2x backing store
-    metrics/
-      stats.ts                 SampleWindow, RateMeter (pure)
-      gpu-timer.ts             timestamp-query pool
-  ui/
-    overlay.ts                 diagnostic overlay
-    harness.css
-index.html                     harness entry point
-test/                          unit tests for the non-GPU logic
-tools/make-test-clip.html      deterministic clip generator
-public/media/                  committed test clips (30/60 fps, VP9 and H.264)
+  core/                        shared WebGPU pipeline, upscalers and runtime policy
+  extension/                   preserved MV3 browser extension
+  main.ts                      standalone harness entry
+  ui/                          harness controls and metrics
+public/models/                 production model and golden reference tensors
+public/media/                  committed test clips
+test/                          TypeScript contracts and evidence-checker tests
+tools/                         experiment, training, fixture and validation tooling
+tools/m13/                     Metal and native-playback evidence runners/checkers
+docs/                          phase protocols, reports and dataset documentation
+results/                       compact, source-bound evidence indexes
+index.html                     web harness
+bench.html                     isolated WebGPU feasibility experiments
 ```
 
 ## Documentation
 
 | File | Contents |
 |---|---|
-| `AGENTS.md` | Binding engineering rules for contributors |
-| `ARCHITECTURE.md` | Data flow, stage contracts, where the neural stage goes |
-| `DECISIONS.md` | Architecture decision records |
-| `BENCHMARKS.md` | Benchmark format, environment, measured results, non-results |
-| `ROADMAP.md` | Milestones and acceptance criteria |
+| [AGENTS.md](AGENTS.md) | Binding engineering rules for contributors |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Data flow and shared WebGPU stage contracts |
+| [DECISIONS.md](DECISIONS.md) | Architecture decision records, including the native player |
+| [BENCHMARKS.md](BENCHMARKS.md) | Measurement environments, results and non-results |
+| [ROADMAP.md](ROADMAP.md) | Milestones and acceptance criteria |
+| [M11 report](docs/M11-REPORT.md) | Qualified desktop MVP scope |
+| [M13 Phase 1.5 report](docs/M13-PHASE1.5-METAL-OPTIMIZATION.md) | Optimized native Metal inference |
+| [M13 Phase 2 report](docs/M13-PHASE2-NATIVE-PLAYBACK.md) | Native local playback results and remaining blockers |
 
 ## Prior art and licensing
 
