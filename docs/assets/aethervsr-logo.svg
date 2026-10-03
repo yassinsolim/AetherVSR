@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <title>AetherVSR</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d2256"/>
+      <stop offset="1" stop-color="#0a0d24"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="131.5" y1="0" x2="192.0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7fe3ff"/>
+      <stop offset="1" stop-color="#9a6bff"/>
+    </linearGradient>
+  </defs>
+  <path d="M 56 0 H 200 A 56 56 0 0 1 256 56 V 200 A 56 56 0 0 1 200 256 H 56 A 56 56 0 0 1 0 200 V 56 A 56 56 0 0 1 56 0 Z" fill="url(#bg)"/>
+  <rect x="67.5" y="57.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="73.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="89.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="105.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="121.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="137.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="153.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="169.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="67.5" y="185.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.40"/>
+  <rect x="83.5" y="73.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.56"/>
+  <rect x="83.5" y="89.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.56"/>
+  <rect x="83.5" y="105.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.56"/>
+  <rect x="83.5" y="121.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.56"/>
+  <rect x="83.5" y="137.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.56"/>
+  <rect x="83.5" y="153.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.56"/>
+  <rect x="83.5" y="169.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.56"/>
+  <rect x="99.5" y="73.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.77"/>
+  <rect x="99.5" y="89.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.77"/>
+  <rect x="99.5" y="105.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.77"/>
+  <rect x="99.5" y="121.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.77"/>
+  <rect x="99.5" y="137.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.77"/>
+  <rect x="99.5" y="153.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.77"/>
+  <rect x="99.5" y="169.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="0.77"/>
+  <rect x="115.5" y="89.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="1.00"/>
+  <rect x="115.5" y="105.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="1.00"/>
+  <rect x="115.5" y="121.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="1.00"/>
+  <rect x="115.5" y="137.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="1.00"/>
+  <rect x="115.5" y="153.5" width="13" height="13" rx="3" fill="#7fe3ff" fill-opacity="1.00"/>
+  <path d="M 131.5 89.62 L 192.0 128.0 L 131.5 166.38 Z" fill="url(#beam)" stroke="url(#beam)" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M 184 41 C 187 58 188 59 205 62 C 188 65 187 66 184 83 C 181 66 180 65 163 62 C 180 59 181 58 184 41 Z" fill="#ffffff" fill-opacity="0.92"/>
+</svg>

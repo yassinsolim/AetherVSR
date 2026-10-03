@@ -1,3 +1,5 @@
+<img src="docs/assets/aethervsr-logo.svg" alt="AetherVSR logo" width="112" align="right">
+
 # AetherVSR
 
 Local GPU video super-resolution, with an Electron/WebGPU desktop player and
