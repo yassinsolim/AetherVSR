@@ -28,7 +28,7 @@
     "@eslint/js": "^9.39.0",
     "@types/chrome": "0.2.9",
     "@webgpu/types": "^0.1.71",
-    "electron": "44.4.1",
+    "electron": "44.9.1",
     "esbuild": "0.28.2",
     "eslint": "^9.39.0",
     "lucide": "1.47.0",
